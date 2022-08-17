@@ -1,13 +1,52 @@
-body {
-  margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen',
-    'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue',
-    sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+.ant-page-header-heading-title {
+  line-height: 50px !important;
+  font-weight: 700 !important;
+}
+.ant-card-head-title {
+  font-weight: 700 !important;
+  font-size: 28px;
+}
+.ant-descriptions-title {
+  font-size: 20px !important;
 }
 
-code {
-  font-family: source-code-pro, Menlo, Monaco, Consolas, 'Courier New',
-    monospace;
+#components-layout-demo-custom-trigger .trigger {
+  padding: 0 24px;
+  font-size: 18px;
+  line-height: 64px;
+  cursor: pointer;
+  transition: color 0.3s;
+}
+
+#components-layout-demo-custom-trigger .trigger:hover {
+  color: #1890ff;
+}
+
+#components-layout-demo-custom-trigger .logo {
+  height: 32px;
+  margin: 16px;
+  background: rgba(255, 255, 255, 0.3);
+}
+
+.site-layout .site-layout-background {
+  background: #fff;
+}
+
+.ant-menu-item {
+  margin-top: 0 !important;
+  margin-bottom: 0 !important;
+  height: 54px !important;
+  line-height: 54px !important;
+}
+
+.ant-menu {
+  font-size: 17px !important;
+}
+
+.ant-menu-item-icon+span {
+  margin-left: 30px !important;
+}
+
+.anticon {
+  font-size: 18px !important;
 }
