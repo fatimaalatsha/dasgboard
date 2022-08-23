@@ -1,5 +1,5 @@
-import Drivers from "../../pages/Drivers"
 import { Routes, Route } from 'react-router-dom';
+import Drivers from "../../pages/Drivers"
 import DriverDetails from "../../pages/DriverDetails";
 
 const AppRoutes = () => {

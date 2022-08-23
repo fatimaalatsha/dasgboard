@@ -37,7 +37,6 @@ const DriverTimeline = ({ id }) => {
       }
     </Timeline>
   );
-
 };
 
 export default DriverTimeline;

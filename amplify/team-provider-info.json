@@ -1,0 +1,20 @@
+{
+  "dev": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-uridriverportaladmin-dev-154740-authRole",
+      "UnauthRoleArn": "arn:aws:iam::***REMOVED***:role/amplify-uridriverportaladmin-dev-154740-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::***REMOVED***:role/amplify-uridriverportaladmin-dev-154740-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-uridriverportaladmin-dev-154740-deployment",
+      "UnauthRoleName": "amplify-uridriverportaladmin-dev-154740-unauthRole",
+      "StackName": "amplify-uridriverportaladmin-dev-154740",
+      "StackId": "arn:aws:cloudformation:us-east-2:***REMOVED***:stack/amplify-uridriverportaladmin-dev-154740/***REMOVED***",
+      "AmplifyAppId": "***REMOVED***"
+    },
+    "categories": {
+      "auth": {
+        "uridriverportaladmin0a861bc9": {}
+      }
+    }
+  }
+}

@@ -50,3 +50,7 @@
 .anticon {
   font-size: 18px !important;
 }
+
+[data-amplify-authenticator]{
+  background-color: rgb(250, 249, 249) !important;
+}

@@ -1,7 +1,8 @@
 import { Card, Table, Tag } from 'antd';
 import { useNavigate } from 'react-router-dom';
-import API from '../../api/BaseUrl';
 import { useState, useEffect } from 'react';
+import { Auth } from 'aws-amplify';
+import API from '../../api/BaseUrl';
 
 
 const Drivers = () => {
@@ -12,6 +13,8 @@ const Drivers = () => {
 
   useEffect(() => {
     fetchRecords(1)
+    console.log(Auth.currentSession())
+    
   }, []);
 
   const tableColumns = [

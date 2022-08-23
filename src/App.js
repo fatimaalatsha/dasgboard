@@ -1,22 +1,24 @@
 import { Layout } from 'antd'
-import AppRouter from './router/AppRouter'
-import SideMenu from "./components/SideMenu";
-import logo from './assets/data/uride_logo.svg';
 import React, { useState } from 'react';
+import { withAuthenticator, Button, Heading } from '@aws-amplify/ui-react';
+import '@aws-amplify/ui-react/styles.css';
 import {
   MenuFoldOutlined,
   MenuUnfoldOutlined,
 } from '@ant-design/icons';
+import AppRouter from './router/AppRouter'
+import SideMenu from "./components/SideMenu";
+import logo from './assets/data/uride_logo.svg';
 
 const { Sider, Content, Footer, Header} = Layout
 
-function App() {
+function App({ signOut, user }) {
   const [collapsed, setCollapsed] = useState(false);
   
   return (
     <Layout id="components-layout-demo-custom-trigger" style={{minHeight:'100vh', height: '100%'}}>
       <Sider width={250} trigger={null} collapsible collapsed={collapsed} >
-        <div className="logo" />
+        <Button onClick={signOut}>Sign out</Button>
         <SideMenu />
       </Sider>
       <Layout className="site-layout">
@@ -31,8 +33,7 @@ function App() {
         </Content>
       </Layout>
     </Layout>
-    
   );
 }
 
-export default App;
+export default withAuthenticator(App);
