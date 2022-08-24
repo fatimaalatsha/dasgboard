@@ -13,8 +13,6 @@ const Drivers = () => {
 
   useEffect(() => {
     fetchRecords(1)
-    console.log(Auth.currentSession())
-    
   }, []);
 
   const tableColumns = [

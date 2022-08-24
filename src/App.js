@@ -1,6 +1,6 @@
 import { Layout } from 'antd'
 import React, { useState } from 'react';
-import { withAuthenticator, Button, Heading } from '@aws-amplify/ui-react';
+import { withAuthenticator, Button } from '@aws-amplify/ui-react';
 import '@aws-amplify/ui-react/styles.css';
 import {
   MenuFoldOutlined,
@@ -10,7 +10,7 @@ import AppRouter from './router/AppRouter'
 import SideMenu from "./components/SideMenu";
 import logo from './assets/data/uride_logo.svg';
 
-const { Sider, Content, Footer, Header} = Layout
+const { Sider, Content, Header} = Layout
 
 function App({ signOut, user }) {
   const [collapsed, setCollapsed] = useState(false);
