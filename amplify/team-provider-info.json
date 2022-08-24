@@ -16,5 +16,23 @@
         "uridriverportaladmin0a861bc9": {}
       }
     }
+  },
+  "staging": {
+    "awscloudformation": {
+      "AuthRoleName": "amplify-uridriverportaladmin-staging-123603-authRole",
+      "UnauthRoleArn": "arn:aws:iam::***REMOVED***:role/amplify-uridriverportaladmin-staging-123603-unauthRole",
+      "AuthRoleArn": "arn:aws:iam::***REMOVED***:role/amplify-uridriverportaladmin-staging-123603-authRole",
+      "Region": "us-east-2",
+      "DeploymentBucketName": "amplify-uridriverportaladmin-staging-123603-deployment",
+      "UnauthRoleName": "amplify-uridriverportaladmin-staging-123603-unauthRole",
+      "StackName": "amplify-uridriverportaladmin-staging-123603",
+      "StackId": "arn:aws:cloudformation:us-east-2:***REMOVED***:stack/amplify-uridriverportaladmin-staging-123603/***REMOVED***",
+      "AmplifyAppId": "***REMOVED***"
+    },
+    "categories": {
+      "auth": {
+        "uridriverportaladmin0a861bc9": {}
+      }
+    }
   }
 }
