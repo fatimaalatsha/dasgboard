@@ -5,7 +5,7 @@ import API from '../../api/BaseUrl'// Import API base url
 
 const useFectch = (url) => {
     const [fetchedData, setFetchedData] = useState({// Set initia fetch state to empty
-        data: [],
+        data: {},
         isLoading: true,
         error: false,
     })
@@ -34,7 +34,7 @@ const useFectch = (url) => {
 
         } catch (error) {
             setFetchedData({// Set fetch state to error
-                data: [],
+                data: {},
                 isLoading: false,
                 error: true,
             })
