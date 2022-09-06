@@ -5,6 +5,8 @@ import API from '../../api/BaseUrl';
 import DriverDocument from '../../components/DriverDocument';
 import DriverTimeline from '../../components/DriverTimeline';
 
+import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
+
 
 const DriverDetails = () => {
   const {id} = useParams();
@@ -12,16 +14,21 @@ const DriverDetails = () => {
   const [userDocuments, setUserDocuments] = useState([])
   const [userCity, setUserCity] = useState()
   const [loading, setLoading] = useState(true);
+
+  const { data, isLoading, error } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
+
+  console.log(data)
+
   const options = {
     headers: {
         'Authorization': 'accessToken'
     }
   }
 
-  useEffect(() => {
+  /* useEffect(() => {
     getUserInfo(id)
     getUserDocuments(id)
-  }, []);
+  }, []); */
 
   const getUserInfo = async (id) => {
     setLoading(true)
@@ -60,10 +67,10 @@ const DriverDetails = () => {
   };
 
   return(
-        <Card title={'Driver Details'}  loading={loading} style={{ margin: 15 }} >
+        <Card title={'Driver Details'}  loading={isLoading} style={{ margin: 15 }} >
           <Descriptions 
             labelStyle={{ fontWeight:'bold' }} 
-            title={`${userInfo.first_name} ${userInfo.last_name}`} 
+            title={`${data.first_name} ${data.last_name}`} 
             extra={
               <>
               <Button type="primary" style={{ marginRight: 15 }}>
@@ -74,21 +81,21 @@ const DriverDetails = () => {
             </Button>
             </>
             }>
-              <Descriptions.Item label="First Name">{userInfo.first_name}</Descriptions.Item>
-              <Descriptions.Item label="Last Name">{userInfo.last_name}</Descriptions.Item>
-              <Descriptions.Item label="Email">{userInfo.email}</Descriptions.Item>
-              <Descriptions.Item label="Date of Birth">{userInfo.date_birth}</Descriptions.Item>
-              <Descriptions.Item label="City">{userCity}</Descriptions.Item>
-              <Descriptions.Item label="Address">{userInfo.address}</Descriptions.Item>
+              <Descriptions.Item label="First Name">{data.first_name}</Descriptions.Item>
+              <Descriptions.Item label="Last Name">{data.last_name}</Descriptions.Item>
+              <Descriptions.Item label="Email">{data.email}</Descriptions.Item>
+              <Descriptions.Item label="Date of Birth">{data.date_birth}</Descriptions.Item>
+              <Descriptions.Item label="City">{data.city.name}</Descriptions.Item>
+              <Descriptions.Item label="Address">{data.address}</Descriptions.Item>
           </Descriptions>
           <Divider orientation="left"><h3>Driver Documents</h3></Divider>
-            {
+            {/* {
               userDocuments.map((item) => (
-                <DriverDocument key={item.id} document={item} userPrefix={userInfo.prefix}/>
+                <DriverDocument key={item.id} document={item} userPrefix={data.prefix}/>
               ))
-            }
+            } */}
            <Divider orientation="left"><h3>Driver History</h3></Divider>
-           <DriverTimeline key={id} id={id}/>
+           {/* <DriverTimeline key={id} id={id}/> */}
         </Card>
   )
 };
