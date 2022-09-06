@@ -3,6 +3,9 @@ import { useState } from 'react';
 import API from '../../api/BaseUrl';
 import AWS from 'aws-sdk';
 
+import useFectch from '../../hooks/use-fetch'// Import useFetch custom hook
+import Document from '../Document' // Import Document component
+
 const { Panel } = Collapse;
 
 AWS.config.update({
@@ -11,32 +14,52 @@ AWS.config.update({
   secretAccessKey: process.env.REACT_APP_SECRET_ACCESS_KEY,
 });
 
-const DriverDocument = ({ document, userPrefix }) => {
-  const s3 = new AWS.S3();
+const DriverDocument = ({ id }) => {
+  const { data, isLoading, error } = useFectch(`/v1/documents/cc/drivers/${id}`)// Call useFetch custom hook
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+  if (error) {
+    return <div>Error...</div>
+  }
+
+  return (
+    <>
+    {
+      data.items.map((item, index) => (
+        <Document key={index} data={item} />
+      ))
+    }
+    </>
+  )
+
+  /* const s3 = new AWS.S3();
   const [form] = Form.useForm();
   const [documentURL, setDocumentURL] = useState();
   const [secondDocumentURL, setSecondDocumentURL] = useState();
   const [documentLoaded, setDocumentLoaded] = useState(false);
   const [documentStatus, setDocumentStatus] = useState(document.status);
   const [publicNotes, setPublicNotes] = useState(document.notes_public || '')
-  const [isModalVisible, setIsModalVisible] = useState(false);
+  const [isModalVisible, setIsModalVisible] = useState(false); */
 
-  const showModal = () => {
+  /* const showModal = () => {
     setIsModalVisible(true);
-  };
+  }; */
 
-  const handleCancel = () => {
+  /* const handleCancel = () => {
     setIsModalVisible(false);
     setPublicNotes(document.notes_public);
     form.setFieldsValue({ reason: document.notes_public });
-  };
+  }; */
 
-  const onPanelChange = () => {
+  /* const onPanelChange = () => {
     if(!documentLoaded) {
       getS3Document(document.key1, document.key2)
     }
     setDocumentLoaded(!documentLoaded)
-  };
+  }; */
 
   /**
     * Updates the status of the current document loaded in this component.
@@ -45,7 +68,7 @@ const DriverDocument = ({ document, userPrefix }) => {
     * @param notes - The notes that will be added to the document.
     * @param notesPublic - The notes that will be added to the document to show to the user.
   */
-  const changeDocStatus = async(status, type) => {
+ /*  const changeDocStatus = async(status, type) => {
     if (status === 'rejected') {
       setIsModalVisible(false);
     }
@@ -64,13 +87,13 @@ const DriverDocument = ({ document, userPrefix }) => {
       document.notes_public = publicNotes
       console.log(response)
     })
-  };
+  }; */
 
   /**
     * Retrieves a signed URL to retrieve the S3 Document for the key provided.
     * @param key - The object key assigned to the S3 document being retrieved for display.
   */
-  const getS3Document = (key) => {
+ /*  const getS3Document = (key) => {
     var params = {Bucket: 'uridriverportal6363c4dfcd0c439fad3c8ba89fc0c5b6184329-staging', 
     Key: `private/${userPrefix}/${key}`,
     Expires: 5};
@@ -79,12 +102,12 @@ const DriverDocument = ({ document, userPrefix }) => {
       setDocumentURL(url)
       console.log(url)
     }, function(err) { console.log(err) });
-  };
+  }; */
 
   /**
     * Takes the document name and status cleans them up.
   */
-  const renderHeader = () => {
+  /* const renderHeader = () => {
     const documentName = ({
       'ownership': 'Vehicle Registration',
       'safety': 'Safety Inspection',
@@ -104,9 +127,9 @@ const DriverDocument = ({ document, userPrefix }) => {
     })[documentStatus] ?? documentStatus
     
    return ( `${documentName} - ${docStatus}`)
-  };
+  }; */
 
-  return( 
+  /* return( 
     <Collapse bordered={true} onChange={onPanelChange}>
       <Panel style={{ textTransform: 'capitalize' }} header={renderHeader()} key={document.id}>
         <Row justify='center'>
@@ -136,10 +159,10 @@ const DriverDocument = ({ document, userPrefix }) => {
         </Row>
       </Panel>
     </Collapse>
-  )
-};
+  ) */
+}
 
-const styles = {
+/* const styles = {
   buttonsContainer: {
     display: 'flex',
     paddingBottom: 30,
@@ -149,6 +172,6 @@ const styles = {
     marginRight: 20,
     marginLeft: 20
   }
-};
+}; */
 
 export default DriverDocument
