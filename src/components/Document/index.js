@@ -12,6 +12,7 @@ import {
     Typography,
 } from 'antd' // Import antd components
 import DocumentList from "../../hoc/DocumentList" // import DocumentList HOC
+import DocViewer from '../DocViewer' // import document viewer component
 
 const { Panel } = Collapse // Destructure Panel from Collapse
 const { Title } = Typography // Destructure Title from Typography
@@ -49,6 +50,9 @@ const Document = (props) => {
                     </Col>
                 </Row>
             }>
+                <Row>
+                    <DocViewer />
+                </Row>
                 <Row gutter={16}>
                     <Col className="gutter-row" span={12}>
                         <Button block type="danger" size="large">
