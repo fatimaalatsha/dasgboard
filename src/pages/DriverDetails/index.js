@@ -1,36 +1,25 @@
-import { Button, Card, Descriptions, Divider, Modal, Timeline } from 'antd';
-import { useParams } from 'react-router-dom';
-import { useEffect, useState } from 'react';
-import API from '../../api/BaseUrl';
-import DriverDocument from '../../components/DriverDocument';
-import DriverTimeline from '../../components/DriverTimeline';
+import { Button, Card, Descriptions, Divider } from 'antd'
+import { useParams } from 'react-router-dom'
+
+import DriverDocument from '../../components/DriverDocument'
+import DriverTimeline from '../../components/DriverTimeline'
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 
 
 const DriverDetails = () => {
   const {id} = useParams();
-  const [userInfo, setUserInfo] = useState({})
-  const [userDocuments, setUserDocuments] = useState([])
-  const [userCity, setUserCity] = useState()
-  const [loading, setLoading] = useState(true);
 
   const { data, isLoading, error } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
 
-  console.log(data)
-
-  const options = {
+  /* const options = {
     headers: {
         'Authorization': 'usertoken',
         ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
     }
-  }
+  } */
 
-useEffect(() => {
-    getUserDocuments(id)
-  }, []);
-
-  const getUserInfo = async (id) => {
+  /* const getUserInfo = async (id) => {
     setLoading(true)
     
     await API.get(`/v1/drivers/cc/${id}`, options).then(response => {
@@ -41,9 +30,9 @@ useEffect(() => {
       console.log(response.data)
       setLoading(false)
     })
-  };
+  }; */
 
-  const onDeleteDriver = async () => {
+  /* const onDeleteDriver = async () => {
     Modal.confirm({
       title: "Are you sure you want to delete this driver's record?",
       okText: "YES",
@@ -54,9 +43,9 @@ useEffect(() => {
         })
       }
     })
-  }
+  } */
 
-  const getUserDocuments = async (id) => {
+  /* const getUserDocuments = async (id) => {
     setLoading(true)
 
     await API.get(`/v1/documents/cc/drivers/${id}`, options).then(response => {
@@ -64,7 +53,11 @@ useEffect(() => {
       console.log(response.data.items)
       setLoading(false)
     })
-  };
+  }; */
+
+  if (error) {
+    return <div>Something went wrong</div>
+  }
 
   return(
         <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }} >
@@ -76,7 +69,7 @@ useEffect(() => {
               <Button type="primary" style={{ marginRight: 15 }}>
                 Edit
               </Button>
-              <Button type="danger" onClick={() => {onDeleteDriver()}} style={{ marginRight: 15 }}>
+              <Button type="danger" /* onClick={() => {onDeleteDriver()}} style={{ marginRight: 15 }} */>
               Delete Driver
             </Button>
             </>
@@ -89,13 +82,9 @@ useEffect(() => {
               <Descriptions.Item label="Address">{data.address}</Descriptions.Item>
           </Descriptions>
           <Divider orientation="left"><h3>Driver Documents</h3></Divider>
-            {
-              userDocuments.map((item) => (
-                <DriverDocument key={item.id} document={item} userPrefix={data.prefix}/>
-              ))
-            }
+           <DriverDocument id={id} />
            <Divider orientation="left"><h3>Driver History</h3></Divider>
-           <DriverTimeline key={id} id={id}/>
+           <DriverTimeline id={id}/>
         </Card>
   )
 };
