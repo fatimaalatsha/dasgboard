@@ -1,35 +1,25 @@
-import { Timeline } from 'antd';
-import { useEffect, useState } from 'react';
-import API from '../../api/BaseUrl';
-import { SmileOutlined } from '@ant-design/icons';
+import { Timeline } from 'antd'// Import Timeline component from antd
+import useFectch from '../../hooks/use-fetch' // Import useFetch custom hook
+
 const dayjs = require('dayjs')
 
 const DriverTimeline = ({ id }) => {
-  const [driverHistory, setDriverHistory] = useState([]);
-  const options = {
-    headers: {
-        'Authorization': 'accessToken'
-    }
+  const { data, isLoading, error } = useFectch(`/v1/drivers/cc/${id}/logs`)// Call useFetch custom hook
+
+  if(isLoading) {
+    return <div>Loading...</div>
   }
 
-  useEffect(() => {
-    getDriverHistory(id)
-  }, []);
-
-  const getDriverHistory = async(id) => {
-    await API.get(`/v1/drivers/cc/${id}/logs`, options).then(response => {
-      setDriverHistory(response.data.data)
-      console.log(response.data.data)
-      console.log(driverHistory)
-    })
+  if(error) {
+    return <div>Error...</div>
   }
   
   return(
     <Timeline mode='alternate'>
       {
-        driverHistory.slice(0).reverse().map((item) => (
+        data.data.slice(0).reverse().map((item, index) => (
           <Timeline.Item 
-          key={item.id} 
+          key={index} 
           color={item.action.includes('rejected') ? 'red' : 'green'}>
             {item.action} - {dayjs(item.createdAt).format('DD/MM/YYYY HH:mm:ss')}
           </Timeline.Item> 
