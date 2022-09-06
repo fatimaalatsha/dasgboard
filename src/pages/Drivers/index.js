@@ -1,19 +1,20 @@
-import { Card, Table, Tag } from 'antd';
-import { useNavigate } from 'react-router-dom';
-import { useState, useEffect } from 'react';
-import { Auth } from 'aws-amplify';
-import API from '../../api/BaseUrl';
+import { useState } from 'react';
+
+import { Card, Table } from 'antd'; // Import Ant components
+import { useNavigate } from 'react-router-dom'; // Import Nav component
+
+import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 
 
 const Drivers = () => {
   const navigate = useNavigate();
-  const [dataSource, setDataSource] = useState([]);
-  const [totalRecords, setTotalRecords] = useState(1);
-  const [loading, setLoading] = useState(false);
+  const [argument, setArgument] = useState({
+    page: 1,
+    limit: 10,
+    current_page: 1,
+  })
 
-  useEffect(() => {
-    fetchRecords(1)
-  }, []);
+  const { data, isLoading, error } = useFetch(`/v1/drivers/cc?page=${argument.page}&limit=${argument.limit}`)// Call useFetch custom hook
 
   const tableColumns = [
     {
@@ -59,32 +60,23 @@ const Drivers = () => {
     }
   ];
 
-  const fetchRecords = async (page) => {
-    setLoading(true)
-    const options = {
-      headers: {
-          'Authorization': 'accessToken'
-      }
-    }
-    await API.get(`/v1/drivers/cc?page=${page}&limit=10`, options).then(response => {
-      setDataSource(response.data.items)
-      setTotalRecords(response.data.total_items)
-      setLoading(false)
-    })
-  };
+  if (error) {
+    return <div>Something went wrong...</div>
+  }
 
   return(
     <Card title={'Drivers'} style={{ margin: 15 }}>
       <Table
-        dataSource={dataSource}
+        dataSource={data.items}
         columns={tableColumns}
-        loading={loading}
+        loading={isLoading}
         rowKey="user_id"
         pagination={{
-          pageSize:10,
-          total:totalRecords,
+          pageSize: argument.limit,
+          total: data.total_items,
           onChange:(page)=>{
-            fetchRecords(page);
+            console.log(page)
+            setArgument({ ...argument, page: page + 1})// Set argument state
           }
         }}
         onRow={(driverRecord) => ({
