@@ -21,14 +21,14 @@ const DriverDetails = () => {
 
   const options = {
     headers: {
-        'Authorization': 'accessToken'
+        'Authorization': 'usertoken',
+        ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
     }
   }
 
-  /* useEffect(() => {
-    getUserInfo(id)
+useEffect(() => {
     getUserDocuments(id)
-  }, []); */
+  }, []);
 
   const getUserInfo = async (id) => {
     setLoading(true)
@@ -67,7 +67,7 @@ const DriverDetails = () => {
   };
 
   return(
-        <Card title={'Driver Details'}  loading={isLoading} style={{ margin: 15 }} >
+        <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }} >
           <Descriptions 
             labelStyle={{ fontWeight:'bold' }} 
             title={`${data.first_name} ${data.last_name}`} 
@@ -85,17 +85,17 @@ const DriverDetails = () => {
               <Descriptions.Item label="Last Name">{data.last_name}</Descriptions.Item>
               <Descriptions.Item label="Email">{data.email}</Descriptions.Item>
               <Descriptions.Item label="Date of Birth">{data.date_birth}</Descriptions.Item>
-              <Descriptions.Item label="City">{data.city.name}</Descriptions.Item>
+              <Descriptions.Item label="City">{data.city?.name}</Descriptions.Item>
               <Descriptions.Item label="Address">{data.address}</Descriptions.Item>
           </Descriptions>
           <Divider orientation="left"><h3>Driver Documents</h3></Divider>
-            {/* {
+            {
               userDocuments.map((item) => (
                 <DriverDocument key={item.id} document={item} userPrefix={data.prefix}/>
               ))
-            } */}
+            }
            <Divider orientation="left"><h3>Driver History</h3></Divider>
-           {/* <DriverTimeline key={id} id={id}/> */}
+           <DriverTimeline key={id} id={id}/>
         </Card>
   )
 };
