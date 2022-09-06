@@ -14,7 +14,7 @@ AWS.config.update({
   secretAccessKey: process.env.REACT_APP_SECRET_ACCESS_KEY,
 });
 
-const DriverDocument = ({ id }) => {
+const DriverDocument = ({ id, sub }) => {
   const { data, isLoading, error } = useFectch(`/v1/documents/cc/drivers/${id}`)// Call useFetch custom hook
 
   if (isLoading) {
@@ -29,7 +29,7 @@ const DriverDocument = ({ id }) => {
     <>
     {
       data.items.map((item, index) => (
-        <Document key={index} data={item} />
+        <Document key={index} data={item} sub={sub} />
       ))
     }
     </>

@@ -82,7 +82,7 @@ const DriverDetails = () => {
               <Descriptions.Item label="Address">{data.address}</Descriptions.Item>
           </Descriptions>
           <Divider orientation="left"><h3>Driver Documents</h3></Divider>
-           <DriverDocument id={id} />
+           <DriverDocument id={id} sub={data.sub_id} />
            <Divider orientation="left"><h3>Driver History</h3></Divider>
            <DriverTimeline id={id}/>
         </Card>

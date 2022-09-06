@@ -1,8 +1,8 @@
 const DocumentList = ( Component ) => ({...props}) => {
-    const { data } = props
+    const { data, sub } = props
     
     return (
-        <Component {...data} />
+        <Component {...data} sub={sub} />
     )
 }
 
