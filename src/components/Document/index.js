@@ -18,7 +18,7 @@ const { Panel } = Collapse // Destructure Panel from Collapse
 const { Title } = Typography // Destructure Title from Typography
 
 const Document = (props) => {
-    console.log(props)
+    //console.log(props)
 
     const tagConfig = {
         style: {
@@ -51,7 +51,7 @@ const Document = (props) => {
                 </Row>
             }>
                 <Row>
-                    <DocViewer />
+                    <DocViewer objectKey={`${props.sub}/${props.key1}`} />
                 </Row>
                 <Row gutter={16}>
                     <Col className="gutter-row" span={12}>
