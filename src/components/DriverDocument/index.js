@@ -3,19 +3,19 @@ import { useState } from 'react';
 import API from '../../api/BaseUrl';
 import AWS from 'aws-sdk';
 
-import useFectch from '../../hooks/use-fetch'// Import useFetch custom hook
+import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import Document from '../Document' // Import Document component
 
 const { Panel } = Collapse;
 
-AWS.config.update({
+/* AWS.config.update({
   region: 'us-east-2',
   accessKeyId: process.env.REACT_APP_ACCESS_KEY_ID,
   secretAccessKey: process.env.REACT_APP_SECRET_ACCESS_KEY,
-});
+}); */
 
 const DriverDocument = ({ id, sub }) => {
-  const { data, isLoading, error } = useFectch(`/v1/documents/cc/drivers/${id}`)// Call useFetch custom hook
+  const { data, isLoading, error } = useFetch(`/v1/documents/cc/drivers/${id}`)// Call useFetch custom hook
 
   if (isLoading) {
     return <div>Loading...</div>
