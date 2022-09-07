@@ -1,14 +1,34 @@
 import { Select } from "antd" // Import antd components
+import { useField, useFormikContext } from "formik" // Import Formik form hooks
 
 const { Option } = Select // Destructure Option from Select
 
-const SelectWarpper = () => {
+const SelectWarpper = ({
+    name,
+    ...otherProps
+}) => {
+    const { setFieldValue } = useFormikContext() // Destructure setFieldValue from useFormikContext
+    const [field, meta] = useField(name) // Destructure field and meta from useField
+
+    const handleChange = (value) => {
+        setFieldValue(name, value)
+    }
+
+    console.log(field)
 
     const selectConfig = {
+        ...field,
+        ...otherProps,
         placeholder: 'Select a reason to reject the document',
         style: {
             width: '100%',
-        }
+        },
+        onChange: handleChange,
+        value: field.value || undefined,
+    }
+
+    if (meta && meta.touched && meta.error) {
+        selectConfig.status = "error"
     }
 
     return (

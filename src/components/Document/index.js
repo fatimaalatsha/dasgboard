@@ -7,16 +7,17 @@ import {
     Row, 
     Col,
     Modal, 
-    Input, 
-    Form,
+    Input,
     Tag,
     Typography,
 } from 'antd' // Import antd components
 import { Auth } from 'aws-amplify'// Import Amplify auth method
+import { Formik, Form } from 'formik' // Import Formik form components
+import { object, shape, string } from 'yup'
 
 import DocumentList from "../../hoc/DocumentList" // import DocumentList HOC
 import DocViewer from '../DocViewer' // import document viewer component
-import SelectWarpper from '../forms/SelectWrapper' // Import SelectWrapper component
+import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper component
 import API from '../../api/BaseUrl' // Import API base URL
 
 const { Panel } = Collapse // Destructure Panel from Collapse
@@ -32,6 +33,10 @@ const Document = (props) => {
         },
         color: props.color
     }
+
+    const rejectSchema = object().shape({
+        notes_public: string().required('Required'),
+    })
 
     const changeDocStatus = async (status, type, id) => {
         try {
@@ -109,7 +114,22 @@ const Document = (props) => {
             onOk={() => setIsModalVisible(false)}
             onCancel={() => setIsModalVisible(false)}
         >
-            <SelectWarpper />
+            <Formik
+                initialValues={{
+                    notes_public: '',
+                }}
+                validationSchema={rejectSchema}
+                onSubmit={async (values, { setSubmitting }) => {
+                    console.log(values)
+                    await changeDocStatus('rejected', props.document.type, props.id)
+                }}
+            >
+                <Form>
+                    <SelectWrapper 
+                        name="notes_public"
+                    />
+                </Form>
+            </Formik>
         </Modal>
         </>
     )
