@@ -14,8 +14,6 @@ const SelectWarpper = ({
         setFieldValue(name, value)
     }
 
-    console.log(field)
-
     const selectConfig = {
         ...field,
         ...otherProps,
