@@ -10,8 +10,6 @@ const useFectch = (url) => {
         error: false,
     })
 
-    const controller = new AbortController()// Create a new AbortController
-
     const fetchData = useCallback(async () => {
         try {
             const auth = await Auth.currentSession()// Get current session
@@ -43,6 +41,7 @@ const useFectch = (url) => {
     }, [url])// Create a new fetchData function
 
     useEffect(() => {
+        const controller = new AbortController()// Create a new AbortController
         fetchData()// Call fetchData function
         return () => controller.abort()// Abort fetch request
     }, [fetchData, url])// Call fetchData function on mount and unmount
