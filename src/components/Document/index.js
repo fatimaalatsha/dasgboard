@@ -23,13 +23,18 @@ const { Title } = Typography // Destructure Title from Typography
 
 const Document = (props) => {
     const [isModalVisible, setIsModalVisible] = useState(false) // Set modal state to false
+    const [documentStatus, setDocumentStatus] = useState({// Set document status state manager
+        status: props.status,
+        color: props.color,
+        active: null,
+    }) 
     //console.log(props)
 
     const tagConfig = {
         style: {
             textTransform: 'capitalize'
         },
-        color: props.color
+        color: documentStatus.color
     }
 
     const rejectSchema = object().shape({
@@ -54,30 +59,39 @@ const Document = (props) => {
             const response = await API.post(`/v1/documents/cc/${id}`, body, options)
             const data = await response.data
             if (data.success) {
-                console.log(data)
+                status === 'approved' ? setDocumentStatus({
+                    status: 'approved',
+                    color: 'success',
+                    active: null,
+                }) : setDocumentStatus({
+                    status: 'rejected',
+                    color: 'error',
+                    active: null,
+                })
             }
         } catch (err) {
             console.log(err)
         }
     }
 
+    const handleCollapseChange = (key) => { // Handle collapse change
+        setDocumentStatus({...documentStatus, active: key})
+    }
+
     return (
         <>
-        <Collapse>
+        <Collapse activeKey={documentStatus.active} onChange={handleCollapseChange}>
             <Panel header={
-                <Row style={{ display: 'flex', width: '100%'}}>
-                    <Col span={20}>
-                        <Title level={5}>
-                            {props.document?.title}
-                        </Title>
-                    </Col>
-                    <Col span={4}>
-                        <Tag {...tagConfig}>
-                            {props.status}
-                        </Tag>
-                    </Col>
-                </Row>
-            }>
+                <Title level={5}>
+                    {props.document?.title}
+                </Title>
+            }
+            extra={
+                <Tag {...tagConfig}>
+                    {documentStatus.status}
+                </Tag>
+            }
+            >
                 <Row>
                     <DocViewer objectKey={`${props.sub}/${props.key1}`} />
                 </Row>
@@ -112,7 +126,6 @@ const Document = (props) => {
             }}
             validationSchema={rejectSchema}
             onSubmit={async (values, { setSubmitting }) => {
-                console.log(values)
                 await changeDocStatus('rejected', props.document.type, props.id, values.notes_public)
                 .then(() => {
                     setIsModalVisible(false)
