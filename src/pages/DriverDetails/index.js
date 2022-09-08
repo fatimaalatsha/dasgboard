@@ -11,50 +11,7 @@ const DriverDetails = () => {
   const {id} = useParams();
 
   const { data, isLoading, error } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
-
-  /* const options = {
-    headers: {
-        'Authorization': 'usertoken',
-        ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
-    }
-  } */
-
-  /* const getUserInfo = async (id) => {
-    setLoading(true)
-    
-    await API.get(`/v1/drivers/cc/${id}`, options).then(response => {
-      setUserInfo(response.data)
-      if (response.data.city){
-      setUserCity(response.data.city.name)
-      }
-      console.log(response.data)
-      setLoading(false)
-    })
-  }; */
-
-  /* const onDeleteDriver = async () => {
-    Modal.confirm({
-      title: "Are you sure you want to delete this driver's record?",
-      okText: "YES",
-      okType: "danger",
-      onOk: async () => {
-        await API.delete(`/v1/drivers/${id}`, options).then(response => {
-          console.log(response.data)
-        })
-      }
-    })
-  } */
-
-  /* const getUserDocuments = async (id) => {
-    setLoading(true)
-
-    await API.get(`/v1/documents/cc/drivers/${id}`, options).then(response => {
-      setUserDocuments(response.data.items)
-      console.log(response.data.items)
-      setLoading(false)
-    })
-  }; */
-
+  
   if (error) {
     return <div>Something went wrong</div>
   }
