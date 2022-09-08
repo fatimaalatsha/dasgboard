@@ -1,9 +1,10 @@
-import { Select } from "antd" // Import antd components
-import { useField, useFormikContext } from "formik" // Import Formik form hooks
+import { Select, Typography } from "antd" // Import antd components
+import { useField, useFormikContext, ErrorMessage } from "formik" // Import Formik form hooks
 
 const { Option } = Select // Destructure Option from Select
+const { Text } = Typography // Destructure Text from Typography
 
-const SelectWarpper = ({
+const SelectWrapper = ({
     name,
     ...otherProps
 }) => {
@@ -30,12 +31,17 @@ const SelectWarpper = ({
     }
 
     return (
+        <>
         <Select {...selectConfig}>
             <Option value="wrong document">Wrong document</Option>
             <Option value="image is to blurry">Image is to blurry</Option>
             <Option value="expired document">Expired document</Option>
         </Select>
+        <ErrorMessage name={name}>
+            {msg => <Text type="danger">{msg}</Text>}
+        </ErrorMessage>
+        </>
     )
 }
 
-export default SelectWarpper
+export default SelectWrapper

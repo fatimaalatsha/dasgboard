@@ -2,22 +2,20 @@ import { useState } from 'react'
 import { 
     Button, 
     Collapse,
-    Badge,
-    Image, 
     Row, 
     Col,
-    Modal, 
-    Input,
+    Modal,
     Tag,
     Typography,
 } from 'antd' // Import antd components
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form } from 'formik' // Import Formik form components
-import { object, shape, string } from 'yup'
+import { object, string } from 'yup'
 
 import DocumentList from "../../hoc/DocumentList" // import DocumentList HOC
 import DocViewer from '../DocViewer' // import document viewer component
 import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper component
+import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import API from '../../api/BaseUrl' // Import API base URL
 
 const { Panel } = Collapse // Destructure Panel from Collapse
@@ -38,7 +36,7 @@ const Document = (props) => {
         notes_public: string().required('Required'),
     })
 
-    const changeDocStatus = async (status, type, id) => {
+    const changeDocStatus = async (status, type, id, notes = '') => {
         try {
             const auth = await Auth.currentSession()// Get current session
             const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -51,7 +49,7 @@ const Document = (props) => {
             const body = {
                 status,
                 type,
-                notes_public: '',
+                ...( notes && { notes_public: notes })
             }
             const response = await API.post(`/v1/documents/cc/${id}`, body, options)
             const data = await response.data
@@ -108,29 +106,41 @@ const Document = (props) => {
                 </Row>
             </Panel>
         </Collapse>
-        <Modal
-            title={`Reject: ${props.document?.title}`}
-            visible={isModalVisible}
-            onOk={() => setIsModalVisible(false)}
-            onCancel={() => setIsModalVisible(false)}
+        <Formik
+            initialValues={{
+                notes_public: '',
+            }}
+            validationSchema={rejectSchema}
+            onSubmit={async (values, { setSubmitting }) => {
+                console.log(values)
+                await changeDocStatus('rejected', props.document.type, props.id, values.notes_public)
+                .then(() => {
+                    setIsModalVisible(false)
+                    setSubmitting(false)
+                })
+            }}
         >
-            <Formik
-                initialValues={{
-                    notes_public: '',
-                }}
-                validationSchema={rejectSchema}
-                onSubmit={async (values, { setSubmitting }) => {
-                    console.log(values)
-                    await changeDocStatus('rejected', props.document.type, props.id)
-                }}
+            <Modal
+                title={`Reject: ${props.document?.title}`}
+                visible={isModalVisible}
+                onOk={() => setIsModalVisible(false)}
+                onCancel={() => setIsModalVisible(false)}
+                footer={[
+                    <Button key="back" onClick={() => setIsModalVisible(false)}>
+                        Cancel
+                    </Button>,
+                    <SubmitWrapper key="submit" type="primary">
+                        Submit
+                    </SubmitWrapper>,
+                ]}
             >
-                <Form>
-                    <SelectWrapper 
-                        name="notes_public"
-                    />
-                </Form>
-            </Formik>
-        </Modal>
+                    <Form>
+                        <SelectWrapper 
+                            name="notes_public"
+                        />
+                    </Form>
+            </Modal>
+        </Formik>
         </>
     )
 }
