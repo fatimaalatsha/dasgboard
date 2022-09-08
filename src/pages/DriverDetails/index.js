@@ -21,17 +21,8 @@ const DriverDetails = () => {
         <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }} >
           <Descriptions 
             labelStyle={{ fontWeight:'bold' }} 
-            title={`${data.first_name} ${data.last_name}`} 
-            extra={
-              <>
-              <Button type="primary" style={{ marginRight: 15 }}>
-                Edit
-              </Button>
-              <Button type="danger" /* onClick={() => {onDeleteDriver()}} style={{ marginRight: 15 }} */>
-              Delete Driver
-            </Button>
-            </>
-            }>
+            title={`${data.first_name} ${data.last_name}`}
+          >
               <Descriptions.Item label="First Name">
                 <EditableText text={data.first_name} />
               </Descriptions.Item>
