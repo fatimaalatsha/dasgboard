@@ -92,12 +92,12 @@ const Document = (props) => {
                 </Tag>
             }
             >
-                <Row>
+                <Row justify='center'>
                     <DocViewer objectKey={`${props.sub}/${props.key1}`} />
                 </Row>
                 {
                     props.key2 && (
-                        <Row>
+                        <Row justify='center'>
                             <DocViewer objectKey={`${props.sub}/${props.key2}`} />
                         </Row>
                     )
@@ -138,6 +138,7 @@ const Document = (props) => {
                 visible={isModalVisible}
                 onOk={() => setIsModalVisible(false)}
                 onCancel={() => setIsModalVisible(false)}
+                destroyOnClose={true}
                 footer={[
                     <Button key="back" onClick={() => setIsModalVisible(false)}>
                         Cancel
