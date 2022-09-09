@@ -1,13 +1,10 @@
 import { useState } from 'react'
 import { Typography, Modal } from 'antd' // Import antd components
-import { Auth } from 'aws-amplify'// Import Amplify auth method
-import API from '../../api/BaseUrl' // Import API base URL
 
 const { Text } = Typography // Destructure Text from Typography
 const { confirm } = Modal // Destructure config from Modal 
 
 const EditableText = ({children, ...props}) => {
-    //console.log(props)
     const [editableString, setEditableString] = useState(children)// Set editable string state
     const [isEditing, setIsEditing] = useState(true)// Set isEditing state
 

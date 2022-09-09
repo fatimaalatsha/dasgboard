@@ -29,7 +29,6 @@ const DriverDocument = ({ id, sub }) => {
           ['type']: type,
           ...newValue,
         }
-        console.log(body)
         const response = await API.post(`/v1/documents/cc/${documentId}`, body, options)
         const data = await response.data
         if(data) {
