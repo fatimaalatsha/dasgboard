@@ -10,7 +10,7 @@ const useFectch = (url) => {
         error: false,
     })
 
-    const fetchData = useCallback(async () => {
+    const fetchData = useCallback(async () => {// Create a new fetchData function
         try {
             const auth = await Auth.currentSession()// Get current session
             const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -38,7 +38,16 @@ const useFectch = (url) => {
             })
             console.log(error)
         }
-    }, [url])// Create a new fetchData function
+    }, [url])
+
+    const refetch = () => {// Create a new refetch function
+        setFetchedData({// Set fetched data to initial state
+            data: {},
+            isLoading: true,
+            error: false,
+        })
+        fetchData()// Call fetchData function
+    }
 
     useEffect(() => {
         const controller = new AbortController()// Create a new AbortController
@@ -47,7 +56,7 @@ const useFectch = (url) => {
     }, [fetchData, url])// Call fetchData function on mount and unmount
 
     const { data, isLoading, error } = fetchedData// Destructure fetched data
-    return { data, isLoading, error }// Return fetched data
+    return { data, isLoading, error, refetch }// Return fetched data
 }
 
 export default useFectch
