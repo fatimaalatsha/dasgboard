@@ -31,7 +31,7 @@ const Document = (props) => {
         color: props.color,
         active: null,
     }) 
-    console.log(props)
+    //console.log(props)
 
     const tagConfig = {
         style: {
@@ -112,7 +112,7 @@ const Document = (props) => {
                         <Col span={12}>
                             <Descriptions title='Document Details' layout='vertical' labelStyle={{ fontWeight:'bold' }}>
                                 <Descriptions.Item label="Expiration Date">
-                                    <EditableText name='expiration_date' updateCallback={props.updateText}>
+                                    <EditableText name='expiration_date' updateCallback={(value) => props.updateText(value, props.document.type, props.id)}>
                                         {props.expiration_date}
                                     </EditableText>
                                 </Descriptions.Item>

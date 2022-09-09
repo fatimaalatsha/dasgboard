@@ -15,7 +15,7 @@ const DriverDocument = ({ id, sub }) => {
     return <div>Error...</div>
   }
 
-  const updateText = async (payload) => {
+  const updateText = async (newValue, type, documentId) => {
     try {
         const auth = await Auth.currentSession()// Get current session
         const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -25,8 +25,12 @@ const DriverDocument = ({ id, sub }) => {
                 ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
             }
         }
-        const body = payload
-        const response = await API.put(`/v1/drivers/cc/${id}`, body, options)
+        const body = {
+          ['type']: type,
+          ...newValue,
+        }
+        console.log(body)
+        const response = await API.post(`/v1/documents/cc/${documentId}`, body, options)
         const data = await response.data
         if(data) {
             console.log(data)
