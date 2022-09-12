@@ -18,16 +18,17 @@ const EditableDate = ({...props}) => {
             title: 'Are you sure you want to edit this record?',
             content: 'This action cannot be undone.',
             onOk: async () => {
-                console.log({[props.name]: value})
                 await props.updateCallback({[props.name]: value})
                 .then(() => {
                     setDateValue(userDate)
                     setIsLoading(false)
+                    setIsEnable(false)
                 })
             },
             onCancel() {
                 console.log('Cancel')
                 setIsLoading(false)
+                setIsEnable(false)
             },
         });
     }
@@ -47,7 +48,6 @@ const EditableDate = ({...props}) => {
                     format={dateFormat} 
                     bordered={false} 
                     onChange={(date, dateString) => {
-                        console.log(dateString)
                         setUserDate(dateString)
                     }}
                     renderExtraFooter={() => (
