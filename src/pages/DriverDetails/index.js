@@ -28,6 +28,7 @@ const DriverDetails = () => {
             }
         }
         const body = payload
+        console.log(body)
         const response = await API.put(`/v1/drivers/cc/${id}`, body, options)
         const data = await response.data
         if(data) {
@@ -73,8 +74,7 @@ const DriverDetails = () => {
                 <EditableText name='address' value={data.address} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="Date of Birth">
-                {/* <EditableDate name='date_birth' value={data.date_birth} updateCallback={updateText} /> */}
-                <EditableText name='date_birth' value={data.date_birth} updateCallback={updateText} />
+                <EditableDate name='date_birth' value={data.date_birth} updateCallback={updateText} />
               </Descriptions.Item>
           </Descriptions>
           <Divider orientation="left"><h3>Driver Documents</h3></Divider>
