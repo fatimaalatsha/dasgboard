@@ -112,9 +112,13 @@ const Document = (props) => {
                         <Col span={12}>
                             <Descriptions title='Document Details' layout='vertical' labelStyle={{ fontWeight:'bold' }}>
                                 <Descriptions.Item label="Expiration Date">
-                                    <EditableText name='expiration_date' updateCallback={(value) => props.updateText(value, props.document.type, props.id)}>
-                                        {props.expiration_date}
-                                    </EditableText>
+                                    <EditableText 
+                                        name='expiration_date' 
+                                        value={props.expiration_date} 
+                                        updateCallback={(value) => {
+                                            props.updateText(value, props.document.type, props.id)
+                                        }} 
+                                    />
                                 </Descriptions.Item>
                             </Descriptions>
                         </Col>

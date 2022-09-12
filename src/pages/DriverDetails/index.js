@@ -5,7 +5,8 @@ import { Auth } from 'aws-amplify'// Import Amplify auth method
 import API from '../../api/BaseUrl' // Import API base URL
 
 
-import EditableText from '../../components/EditableText' // Import Driver contact information component
+import EditableText from '../../components/EditableText' // Import editbale string component
+import EditableDate from '../../components/EditableDate' // Import editable date component
 import DriverDocument from '../../components/DriverDocument' // Import Document viewers component
 import DriverTimeline from '../../components/DriverTimeline' // Import Timeline 
 
@@ -42,6 +43,8 @@ const DriverDetails = () => {
     return <div>Something went wrong</div>
   }
 
+  //console.log(data)
+
   return (
         <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }} >
           <Descriptions 
@@ -49,40 +52,29 @@ const DriverDetails = () => {
             title={`${data.first_name} ${data.last_name}`}
           >
               <Descriptions.Item label="First Name">
-                <EditableText name='first_name' updateCallback={updateText}>
-                  {data.first_name}
-                </EditableText>
+                <EditableText name='first_name' value={data.first_name} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="Last Name">
-                <EditableText name='last_name' updateCallback={updateText}>
-                  {data.last_name}
-                </EditableText>
+                <EditableText name='last_name' value={data.last_name} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="Email">
-                <EditableText name='email' updateCallback={updateText}>
-                  {data.email}
-                </EditableText>
+                <EditableText name='email' value={data.email} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="Phone Number">
-                <EditableText name='phone' updateCallback={updateText}>
-                  {data.phone}
-                </EditableText>
+                <EditableText name='phone' value={data.phone} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="Licence Number">
-                <EditableText name='license_number' updateCallback={updateText}>
-                  {data.license_number}
-                </EditableText>
+                <EditableText name='license_number' value={data.license_number} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="City">
                 {data.city?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Address">
-                <EditableText name='address' updateCallback={updateText}>
-                  {data.address}
-                </EditableText>
+                <EditableText name='address' value={data.address} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="Date of Birth">
-                {data.date_birth}
+                {/* <EditableDate name='date_birth' value={data.date_birth} updateCallback={updateText} /> */}
+                <EditableText name='date_birth' value={data.date_birth} updateCallback={updateText} />
               </Descriptions.Item>
           </Descriptions>
           <Divider orientation="left"><h3>Driver Documents</h3></Divider>

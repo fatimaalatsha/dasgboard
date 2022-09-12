@@ -15,7 +15,7 @@ const getFromS3 = async (key) => {
             Key: s3ObjectKey
         }
         const s3GetCommnd = new GetObjectCommand(params)// Create a new GetObjectCommand
-        const url = await getSignedUrl(s3, s3GetCommnd, { expiresIn: 3600 })// Create a signed URL
+        const url = await getSignedUrl(s3, s3GetCommnd, { expiresIn: 30 })// Create a signed URL
         if (url) {
             return url
         }

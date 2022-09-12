@@ -4,8 +4,8 @@ import { Typography, Modal } from 'antd' // Import antd components
 const { Text } = Typography // Destructure Text from Typography
 const { confirm } = Modal // Destructure config from Modal 
 
-const EditableText = ({children, ...props}) => {
-    const [editableString, setEditableString] = useState(children)// Set editable string state
+const EditableText = ({...props}) => {
+    const [editableString, setEditableString] = useState(props.value)// Set editable string state
     const [isEditing, setIsEditing] = useState(true)// Set isEditing state
 
     const showConfirm = (value) => {
