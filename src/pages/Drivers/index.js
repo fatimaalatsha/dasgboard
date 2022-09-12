@@ -14,7 +14,7 @@ const Drivers = () => {
     current_page: 1,
   })
 
-  const { data, isLoading, error } = useFetch(`/v1/drivers/cc?page=${argument.page}&limit=${argument.limit}`)// Call useFetch custom hook
+  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?page=${argument.page}&limit=${argument.limit}`)// Call useFetch custom hook
 
   const tableColumns = [
     {
@@ -75,8 +75,7 @@ const Drivers = () => {
           pageSize: argument.limit,
           total: data.total_items,
           onChange:(page)=>{
-            console.log(page)
-            setArgument({ ...argument, page: page + 1})// Set argument state
+            setArgument({ ...argument, page: page})// Set argument state
           }
         }}
         onRow={(driverRecord) => ({
