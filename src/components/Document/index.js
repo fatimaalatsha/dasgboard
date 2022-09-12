@@ -18,6 +18,7 @@ import DocViewer from '../DocViewer' // import document viewer component
 import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper component
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import EditableText from '../../components/EditableText' // Import Driver contact information component
+import EditableDate from '../../components/EditableDate' // Import Driver contact information component
 import API from '../../api/BaseUrl' // Import API base URL
 
 const { Panel } = Collapse // Destructure Panel from Collapse
@@ -112,11 +113,25 @@ const Document = (props) => {
                         <Col span={12}>
                             <Descriptions title='Document Details' layout='vertical' labelStyle={{ fontWeight:'bold' }}>
                                 <Descriptions.Item label="Expiration Date">
-                                    <EditableText 
+                                    {/* <EditableText 
                                         name='expiration_date' 
                                         value={props.expiration_date} 
                                         updateCallback={(value) => {
                                             props.updateText(value, props.document.type, props.id)
+                                        }} 
+                                    /> */}
+                                    
+                                    <EditableDate 
+                                        name='expiration_date' 
+                                        value={props.expiration_date} 
+                                        updateCallback={async (value) => {
+                                            await props.updateText(value, props.document.type, props.id)
+                                                    .then((response) => {
+                                                        return response
+                                                    })
+                                                    .catch((err) => {
+                                                        console.log(err)
+                                                    })
                                         }} 
                                     />
                                 </Descriptions.Item>

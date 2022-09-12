@@ -32,8 +32,7 @@ const DriverDocument = ({ id, sub }) => {
         const response = await API.post(`/v1/documents/cc/${documentId}`, body, options)
         const data = await response.data
         if(data) {
-            console.log(data)
-            refetch() // Refetch data
+            return data
         }
     } catch (error) {
         console.log(error)
