@@ -7,6 +7,7 @@ import {
     Modal,
     Tag,
     Typography,
+    Descriptions,
 } from 'antd' // Import antd components
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form } from 'formik' // Import Formik form components
@@ -16,10 +17,12 @@ import DocumentList from "../../hoc/DocumentList" // import DocumentList HOC
 import DocViewer from '../DocViewer' // import document viewer component
 import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper component
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
+import EditableText from '../../components/EditableText' // Import Driver contact information component
 import API from '../../api/BaseUrl' // Import API base URL
 
 const { Panel } = Collapse // Destructure Panel from Collapse
-const { Title } = Typography // Destructure Title from Typography
+const { Title, Text } = Typography // Destructure Title from Typography
+const { Items } = Descriptions // Destructure Items from Descriptions
 
 const Document = (props) => {
     const [isModalVisible, setIsModalVisible] = useState(false) // Set modal state to false
@@ -92,16 +95,36 @@ const Document = (props) => {
                 </Tag>
             }
             >
-                <Row>
-                    <DocViewer objectKey={`${props.sub}/${props.key1}`} />
-                </Row>
-                {
-                    props.key2 && (
-                        <Row>
-                            <DocViewer objectKey={`${props.sub}/${props.key2}`} />
+                <Row gutter={16}>
+                    <Col span={ props.document?.has_expiration ? 12 : 24}>
+                        <Row justify='center'>
+                            <DocViewer objectKey={`${props.sub}/${props.key1}`} />
                         </Row>
-                    )
-                }
+                        {
+                            props.key2 && (
+                                <Row justify='center'>
+                                    <DocViewer objectKey={`${props.sub}/${props.key2}`} />
+                                </Row>
+                            )
+                        }
+                    </Col>
+                    { props.document?.has_expiration && (
+                        <Col span={12}>
+                            <Descriptions title='Document Details' layout='vertical' labelStyle={{ fontWeight:'bold' }}>
+                                <Descriptions.Item label="Expiration Date">
+                                    <EditableText 
+                                        name='expiration_date' 
+                                        value={props.expiration_date} 
+                                        updateCallback={(value) => {
+                                            props.updateText(value, props.document.type, props.id)
+                                        }} 
+                                    />
+                                </Descriptions.Item>
+                            </Descriptions>
+                        </Col>
+                    )}
+
+                </Row>
                 <Row gutter={16}>
                     <Col className="gutter-row" span={12}>
                         <Button block type="danger" size="large"
@@ -138,6 +161,7 @@ const Document = (props) => {
                 visible={isModalVisible}
                 onOk={() => setIsModalVisible(false)}
                 onCancel={() => setIsModalVisible(false)}
+                destroyOnClose={true}
                 footer={[
                     <Button key="back" onClick={() => setIsModalVisible(false)}>
                         Cancel
