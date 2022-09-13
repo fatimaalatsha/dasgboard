@@ -7,6 +7,7 @@ import API from '../../api/BaseUrl' // Import API base URL
 
 import EditableText from '../../components/EditableText' // Import editbale string component
 import EditableDate from '../../components/EditableDate' // Import editable date component
+import EditableSelect from '../../components/EditableSelect' // Import editable select component
 import DriverDocument from '../../components/DriverDocument' // Import Document viewers component
 import DriverTimeline from '../../components/DriverTimeline' // Import Timeline 
 
@@ -67,7 +68,7 @@ const DriverDetails = () => {
                 <EditableText name='license_number' value={data.license_number} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="City">
-                {data.city?.name}
+                <EditableSelect value={data.city?.name} />
               </Descriptions.Item>
               <Descriptions.Item label="Address">
                 <EditableText name='address' value={data.address} updateCallback={updateText} />
