@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Button, Card, Descriptions, Divider } from 'antd'
+import { Card, Descriptions, Divider } from 'antd'
 import { useParams } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import API from '../../api/BaseUrl' // Import API base URL
@@ -7,10 +6,29 @@ import API from '../../api/BaseUrl' // Import API base URL
 
 import EditableText from '../../components/EditableText' // Import editbale string component
 import EditableDate from '../../components/EditableDate' // Import editable date component
+import EditableSelect from '../../components/EditableSelect' // Import editable select component
 import DriverDocument from '../../components/DriverDocument' // Import Document viewers component
 import DriverTimeline from '../../components/DriverTimeline' // Import Timeline 
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
+
+const SelectFeeder = (props) => {
+  const { data, isLoading, error } = useFetch(`/v1/cities`)// Call useFetch custom hook
+
+  if (isLoading) {
+    return <>Loading...</>
+  }
+  
+  if (error) {
+    return <>Something went wrong</>
+  }
+  
+  return (
+    <>
+      <EditableSelect updateCallback={props.updateCallback} value={props.value} options={data.items} name="city_id" />
+    </>
+  )
+}
 
 
 const DriverDetails = () => {
@@ -43,8 +61,6 @@ const DriverDetails = () => {
     return <div>Something went wrong</div>
   }
 
-  //console.log(data)
-
   return (
         <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }} >
           <Descriptions 
@@ -67,7 +83,7 @@ const DriverDetails = () => {
                 <EditableText name='license_number' value={data.license_number} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="City">
-                {data.city?.name}
+                <SelectFeeder value={data.city?.name} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="Address">
                 <EditableText name='address' value={data.address} updateCallback={updateText} />

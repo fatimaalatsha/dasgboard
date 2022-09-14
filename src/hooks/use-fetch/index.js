@@ -3,7 +3,7 @@ import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
 
 import API from '../../api/BaseUrl'// Import API base url
 
-const useFectch = (url) => {
+const useFetch = (url) => {
     const [fetchedData, setFetchedData] = useState({// Set initia fetch state to empty
         data: {},
         isLoading: true,
@@ -59,4 +59,4 @@ const useFectch = (url) => {
     return { data, isLoading, error, refetch }// Return fetched data
 }
 
-export default useFectch
+export default useFetch
