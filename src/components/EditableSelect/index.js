@@ -45,6 +45,7 @@ const EditableSelect = (props) => {
                         bordered={false} 
                         /* onChange={(value) => props.updateCallback({[props.name]: value})} */
                         onChange={handleChange}
+                        style={{minWidth: 200}}
                         dropdownRender={menu => (
                             <Space direction="vertical" style={{ width: '100%'}}>
                                 {menu}
