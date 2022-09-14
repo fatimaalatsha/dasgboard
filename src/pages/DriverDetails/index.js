@@ -24,8 +24,6 @@ const SelectFeeder = (props) => {
     return <>Something went wrong</>
   }
 
-  console.log("city response: ",data)
-
   return (
     <>
       <EditableSelect value={props.value} options={data.items} />
