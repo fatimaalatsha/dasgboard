@@ -34,7 +34,7 @@ const EditableDate = ({...props}) => {
     }
 
     return (
-        <>
+        <Space align="start" direction="horizontal">
         {
             isEnable ? (
                 <DatePicker 
@@ -64,7 +64,7 @@ const EditableDate = ({...props}) => {
         <Tooltip title="Edit">
             <Button style={{padding: 0, height: 'auto' }} onClick={() => setIsEnable(true)} type='link' icon={<EditOutlined />} />
         </Tooltip>
-        </>
+        </Space>
     )
 }
 
