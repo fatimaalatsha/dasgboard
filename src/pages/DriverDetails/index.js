@@ -13,6 +13,26 @@ import DriverTimeline from '../../components/DriverTimeline' // Import Timeline
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 
+const SelectFeeder = (props) => {
+  const { data, isLoading, error, refetch } = useFetch(`/v1/cities`)// Call useFetch custom hook
+
+  if (isLoading) {
+    return <>Loading...</>
+  }
+
+  if (error) {
+    return <>Something went wrong</>
+  }
+
+  console.log("city response: ",data)
+
+  return (
+    <>
+      <EditableSelect value={props.value} options={data.items} />
+    </>
+  )
+}
+
 
 const DriverDetails = () => {
   const {id} = useParams(); // Get id from url
@@ -68,7 +88,7 @@ const DriverDetails = () => {
                 <EditableText name='license_number' value={data.license_number} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="City">
-                <EditableSelect value={data.city?.name} />
+                <SelectFeeder value={data.city?.name} />
               </Descriptions.Item>
               <Descriptions.Item label="Address">
                 <EditableText name='address' value={data.address} updateCallback={updateText} />
