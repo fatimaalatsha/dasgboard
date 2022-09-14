@@ -12,7 +12,6 @@ const EditableSelect = (props) => {
     
     const handleChange = (value) => {// Create a new handleChange function
         setNewValue(value.value)
-        //setIsEnable(false)// Set isEnable to false
     }
 
     const showConfirm = (value) => {
@@ -24,7 +23,6 @@ const EditableSelect = (props) => {
                 .then(() => {
                     setIsEnable(false)
                 })
-                console.log(value)
             },
             onCancel() {
                 console.log('Cancel');
@@ -43,7 +41,6 @@ const EditableSelect = (props) => {
                         open={isEnable} 
                         size='small' 
                         bordered={false} 
-                        /* onChange={(value) => props.updateCallback({[props.name]: value})} */
                         onChange={handleChange}
                         style={{minWidth: 200}}
                         dropdownRender={menu => (

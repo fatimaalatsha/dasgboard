@@ -1,5 +1,4 @@
-import { useState } from 'react'
-import { Button, Card, Descriptions, Divider } from 'antd'
+import { Card, Descriptions, Divider } from 'antd'
 import { useParams } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import API from '../../api/BaseUrl' // Import API base URL
@@ -14,12 +13,12 @@ import DriverTimeline from '../../components/DriverTimeline' // Import Timeline
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 
 const SelectFeeder = (props) => {
-  const { data, isLoading, error, refetch } = useFetch(`/v1/cities`)// Call useFetch custom hook
+  const { data, isLoading, error } = useFetch(`/v1/cities`)// Call useFetch custom hook
 
   if (isLoading) {
     return <>Loading...</>
   }
-
+  
   if (error) {
     return <>Something went wrong</>
   }
@@ -61,8 +60,6 @@ const DriverDetails = () => {
   if (error) {
     return <div>Something went wrong</div>
   }
-
-  //console.log(data)
 
   return (
         <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }} >
