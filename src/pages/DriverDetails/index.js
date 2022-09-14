@@ -23,10 +23,10 @@ const SelectFeeder = (props) => {
   if (error) {
     return <>Something went wrong</>
   }
-
+  
   return (
     <>
-      <EditableSelect value={props.value} options={data.items} />
+      <EditableSelect updateCallback={props.updateCallback} value={props.value} options={data.items} name="city_id" />
     </>
   )
 }
@@ -86,7 +86,7 @@ const DriverDetails = () => {
                 <EditableText name='license_number' value={data.license_number} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="City">
-                <SelectFeeder value={data.city?.name} />
+                <SelectFeeder value={data.city?.name} updateCallback={updateText} />
               </Descriptions.Item>
               <Descriptions.Item label="Address">
                 <EditableText name='address' value={data.address} updateCallback={updateText} />

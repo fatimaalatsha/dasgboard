@@ -8,10 +8,10 @@ const { confirm } = Modal // Destructure config from Modal
 
 const EditableSelect = (props) => {
     const [isEnable, setIsEnable] = useState(false)// Set state for showing select input
-    const [newValue, setNewValue] = useState('')// Set state for new value
+    const [newValue, setNewValue] = useState(0)// Set state for new value
     
     const handleChange = (value) => {// Create a new handleChange function
-        setNewValue(value.key)
+        setNewValue(value.value)
         //setIsEnable(false)// Set isEnable to false
     }
 
@@ -20,10 +20,10 @@ const EditableSelect = (props) => {
             title: 'Are you sure you want to edit this record?',
             content: 'This action cannot be undone.',
             onOk: async () => {
-                /* await props.updateCallback({[props.name]: value})
+                await props.updateCallback({[props.name]: value})
                 .then(() => {
-                    setEditableString(value)
-                }) */
+                    setIsEnable(false)
+                })
                 console.log(value)
             },
             onCancel() {
