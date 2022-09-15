@@ -18,7 +18,6 @@ function App({ signOut, user }) {
   return (
     <Layout id="components-layout-demo-custom-trigger" style={{minHeight:'100vh', height: '100%'}}>
       <Sider width={250} trigger={null} collapsible collapsed={collapsed} >
-        <Button onClick={signOut}>Sign out</Button>
         <SideMenu />
       </Sider>
       <Layout className="site-layout">
