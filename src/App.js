@@ -1,22 +1,28 @@
-import { Layout } from 'antd'
+/* import { Layout } from 'antd' */
 import React, { useState } from 'react';
-import { withAuthenticator, Button } from '@aws-amplify/ui-react';
-import '@aws-amplify/ui-react/styles.css';
-import {
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-} from '@ant-design/icons';
 import AppRouter from './router/AppRouter'
-import SideMenu from "./components/SideMenu";
-import logo from './assets/data/uride_logo.svg';
+import { Routes, Route } from 'react-router-dom'
+import Login from './pages/Login'
+import Layout from './outlet/Layout'
 
-const { Sider, Content, Header} = Layout
-
-function App({ signOut, user }) {
-  const [collapsed, setCollapsed] = useState(false);
+function App() {
   
   return (
-    <Layout id="components-layout-demo-custom-trigger" style={{minHeight:'100vh', height: '100%'}}>
+    <Routes>
+      <Route path='/login' element={<Login />}/>
+      <Route path='/*' element={
+        <AppRouter>
+          <Layout />
+        </AppRouter>
+      }/>
+    </Routes>
+  )
+}
+
+export default App
+
+
+    {/* <Layout id="components-layout-demo-custom-trigger" style={{minHeight:'100vh', height: '100%'}}>
       <Sider width={250} trigger={null} collapsible collapsed={collapsed} >
         <SideMenu />
       </Sider>
@@ -31,8 +37,4 @@ function App({ signOut, user }) {
           <AppRouter />
         </Content>
       </Layout>
-    </Layout>
-  );
-}
-
-export default withAuthenticator(App);
+    </Layout> */}
