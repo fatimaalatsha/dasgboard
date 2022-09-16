@@ -64,7 +64,7 @@
     },
     "breakCircularDependency": true,
     "dependsOn": [],
-    "hostedUIProviderCreds": "[]",
-    "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"https://admin.uride.co/\"],\"LogoutURLs\":[\"https://admin.uride.co/\"]}"
+    "hostedUIProviderCreds": "[{\"ProviderName\":\"Google\"}]",
+    "oAuthMetadata": "{\"AllowedOAuthFlows\":[\"code\"],\"AllowedOAuthScopes\":[\"phone\",\"email\",\"openid\",\"profile\",\"aws.cognito.signin.user.admin\"],\"CallbackURLs\":[\"https://admin.uridetech.com/\"],\"LogoutURLs\":[\"https://admin.uridetech.com/\"]}"
   }
 }
