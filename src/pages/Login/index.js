@@ -2,12 +2,13 @@ import { Space, Button } from 'antd'
 import { GoogleOutlined } from '@ant-design/icons'
 import { useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
+import { CognitoHostedUIIdentityProvider } from "@aws-amplify/auth"
 
 const Login = () => {
     const navigate = useNavigate()
 
     const signIn = async () => {
-        await Auth.federatedSignIn({ provider: 'Google' })  // Sign in with Google
+        await Auth.federatedSignIn({ provider: CognitoHostedUIIdentityProvider.Google })  // Sign in with Google
         .then(() => {
             console.log('Signed in')
             navigate('/') // Navigate to home page
@@ -26,7 +27,7 @@ const Login = () => {
             height: '100vh'
         }}>
             <>Uride</>
-            <Button onClick={signIn} type='primary' icon={<GoogleOutlined />}>Sign in with Uride</Button>
+            <Button onClick={() => signIn()} type='primary' icon={<GoogleOutlined />}>Sign in with Uride</Button>
         </Space>
     )
 }
