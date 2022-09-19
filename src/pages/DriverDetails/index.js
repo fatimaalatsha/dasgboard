@@ -12,6 +12,7 @@ import DriverDocument from '../../components/DriverDocument' // Import Document 
 import DriverTimeline from '../../components/DriverTimeline' // Import Timeline 
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
+import { isAllApproved } from '../../utils/doc-status'
 
 const { confirm } = Modal // Destructure config from Modal
 const { Title, Text } = Typography // Destructure Title from Typography
@@ -106,6 +107,16 @@ const DriverDetails = () => {
     });
   }
 
+  const showError = (status) => {
+    Modal.error({
+      title: 'Not all documents are approved',
+      content: 
+        <Text>
+          {`You cannot change the status to `} <Text mark strong>{status}</Text> {`until all documents are approved.`}
+        </Text>
+    });
+  }
+
   if (error) {
     return <div>Something went wrong</div>
   }
@@ -137,7 +148,12 @@ const DriverDetails = () => {
                 loading={loading} 
                 key="1" 
                 type="primary" 
-                onClick={() => showConfirm('active')}
+                onClick={async () => {
+                  await isAllApproved(id)
+                  .then((res) => {
+                    res ? showConfirm('active') : showError('active')
+                  })
+                }}
                 disabled={data.status === 'active' || data.status === 'onboard'}
               >
                 Activate Driver
