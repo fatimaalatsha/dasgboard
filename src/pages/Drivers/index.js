@@ -22,11 +22,10 @@ const Drivers = () => {
       const response = await API.get('/v1/cities')
       const data = await response.data
       if (data) {
-        console.log(data)
         const cities = data.items.map((city) => {
           city.value = city.name
           city.text = city.name
-          //delete city.name
+          delete city.name
           return city;
         })
         setCities(cities)
@@ -47,7 +46,6 @@ const Drivers = () => {
 
   
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?page=${argument.page}&limit=${argument.limit}`)// Call useFetch custom hook
-  console.log(data)
   const tableColumns = [
     {
       title: 'User ID',
@@ -77,7 +75,6 @@ const Drivers = () => {
       key: 'city',
       filters: cities, 
       onFilter: (value, record) => {
-        console.log(record)
       return record.city?.name === value;
       },
       sorter: (record1, record2) => {
