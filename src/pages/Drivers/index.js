@@ -1,21 +1,53 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Card, Table } from 'antd'; // Import Ant components
 import { useNavigate } from 'react-router-dom'; // Import Nav component
 
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
+import API from '../../api/BaseUrl'
 
 
 const Drivers = () => {
   const navigate = useNavigate();
+  const [cities, setCities] = useState([])
   const [argument, setArgument] = useState({
     page: 1,
     limit: 10,
     current_page: 1,
   })
 
-  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?page=${argument.page}&limit=${argument.limit}`)// Call useFetch custom hook
+  
+  const getCities = async () => {
+    try { 
+      const response = await API.get('/v1/cities')
+      const data = await response.data
+      if (data) {
+        console.log(data)
+        const cities = data.items.map((city) => {
+          city.value = city.name
+          city.text = city.name
+          //delete city.name
+          return city;
+        })
+        setCities(cities)
+      }
+    }
+    catch (error) {
+      console.log(error)
+  }  
+  }
+  
+  useEffect(() => {
+    let isMounted = true
+    if (isMounted) {
+      getCities()
+    }
+    return () => { isMounted = false }
+}, [])
 
+  
+  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?page=${argument.page}&limit=${argument.limit}`)// Call useFetch custom hook
+  console.log(data)
   const tableColumns = [
     {
       title: 'User ID',
@@ -39,10 +71,18 @@ const Drivers = () => {
       responsive: ['md'],
     },
     {
-      title: 'address',
-      dataIndex: 'address',
-      key: 'address',
-      responsive: ['xl'],
+      
+      title: 'city',
+      dataIndex: ['city', 'name'],
+      key: 'city',
+      filters: cities, 
+      onFilter: (value, record) => {
+        console.log(record)
+      return record.city?.name === value;
+      },
+      sorter: (record1, record2) => {
+        return record1.city?.id < record2.city?.id;
+      }
     },
     {
       title: 'email',
@@ -54,8 +94,13 @@ const Drivers = () => {
       title: 'status',
       dataIndex: 'status',
       key: 'status',
-      sorter:(record1, record2) =>{
-        return record1.status.localeCompare(record2.status)
+      filters: [
+        {text:'onboard', value: 'onboard' },
+        { text: 'pending', value: 'pending' },
+        { text: 'inactive', value: 'inactive' },
+      ], 
+      onFilter: (value, record) => {
+        return record.status === value;
       }
     }
   ];
