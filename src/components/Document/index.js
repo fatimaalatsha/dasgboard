@@ -17,13 +17,11 @@ import DocumentList from "../../hoc/DocumentList" // import DocumentList HOC
 import DocViewer from '../DocViewer' // import document viewer component
 import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper component
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
-import EditableText from '../../components/EditableText' // Import Driver contact information component
 import EditableDate from '../../components/EditableDate' // Import Driver contact information component
 import API from '../../api/BaseUrl' // Import API base URL
 
 const { Panel } = Collapse // Destructure Panel from Collapse
-const { Title, Text } = Typography // Destructure Title from Typography
-const { Items } = Descriptions // Destructure Items from Descriptions
+const { Title } = Typography // Destructure Title from Typography
 
 const Document = (props) => {
     const [isModalVisible, setIsModalVisible] = useState(false) // Set modal state to false
