@@ -1,6 +1,6 @@
 import { useState} from 'react'
 import { Card, Descriptions, Divider, PageHeader, Button, Tag, Modal, Typography, Space } from 'antd'
-import { useParams } from 'react-router-dom'
+import { useParams, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import API from '../../api/BaseUrl' // Import API base URL
 
@@ -12,7 +12,8 @@ import DriverDocument from '../../components/DriverDocument' // Import Document 
 import DriverTimeline from '../../components/DriverTimeline' // Import Timeline 
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
-import { isAllApproved } from '../../utils/doc-status'
+import { isAllApproved } from '../../utils/doc-status' // Import isAllApproved function
+import { deleteDriver, updateStatus } from '../../utils/driver-status' // Import delete driver method
 
 const { confirm } = Modal // Destructure config from Modal
 const { Title, Text } = Typography // Destructure Title from Typography
@@ -35,13 +36,13 @@ const SelectFeeder = (props) => {
   )
 }
 
-
 const DriverDetails = () => {
   const {id} = useParams(); // Get id from url
+  const navigate = useNavigate(); // Get navigate method from react-router-dom
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
 
-  const updateText = async (payload) => {
+  const updateText = async (payload) => { // Update text method
     try {
         const auth = await Auth.currentSession()// Get current session
         const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -63,28 +64,6 @@ const DriverDetails = () => {
     }
   }
 
-  const updateStatus = async (status) => {
-    try {
-      const auth = await Auth.currentSession()// Get current session
-      const token = auth.getAccessToken().getJwtToken()// Get token from session
-      const options = { // Set options for fetch
-          headers: {
-              'Authorization': token,
-              ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
-          }
-      }
-      const body = {'status': status}
-      const response = await API.post(`/v1/drivers/cc/${id}/status`, body, options)
-      const data = await response.data
-      if(data) {
-          //console.log(data)
-          refetch() // Refetch data
-      }
-    } catch (error) {
-        console.log(error)
-    }
-  }
-
   const showConfirm = (status) => {
     setLoading(true)
     confirm({
@@ -95,9 +74,12 @@ const DriverDetails = () => {
           </Title>,
       content: 'This action cannot be undone',
       onOk: async () => {
-        await updateStatus(status)
-        .then(() => {
-          setLoading(false)
+        await updateStatus(status, id)
+        .then((res) => {
+          if (res) {
+            setLoading(false)
+            refetch()
+          }
         })
       },
       onCancel() {
@@ -117,12 +99,47 @@ const DriverDetails = () => {
     });
   }
 
+  const showWarning = () => {
+    Modal.confirm({
+      title: 'Delete driver?',
+      content: 
+        <Space direction="vertical">
+          <Text>
+            {`Are you sure you want to delete `} <Text mark strong>{`${data.first_name} ${data.last_name}`}</Text>{` ?`}
+          </Text>
+          <Text strong>
+            {`This action cannot be undone, all of the driver's documents and records will be deleted forever.`}
+          </Text>
+        </Space>
+        ,
+      onOk: async () => {
+        await deleteDriver(id)
+        .then((response) => {
+          if(response) {
+            navigate('/')
+          }
+        })
+      },
+      onCancel: () => {
+        //console.log('Cancel')
+      },
+      okText: 'Yes, Delete',
+      cancelText: 'Cancel',
+    })
+  }
+
   if (error) {
     return <div>Something went wrong</div>
   }
   
   return (
-        <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }} >
+        <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
+          extra={
+            <Button type="primary" danger onClick={showWarning}>
+              Delete Driver
+            </Button>
+          }
+        >
           <PageHeader
             ghost={false}
             onBack={() => window.history.back()}
