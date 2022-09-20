@@ -2,12 +2,10 @@ import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
 import API from '../../api/BaseUrl' // Import API base URL
 
 const isAllApproved = async (driverId) => {
-  /* const { approvals } = doc
-  return approvals.every((approval) => approval.status === 'approved') */
   try {
     const auth = await Auth.currentSession()// Get current session
     const token = auth.getAccessToken().getJwtToken()// Get token from session
-    const options = { // Set options for fetch
+    const options = { // Set options for endpoint
         headers: {
             'Authorization': token,
             ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
@@ -22,9 +20,7 @@ const isAllApproved = async (driverId) => {
         ...data,
         ...docArray.find(doc => doc.document.name === data.name)
       }))
-        //console.log(mergedArray)
         const isReady = mergedArray.every((doc) => doc.status === 'approved')
-        //console.log(isReady)
         return isReady
     }
     return false
