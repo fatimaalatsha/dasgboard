@@ -23,6 +23,18 @@ import API from '../../api/BaseUrl' // Import API base URL
 const { Panel } = Collapse // Destructure Panel from Collapse
 const { Title } = Typography // Destructure Title from Typography
 
+const RejectFeeder = ({name}) => {
+    const reasons = [
+        {value: 'wrong document', text: 'Wrong document'},
+        {value: 'image is too blurry', text: 'Image is too blurry'},
+        {value: 'expired document', text: 'Expired document'},
+    ]
+
+    return (
+        <SelectWrapper name={name} datasource={reasons} placeholder="Select a reason to reject the document" />
+    )
+}
+
 const Document = (props) => {
     const [isModalVisible, setIsModalVisible] = useState(false) // Set modal state to false
     const [documentStatus, setDocumentStatus] = useState({// Set document status state manager
@@ -177,9 +189,7 @@ const Document = (props) => {
                 ]}
             >
                     <Form>
-                        <SelectWrapper 
-                            name="notes_public"
-                        />
+                        <RejectFeeder name="notes_public" />
                     </Form>
             </Modal>
         </Formik>
