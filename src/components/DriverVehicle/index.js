@@ -11,11 +11,14 @@ import {
     Drawer,
     Image,
     Modal,
+    Typography,
 } from 'antd' // Import antd components
 import { Formik, Form } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import yup validation schema
 
 import useFetch from "../../hooks/use-fetch" // Import useFetch custom hook
+import { createVehicle, deleteVehicle } from '../../utils/vehicle-status' // Import vehicle status functions
+
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import InputWrapper from '../forms/InputWrapper' // Import InputWrapper component
 import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper component
@@ -61,38 +64,14 @@ const VehicleModelFeeder = ({name, make_id}) => {
     )
 }
 
+const { Text } = Typography // Destructure Title from Typography
+
 const DriverVehicle = ({ id }) => {
-    const { data, isLoading, error } = useFetch(`/v1/drivers/cc/${id}/vehicles`)// Call useFetch custom hook
+    const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}/vehicles`)// Call useFetch custom hook
     const [open, setOpen] = useState({// Drawer state manager
         drawer: false,
         modal: false,
     })
-    const [vehicleList, setVehicleList] = useState([{ // Set vehicleList state
-        id: 1,
-        make: 'Vehicle 1',
-        model: 'Car',
-        year: 2019,
-        status: 'active',
-        color: 'green',
-        number: '123456',
-    }, {
-        id: 2,
-        make: 'Vehicle 2',
-        model: 'Car',
-        year: 2019,
-        status: 'inactive',
-        color: 'red',
-        number: '123456',
-    }, {
-        id: 3,
-        make: 'Vehicle 3',
-        model: 'Car',
-        year: 2019,
-        status: 'inactive',
-        color: 'green',
-        number: '123456',
-    },
-    ]) 
 
     const initialValues = { // Set initial values for form
         plate_number: '',
@@ -110,26 +89,52 @@ const DriverVehicle = ({ id }) => {
     if (error) {
         return <>Something went wrong</>
     }
-    //console.log(data)
+    
+    const showWarning = (id, make, model, plateNumber) => {
+        Modal.confirm({
+            title: 'Delete vehicle?',
+            content: 
+                <Space direction="vertical">
+                <Text>
+                    {`Are you sure you want to delete `} <Text mark strong>{`${make} ${model} ${plateNumber}`}</Text>{` ?`}
+                </Text>
+                <Text strong>
+                    {`This action cannot be undone, driver's status will be set to offline.`}
+                </Text>
+                </Space>
+                ,
+            onOk: async () => {
+                const response = await deleteVehicle(id)
+                if(response) {
+                    refetch()
+                }
+            },
+            onCancel: () => {
+                //console.log('Cancel')
+            },
+            okText: 'Yes, Delete',
+            cancelText: 'Cancel',
+        })
+    }
 
     return (
         <Space direction='vertical' style={{ display: 'flex', width: '100%', alignItems: 'center'}}>
             <Empty description="No vehicles associated" />
             <List 
-                dataSource={vehicleList} 
+                dataSource={data.items} 
                 renderItem={item => (
                     <>
                     <List.Item
                         actions={[
-                            <Button type="primary" size="small" danger ghost>Delete</Button>,
-                            <Button type="primary" size="small" onClick={() => setOpen({...open, drawer: true})}>View</Button>,
+                            <Button type="primary" size="small" danger ghost onClick={() => showWarning(item.vehicleId, item.make?.name, item.model?.name, item.plate_number)}>Delete</Button>,
+                            <Button disabled type="primary" size="small" onClick={() => setOpen({...open, drawer: true})}>View</Button>,
                             <Switch defaultChecked={item.status === 'active'} />
                         ]}
                     >
                         <Descriptions labelStyle={{ fontWeight:'bold' }} >
-                            <Descriptions.Item label="Make">{item.make}</Descriptions.Item>
-                            <Descriptions.Item label="Model">{item.model}</Descriptions.Item>
-                            <Descriptions.Item label="Plate Number">{item.number}</Descriptions.Item>
+                            <Descriptions.Item label="Plate Number">{item.plate_number}</Descriptions.Item>
+                            <Descriptions.Item label="Make">{item.make?.name}</Descriptions.Item>
+                            <Descriptions.Item label="Model">{item.model?.name}</Descriptions.Item>
                             <Descriptions.Item label="Year">{item.year}</Descriptions.Item>
                             <Descriptions.Item label="Color">{item.color}</Descriptions.Item>
                             <Descriptions.Item label="Status">
@@ -164,7 +169,13 @@ const DriverVehicle = ({ id }) => {
                 initialValues={initialValues}
                 validationSchema={rejectSchema}
                 onSubmit={ async (values, { setSubmitting }) => {
-                    console.log(values)
+                    await createVehicle(values).then((response) => {
+                        if(response) {
+                            setSubmitting(false)
+                            setOpen({...open, modal: false})
+                            refetch()
+                        }
+                    })
                 }}
             >
                 { props => (
@@ -179,16 +190,16 @@ const DriverVehicle = ({ id }) => {
                                     Cancel
                                 </Button>,
                                 <SubmitWrapper key="submit" type="primary">
-                                    Submit
+                                    Add Vehicle
                                 </SubmitWrapper>,
                             ]}
                         >
                             <Space direction='vertical' style={{ width: '100%'}}>
-                                <InputWrapper name="plate_number" placeholder="Plate Number" />
+                                <InputWrapper name="plate_number" placeholder="Plate Number" maxLength={20} />
                                 <VehicleMakeFeeder name="make_id" />
                                 { props.values.make_id && <VehicleModelFeeder name="model_id" make_id={props.values.make_id} />}
                                 <InputWrapper name="year" placeholder="Year" year="true" />
-                                <InputWrapper name="color" placeholder="Cear" />
+                                <InputWrapper name="color" placeholder="Color" maxLength={20} />
                             </Space>
                         </Modal>
                     </Form>
