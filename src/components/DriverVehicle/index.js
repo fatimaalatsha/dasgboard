@@ -9,7 +9,8 @@ import {
     List,
     Switch,
     Drawer,
-    Image
+    Image,
+    Modal,
 } from 'antd' // Import antd components
 import useFetch from "../../hooks/use-fetch" // Import useFetch custom hook
 
@@ -22,21 +23,24 @@ const DriverVehicle = ({ id }) => {
         model: 'Car',
         year: 2019,
         status: 'active',
-        color: 'green'
+        color: 'green',
+        number: '123456',
     }, {
         id: 2,
         make: 'Vehicle 2',
         model: 'Car',
         year: 2019,
         status: 'inactive',
-        color: 'red'
+        color: 'red',
+        number: '123456',
     }, {
         id: 3,
         make: 'Vehicle 3',
         model: 'Car',
         year: 2019,
         status: 'inactive',
-        color: 'green'
+        color: 'green',
+        number: '123456',
     },
     ]) 
 
@@ -66,6 +70,7 @@ const DriverVehicle = ({ id }) => {
                         <Descriptions labelStyle={{ fontWeight:'bold' }} >
                             <Descriptions.Item label="Make">{item.make}</Descriptions.Item>
                             <Descriptions.Item label="Model">{item.model}</Descriptions.Item>
+                            <Descriptions.Item label="Plate Number">{item.number}</Descriptions.Item>
                             <Descriptions.Item label="Year">{item.year}</Descriptions.Item>
                             <Descriptions.Item label="Color">{item.color}</Descriptions.Item>
                             <Descriptions.Item label="Status">
