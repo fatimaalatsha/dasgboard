@@ -153,11 +153,20 @@ const DriverVehicle = ({ id }) => {
                     <>
                     <List.Item
                         actions={[
-                            <Button type="primary" size="small" danger ghost onClick={() => showWarning(item.vehicleId, item.make?.name, item.model?.name, item.plate_number)}>Delete</Button>,
+                            <Button 
+                                disabled={item.status === 'active'} 
+                                type="primary" 
+                                size="small" 
+                                danger ghost 
+                                onClick={() => showWarning(item.vehicleId, item.make?.name, item.model?.name, item.plate_number)}
+                            >
+                                Delete
+                            </Button>,
                             <Button disabled type="primary" size="small" onClick={() => setOpen({...open, drawer: true})}>View</Button>,
                             <Switch 
                                 defaultChecked={item.status === 'active'} 
                                 loading={open.switch} 
+                                disabled={item.status === 'active'}
                                 onChange={(checked) => {
                                     showConfirm(checked ? 'active' : 'inactive', item.vehicleId)
                                 }} 
