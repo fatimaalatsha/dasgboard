@@ -10,6 +10,7 @@ import EditableDate from '../../components/EditableDate' // Import editable date
 import EditableSelect from '../../components/EditableSelect' // Import editable select component
 import DriverDocument from '../../components/DriverDocument' // Import Document viewers component
 import DriverTimeline from '../../components/DriverTimeline' // Import Timeline 
+import DriverVehicle from '../../components/DriverVehicle' // Import Driver Vehicle component
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved } from '../../utils/doc-status' // Import isAllApproved function
@@ -206,6 +207,8 @@ const DriverDetails = () => {
           </PageHeader>
           <Divider orientation="left"><h3>Driver Documents</h3></Divider>
            <DriverDocument id={id} sub={data.sub_id} />
+           <Divider orientation="left"><h3>Driver Vehicle</h3></Divider>
+           <DriverVehicle id={id} />
            <Divider orientation="left"><h3>Driver History</h3></Divider>
            <DriverTimeline id={id}/>
         </Card>

@@ -18,12 +18,16 @@ const SelectWrapper = ({
     const selectConfig = {
         ...field,
         ...otherProps,
-        placeholder: 'Select a reason to reject the document',
         style: {
             width: '100%',
         },
         onChange: handleChange,
         value: field.value || undefined,
+        ...(otherProps.searchable && { 
+            showSearch: true,
+            optionFilterProp: "children",
+            filterOption: (input, option) => option.children.toLowerCase().includes(input.toLowerCase())
+        }),
     }
 
     if (meta && meta.touched && meta.error) {
@@ -33,9 +37,9 @@ const SelectWrapper = ({
     return (
         <>
         <Select {...selectConfig}>
-            <Option value="wrong document">Wrong document</Option>
-            <Option value="image is to blurry">Image is to blurry</Option>
-            <Option value="expired document">Expired document</Option>
+            {otherProps.datasource.map((item, index) => (
+                <Option key={index} value={item.value || item.make_id || item.model_id}>{item.text || item.name}</Option>
+            ))}
         </Select>
         <ErrorMessage name={name}>
             {msg => <Text type="danger">{msg}</Text>}
