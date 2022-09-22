@@ -12,11 +12,61 @@ import {
     Image,
     Modal,
 } from 'antd' // Import antd components
+import { Formik, Form } from 'formik'   // Import Formik form components
+import { object, string, number } from 'yup' // Import yup validation schema
+
 import useFetch from "../../hooks/use-fetch" // Import useFetch custom hook
+import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
+import InputWrapper from '../forms/InputWrapper' // Import InputWrapper component
+import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper component
+
+const rejectSchema = object().shape({
+    plate_number: string().required('Required'),
+    year: string().required('Required'),
+    color: string().required('Required'),
+    make_id: number().required('Required'),
+    model_id: number().required('Required'),
+    user_id: number().required('Required'),
+})
+
+const VehicleMakeFeeder = ({name}) => {
+    const { data, isLoading, error } = useFetch(`/v1/makes`)// Call useFetch custom hook
+
+    if (isLoading) {
+        return <>Loading...</>
+    }
+
+    if (error) {
+        return <>Something went wrong</>
+    }
+    
+    return (
+        <SelectWrapper name={name} datasource={data.items} placeholder="Vehicle Make" searchable="true" />
+    )
+}
+
+const VehicleModelFeeder = ({name, make_id}) => {
+    const { data, isLoading, error } = useFetch(`/v1/makes/${make_id}/models`)// Call useFetch custom hook
+
+    if (isLoading) {
+        return <>Loading...</>
+    }
+
+    if (error) {
+        return <>Something went wrong</>
+    }
+    
+    return (
+        <SelectWrapper name={name} datasource={data.models} placeholder="Vehicle Model" searchable="true" />
+    )
+}
 
 const DriverVehicle = ({ id }) => {
     const { data, isLoading, error } = useFetch(`/v1/drivers/cc/${id}/vehicles`)// Call useFetch custom hook
-    const [open, setOpen] = useState(false) // Drawer state manager
+    const [open, setOpen] = useState({// Drawer state manager
+        drawer: false,
+        modal: false,
+    })
     const [vehicleList, setVehicleList] = useState([{ // Set vehicleList state
         id: 1,
         make: 'Vehicle 1',
@@ -44,6 +94,15 @@ const DriverVehicle = ({ id }) => {
     },
     ]) 
 
+    const initialValues = { // Set initial values for form
+        plate_number: '',
+        year: '',
+        color: '',
+        make_id: '',
+        model_id: '',
+        user_id: id,
+    }
+
     if (isLoading) {
         return <>Loading...</>
     }
@@ -51,7 +110,7 @@ const DriverVehicle = ({ id }) => {
     if (error) {
         return <>Something went wrong</>
     }
-    console.log(data)
+    //console.log(data)
 
     return (
         <Space direction='vertical' style={{ display: 'flex', width: '100%', alignItems: 'center'}}>
@@ -63,7 +122,7 @@ const DriverVehicle = ({ id }) => {
                     <List.Item
                         actions={[
                             <Button type="primary" size="small" danger ghost>Delete</Button>,
-                            <Button type="primary" size="small" onClick={() => setOpen(true)}>View</Button>,
+                            <Button type="primary" size="small" onClick={() => setOpen({...open, drawer: true})}>View</Button>,
                             <Switch defaultChecked={item.status === 'active'} />
                         ]}
                     >
@@ -83,7 +142,7 @@ const DriverVehicle = ({ id }) => {
                             </Descriptions.Item>
                         </Descriptions>
                     </List.Item>
-                    <Drawer title="Basic Drawer" placement="right" onClose={() => setOpen(false)} visible={open}>
+                    <Drawer title="Basic Drawer" placement="right" onClose={() => setOpen({...open, drawer: false})} visible={open.drawer}>
                         {
                             [...Array(8)].map((_, i) => (
                                 <Space size="large" key={i}>
@@ -100,30 +159,43 @@ const DriverVehicle = ({ id }) => {
                     </>
                 )}
             />
-            <Button onClick={() => setVehicleList(vehicleList => [...vehicleList, {
-        id: 4,
-        make: 'Vehicle 4',
-        model: 'Car',
-        year: 2019,
-        status: 'inactive',
-        color: 'red'
-    }])} >Add Vehicle</Button>
+            <Button onClick={() => setOpen({...open, modal: true})} >Add New Vehicle</Button>
+            <Formik
+                initialValues={initialValues}
+                validationSchema={rejectSchema}
+                onSubmit={ async (values, { setSubmitting }) => {
+                    console.log(values)
+                }}
+            >
+                { props => (
+                    <Form>
+                        <Modal 
+                            title="Add New Vehicle" 
+                            visible={open.modal} 
+                            onCancel={() => setOpen({...open, modal: false})}
+                            destroyOnClose={true}
+                            footer={[
+                                <Button key="back" onClick={() => setOpen({...open, modal: false})}>
+                                    Cancel
+                                </Button>,
+                                <SubmitWrapper key="submit" type="primary">
+                                    Submit
+                                </SubmitWrapper>,
+                            ]}
+                        >
+                            <Space direction='vertical' style={{ width: '100%'}}>
+                                <InputWrapper name="plate_number" placeholder="Plate Number" />
+                                <VehicleMakeFeeder name="make_id" />
+                                { props.values.make_id && <VehicleModelFeeder name="model_id" make_id={props.values.make_id} />}
+                                <InputWrapper name="year" placeholder="Year" year="true" />
+                                <InputWrapper name="color" placeholder="Cear" />
+                            </Space>
+                        </Modal>
+                    </Form>
+                )}
+            </Formik>
         </Space>
     )
 }
 
 export default DriverVehicle
-
- /* <Descriptions labelStyle={{ fontWeight:'bold' }} >
-            <Descriptions.Item label="Plate Number">{data.plate_number}</Descriptions.Item>
-            <Descriptions.Item label="Make">{data.make?.name}</Descriptions.Item>
-            <Descriptions.Item label="Model">{data.model?.name}</Descriptions.Item>
-            <Descriptions.Item label="Status">
-                <Tag 
-                    style={{ textTransform: 'capitalize'}} 
-                    color={data.status === 'active' ? 'success' : 'error'}
-                >
-                    {data.status}
-                </Tag>
-            </Descriptions.Item>
-        </Descriptions> */
