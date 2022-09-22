@@ -37,4 +37,25 @@ const deleteVehicle = async (vehicleId) => {
     }
 }
 
-export { createVehicle, deleteVehicle }
+const updateStatus = async (status, id) => {
+    try {
+        const auth = await Auth.currentSession()// Get current session
+        const token = auth.getAccessToken().getJwtToken()// Get token from session
+        const options = { // Set options for endpoint
+            headers: {
+                'Authorization': token,
+                ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+            }
+        }
+        const body = { 
+            'status': status
+        }
+        const response = await API.put(`/v1/vehicles/${id}`, body, options)
+        return response
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+export { createVehicle, deleteVehicle, updateStatus }

@@ -17,7 +17,7 @@ import { Formik, Form } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import yup validation schema
 
 import useFetch from "../../hooks/use-fetch" // Import useFetch custom hook
-import { createVehicle, deleteVehicle } from '../../utils/vehicle-status' // Import vehicle status functions
+import { createVehicle, deleteVehicle, updateStatus } from '../../utils/vehicle-status' // Import vehicle status functions
 
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import InputWrapper from '../forms/InputWrapper' // Import InputWrapper component
@@ -64,13 +64,14 @@ const VehicleModelFeeder = ({name, make_id}) => {
     )
 }
 
-const { Text } = Typography // Destructure Title from Typography
+const { Title, Text } = Typography // Destructure Title from Typography
 
 const DriverVehicle = ({ id }) => {
     const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}/vehicles`)// Call useFetch custom hook
     const [open, setOpen] = useState({// Drawer state manager
         drawer: false,
         modal: false,
+        switch: false,
     })
 
     const initialValues = { // Set initial values for form
@@ -117,9 +118,35 @@ const DriverVehicle = ({ id }) => {
         })
     }
 
+    const showConfirm = (status, id) => {
+      setOpen({ ...open, switch: true })
+        Modal.confirm({
+            title: 
+                <Title level={4}>
+                    {`Are you sure you want to change the status to `}
+                    <Text style={{ textTransform: 'capitalize'}} mark strong>{status}?</Text>
+                </Title>,
+            content: 'This action cannot be undone',
+            onOk: async () => {
+                await updateStatus(status, id)
+                .then((response) => {
+                if (response) {
+                    setOpen({ ...open, switch: false })
+                    refetch()
+                }
+                })
+            },
+            onCancel() {
+                setOpen({ ...open, switch: false })
+                //console.log('Cancel')
+                refetch()
+            },
+        });
+    }
+
     return (
         <Space direction='vertical' style={{ display: 'flex', width: '100%', alignItems: 'center'}}>
-            <Empty description="No vehicles associated" />
+            {/* <Empty description="No vehicles associated" /> */}
             <List 
                 dataSource={data.items} 
                 renderItem={item => (
@@ -128,7 +155,13 @@ const DriverVehicle = ({ id }) => {
                         actions={[
                             <Button type="primary" size="small" danger ghost onClick={() => showWarning(item.vehicleId, item.make?.name, item.model?.name, item.plate_number)}>Delete</Button>,
                             <Button disabled type="primary" size="small" onClick={() => setOpen({...open, drawer: true})}>View</Button>,
-                            <Switch defaultChecked={item.status === 'active'} />
+                            <Switch 
+                                defaultChecked={item.status === 'active'} 
+                                loading={open.switch} 
+                                onChange={(checked) => {
+                                    showConfirm(checked ? 'active' : 'inactive', item.vehicleId)
+                                }} 
+                            />
                         ]}
                     >
                         <Descriptions labelStyle={{ fontWeight:'bold' }} >
