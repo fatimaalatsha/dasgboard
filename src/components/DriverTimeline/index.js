@@ -1,10 +1,10 @@
 import { Timeline } from 'antd'// Import Timeline component from antd
-import useFectch from '../../hooks/use-fetch' // Import useFetch custom hook
+import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 
 const dayjs = require('dayjs')
 
 const DriverTimeline = ({ id }) => {
-  const { data, isLoading, error } = useFectch(`/v1/drivers/cc/${id}/logs`)// Call useFetch custom hook
+  const { data, isLoading, error } = useFetch(`/v1/drivers/cc/${id}/logs`)// Call useFetch custom hook
 
   if(isLoading) {
     return <div>Loading...</div>

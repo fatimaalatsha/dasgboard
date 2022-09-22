@@ -19,7 +19,7 @@ const Layout = () => {
     return (
         <Container id="components-layout-demo-custom-trigger" style={{minHeight:'100vh', height: '100%'}}>
           <Sider width={250} trigger={null} collapsible collapsed={collapsed} >
-            <SideMenu />
+            <SideMenu collapsed={collapsed} />
           </Sider>
           <Container className="site-layout">
             <Header className="site-layout-background" style={{ padding: 0 }}>
