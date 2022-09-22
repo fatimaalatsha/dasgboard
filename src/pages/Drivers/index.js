@@ -14,8 +14,8 @@ const Drivers = () => {
     page: 1,
     limit: 10,
     current_page: 1,
+    cities: null,
   })
-
   
   const getCities = async () => {
     try { 
@@ -23,7 +23,7 @@ const Drivers = () => {
       const data = await response.data
       if (data) {
         const cities = data.items.map((city) => {
-          city.value = city.name
+          city.value = city.city_id
           city.text = city.name
           delete city.name
           return city;
@@ -35,7 +35,7 @@ const Drivers = () => {
       console.log(error)
   }  
   }
-  
+ 
   useEffect(() => {
     let isMounted = true
     if (isMounted) {
@@ -44,8 +44,8 @@ const Drivers = () => {
     return () => { isMounted = false }
 }, [])
 
-  
-  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?page=${argument.page}&limit=${argument.limit}`)// Call useFetch custom hook
+  const { data, isLoading, error, refetch } = useFetch( argument.cities ? `/v1/drivers/cc?page=${argument.page}&limit=${argument.limit}&filter[city_id]=in|${argument.cities}` : `/v1/drivers/cc?page=${argument.page}&limit=${argument.limit}&sort[city_id]=desc`)// Call useFetch custom hook
+ 
   const tableColumns = [
     {
       title: 'User ID',
@@ -74,10 +74,12 @@ const Drivers = () => {
       dataIndex: ['city', 'name'],
       key: 'city',
       filters: cities, 
-      onFilter: (value, record) => {
-      return record.city?.name === value;
+      onFilter: (value, record) => { 
+        return record.city?.id === value;
       },
       sorter: (record1, record2) => {
+               console.log(record2.city?.id)
+
         return record1.city?.id < record2.city?.id;
       }
     },
@@ -116,13 +118,18 @@ const Drivers = () => {
         pagination={{
           pageSize: argument.limit,
           total: data.total_items,
-          onChange:(page)=>{
+          onChange: (page) => {
+            
             setArgument({ ...argument, page: page})// Set argument state
           }
         }}
         onRow={(driverRecord) => ({
           onClick: () => navigate(`driver/${driverRecord.user_id}`)
         })}
+        onChange={(pagination, filters, sorter) => {
+          console.log('params: ', pagination, filters, sorter)
+          setArgument({...argument, cities: filters.city })
+        }}
       />
     </Card>
   )
