@@ -17,11 +17,13 @@ import { Formik, Form } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import yup validation schema
 
 import useFetch from "../../hooks/use-fetch" // Import useFetch custom hook
-import { createVehicle, deleteVehicle, updateStatus } from '../../utils/vehicle-status' // Import vehicle status functions
+import { createVehicle, deleteVehicle, updateVehicle } from '../../utils/vehicle-status' // Import vehicle status functions
 
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import InputWrapper from '../forms/InputWrapper' // Import InputWrapper component
 import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper component
+
+import EditableText from '../EditableText' // Import EditableText component
 
 const rejectSchema = object().shape({
     plate_number: string().required('Required'),
@@ -100,7 +102,7 @@ const DriverVehicle = ({ id }) => {
                     {`Are you sure you want to delete `} <Text mark strong>{`${make} ${model} ${plateNumber}`}</Text>{` ?`}
                 </Text>
                 <Text strong>
-                    {`This action cannot be undone, driver's status will be set to offline.`}
+                    {`This action cannot be undone.`}
                 </Text>
                 </Space>
                 ,
@@ -128,7 +130,7 @@ const DriverVehicle = ({ id }) => {
                 </Title>,
             content: 'This action cannot be undone',
             onOk: async () => {
-                await updateStatus(status, id)
+                await updateVehicle({'status': status}, id)
                 .then((response) => {
                 if (response) {
                     setOpen({ ...open, switch: false })
@@ -142,6 +144,15 @@ const DriverVehicle = ({ id }) => {
                 refetch()
             },
         });
+    }
+
+    const handleUpdate = async (newValue, id) => {
+        await updateVehicle(newValue, id)
+        .then((response) => {
+            if (response) {
+                refetch()
+            }
+        })
     }
 
     return (
@@ -167,18 +178,24 @@ const DriverVehicle = ({ id }) => {
                                 defaultChecked={item.status === 'active'} 
                                 loading={open.switch} 
                                 disabled={item.status === 'active'}
-                                onChange={(checked) => {
-                                    showConfirm(checked ? 'active' : 'inactive', item.vehicleId)
+                                onChange={() => {
+                                    showConfirm('active', item.vehicleId)
                                 }} 
                             />
                         ]}
                     >
                         <Descriptions labelStyle={{ fontWeight:'bold' }} >
-                            <Descriptions.Item label="Plate Number">{item.plate_number}</Descriptions.Item>
+                            <Descriptions.Item label="Plate Number">
+                                <EditableText name='plate_number' value={item.plate_number} updateCallback={value => handleUpdate(value, item.vehicleId)} />
+                            </Descriptions.Item>
                             <Descriptions.Item label="Make">{item.make?.name}</Descriptions.Item>
                             <Descriptions.Item label="Model">{item.model?.name}</Descriptions.Item>
-                            <Descriptions.Item label="Year">{item.year}</Descriptions.Item>
-                            <Descriptions.Item label="Color">{item.color}</Descriptions.Item>
+                            <Descriptions.Item label="Year">
+                                <EditableText name='year' value={item.year} updateCallback={value => handleUpdate(value, item.vehicleId)} />
+                            </Descriptions.Item>
+                            <Descriptions.Item label="Color">
+                                <EditableText name='color' value={item.color} updateCallback={value => handleUpdate(value, item.vehicleId)} />
+                            </Descriptions.Item>
                             <Descriptions.Item label="Status">
                                 <Tag 
                                     style={{ textTransform: 'capitalize'}} 
