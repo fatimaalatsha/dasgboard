@@ -42,9 +42,9 @@ const EditableSelect = (props) => {
                         size='small' 
                         bordered={false} 
                         onChange={handleChange}
-                        style={{minWidth: 200}}
+                        dropdownMatchSelectWidth={false}
                         dropdownRender={menu => (
-                            <Space direction="vertical" style={{ width: '100%'}}>
+                            <Space direction="vertical">
                                 {menu}
                                 <Divider style={{ margin: '2px 0'}} />
                                 <Space direction='horizontal' style={{ display: 'flex', justifyContent: 'space-between', margin: 8}}>
@@ -56,7 +56,7 @@ const EditableSelect = (props) => {
                     >
                         {
                             props.options.map((item, index) => (
-                                <Option key={index} value={item.city_id}>{item.name}</Option>
+                                <Option key={index} value={item.city_id || item.make_id || item.model_id}>{item.name}</Option>
                             ))
                         }
                     </Select>

@@ -30,11 +30,7 @@ const SelectFeeder = (props) => {
     return <>Something went wrong</>
   }
   
-  return (
-    <>
-      <EditableSelect updateCallback={props.updateCallback} value={props.value} options={data.items} name="city_id" />
-    </>
-  )
+  return  <EditableSelect updateCallback={props.updateCallback} value={props.value} options={data.items} name="city_id" />
 }
 
 const DriverDetails = () => {

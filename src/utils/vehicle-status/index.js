@@ -37,7 +37,7 @@ const deleteVehicle = async (vehicleId) => {
     }
 }
 
-const updateStatus = async (status, id) => {
+const updateVehicle = async (payload, id) => {
     try {
         const auth = await Auth.currentSession()// Get current session
         const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -47,9 +47,7 @@ const updateStatus = async (status, id) => {
                 ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
             }
         }
-        const body = { 
-            'status': status
-        }
+        const body = payload
         const response = await API.put(`/v1/vehicles/${id}`, body, options)
         return response
     } catch (error) {
@@ -58,4 +56,4 @@ const updateStatus = async (status, id) => {
     }
 }
 
-export { createVehicle, deleteVehicle, updateStatus }
+export { createVehicle, deleteVehicle, updateVehicle }
