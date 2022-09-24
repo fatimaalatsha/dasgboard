@@ -1,5 +1,6 @@
 import { useState} from 'react'
-import { Card, Descriptions, Divider, PageHeader, Button, Tag, Modal, Typography, Space } from 'antd'
+import { Card, Descriptions, Divider, PageHeader, Button, Tag, Modal, Typography, Space } from 'antd' // Import antd components
+import { SendOutlined } from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import API from '../../api/BaseUrl' // Import API base URL
@@ -209,6 +210,16 @@ const DriverDetails = () => {
           </Descriptions>
           </PageHeader>
           <Divider orientation="left"><Title level={4}>Driver Documents</Title></Divider>
+           <Space 
+              style={{
+                display: 'flex',
+                justifyItems: 'flex-end',
+                justifyContent: 'flex-end',
+                margin: ['16px 0'],
+              }}
+           >
+            <Button type="primary" icon={<SendOutlined />} onClick={() => navigate(`/drivers/${id}/documents/new`)}>Notify Driver</Button>
+           </Space>
            <DriverDocument id={id} sub={data.sub_id} />
            <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
            <DriverVehicle id={id} />
