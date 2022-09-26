@@ -1,5 +1,6 @@
 import { useState} from 'react'
-import { Card, Descriptions, Divider, PageHeader, Button, Tag, Modal, Typography, Space } from 'antd'
+import { Card, Descriptions, Divider, PageHeader, Button, Tag, Modal, Typography, Space } from 'antd' // Import antd components
+import { SendOutlined } from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import API from '../../api/BaseUrl' // Import API base URL
@@ -69,7 +70,7 @@ const DriverDetails = () => {
             {`Are you sure you want to change the status to `}
             <Text style={{ textTransform: 'capitalize'}} mark strong>{status}?</Text>
           </Title>,
-      content: 'This action cannot be undone',
+      content: 'This action cannot be undone, and the driver will be notified.',
       onOk: async () => {
         await updateStatus(status, id)
         .then((res) => {
@@ -92,11 +93,15 @@ const DriverDetails = () => {
       content: 
         <Text>
           {`You cannot change the status to `} <Text mark strong>{status}</Text> {`until all documents are approved.`}
-        </Text>
+        </Text>,
+      onOk: () => {
+        setLoading(false)
+      }
     });
   }
 
   const showWarning = () => {
+    setLoading(true)
     Modal.confirm({
       title: 'Delete driver?',
       content: 
@@ -113,11 +118,13 @@ const DriverDetails = () => {
         await deleteDriver(id)
         .then((response) => {
           if(response) {
+            setLoading(false)
             navigate('/')
           }
         })
       },
       onCancel: () => {
+        setLoading(false)
         //console.log('Cancel')
       },
       okText: 'Yes, Delete',
@@ -132,7 +139,7 @@ const DriverDetails = () => {
   return (
         <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
           extra={
-            <Button type="primary" danger onClick={showWarning}>
+            <Button loading={loading} type="primary" danger onClick={showWarning}>
               Delete Driver
             </Button>
           }
@@ -163,6 +170,7 @@ const DriverDetails = () => {
                 key="1" 
                 type="primary" 
                 onClick={async () => {
+                  setLoading(true)
                   await isAllApproved(id)
                   .then((res) => {
                     res ? showConfirm('active') : showError('active')
@@ -201,11 +209,21 @@ const DriverDetails = () => {
               </Descriptions.Item>
           </Descriptions>
           </PageHeader>
-          <Divider orientation="left"><h3>Driver Documents</h3></Divider>
+          <Divider orientation="left"><Title level={4}>Driver Documents</Title></Divider>
+           <Space 
+              style={{
+                display: 'flex',
+                justifyItems: 'flex-end',
+                justifyContent: 'flex-end',
+                margin: ['16px 0'],
+              }}
+           >
+            <Button type="primary" icon={<SendOutlined />} disabled onClick={() => navigate(`/drivers/${id}/documents/new`)}>Notify Driver</Button>
+           </Space>
            <DriverDocument id={id} sub={data.sub_id} />
-           <Divider orientation="left"><h3>Driver Vehicle</h3></Divider>
+           <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
            <DriverVehicle id={id} />
-           <Divider orientation="left"><h3>Driver History</h3></Divider>
+           <Divider orientation="left"><Title level={4}>Driver History</Title></Divider>
            <DriverTimeline id={id}/>
         </Card>
   )
