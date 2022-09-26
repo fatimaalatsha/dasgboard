@@ -25,7 +25,7 @@ import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper compo
 import EditableText from '../EditableText' // Import EditableText component
 import EditableSelect from '../EditableSelect' // Import EditableSelect component
 
-const rejectSchema = object().shape({
+const vehicleSchema = object().shape({
     plate_number: string().required('Required'),
     year: string().required('Required'),
     color: string().required('Required'),
@@ -76,6 +76,7 @@ const VehicleModelFeeder = ({name, make_id, editable, value, handleUpdate}) => {
 
 const VehicleList = ({vehicle, setOpen, open, refetch}) => {
     const [makeId, setMakeId] = useState(vehicle.make?.id)
+    const [isModalVisible, setIsModalVisible] = useState(false) // Set modal state to false
     
     const showWarning = (make, model, plateNumber) => {
         Modal.confirm({
@@ -142,6 +143,17 @@ const VehicleList = ({vehicle, setOpen, open, refetch}) => {
         })
     }
 
+    const selectModel = async (value) => {
+        const { make_id } = value
+        console.log(make_id)
+        setMakeId(make_id)
+        return setIsModalVisible(true)
+    }
+
+    const modelSchema = object().shape({
+        model_id: number().required('Required')
+    })
+
     return (
         <>
         <List.Item
@@ -171,7 +183,7 @@ const VehicleList = ({vehicle, setOpen, open, refetch}) => {
                     <EditableText name='plate_number' value={vehicle.plate_number} updateCallback={value => handleUpdate(value)} />
                 </Descriptions.Item>
                 <Descriptions.Item label="Make">
-                    <VehicleMakeFeeder name='make_id' value={vehicle.make?.name} handleUpdate={selectedValue => handleUpdate(selectedValue)} editable />
+                    <VehicleMakeFeeder name='make_id' value={vehicle.make?.name} handleUpdate={selectedValue => selectModel(selectedValue)} editable />
                 </Descriptions.Item>
                 <Descriptions.Item label="Model">
                     {
@@ -208,6 +220,42 @@ const VehicleList = ({vehicle, setOpen, open, refetch}) => {
                 ))
             }
         </Drawer> */}
+        <Formik
+            initialValues={{
+                model_id: '',
+            }}
+            validationSchema={modelSchema}
+            onSubmit={async (values, { setSubmitting }) => {
+                await updateVehicle({make_id: makeId, ...values}, vehicle.vehicleId)
+                .then((response) => {
+                    if (response) {
+                        setIsModalVisible(false)
+                        setSubmitting(false)
+                        refetch()
+                    }
+                })
+            }}
+        >
+            <Modal
+                title={`Select a vehicle model.`}
+                visible={isModalVisible}
+                onOk={() => setIsModalVisible(false)}
+                onCancel={() => setIsModalVisible(false)}
+                destroyOnClose={true}
+                footer={[
+                    <Button key="back" onClick={() => setIsModalVisible(false)}>
+                        Cancel
+                    </Button>,
+                    <SubmitWrapper key="submit" type="primary">
+                        Submit
+                    </SubmitWrapper>,
+                ]}
+            >
+                    <Form>
+                        <VehicleModelFeeder name="model_id" make_id={makeId} />
+                    </Form>
+            </Modal>
+        </Formik>
         </>
     )
 }
@@ -250,7 +298,7 @@ const DriverVehicle = ({ id }) => {
             <Button onClick={() => setOpen({...open, modal: true})} >Add New Vehicle</Button>
             <Formik
                 initialValues={initialValues}
-                validationSchema={rejectSchema}
+                validationSchema={vehicleSchema}
                 onSubmit={ async (values, { setSubmitting }) => {
                     await createVehicle(values).then((response) => {
                         if(response) {
