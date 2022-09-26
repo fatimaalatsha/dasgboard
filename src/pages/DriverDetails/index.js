@@ -218,7 +218,7 @@ const DriverDetails = () => {
                 margin: ['16px 0'],
               }}
            >
-            <Button type="primary" icon={<SendOutlined />} onClick={() => navigate(`/drivers/${id}/documents/new`)}>Notify Driver</Button>
+            <Button type="primary" icon={<SendOutlined />} disabled onClick={() => navigate(`/drivers/${id}/documents/new`)}>Notify Driver</Button>
            </Space>
            <DriverDocument id={id} sub={data.sub_id} />
            <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
