@@ -77,7 +77,7 @@ const VehicleModelFeeder = ({name, make_id, editable, value, handleUpdate}) => {
 const VehicleList = ({vehicle, setOpen, open, refetch}) => {
     const [makeId, setMakeId] = useState(vehicle.make?.id)
     
-    const showWarning = (id, make, model, plateNumber) => {
+    const showWarning = (make, model, plateNumber) => {
         Modal.confirm({
             title: 'Delete vehicle?',
             content: 
@@ -91,7 +91,7 @@ const VehicleList = ({vehicle, setOpen, open, refetch}) => {
                 </Space>
                 ,
             onOk: async () => {
-                const response = await deleteVehicle(id)
+                const response = await deleteVehicle(vehicle.vehicleId)
                 if(response) {
                     refetch()
                 }
@@ -104,7 +104,7 @@ const VehicleList = ({vehicle, setOpen, open, refetch}) => {
         })
     }
 
-    const showConfirm = (status, id) => {
+    const showConfirm = (status) => {
       setOpen({ ...open, switch: true })
         Modal.confirm({
             title: 
@@ -114,7 +114,7 @@ const VehicleList = ({vehicle, setOpen, open, refetch}) => {
                 </Title>,
             content: 'This action cannot be undone',
             onOk: async () => {
-                await updateVehicle({'status': status}, id)
+                await updateVehicle({'status': status}, vehicle.vehicleId)
                 .then((response) => {
                 if (response) {
                     setOpen({ ...open, switch: false })
@@ -130,11 +130,11 @@ const VehicleList = ({vehicle, setOpen, open, refetch}) => {
         });
     }
 
-    const handleUpdate = async (newValue, id) => {
-        if(Object.keys(newValue) === 'make_id') {
+    const handleUpdate = async (newValue) => {
+        if(Object.keys(newValue)[0] === 'model_id') {
             setMakeId(newValue.make_id)
         }
-        await updateVehicle(newValue, id)
+        await updateVehicle(newValue, vehicle.vehicleId)
         .then((response) => {
             if (response) {
                 refetch()
@@ -151,7 +151,7 @@ const VehicleList = ({vehicle, setOpen, open, refetch}) => {
                     type="primary" 
                     size="small" 
                     danger ghost 
-                    onClick={() => showWarning(vehicle.vehicleId, vehicle.make?.name, vehicle.model?.name, vehicle.plate_number)}
+                    onClick={() => showWarning(vehicle.make?.name, vehicle.model?.name, vehicle.plate_number)}
                 >
                     Delete
                 </Button>,
@@ -161,28 +161,28 @@ const VehicleList = ({vehicle, setOpen, open, refetch}) => {
                     loading={open.switch} 
                     disabled={vehicle.status === 'active'}
                     onChange={() => {
-                        showConfirm('active', vehicle.vehicleId)
+                        showConfirm('active')
                     }} 
                 />
             ]}
         >
             <Descriptions labelStyle={{ fontWeight:'bold' }} >
                 <Descriptions.Item label="Plate Number">
-                    <EditableText name='plate_number' value={vehicle.plate_number} updateCallback={value => handleUpdate(value, vehicle.vehicleId)} />
+                    <EditableText name='plate_number' value={vehicle.plate_number} updateCallback={value => handleUpdate(value)} />
                 </Descriptions.Item>
                 <Descriptions.Item label="Make">
-                    <VehicleMakeFeeder name='make_id' value={vehicle.make?.name} handleUpdate={selectedValue => handleUpdate(selectedValue, vehicle.vehicleId)} editable />
+                    <VehicleMakeFeeder name='make_id' value={vehicle.make?.name} handleUpdate={selectedValue => handleUpdate(selectedValue)} editable />
                 </Descriptions.Item>
                 <Descriptions.Item label="Model">
                     {
-                        makeId && <VehicleModelFeeder name='model_id' make_id={vehicle.make?.id} value={vehicle.model?.name} handleUpdate={selectedValue => handleUpdate(selectedValue, vehicle.vehicleId)} editable />
+                        vehicle.make?.id && <VehicleModelFeeder name='model_id' make_id={vehicle.make?.id} value={vehicle.model?.name} handleUpdate={selectedValue => handleUpdate(selectedValue)} editable />
                     }
                 </Descriptions.Item>
                 <Descriptions.Item label="Year">
-                    <EditableText name='year' value={vehicle.year} updateCallback={value => handleUpdate(value, vehicle.vehicleId)} />
+                    <EditableText name='year' value={vehicle.year} updateCallback={value => handleUpdate(value)} />
                 </Descriptions.Item>
                 <Descriptions.Item label="Color">
-                    <EditableText name='color' value={vehicle.color} updateCallback={value => handleUpdate(value, vehicle.vehicleId)} />
+                    <EditableText name='color' value={vehicle.color} updateCallback={value => handleUpdate(value)} />
                 </Descriptions.Item>
                 <Descriptions.Item label="Status">
                     <Tag 
