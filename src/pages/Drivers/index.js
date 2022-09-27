@@ -7,16 +7,22 @@ import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import API from '../../api/BaseUrl'
 
 
+
 const Drivers = () => {
   const navigate = useNavigate();
   const [cities, setCities] = useState([])
   const [argument, setArgument] = useState({
-    page: 1,
+    filters: [],
+  })
+
+  const [page, setPage] = useState({
     limit: 10,
     current_page: 1,
-    cities: null,
   })
+
+  const url = `/v1/drivers/cc?limit=${page.limit}&page=${page.current_page}${argument.filters}`
   
+  // Fetch Cities list from API
   const getCities = async () => {
     try { 
       const response = await API.get('/v1/cities')
@@ -33,7 +39,7 @@ const Drivers = () => {
     }
     catch (error) {
       console.log(error)
-  }  
+    }  
   }
  
   useEffect(() => {
@@ -44,14 +50,8 @@ const Drivers = () => {
     return () => { isMounted = false }
 }, [])
 
-  const { data, isLoading, error, refetch } = useFetch( argument.cities ? `/v1/drivers/cc?page=${argument.page}&limit=${argument.limit}&filter[city_id]=in|${argument.cities}` : `/v1/drivers/cc?page=${argument.page}&limit=${argument.limit}&sort[city_id]=desc`)// Call useFetch custom hook
- 
+  const { data, isLoading, error, refetch } = useFetch(url)
   const tableColumns = [
-    {
-      title: 'User ID',
-      dataIndex: 'user_id',
-      key: 'user_id'
-    },
     {
       title: 'First Name',
       dataIndex: 'first_name',
@@ -72,15 +72,13 @@ const Drivers = () => {
       
       title: 'city',
       dataIndex: ['city', 'name'],
-      key: 'city',
+      key: 'city_id',
       filters: cities, 
       onFilter: (value, record) => { 
         return record.city?.id === value;
       },
       sorter: (record1, record2) => {
-               console.log(record2.city?.id)
-
-        return record1.city?.id < record2.city?.id;
+        return record1.city?.name.localeCompare(record2.city?.name);
       }
     },
     {
@@ -97,6 +95,7 @@ const Drivers = () => {
         {text:'onboard', value: 'onboard' },
         { text: 'pending', value: 'pending' },
         { text: 'inactive', value: 'inactive' },
+        { text: 'active', value: 'active' },
       ], 
       onFilter: (value, record) => {
         return record.status === value;
@@ -116,20 +115,24 @@ const Drivers = () => {
         loading={isLoading}
         rowKey="user_id"
         pagination={{
-          pageSize: argument.limit,
+          pageSize: page.limit,
           total: data.total_items,
-          onChange: (page) => {
-            
-            setArgument({ ...argument, page: page})// Set argument state
-          }
         }}
         onRow={(driverRecord) => ({
           onClick: () => navigate(`driver/${driverRecord.user_id}`)
         })}
         onChange={(pagination, filters, sorter) => {
+          
           console.log('params: ', pagination, filters, sorter)
-          setArgument({...argument, cities: filters.city })
+          
+          setPage({...page, current_page: pagination.current})
+          Object.keys(filters).some(key => {
+            filters[key] 
+            ? setArgument({ filters: `&filter[${key}]=in|${Object.values(filters[key])}`}) 
+            : setArgument({ ...argument, filters: ''})
+          })
         }}
+        
       />
     </Card>
   )
