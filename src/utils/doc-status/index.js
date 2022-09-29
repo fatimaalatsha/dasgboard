@@ -11,7 +11,7 @@ const isAllApproved = async (driverId) => {
             ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
         }
     }
-    const listResponse = await API.get(`/v1/documents/cc/`, options)
+    const listResponse = await API.get(`/v1/documents-types/`, options)
     const dataList = await listResponse.data.items
     const docsResponse = await API.get(`/v1/documents/cc/drivers/${driverId}`, options)
     const docArray = await docsResponse.data.items
