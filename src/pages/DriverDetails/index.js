@@ -1,5 +1,16 @@
 import { useState} from 'react'
-import { Card, Descriptions, Divider, PageHeader, Button, Tag, Modal, Typography, Space } from 'antd' // Import antd components
+import { 
+  Card, 
+  Descriptions, 
+  Divider, 
+  PageHeader, 
+  Button, 
+  Tag, 
+  Modal, 
+  Typography, 
+  Space,
+  Tooltip, 
+} from 'antd' // Import antd components
 import { SendOutlined } from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
@@ -39,6 +50,13 @@ const DriverDetails = () => {
   const navigate = useNavigate(); // Get navigate method from react-router-dom
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
+
+  const tooltipConfig = {
+    placement: 'top',
+    color: 'orange',
+    title: 'Can only delete inactive drivers',
+    ...data?.status === 'inactive' && { open: false, visible: false }
+  }
 
   const updateText = async (payload) => { // Update text method
     try {
@@ -139,9 +157,11 @@ const DriverDetails = () => {
   return (
         <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
           extra={
-            <Button loading={loading} type="primary" danger onClick={showWarning}>
-              Delete Driver
-            </Button>
+            <Tooltip {...tooltipConfig}>
+              <Button loading={loading} type="primary" danger onClick={showWarning} disabled={data.status !== 'inactive'}>
+                Delete Driver
+              </Button>
+            </Tooltip>
           }
         >
           <PageHeader
