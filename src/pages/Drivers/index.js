@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Card, Table } from 'antd'; // Import Ant components
+import { Card, Table,Button, Tag } from 'antd'; // Import Ant components
 import { useNavigate } from 'react-router-dom'; // Import Nav component
 
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
@@ -15,13 +15,50 @@ const Drivers = () => {
     filters: [],
   })
 
+  // Fetch data from API to help with rest filtered
+  let [filteredData, setfilteredData] = useState([])
+  
+
+  //handling pagination
   const [page, setPage] = useState({
     limit: 10,
     current_page: 1,
   })
 
-  const url = `/v1/drivers/cc?limit=${page.limit}&page=${page.current_page}${argument.filters}`
+
+  //sorting fetched data
+  const [sort, setSort] = useState({
+    sorter: [],
+  })
+
+  //rest filtered data
+  const [rest, setRest] = useState(false)
   
+  //beased on the argument and page number fetch the data
+  const url = `/v1/drivers/cc?limit=${page.limit}&page=${page.current_page}${argument.filters}${sort.sorter}`
+
+
+  //handle reset
+  const handleClick = async () => {
+    
+    console.log('click ', argument, page, sort);
+    setArgument({ filters: [] });
+    setSort({ sorter: [] });
+    setPage({ limit: 10, current_page: 1 });
+   // window.location.reload();
+    // try {
+    //   const response = await API.get(url)
+    //   const data = await response.data
+    //   if (data) {
+    //     setfilteredData(data.items)
+    //   }
+
+    // }
+    // catch (error) { console.log(error) } 
+    
+  refetch()
+  };
+
   // Fetch Cities list from API
   const getCities = async () => {
     try { 
@@ -51,6 +88,14 @@ const Drivers = () => {
 }, [])
 
   const { data, isLoading, error, refetch } = useFetch(url)
+//data
+  useEffect(() => {
+    if (data) {
+      setfilteredData(data.items)
+    }
+  }
+   , [data])
+
   const tableColumns = [
     {
       title: 'First Name',
@@ -73,13 +118,14 @@ const Drivers = () => {
       title: 'city',
       dataIndex: ['city', 'name'],
       key: 'city_id',
-      filters: cities, 
+      filters: cities,
       onFilter: (value, record) => { 
         return record.city?.id === value;
       },
       sorter: (record1, record2) => {
-        return record1.city?.name.localeCompare(record2.city?.name);
-      }
+        return record2.city?.name.localeCompare(record1.city?.name);
+      },
+     
     },
     {
       title: 'email',
@@ -91,6 +137,14 @@ const Drivers = () => {
       title: 'status',
       dataIndex: 'status',
       key: 'status',
+      render: (status) => {
+        return (
+          <Tag color={status === 'active' ? 'success' : status === 'inactive' ? 'error' : 'warning'}>
+          {status}
+          </Tag>
+        );
+      }
+      ,
       filters: [
         {text:'onboard', value: 'onboard' },
         { text: 'pending', value: 'pending' },
@@ -109,29 +163,58 @@ const Drivers = () => {
 
   return(
     <Card title={'Drivers'} style={{ margin: 15 }}>
+          {/* //restting sort and filters */}
+      <Button type="primary" style={{ marginBottom: 16 }} onClick={() => {
+        
+        handleClick();
+        //setfilteredData(data.items)
+      }}>Reset</Button>
+      
       <Table
-        dataSource={data.items}
+        dataSource={filteredData}
         columns={tableColumns}
         loading={isLoading}
         rowKey="user_id"
         pagination={{
           pageSize: page.limit,
           total: data.total_items,
+          showSizeChanger: true,
+          showQuickJumper: true,
         }}
+        
+         
         onRow={(driverRecord) => ({
           onClick: () => navigate(`driver/${driverRecord.user_id}`)
         })}
-        onChange={(pagination, filters, sorter) => {
+        onChange={(pagination, filters, sorter, extra) => {
+          console.log('params', extra);
+          //setting sorter for cities
+          if (sorter.order) { 
+            setSort({
+              sorter: `&sort[${sorter.column.key}]=${sorter.order === 'ascend' ? 'asc' : 'desc'}`,
+             })
+           }
+                    
+          //setting pagination 
+          setPage({ ...page, current_page: pagination.current ,limit: pagination.pageSize})
           
-          console.log('params: ', pagination, filters, sorter)
-          
-          setPage({...page, current_page: pagination.current})
+
+          //setting filters
           Object.keys(filters).some(key => {
-            filters[key] 
-            ? setArgument({ filters: `&filter[${key}]=in|${Object.values(filters[key])}`}) 
-            : setArgument({ ...argument, filters: ''})
-          })
-        }}
+            filters[key]
+              ? setArgument({ filters: `&filter[${key}]=in|${Object.values(filters[key])}` })
+              : setArgument({ ...argument, filters: '' })
+          }) 
+
+          //setting rest
+          if (rest === true) {
+            setArgument({ filters: '' });
+            setSort({ sorter: '' });
+            setPage({ limit: 10, current_page: 1 });
+            setRest(false)
+          }
+        }
+        }
         
       />
     </Card>
