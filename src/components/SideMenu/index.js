@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Menu, Avatar, Space, Dropdown, Typography } from 'antd' // import antd components
-import { useNavigate } from 'react-router-dom';
+import { useParams, useNavigate } from 'react-router-dom';
 import {
   FileOutlined,
   CarOutlined,
@@ -22,6 +22,7 @@ const SideMenu = ({collapsed}) => {
   })
 
   const navigate = useNavigate();
+  const params = useParams();
 
   const getUserInfo = async () => { // get user info
     try {
@@ -125,7 +126,7 @@ const SideMenu = ({collapsed}) => {
       <Menu 
         theme="dark"
         mode="inline"
-        defaultSelectedKeys={['/']}
+        defaultSelectedKeys={[`/${params['*']}`]}
         items={menuItems} 
         style={{borderTop: '1px solid black'}}
         onClick={(menuItem) => navigate(menuItem.key)}
