@@ -1,9 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Card, Table, Tag } from 'antd'; // Import Ant components
+import { Card, Table, Tag, Button } from 'antd' // Import Ant components
+import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import qs from 'qs' // Import qs library
 import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
-import { useNavigate } from 'react-router-dom'; // Import hook from react-router
+import { useNavigate } from 'react-router-dom' // Import hook from react-router
 
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import API from '../../api/BaseUrl' // Import API
@@ -36,7 +37,12 @@ const Documents = () => {
         setTableParams({
             pagination,
             filter,
-            ...sorter,
+            ...(Object.keys(sorter).length !== 0 && {sort: {
+                [sorter.columnKey]: sorter.order === 'ascend' ? 'asc' : 'desc',
+            }}),
+            /* sort: {
+                [sorter.columnKey]: sorter.order === 'ascend' ? 'asc' : 'desc',
+            }, */
         })
     }
 
@@ -71,6 +77,17 @@ const Documents = () => {
         return () => controller.abort()// Abort fetch on unmount
     }, [data]) // Update table params
 
+    const buttonConfig = {
+        icon: <ReloadOutlined />,
+        onClick: () => refetch(),
+        type: 'primary',
+        ghost: true,
+        size: 'large',
+        style: {
+            marginBottom: '16px',
+        },
+    }
+
     const tableColumns = [
         {
             title: 'Driver',
@@ -85,7 +102,8 @@ const Documents = () => {
             title: 'City',
             dataIndex: 'city',
             filters: cities, 
-            key: 'city_id',
+            key: 'c.id',
+            sorter: true,
         },
         {
             title: 'Status',
@@ -105,16 +123,23 @@ const Documents = () => {
             render: (text, record) => `${dayjs(text).format('YYYY-MM-DD - HH:mm:ss')}`,
             align: 'right',
             sorter: true,
+            key: 'updated_at',
         },
     ]
 
+    if (error) {
+      return <div>Something went wrong...</div>
+    }
+
     return (
         <Card title={'Documents'} style={{ margin: 15 }}>
+            <Button {...buttonConfig} />
             <Table
                 columns={tableColumns}
                 dataSource={data?.items}
                 loading={isLoading}
                 rowKey={record => record.id + record.type}
+                sortDirections={['ascend', 'descend', 'ascend']}
                 pagination={tableParams.pagination}onRow={(driverRecord) => ({
                     onClick: () => navigate(`/driver/${driverRecord.user_id}`)
                 })}
