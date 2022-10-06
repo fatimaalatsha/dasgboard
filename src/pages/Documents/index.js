@@ -70,8 +70,7 @@ const Documents = () => {
         getCities()
         return () => controller.abort()// Abort fetch on unmount
     }, [data]) // Update table params
-
-    console.log(data)
+    
     const tableColumns = [
         {
             title: 'Driver',
