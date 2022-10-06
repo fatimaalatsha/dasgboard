@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Card, Table, Tag, Button } from 'antd' // Import Ant components
+import { Card, Table, Tag, Button, Tooltip } from 'antd' // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import qs from 'qs' // Import qs library
 import dayjs from "dayjs"// Import date handlers
@@ -40,9 +40,6 @@ const Documents = () => {
             ...(Object.keys(sorter).length !== 0 && {sort: {
                 [sorter.columnKey]: sorter.order === 'ascend' ? 'asc' : 'desc',
             }}),
-            /* sort: {
-                [sorter.columnKey]: sorter.order === 'ascend' ? 'asc' : 'desc',
-            }, */
         })
     }
 
@@ -104,6 +101,7 @@ const Documents = () => {
             filters: cities, 
             key: 'c.id',
             sorter: true,
+            filterSearch: true,
         },
         {
             title: 'Status',
@@ -133,14 +131,17 @@ const Documents = () => {
 
     return (
         <Card title={'Documents'} style={{ margin: 15 }}>
-            <Button {...buttonConfig} />
+            <Tooltip title="Reload data">
+                <Button {...buttonConfig} />
+            </Tooltip>
             <Table
                 columns={tableColumns}
                 dataSource={data?.items}
                 loading={isLoading}
                 rowKey={record => record.id + record.type}
                 sortDirections={['ascend', 'descend', 'ascend']}
-                pagination={tableParams.pagination}onRow={(driverRecord) => ({
+                pagination={tableParams.pagination}
+                onRow={(driverRecord) => ({
                     onClick: () => navigate(`/driver/${driverRecord.user_id}`)
                 })}
                 onChange={handleTableChange}
