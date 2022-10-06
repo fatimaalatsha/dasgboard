@@ -70,7 +70,7 @@ const Documents = () => {
         getCities()
         return () => controller.abort()// Abort fetch on unmount
     }, [data]) // Update table params
-    
+
     const tableColumns = [
         {
             title: 'Driver',
@@ -107,7 +107,7 @@ const Documents = () => {
             sorter: true,
         },
     ]
-//console.log(data)
+
     return (
         <Card title={'Documents'} style={{ margin: 15 }}>
             <Table
