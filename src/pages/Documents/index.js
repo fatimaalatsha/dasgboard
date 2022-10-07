@@ -38,7 +38,7 @@ const Documents = () => {
             pagination,
             filter,
             ...(Object.keys(sorter).length !== 0 && {sort: {
-                [sorter.columnKey]: sorter.order === 'ascend' ? 'asc' : 'desc',
+                [`${sorter.columnKey === 'c.id' ? 'city' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
             }}),
         })
     }
