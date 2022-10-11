@@ -55,12 +55,12 @@ const Drivers = () => {
 }, [])
 
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
-  console.log(data)
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
       if (filter[key]) {
         filter[key].unshift('in|' + filter[key][0])
         filter[key].splice(1, 1)
+        console.log(sorter)
       }
     })
      
@@ -68,8 +68,10 @@ const Drivers = () => {
     setTableParams({
         pagination,
         filter,
-         ...(Object.keys(sorter).length !== 0 && {sort: {
-                [sorter.columnKey]: sorter.order === 'ascend' ? 'asc' : 'desc',
+      ...(Object.keys(sorter).length !== 0 && {
+        sort: {
+        
+                [`${sorter.columnKey === 'city_id' ? 'city' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
             }}),
     })
   }
