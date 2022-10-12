@@ -10,6 +10,7 @@ import {
   Typography, 
   Space,
   Tooltip, 
+  message,
 } from 'antd' // Import antd components
 import { SendOutlined } from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
@@ -56,6 +57,10 @@ const DriverDetails = () => {
     color: 'orange',
     title: 'Can only delete inactive drivers',
     ...data?.status === 'inactive' && { open: false, visible: false }
+  }
+
+  const successAlert = (msg) => { // Success alert method
+    message.success(msg)
   }
 
   const updateText = async (payload) => { // Update text method
@@ -169,6 +174,7 @@ const DriverDetails = () => {
         .then((response) => {
           if(response) {
             setLoading(false)
+            successAlert(response.message)
           }
         })
       },
