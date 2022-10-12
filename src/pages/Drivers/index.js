@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Card, Table,Button, Tag } from 'antd'; // Import Ant components
+import { Card, Table, Tag } from 'antd'; // Import Ant components
 import { useNavigate } from 'react-router-dom'; // Import Nav component
 
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
@@ -60,7 +60,6 @@ const Drivers = () => {
       if (filter[key]) {
         filter[key].unshift('in|' + filter[key][0])
         filter[key].splice(1, 1)
-        console.log(sorter)
       }
     })
      
@@ -104,44 +103,43 @@ const Drivers = () => {
       key: 'last_name'
     },
     {
-      title: 'phone',
+      title: 'Phone',
       dataIndex: 'phone',
       key: 'phone',
       responsive: ['md'],
     },
     {
       
-      title: 'city',
+      title: 'City',
       dataIndex: ['city', 'name'],
       key: 'city_id',
       filters: cities,
       sorter: true,
-      
-          
+      filterSearch: true,          
     },
     {
-      title: 'email',
+      title: 'Email',
       dataIndex: 'email',
       key: 'email',
       responsive: ['lg'],
     },
     {
-      title: 'status',
+      title: 'Status',
       dataIndex: 'status',
       key: 'status',
-      render: (status) => {
+      render: (status) => {                                                                           
         return (
-          <Tag color={status === 'active' ? 'success' : status === 'inactive' ? 'error' : 'warning'}>
-          {status}
+          <Tag color={status === 'active' ? 'success' : status === 'inactive' ? 'error' : status=== 'pending'? 'orange': 'blue' }>
+            {status.charAt(0).toUpperCase() + status.slice(1)}
           </Tag>
         );
       }
       ,
       filters: [
-        {text:'onboard', value: 'onboard' },
-        { text: 'pending', value: 'pending' },
-        { text: 'inactive', value: 'inactive' },
-        { text: 'active', value: 'active' },
+        {text:'Oboard', value: 'onboard' },
+        { text: 'Pending', value: 'pending' },
+        { text: 'Inactive', value: 'inactive' },
+        { text: 'Active', value: 'active' },
       ],
     }
   ];
@@ -149,7 +147,7 @@ const Drivers = () => {
   if (error) {
     return <div>Something went wrong...</div>
   }
-
+  
   return(
     <Card title={'Drivers'} style={{ margin: 15 }}>
       <Table
