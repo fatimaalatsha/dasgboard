@@ -95,7 +95,8 @@ const Drivers = () => {
     {
       title: 'First Name',
       dataIndex: 'first_name',
-      key: 'first_name'
+      key: 'first_name',
+      sorter: true,
     },
     {
       title: 'Last Name',
@@ -147,6 +148,7 @@ const Drivers = () => {
   if (error) {
     return <div>Something went wrong...</div>
   }
+
   
   return(
     <Card title={'Drivers'} style={{ margin: 15 }}>
