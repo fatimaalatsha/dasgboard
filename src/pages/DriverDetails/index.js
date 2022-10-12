@@ -10,6 +10,7 @@ import {
   Typography, 
   Space,
   Tooltip, 
+  message,
 } from 'antd' // Import antd components
 import { SendOutlined } from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
@@ -26,7 +27,7 @@ import DriverVehicle from '../../components/DriverVehicle' // Import Driver Vehi
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved } from '../../utils/doc-status' // Import isAllApproved function
-import { deleteDriver, updateStatus } from '../../utils/driver-status' // Import delete driver method
+import { deleteDriver, updateStatus, notifyDriver } from '../../utils/driver-status' // Import delete driver method
 
 const { confirm } = Modal // Destructure config from Modal
 const { Title, Text } = Typography // Destructure Title from Typography
@@ -56,6 +57,10 @@ const DriverDetails = () => {
     color: 'orange',
     title: 'Can only delete inactive drivers',
     ...data?.status === 'inactive' && { open: false, visible: false }
+  }
+
+  const successAlert = (msg) => { // Success alert method
+    message.success(msg)
   }
 
   const updateText = async (payload) => { // Update text method
@@ -150,6 +155,38 @@ const DriverDetails = () => {
     })
   }
 
+  const showNotifyWarning = () => {
+    setLoading(true)
+    Modal.confirm({
+      title: 'Email Notification',
+      content: 
+        <Space direction="vertical">
+          <Text>
+            {`Are you sure you want to continue with this action? `} <Text mark strong>{`${data.first_name} ${data.last_name}`}</Text>{` will recieved an email notification.`}
+          </Text>
+          <Text strong>
+            {`Be wary of sending too many of these notifications, as it may be considered spam.`}
+          </Text>
+        </Space>
+        ,
+      onOk: async () => {
+        await notifyDriver(id)
+        .then((response) => {
+          if(response) {
+            setLoading(false)
+            successAlert(response.message)
+          }
+        })
+      },
+      onCancel: () => {
+        setLoading(false)
+        //console.log('Cancel')
+      },
+      okText: 'Yes, Notify',
+      cancelText: 'Cancel',
+    })
+  }
+
   if (error) {
     return <div>Something went wrong</div>
   }
@@ -238,7 +275,7 @@ const DriverDetails = () => {
                 margin: ['16px 0'],
               }}
            >
-            <Button type="primary" icon={<SendOutlined />} disabled onClick={() => navigate(`/drivers/${id}/documents/new`)}>Notify Driver</Button>
+            <Button type="primary" icon={<SendOutlined />} loading={loading}  onClick={() => showNotifyWarning()}>Notify Driver</Button>
            </Space>
            <DriverDocument id={id} sub={data.sub_id} />
            <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
