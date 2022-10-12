@@ -11,6 +11,8 @@ import SideMenu from "../../components/SideMenu"
 import Drivers from "../../pages/Drivers"
 import DriverDetails from "../../pages/DriverDetails"
 import Documents from '../../pages/Documents'
+import Cities from "../../pages/Cities"
+import CityDetails from "../../pages/CityDetails"
 
 const { Sider, Content, Header} = Container // Destructuring Layout component
 
@@ -34,6 +36,8 @@ const Layout = () => {
                     <Route path="/*" index element={<Drivers />} />
                     <Route path="/driver/:id" element={<DriverDetails />} />
                     <Route path="/documents" element={<Documents />} />
+                    <Route path="/cities" element={<Cities />} />
+                    <Route path="/city/:id" element={<CityDetails />} />
                 </Routes>
             </Content>
           </Container>
