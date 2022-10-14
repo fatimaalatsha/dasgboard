@@ -37,6 +37,13 @@ const descriptionConfig = {
 const CityEmailTemplates = ({data}) => { // Email templates component
     return (
         <>
+        <Divider orientation="left">Welcome Email</Divider>
+        <Divider orientation="left">Initial Document Submission</Divider>
+        <Descriptions>
+            <Item label="Vehicle Safety Wording">
+                <EditableText value="asd" />
+            </Item>
+        </Descriptions>
         <Descriptions 
                 title={<Title level={5}>Initial Documents</Title>} 
                 {...descriptionConfig}
@@ -149,6 +156,14 @@ const CityRequirements = () => {
         },
     ]
     return (
+        <>
+        <Space style={{
+            display: 'flex',
+            justifyContent: 'flex-end',
+            marginBottom: '10px',
+        }}>
+            <Button type="primary" ghost>Add New Requirement</Button>
+        </Space>
         <Row gutter={[16, 24]}>
             {
                 reqArray.map((req, index) => (
@@ -192,6 +207,7 @@ const CityRequirements = () => {
                 ))
             }
         </Row>
+        </>
     )
 }
 
@@ -218,7 +234,7 @@ const CityProfile = ({data}) => { // Editable info profile component
             </Item>
             <Item label="total tax rate">
                 <Space align="baseline">
-                    <Title level={5}>PST + GST</Title>
+                    <Text level={5}>PST + GST</Text>
                     <EditableText value="13" />
                 </Space>
             </Item>
@@ -227,6 +243,9 @@ const CityProfile = ({data}) => { // Editable info profile component
             </Item>
             <Item label="driver pay rate">
                 <EditableText value="13" />
+            </Item>
+            <Item label="recruitment email address">
+                <EditableText value="city@uridetech.com" />
             </Item>
         </Descriptions>
     )
