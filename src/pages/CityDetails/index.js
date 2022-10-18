@@ -18,6 +18,7 @@ import { useParams } from 'react-router-dom'
 
 import useFetch from '../../hooks/use-fetch'
 import EditableText from '../../components/EditableText'
+import emailTemplates from '../../dummy/city-info'
 
 const { Title, Text } = Typography // destructuring Typography component
 const { Item } = Descriptions // destructuring Descriptions component
@@ -33,42 +34,37 @@ const descriptionConfig = {
         textTransform: 'capitalize',
     }
 }
-
+//console.log(emailTemplates)
 const CityEmailTemplates = ({data}) => { // Email templates component
     return (
         <>
-        <Divider orientation="left">Welcome Email</Divider>
-        <Divider orientation="left">Initial Document Submission</Divider>
-        <Descriptions>
-            <Item label="Vehicle Safety Wording">
-                <EditableText value="asd" />
-            </Item>
-        </Descriptions>
-        <Descriptions 
-                title={<Title level={5}>Initial Documents</Title>} 
-                {...descriptionConfig}
-            >
-                <Item label="driver licence">{data.minAge}</Item>
-                <Item label="vehicle insurance">{data.vehicleAge}</Item>
-                <Item label="vehicle ownership">{data.vehicleAge}</Item>
-                <Item label="work eligibility">{data.vehicleAge}</Item>
-                <Item label="driving record">{data.vehicleAge}</Item>
-            </Descriptions>
+            <Divider orientation="left">Welcome Email</Divider>
             <Descriptions 
-                title={<Title level={5}>Onboard Documents</Title>} 
-                {...descriptionConfig}
+                bordered 
+                column={1}
             >
-                <Item label="driver minimum age">{data.minAge}</Item>
-                <Item label="vehicle max manufacturing date">{data.vehicleAge}</Item>
+                {
+                    emailTemplates['stage_1']?.map((template, index) => (
+                        <Item key={index} label={template.document}>
+                            <EditableText value={template.content} />
+                        </Item>
+                    ))
+                }
             </Descriptions>
+            <Divider orientation="left">Initial Document Submission</Divider>
             <Descriptions 
-                title={<Title level={5}>Post-onboard Documents</Title>} 
-                {...descriptionConfig}
+                bordered 
+                column={1}
             >
-                <Item label="driver minimum age">{data.minAge}</Item>
-                <Item label="vehicle max manufacturing date">{data.vehicleAge}</Item>
+                {
+                    emailTemplates['stage_2']?.map((template, index) => (
+                        <Item key={index} label={template.document}>
+                            <EditableText value={template.content} />
+                        </Item>
+                    ))
+                }
             </Descriptions>
-            </>
+        </>
     )
 }
 
@@ -164,7 +160,7 @@ const CityRequirements = () => {
         }}>
             <Button type="primary" ghost>Add New Requirement</Button>
         </Space>
-        <Row gutter={[16, 24]}>
+        <Row gutter={[16, 14]}>
             {
                 reqArray.map((req, index) => (
                     <Col key={index} span={8}>
@@ -258,7 +254,7 @@ const CityDetails = () => {
     if (error) {
         return <>Error: {error.message}</>
     }
-console.log(data)
+//console.log(data)
     return (
         <Card
             title={
