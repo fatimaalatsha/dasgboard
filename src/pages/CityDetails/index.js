@@ -12,6 +12,7 @@ import {
     Switch,
     List,
     Collapse,
+    Input,
 } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
@@ -23,6 +24,7 @@ import emailTemplates from '../../dummy/city-info'
 const { Title, Text } = Typography // destructuring Typography component
 const { Item } = Descriptions // destructuring Descriptions component
 const { Panel } = Collapse // destructuring Collapse component
+const { Search } = Input // destructuring Input component
 
 const descriptionConfig = {
     layout: "vertical",
@@ -39,18 +41,41 @@ const CityEmailTemplates = ({data}) => { // Email templates component
     return (
         <>
             <Divider orientation="left">Welcome Email</Divider>
-            <Descriptions 
+            <Space direction="vertical" style={{ width: '100%'}}>
+                <Text strong>Driver Licence</Text>
+                <Search
+                    addonBefore="Name"
+                    placeholder="Requirement Name"
+                    defaultValue="Driver License"
+                    allowClear
+                    enterButton="Update"
+                    size="large"
+                />
+            </Space>
+            {/* <Descriptions 
                 bordered 
                 column={1}
-            >
-                {
-                    emailTemplates['stage_1']?.map((template, index) => (
-                        <Item key={index} label={template.document}>
-                            <EditableText value={template.content} />
-                        </Item>
-                    ))
-                }
-            </Descriptions>
+            > */}
+                {/* {
+                    Object.keys(emailTemplates['stage_1']).map((key, index) => {
+                        console.log('titles: ', emailTemplates['stage_1'][key].title)
+                        return (
+                            <Item key={index} label={emailTemplates['stage_1'][key].title}>
+                                {
+                                    Object.keys(emailTemplates['stage_1'][key]).map((children, index) => {
+                                        console.log(children)
+                                        return (
+                                            <>
+                                             <EditableText key={index} value={emailTemplates['stage_1'][key][children]} />
+                                             </>
+                                        )
+                                    })
+                                }
+                            </Item>
+                        )
+                    })
+                } */}
+            {/* </Descriptions> */}
             <Divider orientation="left">Initial Document Submission</Divider>
             <Descriptions 
                 bordered 

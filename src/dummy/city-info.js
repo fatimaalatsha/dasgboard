@@ -1,19 +1,32 @@
 const emailTemplates = {
-    "stage_1": [
-        {
-            document: "Driver's Licence Class",
-            content:  "Full G Class"
+    "stage_1": {
+        "driver_license": {
+            title: 'Driver License',
+            content: 'Full G Class Licence'
         },
-        {
-            document: "Driver's Abstract Link",
-            content: "https://www.services.gov.on.ca/wps85/portal/s2i/!ut/p/z1/dYvBCoJAFAC_pR_Yt7uF2tGCCgQtjMq9yNO15aG8FQyFvj7pZtBxhhkw8ADDOJLDF3nGbubCBGV0lIGONyrNknArLzeVRSeVrGWqoZiD8G9w0JCDAZNr2mHdXv0ZXQNFjcKzcH4UgybRz050yJbYCTsOi-FObP30u0xfu5jyhst9DH2L1fvpVh_SE-oq/",
+        "driver_abstract": {
+            title: 'Driver\'s Abstract',
+            document: 'Ontario Driver\'s Abstract',
+            service_place: 'Service Ontario',
+            link: {
+                url: 'https://www.services.gov.on.ca/wps85/portal/s2i/!ut/p/z1/dYvBCoJAFAC_pR_Yt7uF2tGCCgQtjMq9yNO15aG8FQyFvj7pZtBxhhkw8ADDOJLDF3nGbubCBGV0lIGONyrNknArLzeVRSeVrGWqoZiD8G9w0JCDAZNr2mHdXv0ZXQNFjcKzcH4UgybRz050yJbYCTsOi-FObP30u0xfu5jyhst9DH2L1fvpVh_SE-oq/',
+                text: 'Ontario Driver\'s Abstract'
+            }
         },
-        {
-            document: "Vehicle Insurance Limit",
-            content: "Please provide a copy of the current automobile liability insurance with limits of not less than 2M.",
-            default: "Please provide a copy of your vehicle insurance."
+        "vehicle_owner": {
+            title: 'Vehicle Ownership',
+            content: 'The vehicle ownership must be under your name.',
+            notes: 'If the vehicle is under your spouse\'s name please include an authorization letter stating that they are aware the vehicle will be used for rideshare.'
         },
-    ],
+        "vehicle_insurance": {
+            title: 'Vehicle Insurance',
+            content: 'the current automobile liability. With limits of not less than 2M.',
+        },
+        "work_eligibility": {
+            title: 'Proof Of Work Eligibility',
+            content: null,
+        }
+    },
     "stage_2": [
         {
             document: "Vehicle Safety",
