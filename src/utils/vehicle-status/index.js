@@ -11,7 +11,7 @@ const createVehicle = async (payload) => {
                 ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
             }
         }
-        const response = await API.post(`/v1/vehicles`, payload, options)
+        const response = await API.post(`/v1/vehicles/cc`, payload, options)
         return response
     } catch (error) {
         console.log(error)
@@ -29,7 +29,7 @@ const deleteVehicle = async (vehicleId) => {
                 ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
             }
         }
-        const response = await API.delete(`/v1/vehicles/${vehicleId}`, options)
+        const response = await API.delete(`/v1/vehicles/cc/${vehicleId}`, options)
         return response
     } catch (error) {
         console.log(error)
@@ -48,7 +48,7 @@ const updateVehicle = async (payload, id) => {
             }
         }
         const body = payload
-        const response = await API.put(`/v1/vehicles/${id}`, body, options)
+        const response = await API.put(`/v1/vehicles/cc/${id}`, body, options)
         return response
     } catch (error) {
         console.log(error)
