@@ -1,3 +1,4 @@
+import { useState } from 'react'
 import { 
     Card,
     Button,
@@ -16,15 +17,20 @@ import {
 } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
+import { Form, Formik } from 'formik'
+import { object, string, number } from 'yup' // Import yup validation schema
 
 import useFetch from '../../hooks/use-fetch'
 import EditableText from '../../components/EditableText'
 import emailTemplates from '../../dummy/city-info'
 
+import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
+import InputWrapper from '../../components/forms/InputWrapper' // Import InputWrapper component
+
 const { Title, Text } = Typography // destructuring Typography component
 const { Item } = Descriptions // destructuring Descriptions component
 const { Panel } = Collapse // destructuring Collapse component
-const { Search } = Input // destructuring Input component
+const { Search, TextArea } = Input // destructuring Input component
 
 const descriptionConfig = {
     layout: "vertical",
@@ -36,22 +42,257 @@ const descriptionConfig = {
         textTransform: 'capitalize',
     }
 }
+
+const safetyDealSchema = object().shape({
+    shop_name: string().required('Required'),
+    shop_address: string().required('Required'),
+    shop_number: string().required('Required'),
+    deal_details: number().required('Required'),
+})
+
+const backgroundLinkSchema = object().shape({
+    link: string().required('Required'),
+    link_text: string().required('Required')
+})
+
 //console.log(emailTemplates)
 const CityEmailTemplates = ({data}) => { // Email templates component
+    const [showForm, setShowForm] = useState({
+        agreement: false,
+        background_link: false,
+    })
+    const initialValues = {
+        agreement: {
+            shop_name: '',
+            shop_address: '',
+            shop_number: '',
+            deal_details: '',
+        },
+        background: {
+            link: '',
+            link_text: '',
+        }
+}
+
     return (
         <>
-            <Divider orientation="left">Welcome Email</Divider>
-            <Space direction="vertical" style={{ width: '100%'}}>
-                <Text strong>Driver Licence</Text>
-                <Search
-                    addonBefore="Name"
-                    placeholder="Requirement Name"
-                    defaultValue="Driver License"
-                    allowClear
-                    enterButton="Update"
-                    size="large"
-                />
-            </Space>
+            <Collapse>
+            <Panel header="Welcome Email" key="1">
+                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
+                    <Divider orientation="left">Driver Licence</Divider>
+                    <Search
+                        addonBefore="Name"
+                        placeholder="Requirement Name"
+                        defaultValue="Driver License"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                    <Search
+                        addonBefore="Class"
+                        placeholder="Requirement Name"
+                        defaultValue="Full G Class Licence"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                </Space>
+                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
+                    <Divider orientation="left">Driver Abstract</Divider>
+                    <Search
+                        addonBefore="Name"
+                        placeholder="Requirement Name"
+                        defaultValue="Driver's Abstract"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                    <Search
+                        addonBefore="Document Name"
+                        placeholder="Document Name"
+                        defaultValue="Ontario Driver's Abstract"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                    <Search
+                        addonBefore="Place"
+                        placeholder="Place"
+                        defaultValue="Service Ontario"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                    <Search
+                        addonBefore="URL"
+                        placeholder="URL to get the document"
+                        defaultValue="https://www.services.gov.on.ca/wps85/portal/s2i/!ut/p/z1/dYvBCoJAFAC_pR_Yt7uF2tGCCgQtjMq9yNO15aG8FQyFvj7pZtBxhhkw8ADDOJLDF3nGbubCBGV0lIGONyrNknArLzeVRSeVrGWqoZiD8G9w0JCDAZNr2mHdXv0ZXQNFjcKzcH4UgybRz050yJbYCTsOi-FObP30u0xfu5jyhst9DH2L1fvpVh_SE-oq/"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                    <Search
+                        addonBefore="URL Name"
+                        placeholder="Name displayed on the URL"
+                        defaultValue="Ontario Driver's Abstract"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                </Space>
+                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
+                    <Divider orientation="left">Vehicle Ownership</Divider>
+                    <Search
+                        addonBefore="Name"
+                        placeholder="Requirement Name"
+                        defaultValue="Vehicle Ownership"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                    <Descriptions bordered size="small" labelStyle={{ width: '100px'}} column={1}>
+                        <Item label="Content" contentStyle={{ margin: 16}}>
+                            <TextArea
+                                style={{ width: '100%', marginBottom: 16}}
+                                placeholder="Requirement Content"
+                                defaultValue="The vehicle ownership must be under your name."
+                                size="large"
+                                autoSize={{ minRows: 2, maxRows: 3 }}
+                            />
+                            <Button type="primary">Update</Button>
+                        </Item>
+                        <Item label="Notes" contentStyle={{ margin: 16}}>
+                            <TextArea
+                                style={{ width: '100%', marginBottom: 16}}
+                                placeholder="Requirement Content"
+                                defaultValue="If the vehicle is under your spouse's name please include an authorization letter stating that they are aware the vehicle will be used for rideshare."
+                                size="large"
+                                autoSize={{ minRows: 2, maxRows: 3 }}
+                            />
+                            <Button type="primary">Update</Button>
+                        </Item>
+                    </Descriptions>
+                </Space>
+                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
+                    <Divider orientation="left">Vehicle Insurance</Divider>
+                    <Search
+                        addonBefore="Name"
+                        placeholder="Requirement Name"
+                        defaultValue="Vehicle Insurance"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                    <Descriptions bordered size="small" labelStyle={{ width: '100px'}} column={1}>
+                        <Item label="Content" contentStyle={{ margin: 16}}>
+                            <TextArea
+                                style={{ width: '100%', marginBottom: 16}}
+                                placeholder="Requirement Content"
+                                defaultValue="Please provide a copy of the current automobile liability insurance. With limits of not less than 2M."
+                                size="large"
+                                autoSize={{ minRows: 2, maxRows: 3 }}
+                            />
+                            <Button type="primary">Update</Button>
+                        </Item>
+                    </Descriptions>
+                </Space>
+                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
+                    <Divider orientation="left">Work Eligibility</Divider>
+                    <Search
+                        addonBefore="Name"
+                        placeholder="Requirement Name"
+                        defaultValue="Proof Of Work Eligibility"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                    <Descriptions bordered size="small" labelStyle={{ width: '100px'}} column={1}>
+                        <Item label="Content" contentStyle={{ margin: 16}}>
+                            <TextArea
+                                style={{ width: '100%', marginBottom: 16}}
+                                placeholder="Requirement Content"
+                                defaultValue=""
+                                size="large"
+                                autoSize={{ minRows: 2, maxRows: 3 }}
+                            />
+                            <Button type="primary">Update</Button>
+                        </Item>
+                    </Descriptions>
+                </Space>
+            </Panel>
+            <Panel header="Initial Document Submission" key="2">
+                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
+                    <Divider orientation="left">Vehicly Safety</Divider>
+                    <Search
+                        addonBefore="Name"
+                        placeholder="Requirement Name"
+                        defaultValue="Driver License"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                    <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
+                    <Checkbox checked={showForm.agreement} onChange={() => setShowForm({...showForm, agreement: !showForm.agreement})}>Agreement?</Checkbox>
+                    {
+                        showForm.agreement && (
+                            <Formik
+                                initialValues={initialValues.agreement}
+                                validationSchema={safetyDealSchema}
+                                onSubmit={ async (values, { setSubmitting }) => {
+                                    console.log(values)
+                                    setSubmitting(false)
+                                }
+                            }>
+                                <Form>
+                                    <Space direction="vertical" style={{ width: '100%'}}>
+                                        <InputWrapper name="shop_name" placeholder="Shop Name" maxLength={50} />
+                                        <InputWrapper name="shop_address" placeholder="Shop Address" maxLength={50} />
+                                        <InputWrapper name="shop_number" placeholder="Shop Number" maxLength={15} />
+                                        <InputWrapper name="deal_details" placeholder="Agreement Details" maxLength={100} />                           
+                                        <SubmitWrapper key="submit" type="primary">
+                                            Add Agreement
+                                        </SubmitWrapper>
+                                    </Space>
+                                </Form>
+                            </Formik>)
+                    }
+                    <Divider orientation="left">Background Check</Divider>
+                    <Search
+                        addonBefore="Name"
+                        placeholder="Requirement Name"
+                        defaultValue="Background Check"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                    <Descriptions bordered size="small" labelStyle={{ width: '100px'}} column={1}>
+                        <Item label="Content" contentStyle={{ margin: 16}}>
+                            <TextArea
+                                style={{ width: '100%', marginBottom: 16}}
+                                placeholder="Requirement Content"
+                                defaultValue="Complete your background check at:"
+                                size="large"
+                                autoSize={{ minRows: 2, maxRows: 3 }}
+                            />
+                            <Button type="primary">Update</Button>
+                        </Item>
+                    </Descriptions>
+                    <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
+                        <Checkbox checked={showForm.background_link} onChange={() => setShowForm({...showForm, background_link: !showForm.background_link})}>Link?</Checkbox>
+                        {
+                            showForm.background_link && (
+                                <Formik
+                                    initialValues={initialValues.background}
+                                    validationSchema={backgroundLinkSchema}
+                                    onSubmit={ async (values, { setSubmitting }) => {
+                                        console.log(values)
+                                        setSubmitting(false)
+                                    }
+                                }>
+                                    <Form>
+                                        <Space direction="vertical" style={{ width: '100%'}}>
+                                            <InputWrapper name="link" placeholder="URL" maxLength={200} />
+                                            <InputWrapper name="link_text" placeholder="Name displayed on the URL" maxLength={50} />                           
+                                            <SubmitWrapper key="submit" type="primary">
+                                                Add Link
+                                            </SubmitWrapper>
+                                        </Space>
+                                    </Form>
+                                </Formik>)
+                        }
+                        </Space>
+                    </Space>
+                </Space>
+            </Panel>
+            </Collapse>
             {/* <Descriptions 
                 bordered 
                 column={1}
@@ -76,19 +317,6 @@ const CityEmailTemplates = ({data}) => { // Email templates component
                     })
                 } */}
             {/* </Descriptions> */}
-            <Divider orientation="left">Initial Document Submission</Divider>
-            <Descriptions 
-                bordered 
-                column={1}
-            >
-                {
-                    emailTemplates['stage_2']?.map((template, index) => (
-                        <Item key={index} label={template.document}>
-                            <EditableText value={template.content} />
-                        </Item>
-                    ))
-                }
-            </Descriptions>
         </>
     )
 }
@@ -250,7 +478,7 @@ const CityProfile = ({data}) => { // Editable info profile component
             <Item label="driver minimum age">
                 <EditableText value={data.min_age} />
             </Item>
-            <Item label="vehicle max manufacturing date">
+            <Item label="maximum vehicle age (years)">
                 <EditableText value={data.vehicle_age} />
             </Item>
             <Item label="total tax rate">
