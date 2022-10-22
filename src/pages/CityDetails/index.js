@@ -291,6 +291,104 @@ const CityEmailTemplates = ({data}) => { // Email templates component
                         </Space>
                     </Space>
                 </Space>
+                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
+                    {
+                        true && (
+                            <>
+                                <Divider orientation="left">Rideshare Driver - Insurance Verification</Divider>
+                                <Search
+                                    addonBefore="Name"
+                                    placeholder="Requirement Name"
+                                    defaultValue="Rideshare Driver - Insurance Verification"
+                                    enterButton="Update"
+                                    size="middle"
+                                />
+                                <Descriptions bordered size="small" labelStyle={{ width: '100px'}} column={1}>
+                                    <Item label="Content 1" contentStyle={{ margin: 16}}>
+                                        <TextArea
+                                            style={{ width: '100%', marginBottom: 16}}
+                                            placeholder="Requirement Content"
+                                            defaultValue="Have this form printed out. You will be the one to fill out all the information. This is a requirement by the City of Sault Ste Marie. This document confirms your insurance details including the $2M Liability Coverage and that your insurance company has confirmed that they allow the vehicle to be used for ridesharing activity."
+                                            size="large"
+                                            autoSize={{ minRows: 2, maxRows: 3 }}
+                                        />
+                                        <Button type="primary">Update</Button>
+                                    </Item>
+                                    <Item label="Content 2" contentStyle={{ margin: 16}}>
+                                        <TextArea
+                                            style={{ width: '100%', marginBottom: 16}}
+                                            placeholder="Requirement Content"
+                                            defaultValue="Uride's commercial insurance covers you from the moment the app is turned on to the moment passengers exit the vehicle. When the app is turned off, the vehicle owner’s personal auto insurance policy applies. Once it's filled out please take a photo and send it back. The printed form will be submitted to the City."
+                                            size="large"
+                                            autoSize={{ minRows: 2, maxRows: 3 }}
+                                        />
+                                        <Button type="primary">Update</Button>
+                                    </Item>
+                                </Descriptions>
+                            </>
+                        )
+                 }
+                </Space>
+                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
+                    {
+                        true && (
+                            <>
+                                <Divider orientation="left">City Licensing</Divider>
+                                <Search
+                                    addonBefore="Name"
+                                    placeholder="Requirement Name"
+                                    defaultValue="City Licensing"
+                                    enterButton="Update"
+                                    size="middle"
+                                />
+                                <Descriptions bordered size="small" labelStyle={{ width: '100px'}} column={1}>
+                                    <Item label="Content 1" contentStyle={{ margin: 16}}>
+                                        <TextArea
+                                            style={{ width: '100%', marginBottom: 16}}
+                                            placeholder="Requirement Content"
+                                            defaultValue="The two licenses together come up to $250."
+                                            size="large"
+                                            autoSize={{ minRows: 2, maxRows: 3 }}
+                                        />
+                                        <Button type="primary">Update</Button>
+                                    </Item>
+                                    <Item label="Content 2" contentStyle={{ margin: 16}}>
+                                        <TextArea
+                                            style={{ width: '100%', marginBottom: 16}}
+                                            placeholder="Requirement Content"
+                                            defaultValue="You are required to call the City at (807) 625-2710 for payment, so your license will be processed."
+                                            size="large"
+                                            autoSize={{ minRows: 2, maxRows: 3 }}
+                                        />
+                                        <Button type="primary">Update</Button>
+                                    </Item>
+                                    <Item label="Notes" contentStyle={{ margin: 16}}>
+                                        <TextArea
+                                            style={{ width: '100%', marginBottom: 16}}
+                                            placeholder="Requirement Content"
+                                            defaultValue="Keep all of your receipts so you can write this off as a business expense!"
+                                            size="large"
+                                            autoSize={{ minRows: 2, maxRows: 3 }}
+                                        />
+                                        <Button type="primary">Update</Button>
+                                    </Item>
+                                </Descriptions>
+                            </>
+                        )
+                 }
+                </Space>
+            </Panel>
+            <Panel header="Activate Driver" key="3">
+                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
+                    <Divider orientation="left">App Activation</Divider>
+                    <Search
+                        addonBefore="Phone Number"
+                        placeholder="Activation Number"
+                        defaultValue="+12362371117"
+                        enterButton="Update"
+                        size="middle"
+                    />
+                </Space>
             </Panel>
             </Collapse>
             {/* <Descriptions 
