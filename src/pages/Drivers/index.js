@@ -137,7 +137,7 @@ const Drivers = () => {
       }
       ,
       filters: [
-        {text:'Oboard', value: 'onboard' },
+        {text:'onboard', value: 'onboard' },
         { text: 'Pending', value: 'pending' },
         { text: 'Inactive', value: 'inactive' },
         { text: 'Active', value: 'active' },
