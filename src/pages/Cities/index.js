@@ -1,14 +1,22 @@
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
-import { Card, Table, Button, Modal, Space, Tag} from 'antd';
-import React ,{ useState } from 'react';
-import { Formik, Form } from 'formik'   // Import Formik form components
-import InputWrapper from '../../components/forms/InputWrapper'
-import SelectWrapper from '../../components/forms/SelectWrapper'
-import SubmitWrapper from '../../components/forms/SubmitWrapper'
-import * as yup from 'yup';
 import API from '../../api/BaseUrl'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
-import { createCity } from '../../utils/city-status'
+
+import React ,{ useState, useEffect } from 'react'; // Import React
+import { useNavigate } from 'react-router-dom' // Import hook from react-router
+
+import { Card, Table, Button, Modal, Space, Tag } from 'antd'; // Import Ant components
+import { Formik, Form } from 'formik'   // Import Formik form components
+
+import * as yup from 'yup'; // Import Yup validation library
+import qs from 'qs' // Import qs library
+
+import InputWrapper from '../../components/forms/InputWrapper' // Import InputWrapper component
+import SelectWrapper from '../../components/forms/SelectWrapper' // Import SelectWrapper component
+import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
+import { createCity } from '../../utils/city-status'  // Import createCity function
+
+
 
 const Cities = () => {
 
@@ -17,7 +25,6 @@ const Cities = () => {
   const showModal = () => {
     setOpen({...open, modal: true})
     getProvince();
-
   };
   
   const handleCancel = () => {
@@ -27,7 +34,7 @@ const Cities = () => {
 
   const status = [{ label: 'active', value: 'active' }, { label: 'inactive', value: 'inactive' }]
   const [provinces, setProvinces] = useState([])
-
+  const navigate = useNavigate()
   
    // Fetch getProvince list from API
   const getProvince = async () => {
@@ -57,17 +64,78 @@ const Cities = () => {
     }  
   }
   
+    //get the papams that will be passed to filters through qs
+  const getUserParams = (params) => ({ // Get table params
+  limit: params.pagination?.pageSize,
+  page: params.pagination?.current,
+  ...params,
+  })
 
-    //fetch data from api
-  const { data, isLoading, error, refetch } = useFetch(`v1/cities/cc`) // Fetch data from API
+  const [tableParams, setTableParams] = useState({ // Set table params
+      pagination: {
+      current: 1,
+      pageSize: 10,
+      showSizeChanger: true,
+      },
+  })
+  //fetch data from api
+  const { data, isLoading, error, refetch } = useFetch(`v1/cities/cc?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
+  //handle table change
+  
+
+  const handleTableChange = (pagination, filter, sorter) => { 
+        Object.keys(filter).forEach(key => {
+            if (filter[key]) {
+              filter[key].unshift('in|'+ filter[key][0])
+              filter[key].splice(1, 1)
+            }
+          })
+        setTableParams({
+            pagination,
+            filter,
+            ...(Object.keys(sorter).length !== 0 && {sort: {
+                [`${sorter.columnKey === 'c.id' ? 'city' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
+            }}),
+        })
+  }
+  
+    useEffect(() => {
+    let isMounted = true
+    setTableParams({// Set table params
+        ...tableParams,
+        pagination: {
+            ...tableParams.pagination,
+            total: data?.total_items,
+        }
+    }) 
+    if (isMounted) {
+      getProvince()
+    }
+    return () => { isMounted = false }
+}, [data])
+/////////
+  
 // validate schema for form
   const validationSchema = yup.object({
- province_id:  yup.string().required('Required'),
-        name: yup.string().required('Required'),
-    email: yup.string().email('Please Enter A Aalid Email Address!').required('Please type your valid email address!'),
-      status: yup.string().required('please select status'),
-     min_age:  yup.number().required('Minmum Age Should Be A Number ').positive().integer(),
- vehicle_age: yup.number().required('Required').positive().integer(),
+    province_id: yup.string()
+      .required('Required'),
+    name: yup.string()
+      .required('Required'),
+    email: yup.string()
+      .email('Please Enter A Aalid Email Address!').required('Please type your valid email address!'),
+    status: yup.string()
+      .required('please select status'),
+    min_age: yup.number()
+      .typeError('Minimum Age Should be A Number!')
+      .required('Required').positive('Minimum Age Should be A Positive Number!')
+      .integer()
+      .max(99, 'Minimum Age Should be Two-Digit Number!'),
+    vehicle_age: yup.number()
+      .typeError('Minimum Age Should be A Number!')
+      .required('Required')
+      .positive('Minimum Age Should be A Positive Number!')
+      .integer()
+      .max(99, 'Minimum Age Should be A Two-Digit Number!'),
   })
    
   const initialValues = {
@@ -88,12 +156,13 @@ const Cities = () => {
             title: 'Name',
             dataIndex: 'name',
             key: 'name',
-            sorter: (a, b) => a.name.localeCompare(b.name),
+            sorter: true,
         },
          {
           title: 'Status',
           dataIndex: 'status',
           key: 'status',
+          align: 'center',
            render: (status) =>
              <Tag color={status === 'active' ? 'green' : status === 'inactive' ? 'volcano' : 'orange'}>
                   {status.charAt(0).toUpperCase() + status.slice(1)}
@@ -108,17 +177,20 @@ const Cities = () => {
                 value: 'inactive',
              },
            ],
-           onFilter: (value, record) => record.status.indexOf(value) === 0,
         },
           {
             title: 'Minmum Age',
             dataIndex: 'minAge',
             key: 'minAge',
+            align: 'right',
+
         },
         {
             title: 'Vehicle Age',
             dataIndex: 'vehicleAge',
             key: 'vehicleAge',
+            align: 'right',
+                        
       },        
     ]
     return (
@@ -179,7 +251,7 @@ const Cities = () => {
                       <InputWrapper type="text" name="email" placeholder="City Email" />
                       <SelectWrapper type="text" datasource={status} name="status" placeholder="Status" />
                       <InputWrapper type="text" name="min_age" placeholder="Driver Minimum Age" />
-                      <InputWrapper type="text" name="vehicle_age" placeholder="Vehicle Max Manufacturing Date" />
+                      <InputWrapper type="text" name="vehicle_age" placeholder="Maximum Vehicle Age" />
                     </Space>
                   </Modal>
                 </Form>
@@ -189,7 +261,13 @@ const Cities = () => {
             dataSource={data.items}
             columns={columns}
             loading={isLoading}
+            pagination={tableParams.pagination}
+            sortDirections={['ascend', 'descend', 'ascend']}
+            onChange={handleTableChange}
             rowKey={(record) => record.city_id}
+            onRow={(record) => ({
+                    onClick: () => navigate(`/v1/cities/${record.city_id}`)
+          })}
             />      
       </Card>
     )
