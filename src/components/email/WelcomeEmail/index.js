@@ -72,10 +72,10 @@ const WelcomeEmail = ({data, id, refetch}) => {
         <>
         {
             welcomeEmail.map((item, index) => {
-                let dividerName = item[0].key?.replace(/\_([^_]+)$/, '')
+                let dividerName = item[0].key?.split('_') // Remove last underscore and everything after it
                 return (
                     <Space key={index} direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
-                        <Divider {...dividerConfig}>{dividerName.replace(/_/g, ' ')}</Divider>
+                        <Divider {...dividerConfig}>{`${dividerName[0]} ${dividerName[1]}`}</Divider>
                         {
                             Object.entries(item).map(([key, value]) => ( 
                                 <Form 
@@ -92,7 +92,7 @@ const WelcomeEmail = ({data, id, refetch}) => {
                                         {...formItemConfig}
                                     >
                                         {
-                                            value.value?.length > 30 ? (
+                                            value.value.length > 30 ? (
                                                 <TextArea rows={3} />
                                             ) : (
                                                 <Input />

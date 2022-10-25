@@ -212,10 +212,10 @@ const CityProfile = ({data, cityid}) => { // Editable info profile component
     return (
         <Descriptions {...descriptionConfig}>
             <Item label="driver minimum age">
-                <EditableText name="min_age" value={data?.minAge.toString()} updateCallback={value => updateCityProfile(cityid, value)}/>
+                <EditableText name="min_age" value={data?.min_age.toString()} updateCallback={value => updateCityProfile(cityid, value)}/>
             </Item>
             <Item label="maximum vehicle age (years)">
-                <EditableText name="vehicle_age" value={data?.vehicleAge.toString()} updateCallback={value => updateCityProfile(cityid, value)}/>
+                <EditableText name="vehicle_age" value={data?.vehicle_age.toString()} updateCallback={value => updateCityProfile(cityid, value)}/>
             </Item>
             <Item label="total tax rate">
                 <Space align="baseline">
