@@ -14,11 +14,12 @@ const createCity = async (values) => {
         }
       
       }
+            console.log("valuse :" ,values)
 
       const response = await API.post(`/v1/cities/cc`, values, options)
       const data = await response.data
       if (data) {
-        message.success('new city created successfully');
+        message.success('City created successfully');
       }
     }
     catch (error) {
@@ -26,5 +27,34 @@ const createCity = async (values) => {
     }  
   }
   
+ // Fetch getProvince list from API
+
+  const getProvince = async () => {
+    try {
+      const auth = await Auth.currentSession()// Get current session
+      const token = auth.getAccessToken().getJwtToken()// Get token from session
+      const options = { // Set options for fetch
+        headers: {
+          Authorization: token,
+          ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
+        }
+      
+      }
+      const response = await API.get(`/v1/provinces`, options)
+      const data = await response.data
+      console.log('data', data)
+      if (data) {
+        const provinces = data.items.map((province) => {
+          province.value = province.province_id
+          return province;
+        })
+        // setProvinces(provinces)
+        // console.log('provinces', data.items)
+      }
+    }
+    catch (error) {
+      console.log(error)
+    }  
+}
   
-export { createCity }
+export { createCity, getProvince }

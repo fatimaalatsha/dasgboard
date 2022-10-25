@@ -52,11 +52,11 @@ const Cities = () => {
       const data = await response.data
       if (data) {
         const provinces = data.items.map((province) => {
+          province.text = province.name
           province.value = province.id
           return province;
         })
-        setProvinces(provinces)
-       
+        setProvinces(provinces) 
       }
     }
     catch (error) {
@@ -80,9 +80,8 @@ const Cities = () => {
   })
   //fetch data from api
   const { data, isLoading, error, refetch } = useFetch(`v1/cities/cc?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
-  //handle table change
-  
 
+  //handle table change
   const handleTableChange = (pagination, filter, sorter) => { 
         Object.keys(filter).forEach(key => {
             if (filter[key]) {
@@ -113,7 +112,7 @@ const Cities = () => {
     }
     return () => { isMounted = false }
 }, [data])
-/////////
+
   
 // validate schema for form
   const validationSchema = yup.object({
@@ -153,10 +152,10 @@ const Cities = () => {
      }
     const columns = [
         {
-            title: 'Name',
+            title: 'City Name',
             dataIndex: 'name',
-            key: 'name',
-            sorter: true,
+            key: 'province_id',
+            filters: provinces,
         },
          {
           title: 'Status',
@@ -179,16 +178,16 @@ const Cities = () => {
            ],
         },
           {
-            title: 'Minmum Age',
-            dataIndex: 'minAge',
-            key: 'minAge',
+            title: 'Minimum Age',
+            dataIndex: 'min_age',
+            key: 'min_age',
             align: 'right',
 
         },
         {
             title: 'Vehicle Age',
-            dataIndex: 'vehicleAge',
-            key: 'vehicleAge',
+            dataIndex: 'vehicle_age',
+            key: 'vehicle_age',
             align: 'right',
                         
       },        
@@ -266,7 +265,7 @@ const Cities = () => {
             onChange={handleTableChange}
             rowKey={(record) => record.city_id}
             onRow={(record) => ({
-                    onClick: () => navigate(`/v1/cities/${record.city_id}`)
+                    onClick: () => navigate(`/city/${record.city_id}`)
           })}
             />      
       </Card>
