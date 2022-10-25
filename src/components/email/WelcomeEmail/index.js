@@ -3,16 +3,14 @@ import {
     Button,
     Space,
     Divider,
-    Descriptions,
     Input,
     Form,
-     message,
+    message,
 } from 'antd'
 
 import { updateEmailTemplate } from '../../../utils/city-status'
 
-const { Item } = Descriptions // destructuring Descriptions component
-const { Search, TextArea } = Input // destructuring Input component
+const { TextArea } = Input // destructuring Input component
 
 const WelcomeEmail = ({data, id, refetch}) => {
 
@@ -31,7 +29,7 @@ const WelcomeEmail = ({data, id, refetch}) => {
     ]
 
     const successAlert = (msg) => { // Success alert method
-    message.success(msg)
+        message.success(msg)
     }
 
     const onFinish = async (values) => {
@@ -94,7 +92,7 @@ const WelcomeEmail = ({data, id, refetch}) => {
                                         {...formItemConfig}
                                     >
                                         {
-                                            value.value.length > 30 ? (
+                                            value.value?.length > 30 ? (
                                                 <TextArea rows={3} />
                                             ) : (
                                                 <Input />
