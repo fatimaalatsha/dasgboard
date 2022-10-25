@@ -21,11 +21,13 @@ import { Form, Formik } from 'formik'
 import { object, string, number } from 'yup' // Import yup validation schema
 
 import useFetch from '../../hooks/use-fetch'
-import EditableText from '../../components/EditableText'
-import emailTemplates from '../../dummy/city-info'
+import { updateCityProfile } from '../../utils/city-status' // Import updateCityProfile function
 
+import EditableText from '../../components/EditableText' // Import EditableText component
 import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
 import InputWrapper from '../../components/forms/InputWrapper' // Import InputWrapper component
+
+import WelcomeEmail from '../../components/email/WelcomeEmail' // Import WelcomeEmail component
 
 const { Title, Text } = Typography // destructuring Typography component
 const { Item } = Descriptions // destructuring Descriptions component
@@ -56,11 +58,17 @@ const backgroundLinkSchema = object().shape({
 })
 
 //console.log(emailTemplates)
-const CityEmailTemplates = ({data}) => { // Email templates component
+const CityEmailTemplates = ({cityid}) => { // Email templates component
+    const { data, isLoading, error, refetch } = useFetch(`/v1/cities/cc/${cityid}/settings`) // Fetch city settings
+    console.log("City Settings: ",data)
+
+    //console.log(workEligibility)
+
     const [showForm, setShowForm] = useState({
         agreement: false,
         background_link: false,
     })
+
     const initialValues = {
         agreement: {
             shop_name: '',
@@ -78,137 +86,7 @@ const CityEmailTemplates = ({data}) => { // Email templates component
         <>
             <Collapse>
             <Panel header="Welcome Email" key="1">
-                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
-                    <Divider orientation="left">Driver Licence</Divider>
-                    <Search
-                        addonBefore="Name"
-                        placeholder="Requirement Name"
-                        defaultValue="Driver License"
-                        enterButton="Update"
-                        size="middle"
-                    />
-                    <Search
-                        addonBefore="Class"
-                        placeholder="Requirement Name"
-                        defaultValue="Full G Class Licence"
-                        enterButton="Update"
-                        size="middle"
-                    />
-                </Space>
-                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
-                    <Divider orientation="left">Driver Abstract</Divider>
-                    <Search
-                        addonBefore="Name"
-                        placeholder="Requirement Name"
-                        defaultValue="Driver's Abstract"
-                        enterButton="Update"
-                        size="middle"
-                    />
-                    <Search
-                        addonBefore="Document Name"
-                        placeholder="Document Name"
-                        defaultValue="Ontario Driver's Abstract"
-                        enterButton="Update"
-                        size="middle"
-                    />
-                    <Search
-                        addonBefore="Place"
-                        placeholder="Place"
-                        defaultValue="Service Ontario"
-                        enterButton="Update"
-                        size="middle"
-                    />
-                    <Search
-                        addonBefore="URL"
-                        placeholder="URL to get the document"
-                        defaultValue="https://www.services.gov.on.ca/wps85/portal/s2i/!ut/p/z1/dYvBCoJAFAC_pR_Yt7uF2tGCCgQtjMq9yNO15aG8FQyFvj7pZtBxhhkw8ADDOJLDF3nGbubCBGV0lIGONyrNknArLzeVRSeVrGWqoZiD8G9w0JCDAZNr2mHdXv0ZXQNFjcKzcH4UgybRz050yJbYCTsOi-FObP30u0xfu5jyhst9DH2L1fvpVh_SE-oq/"
-                        enterButton="Update"
-                        size="middle"
-                    />
-                    <Search
-                        addonBefore="URL Name"
-                        placeholder="Name displayed on the URL"
-                        defaultValue="Ontario Driver's Abstract"
-                        enterButton="Update"
-                        size="middle"
-                    />
-                </Space>
-                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
-                    <Divider orientation="left">Vehicle Ownership</Divider>
-                    <Search
-                        addonBefore="Name"
-                        placeholder="Requirement Name"
-                        defaultValue="Vehicle Ownership"
-                        enterButton="Update"
-                        size="middle"
-                    />
-                    <Descriptions bordered size="small" labelStyle={{ width: '100px'}} column={1}>
-                        <Item label="Content" contentStyle={{ margin: 16}}>
-                            <TextArea
-                                style={{ width: '100%', marginBottom: 16}}
-                                placeholder="Requirement Content"
-                                defaultValue="The vehicle ownership must be under your name."
-                                size="large"
-                                autoSize={{ minRows: 2, maxRows: 3 }}
-                            />
-                            <Button type="primary">Update</Button>
-                        </Item>
-                        <Item label="Notes" contentStyle={{ margin: 16}}>
-                            <TextArea
-                                style={{ width: '100%', marginBottom: 16}}
-                                placeholder="Requirement Content"
-                                defaultValue="If the vehicle is under your spouse's name please include an authorization letter stating that they are aware the vehicle will be used for rideshare."
-                                size="large"
-                                autoSize={{ minRows: 2, maxRows: 3 }}
-                            />
-                            <Button type="primary">Update</Button>
-                        </Item>
-                    </Descriptions>
-                </Space>
-                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
-                    <Divider orientation="left">Vehicle Insurance</Divider>
-                    <Search
-                        addonBefore="Name"
-                        placeholder="Requirement Name"
-                        defaultValue="Vehicle Insurance"
-                        enterButton="Update"
-                        size="middle"
-                    />
-                    <Descriptions bordered size="small" labelStyle={{ width: '100px'}} column={1}>
-                        <Item label="Content" contentStyle={{ margin: 16}}>
-                            <TextArea
-                                style={{ width: '100%', marginBottom: 16}}
-                                placeholder="Requirement Content"
-                                defaultValue="Please provide a copy of the current automobile liability insurance. With limits of not less than 2M."
-                                size="large"
-                                autoSize={{ minRows: 2, maxRows: 3 }}
-                            />
-                            <Button type="primary">Update</Button>
-                        </Item>
-                    </Descriptions>
-                </Space>
-                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
-                    <Divider orientation="left">Work Eligibility</Divider>
-                    <Search
-                        addonBefore="Name"
-                        placeholder="Requirement Name"
-                        defaultValue="Proof Of Work Eligibility"
-                        enterButton="Update"
-                        size="middle"
-                    />
-                    <Descriptions bordered size="small" labelStyle={{ width: '100px'}} column={1}>
-                        <Item label="Content" contentStyle={{ margin: 16}}>
-                            <TextArea
-                                style={{ width: '100%', marginBottom: 16}}
-                                placeholder="Requirement Content"
-                                defaultValue=""
-                                size="large"
-                                autoSize={{ minRows: 2, maxRows: 3 }}
-                            />
-                            <Button type="primary">Update</Button>
-                        </Item>
-                    </Descriptions>
-                </Space>
+                <WelcomeEmail data={data} id={cityid} refetch={refetch} />
             </Panel>
             <Panel header="Initial Document Submission" key="2">
                 <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
@@ -558,41 +436,33 @@ const CityRequirements = () => {
     )
 }
 
-const CityProfile = ({data}) => { // Editable info profile component
+const CityProfile = ({data, cityid}) => { // Editable info profile component
     return (
         <Descriptions {...descriptionConfig}>
-            <Item label="driver licence classes">
-                <Space direction='vertical'>
-                {
-                    data.licenses?.map((license, index) => (
-                        <Checkbox key={index}>
-                            <EditableText value={license.name} />
-                        </Checkbox>
-                    ))
-                }
-                    <Button ghost type="primary">Add New Class</Button>
-                </Space>
-            </Item>
             <Item label="driver minimum age">
-                <EditableText value={data.min_age} />
+                <EditableText name="min_age" value={data?.minAge.toString()} updateCallback={value => updateCityProfile(cityid, value)}/>
             </Item>
             <Item label="maximum vehicle age (years)">
-                <EditableText value={data.vehicle_age} />
+                <EditableText name="vehicle_age" value={data?.vehicleAge.toString()} updateCallback={value => updateCityProfile(cityid, value)}/>
             </Item>
             <Item label="total tax rate">
                 <Space align="baseline">
                     <Text level={5}>PST + GST</Text>
-                    <EditableText value="13" />
+                    {/* <EditableText value="13" /> */}
+                    <Text>13</Text>
                 </Space>
             </Item>
-            <Item label="base fare">
+            {/* <Item label="base fare">
+                <EditableText value="13" /> 
+                <Text>13</Text>
+            </Item> */}
+            {/* <Item label="driver pay rate">
                 <EditableText value="13" />
-            </Item>
-            <Item label="driver pay rate">
-                <EditableText value="13" />
-            </Item>
+                <Text>13</Text>
+            </Item> */}
             <Item label="recruitment email address">
-                <EditableText value="city@uridetech.com" />
+                {/* <EditableText name="email" value="city@uridetech.com" updateCallback={value => updateCityProfile(cityid, value)}/> */}
+                <Text>city@uridetech.com</Text>
             </Item>
         </Descriptions>
     )
@@ -600,12 +470,11 @@ const CityProfile = ({data}) => { // Editable info profile component
 
 const CityDetails = () => {
     const { id } = useParams()
-    const { data, isLoading, error, refetch } = useFetch(`/v1/cities/${id}`)
-
+    const { data, isLoading, error, refetch } = useFetch(`/v1/cities/cc/${id}`)
+    
     if (error) {
         return <>Error: {error.message}</>
     }
-//console.log(data)
     return (
         <Card
             title={
@@ -620,13 +489,13 @@ const CityDetails = () => {
             }
             loading={isLoading}
         >
-            <CityProfile data={data} />
+            <CityProfile cityid={id} data={data} />
             <Collapse>
                 <Panel header="Requirements" key="1">
                     <CityRequirements />
                 </Panel>
                 <Panel header="Email Templates" key="2">
-                    <CityEmailTemplates data={data}/>
+                    <CityEmailTemplates cityid={id}/>
                 </Panel>
             </Collapse>
         </Card>
