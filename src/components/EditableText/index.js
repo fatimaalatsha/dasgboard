@@ -9,11 +9,12 @@ const EditableText = ({...props}) => {
     const [isEditing, setIsEditing] = useState(true)// Set isEditing state
 
     const showConfirm = (value) => {
+        console.log(isNaN(props.value))
         confirm({
             title: 'Are you sure you want to edit this record?',
             content: 'This action cannot be undone.',
             onOk: async () => {
-                await props.updateCallback({[props.name]: value})
+                await props.updateCallback({[props.name]: isNaN(props.value) ? value : Number(value)})// Call updateCallback function
                 .then(() => {
                     setEditableString(value)
                 })
@@ -35,7 +36,7 @@ const EditableText = ({...props}) => {
 
     return (
         <>
-            <Text {...textConfig}>{editableString}</Text>
+            <Text {...textConfig}>{`${editableString}`}</Text>
         </>
     )
 }
