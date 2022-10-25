@@ -19,13 +19,13 @@ const InitialDocuments = ({data, id, refetch}) => {
     const insuranceVerification = Object.assign({}, data?.items?.filter(item => item.key.includes('insurance_verification_'))) // Find insurance verification info
     const cityLicensing = Object.assign({}, data?.items?.filter(item => item.key.includes('city_licensing_'))) // Find city licensing info
 
-    const welcomeEmail = [
+    const initialDocuments = [
         vehicleSafety,
         backgroundCheck,
         cityLicensing,
     ]
 
-    Number(id) === 8 && welcomeEmail.push(insuranceVerification)
+    Number(id) === 8 && initialDocuments.push(insuranceVerification)
 
     const successAlert = (msg) => { // Success alert method
         message.success(msg)
@@ -70,7 +70,7 @@ const InitialDocuments = ({data, id, refetch}) => {
     return (
         <>
         {
-            welcomeEmail.map((item, index) => {
+            initialDocuments.map((item, index) => {
                 let dividerName = item[0].key?.replace(/\_([^_]+)$/, '')
                 return (
                     <Space key={index} direction="vertical" style={{ width: '100%', padding: '16px 0'}}>

@@ -5,7 +5,6 @@ import {
     Typography,
     Space,
     Tag,
-    Divider,
     Descriptions,
     Checkbox,
     Col,
@@ -17,23 +16,20 @@ import {
 } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
-import { Form, Formik } from 'formik'
 import { object, string, number } from 'yup' // Import yup validation schema
 
 import useFetch from '../../hooks/use-fetch'
 import { updateCityProfile } from '../../utils/city-status' // Import updateCityProfile function
 
 import EditableText from '../../components/EditableText' // Import EditableText component
-import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
-import InputWrapper from '../../components/forms/InputWrapper' // Import InputWrapper component
 
 import WelcomeEmail from '../../components/email/WelcomeEmail' // Import WelcomeEmail component
 import InitialDocuments from '../../components/email/InitialDocuments' // Import InitialDocuments component
+import AppActivation from '../../components/email/AppActivation' // Import AppActivation component
 
 const { Title, Text } = Typography // destructuring Typography component
 const { Item } = Descriptions // destructuring Descriptions component
 const { Panel } = Collapse // destructuring Collapse component
-const { Search, TextArea } = Input // destructuring Input component
 
 const descriptionConfig = {
     layout: "vertical",
@@ -46,40 +42,8 @@ const descriptionConfig = {
     }
 }
 
-const safetyDealSchema = object().shape({
-    shop_name: string().required('Required'),
-    shop_address: string().required('Required'),
-    shop_number: string().required('Required'),
-    deal_details: number().required('Required'),
-})
-
-const backgroundLinkSchema = object().shape({
-    link: string().required('Required'),
-    link_text: string().required('Required')
-})
-
-//console.log(emailTemplates)
 const CityEmailTemplates = ({cityid}) => { // Email templates component
     const { data, isLoading, error, refetch } = useFetch(`/v1/cities/cc/${cityid}/settings`) // Fetch city settings
-    console.log("City Settings: ",data)
-
-    const [showForm, setShowForm] = useState({
-        agreement: false,
-        background_link: false,
-    })
-
-    const initialValues = {
-        agreement: {
-            shop_name: '',
-            shop_address: '',
-            shop_number: '',
-            deal_details: '',
-        },
-        background: {
-            link: '',
-            link_text: '',
-        }
-}
 
     if (isLoading) {
         return <>Loading...</>
@@ -98,42 +62,9 @@ const CityEmailTemplates = ({cityid}) => { // Email templates component
                 <InitialDocuments data={data} id={cityid} refetch={refetch} />
             </Panel>
             <Panel header="Activate Driver" key="3">
-                <Space direction="vertical" style={{ width: '100%', padding: '16px 0'}}>
-                    <Divider orientation="left">App Activation</Divider>
-                    <Search
-                        addonBefore="Phone Number"
-                        placeholder="Activation Number"
-                        defaultValue="+12362371117"
-                        enterButton="Update"
-                        size="middle"
-                    />
-                </Space>
+                <AppActivation data={data} id={cityid} refetch={refetch} />
             </Panel>
             </Collapse>
-            {/* <Descriptions 
-                bordered 
-                column={1}
-            > */}
-                {/* {
-                    Object.keys(emailTemplates['stage_1']).map((key, index) => {
-                        console.log('titles: ', emailTemplates['stage_1'][key].title)
-                        return (
-                            <Item key={index} label={emailTemplates['stage_1'][key].title}>
-                                {
-                                    Object.keys(emailTemplates['stage_1'][key]).map((children, index) => {
-                                        console.log(children)
-                                        return (
-                                            <>
-                                             <EditableText key={index} value={emailTemplates['stage_1'][key][children]} />
-                                             </>
-                                        )
-                                    })
-                                }
-                            </Item>
-                        )
-                    })
-                } */}
-            {/* </Descriptions> */}
         </>
     )
 }
