@@ -62,8 +62,6 @@ const CityEmailTemplates = ({cityid}) => { // Email templates component
     const { data, isLoading, error, refetch } = useFetch(`/v1/cities/cc/${cityid}/settings`) // Fetch city settings
     console.log("City Settings: ",data)
 
-    //console.log(workEligibility)
-
     const [showForm, setShowForm] = useState({
         agreement: false,
         background_link: false,
@@ -81,6 +79,13 @@ const CityEmailTemplates = ({cityid}) => { // Email templates component
             link_text: '',
         }
 }
+
+    if (isLoading) {
+        return <>Loading...</>
+    }
+    if (error) {
+        return <>Something went wrong</>
+    }
 
     return (
         <>
