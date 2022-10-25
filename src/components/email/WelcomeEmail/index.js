@@ -76,13 +76,24 @@ const WelcomeEmail = ({data, id, refetch}) => {
                     <Button {...formButtonConfig}>Update</Button>
                 </Form.Item>
             </Form>
-            <Search
-                addonBefore="Name"
-                placeholder="Requirement Name"
-                value={driverLicense[1]?.value}
-                enterButton="Update"
-                size="middle"
-            />
+            <Form 
+                {...formConfig}
+                initialValues={{
+                    key: driverLicense[0]?.key,
+                    value: driverLicense[0]?.value,
+                }}
+            >
+                <Form.Item name="key" hidden><Input /></Form.Item>
+                <Form.Item 
+                    label="Class"
+                    {...formItemConfig}
+                >
+                    <Input />
+                </Form.Item>
+                <Form.Item>
+                    <Button {...formButtonConfig}>Update</Button>
+                </Form.Item>
+            </Form>
             <Search
                 addonBefore="Class"
                 placeholder="Requirement Name"

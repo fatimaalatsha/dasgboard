@@ -89,7 +89,7 @@ const updateEmailTemplate = async (id, payload) => {
         }
       }
       const body = {
-        city_id: id,
+        city_id: Number(id),
         ...payload
       }
       const response = await API.post(`/v1/cities/cc/${id}/settings`, body, options)
