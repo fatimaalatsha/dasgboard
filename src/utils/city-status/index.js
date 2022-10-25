@@ -56,5 +56,52 @@ const createCity = async (values) => {
       console.log(error)
     }  
 }
+
+const updateCityProfile = async (id, property) => {
+    try {
+      const auth = await Auth.currentSession()// Get current session
+      const token = auth.getAccessToken().getJwtToken()// Get token from session
+      const options = { // Set options for fetch
+        headers: {
+          Authorization: token,
+          ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
+        }
+      }
+      const response = await API.put(`/v1/cities/cc/${id}`, property, options)
+      const data = await response.data
+      if (data) {
+        return data
+      }
+    }
+    catch (error) {
+      console.log(error)
+    }  
+}
+
+const updateEmailTemplate = async (id, payload) => {
+    try {
+      const auth = await Auth.currentSession()// Get current session
+      const token = auth.getAccessToken().getJwtToken()// Get token from session
+      const options = { // Set options for fetch
+        headers: {
+          Authorization: token,
+          ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
+        }
+      }
+      const body = {
+        city_id: Number(id),
+        ...payload
+      }
+      const response = await API.post(`/v1/cities/cc/${id}/settings`, body, options)
+      const data = await response.data
+      if (data) {
+        return data.message
+      }
+    }
+    catch (error) {
+      console.log(error)
+    }
+}
+
   
-export { createCity, getProvince }
+export { createCity, getProvince, updateCityProfile, updateEmailTemplate }
