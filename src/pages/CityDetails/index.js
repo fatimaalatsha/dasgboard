@@ -12,11 +12,10 @@ import {
     Switch,
     List,
     Collapse,
-    Input,
+    Modal,
 } from 'antd'
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
-import { object, string, number } from 'yup' // Import yup validation schema
 
 import useFetch from '../../hooks/use-fetch'
 import { updateCityProfile } from '../../utils/city-status' // Import updateCityProfile function
@@ -30,6 +29,7 @@ import AppActivation from '../../components/email/AppActivation' // Import AppAc
 const { Title, Text } = Typography // destructuring Typography component
 const { Item } = Descriptions // destructuring Descriptions component
 const { Panel } = Collapse // destructuring Collapse component
+const { confirm } = Modal // Destructure config from Modal
 
 const descriptionConfig = {
     layout: "vertical",
@@ -243,21 +243,50 @@ const CityProfile = ({data, cityid}) => { // Editable info profile component
 const CityDetails = () => {
     const { id } = useParams()
     const { data, isLoading, error, refetch } = useFetch(`/v1/cities/cc/${id}`)
-    
+    const [loading, setLoading] = useState(false)
+
     if (error) {
         return <>Error: {error.message}</>
     }
+
+    const showConfirm = (status) => {
+      setLoading(true)
+      confirm({
+        title: 
+            <Title level={4}>
+              {`Are you sure you want to change the status to `}
+              <Text style={{ textTransform: 'capitalize'}} mark strong>{status}?</Text>
+            </Title>,
+        content: 'This action cannot be undone.',
+        onOk: async () => {
+          await updateCityProfile( id, {status: status})
+          .then((res) => {
+            if (res) {
+              setLoading(false)
+              refetch()
+            }
+          })
+        },
+        onCancel() {
+          setLoading(false)
+          console.log('Cancel');
+        },
+      });
+    }
+    
     return (
         <Card
             title={
                 <Space align="start">
                     <Button onClick={() => window.history.back()} type="text" icon={<ArrowLeftOutlined />} />
                     <Title>{data.name}</Title>
-                    <Tag color="green" style={{ textTransform: 'capitalize'}}>{data.status}</Tag>
+                    <Tag color={data.status === 'active' ? "green" : 'red' } style={{ textTransform: 'capitalize'}}>{data.status}</Tag>
                 </Space>
             }
             extra={
-                <Button type="primary" danger>Deactivate</Button>
+                data.status === 'active' ?
+                (<Button loading={loading} type="primary" danger onClick={() => showConfirm('inactive')}>Deactivate</Button>) :
+                (<Button loading={loading} type="primary" onClick={() => showConfirm('active')}>Activate</Button>)
             }
             loading={isLoading}
         >

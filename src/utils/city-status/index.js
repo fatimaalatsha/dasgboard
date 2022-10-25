@@ -70,7 +70,7 @@ const updateCityProfile = async (id, property) => {
       const response = await API.put(`/v1/cities/cc/${id}`, property, options)
       const data = await response.data
       if (data) {
-        message.success('City updated successfully');
+        return data
       }
     }
     catch (error) {

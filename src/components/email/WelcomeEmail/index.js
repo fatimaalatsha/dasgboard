@@ -92,7 +92,7 @@ const WelcomeEmail = ({data, id, refetch}) => {
                                         {...formItemConfig}
                                     >
                                         {
-                                            value.value.length > 30 ? (
+                                            value.value?.length > 30 ? (
                                                 <TextArea rows={3} />
                                             ) : (
                                                 <Input />
