@@ -8,7 +8,6 @@ import {
     List,
     Switch,
     Drawer,
-    Image,
     Modal,
     Typography,
 } from 'antd' // Import antd components
