@@ -107,11 +107,13 @@ const Documents = () => {
             title: 'Status',
             dataIndex: 'status',
             align: 'center',
-            render: (status) => <Tag color={status === 'approved' ? 'green' : status === 'rejected' ? 'volcano' : 'orange'}>{status.toUpperCase()}</Tag>,
+            render: (status) => <Tag color={status === 'approved' ? 'green' : status === 'rejected' || status === 'expired' ? 'red' : status === 'review' ? 'purple' : 'gold'}>{status.toUpperCase()}</Tag>,
             filters: [
                 { text: 'Review', value: 'review' },
                 { text: 'Approved', value: 'approved' },
                 { text: 'Rejected', value: 'rejected' },
+                { text: 'Expired', value: 'expired' },
+                { text: 'Expiring', value: 'expiring' },
 
             ],
         },
