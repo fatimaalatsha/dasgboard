@@ -45,7 +45,7 @@ const InitialDocuments = ({data, id, refetch}) => {
     }
 
     const formItemConfig = {
-        name: 'value',
+        //name: 'value',
         rules: [{
             required: true,
             message: 'Required',
@@ -82,22 +82,44 @@ const InitialDocuments = ({data, id, refetch}) => {
                                     {...formConfig}
                                     initialValues={{
                                         key: value.key,
-                                        value: value.value,
+                                        ...(value.type === 'array' && !value.value.length ? { value: ['']} : { value: value.value })
                                     }}
                                 >
                                     <Form.Item name="key" hidden><Input /></Form.Item>
-                                    <Form.Item 
-                                        label={value.key.replace(/_/g, ' ')}
-                                        {...formItemConfig}
-                                    >
-                                        {
-                                            value.value?.length > 40 ? (
-                                                <TextArea rows={3} />
-                                            ) : (
-                                                <Input />
-                                            )
-                                        }
-                                    </Form.Item>
+                                    {
+                                        value.type === 'array' ? (
+                                            <Form.List name="value">
+                                            {
+                                                fields => (
+                                                    <>
+                                                    {
+                                                        fields.map(field => (
+                                                            <Form.Item {...formItemConfig} {...field}>
+                                                                <TextArea rows={3}/>
+                                                            </Form.Item>
+                                                        ))
+
+                                                    }
+                                                    </>
+                                                )
+                                            }
+                                            </Form.List>
+                                        ) : (
+                                        <Form.Item 
+                                            name="value"
+                                            label={value.key.replace(/_/g, ' ')}
+                                            {...formItemConfig}
+                                        >
+                                            {
+                                                value.value?.length > 40 ? (
+                                                    <TextArea rows={3} />
+                                                ) : (
+                                                    <Input />
+                                                )
+                                            }
+                                        </Form.Item>
+                                        )
+                                    }
                                     <Form.Item>
                                         <Button {...formButtonConfig}>Update</Button>
                                     </Form.Item>
