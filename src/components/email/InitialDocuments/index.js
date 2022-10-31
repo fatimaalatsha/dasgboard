@@ -82,7 +82,7 @@ const InitialDocuments = ({data, id, refetch}) => {
                                     {...formConfig}
                                     initialValues={{
                                         key: value.key,
-                                        value: value.value
+                                        ...(value.type === 'array' && !value.value.length ? { value: ['']} : { value: value.value })
                                     }}
                                 >
                                     <Form.Item name="key" hidden><Input /></Form.Item>
