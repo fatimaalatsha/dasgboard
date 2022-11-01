@@ -70,7 +70,7 @@ const Drivers = () => {
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
         
-                [`${sorter.columnKey === 'city_id' ? 'city' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
+                [`${sorter.columnKey === 'city_id' ? 'name' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
             }}),
     })
   }
@@ -112,7 +112,7 @@ const Drivers = () => {
     {
       
       title: 'City',
-      dataIndex: ['city', 'name'],
+      dataIndex: ['city_name'],
       key: 'city_id',
       filters: cities,
       sorter: true,
@@ -130,7 +130,7 @@ const Drivers = () => {
       key: 'status',
       render: (status) => {                                                                           
         return (
-          <Tag color={status === 'active' ? 'success' : status === 'inactive' ? 'error' : status=== 'pending'? 'orange': 'blue' }>
+          <Tag color={status === 'active' ? 'success' : status === 'inactive' ? 'error' : status=== 'pending' ? 'orange': 'blue' }>
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Tag>
         );
