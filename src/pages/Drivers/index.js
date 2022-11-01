@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-import { Card, Table, Tag } from 'antd'; // Import Ant components
+import { Card, Table, Tag, Button, Space, Input } from 'antd'; // Import Ant components
+import { SearchOutlined } from '@ant-design/icons' // Import icons
 import { useNavigate } from 'react-router-dom'; // Import Nav component
 
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
@@ -10,10 +11,11 @@ import qs from 'qs' // Import qs library
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
-  limit: params.pagination?.pageSize,
-  page: params.pagination?.current,
-  ...params,
+    limit: params.pagination?.pageSize,
+    page: params.pagination?.current,
+    ...params,
 })
+
 const Drivers = () => {
   const navigate = useNavigate();
   const [cities, setCities] = useState([])
@@ -25,6 +27,8 @@ const Drivers = () => {
       showSizeChanger: true,
       },
   })
+  const [searchText, setSearchText] = useState('');
+  const searchInput = useRef(null) // Get search input
   
   // Fetch Cities list from API
   const getCities = async () => {
@@ -55,6 +59,7 @@ const Drivers = () => {
 }, [])
 
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
+  
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
       if (filter[key]) {
@@ -63,8 +68,8 @@ const Drivers = () => {
       }
     })
      
-    
     setTableParams({
+      ...tableParams,
         pagination,
         filter,
       ...(Object.keys(sorter).length !== 0 && {
@@ -74,6 +79,79 @@ const Drivers = () => {
             }}),
     })
   }
+
+  
+  const handleSearch = (selectedKeys) => {
+    setTableParams({
+      ...tableParams,
+      full_name: selectedKeys ? selectedKeys[0] : null,
+    })
+    selectedKeys ?? setSearchText('')
+  }
+
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }, props) => (
+      <Space direction="vertical" style={{ padding: 8 }}>
+        <Input
+          ref={searchInput}
+          placeholder="Full Name Search"
+          value={selectedKeys[0]}
+          onChange={(e) => setSelectedKeys(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(selectedKeys)}
+          style={{
+            marginBottom: 8,
+            display: 'block',
+          }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => handleSearch(null)}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Clear
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({
+                closeDropdown: true,
+              })
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </Space>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? '#1890ff' : undefined,
+        }}
+      />
+    ),
+    filterDropdownOpen: true,
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+  })
   
   
   useEffect(() => {
@@ -97,6 +175,7 @@ const Drivers = () => {
       dataIndex: 'first_name',
       key: 'first_name',
       sorter: true,
+      ...getColumnSearchProps('first_name'),
     },
     {
       title: 'Last Name',
@@ -152,6 +231,41 @@ const Drivers = () => {
   
   return(
     <Card title={'Drivers'} style={{ margin: 15 }}>
+      <Space direction="vertical" style={{ padding: 8 }}>
+        <Input
+          ref={searchInput}
+          placeholder="Full Name Search"
+          value={searchText}
+          onChange={(e) => setSearchText(e.target.value ? [e.target.value] : [])}
+          onPressEnter={() => handleSearch(searchText)}
+          style={{
+            marginBottom: 8,
+            display: 'block',
+          }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(searchText)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => handleSearch(null)}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Clear
+          </Button>
+        </Space>
+      </Space>
       <Table
         dataSource={data.items}
         columns={tableColumns}
