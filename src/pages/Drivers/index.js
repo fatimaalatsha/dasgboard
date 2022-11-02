@@ -1,6 +1,7 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
-import { Card, Table, Tag } from 'antd'; // Import Ant components
+import { Card, Table, Tag, Button, Space, Input, Tooltip } from 'antd'; // Import Ant components
+import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import { useNavigate } from 'react-router-dom'; // Import Nav component
 
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
@@ -10,10 +11,11 @@ import qs from 'qs' // Import qs library
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
-  limit: params.pagination?.pageSize,
-  page: params.pagination?.current,
-  ...params,
+    limit: params.pagination?.pageSize,
+    page: params.pagination?.current,
+    ...params,
 })
+
 const Drivers = () => {
   const navigate = useNavigate();
   const [cities, setCities] = useState([])
@@ -25,6 +27,8 @@ const Drivers = () => {
       showSizeChanger: true,
       },
   })
+  const [searchText, setSearchText] = useState('');
+  const searchInput = useRef(null) // Get search input
   
   // Fetch Cities list from API
   const getCities = async () => {
@@ -45,16 +49,9 @@ const Drivers = () => {
       console.log(error)
     }  
   }
- 
-  useEffect(() => {
-    let isMounted = true
-    if (isMounted) {
-      getCities()
-    }
-    return () => { isMounted = false }
-}, [])
 
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
+  
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
       if (filter[key]) {
@@ -63,18 +60,28 @@ const Drivers = () => {
       }
     })
      
-    
     setTableParams({
+      ...tableParams,
         pagination,
         filter,
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
-        
-                [`${sorter.columnKey === 'city_id' ? 'name' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
-            }}),
+           [`${sorter.columnKey === 'city_id' ? 'name' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
+        }
+      }),
     })
   }
   
+  const handleSearch = (selectedKeys) => {
+    setTableParams({
+      ...tableParams,
+      full_name: selectedKeys ? selectedKeys[0] : null,
+      pagination: {
+        current: 1,
+      }
+    })
+    selectedKeys ?? setSearchText('')
+  }
   
   useEffect(() => {
     let isMounted = true
@@ -89,7 +96,30 @@ const Drivers = () => {
       getCities()
     }
     return () => { isMounted = false }
-}, [data])
+  }, [data])
+
+  const refetchConfig = {
+      icon: <ReloadOutlined />,
+      onClick: () => refetch(),
+      type: 'primary',
+      ghost: true,
+      size: 'large',
+      style: {
+          marginBottom: '16px',
+      },
+  }
+
+  const searchConfig = {
+    placeholder: "Full Name Search",
+    addonBefore: <Button type="text" size="small" onClick={() => handleSearch(null)}>Clear</Button>,
+    value: searchText,
+    onChange: (e) => setSearchText(e.target.value ? [e.target.value] : []),
+    onPressEnter: () => handleSearch(searchText),
+    style: {
+      marginBottom: 8,
+      width: 'calc(100% - 80px)',
+    }
+  }
 
   const tableColumns = [
     {
@@ -152,6 +182,15 @@ const Drivers = () => {
   
   return(
     <Card title={'Drivers'} style={{ margin: 15 }}>
+      <Space direction="vertical" style={{ padding: 8, display: 'flex' }}>
+        <Tooltip title="Reload data">
+            <Button {...refetchConfig} />
+        </Tooltip>
+        <Input.Group compact>
+          <Input {...searchConfig}/>
+          <Button type="primary" onClick={() => handleSearch(searchText)}>Search</Button>
+        </Input.Group>
+      </Space>
       <Table
         dataSource={data.items}
         columns={tableColumns}
