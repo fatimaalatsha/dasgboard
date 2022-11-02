@@ -117,7 +117,7 @@ const Drivers = () => {
     onPressEnter: () => handleSearch(searchText),
     style: {
       marginBottom: 8,
-      width: 'calc(100% - 80px)',
+      width: 'calc(50% - 80px)',
     }
   }
 
