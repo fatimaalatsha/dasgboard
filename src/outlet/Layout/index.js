@@ -13,6 +13,7 @@ import DriverDetails from "../../pages/DriverDetails"
 import Documents from '../../pages/Documents'
 import Cities from "../../pages/Cities"
 import CityDetails from "../../pages/CityDetails"
+import Trainings from '../../pages/Trainings'
 
 const { Sider, Content, Header} = Container // Destructuring Layout component
 
@@ -38,6 +39,7 @@ const Layout = () => {
                     <Route path="/documents" element={<Documents />} />
                     <Route path="/cities" element={<Cities />} />
                     <Route path="/city/:id" element={<CityDetails />} />
+                    <Route path="/trainings" element={<Trainings />} />
                 </Routes>
             </Content>
           </Container>
