@@ -1,4 +1,4 @@
-import { Card, Table, Tag, Button, Tooltip } from 'antd' // Import Ant components
+import { Card, Table, Tag, Button, Tooltip, Space } from 'antd' // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import dayjs from "dayjs"// Import date handlers
 
@@ -12,6 +12,7 @@ const tableColumns = [
     {
         title: 'Cities',
         dataIndex: 'city_id',
+        render: (city_id) => city_id ?? <Tag color="blue">All Cities</Tag>,
     },
     {
         title: 'Status',
@@ -47,9 +48,12 @@ const Trainings = () => {
 
     return (
         <Card title={'Trainings'} style={{ margin: 15 }}>
-            <Tooltip title="Reload data">
-                <Button {...buttonConfig} />
-            </Tooltip>
+            <Space direction="vertical" style={{ paddingBottom: 16 }}>
+                <Tooltip title="Reload data">
+                    <Button {...buttonConfig} />
+                </Tooltip>
+                <Button disabled type="primary">Add New Training</Button>
+            </Space>
             <Table
                 columns={tableColumns}
                 dataSource={data?.items}
