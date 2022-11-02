@@ -9,6 +9,7 @@ import {
   DownOutlined,
   UserOutlined,
   EnvironmentOutlined,
+  AuditOutlined
 } from '@ant-design/icons'; // import antd navigation icons
 
 import { Auth } from 'aws-amplify' // import aws-amplify auth module
@@ -71,13 +72,21 @@ const SideMenu = ({collapsed}) => {
       icon: <EnvironmentOutlined />,
     },
     {
+      key: "/trainings",
+      label: 'Trainings',
+      disabled: true,
+      icon: <AuditOutlined />,
+    },
+    {
       key: "/reports",
       label: 'Reports',
+      disabled: true,
       icon: <ProjectOutlined />,
     },
     {
       key: "/settings",
       label: 'Settings',
+      disabled: true,
       icon: <SettingOutlined />,
     }
   ];
