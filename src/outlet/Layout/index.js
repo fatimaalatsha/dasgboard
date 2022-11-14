@@ -14,6 +14,7 @@ import Documents from '../../pages/Documents'
 import Cities from "../../pages/Cities"
 import CityDetails from "../../pages/CityDetails"
 import Trainings from '../../pages/Trainings'
+import TrainingDetails from '../../pages/TrainingDetails'
 
 const { Sider, Content, Header} = Container // Destructuring Layout component
 
@@ -40,6 +41,8 @@ const Layout = () => {
                     <Route path="/cities" element={<Cities />} />
                     <Route path="/city/:id" element={<CityDetails />} />
                     <Route path="/trainings" element={<Trainings />} />
+                    <Route path="/training/:id" element={<TrainingDetails />} />
+
                 </Routes>
             </Content>
           </Container>
