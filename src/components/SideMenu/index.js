@@ -74,7 +74,6 @@ const SideMenu = ({collapsed}) => {
     {
       key: "/trainings",
       label: 'Trainings',
-      disabled: true,
       icon: <AuditOutlined />,
     },
     {
