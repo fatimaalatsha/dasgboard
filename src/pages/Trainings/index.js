@@ -213,8 +213,8 @@ const Trainings = () => {
             >
                     <Space direction='vertical' style={{ width: '100%'}}>
                             <InputWrapper type="text" name="title" placeholder="Title" />
-                            <InputWrapper type="text" name="url" placeholder="Vedio Link (from YouTube)" /> 
-                            <SelectWrapper name="global" placeholder="Select Privacy" datasource={global} onSelect={handleGlobal} />
+                            <InputWrapper type="text" name="url" placeholder="Video Link (from YouTube)" /> 
+                            <SelectWrapper name="global" placeholder="Select Video Scope" datasource={global} onSelect={handleGlobal} />
                             { showCities &&  <SelectWrapper allowClear  name="city_id" placeholder="Select City" datasource={cities} mode="multiple"  /> } 
                          </Space>
                     </Modal>
