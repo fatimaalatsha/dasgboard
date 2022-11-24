@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react';
+import { useState, useEffect } from 'react';
 
 import { Card, Table, Tag, Button, Space, Input, Tooltip } from 'antd'; // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
@@ -28,7 +28,6 @@ const Drivers = () => {
       },
   })
   const [searchText, setSearchText] = useState('');
-  const searchInput = useRef(null) // Get search input
   
   // Fetch Cities list from API
   const getCities = async () => {
@@ -83,6 +82,7 @@ const Drivers = () => {
     selectedKeys ?? setSearchText('')
   }
   
+  
   useEffect(() => {
     let isMounted = true
     setTableParams({// Set table params
@@ -121,6 +121,7 @@ const Drivers = () => {
     }
   }
 
+  
   const tableColumns = [
     {
       title: 'First Name',
