@@ -118,7 +118,7 @@ const Trainings = () => {
       const response = await API.post(`/v1/trainings/cc`, values, options)
       const data = await response.data
       if (data) {
-        message.success('training video added successfully');
+        message.success('Training Video Added Successfully');
       }
     }
     catch (error) {
@@ -198,8 +198,8 @@ const Trainings = () => {
         >
         <Form >
         <Modal
-                title="Add New City"
-                visible={open}
+                title="Add New Training Video" 
+                open={open}
                 confirmLoading={confirmLoading}
                 onCancel={handleCancel}
                 footer={[

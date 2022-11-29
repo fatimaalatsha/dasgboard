@@ -90,29 +90,26 @@ const SideMenu = ({collapsed}) => {
     }
   ];
   
-  const userMenu = (
-    <Menu
-      items={[
-        {
-          key: '1',
-          label: (
-            <Text type='secondary'>
-              Profile
-            </Text>
-          ),
-          disabled: true,
-        },
-        {
-          key: '2',
-          label: (
-            <Text onClick={() => Auth.signOut()}>
-              Sign Out
-            </Text>
-          )
-        },
-      ]}
-    />
-  );
+
+  const items = [
+  {
+    key: '1',
+    label: (
+      <Text type='secondary'>
+         Profile
+      </Text>
+      ),
+    disabled: true,
+  },
+  {
+    key: '2',
+    label: (
+      <Text onClick={() => Auth.signOut()}>
+        Sign Out
+      </Text>
+    ),
+  }
+]
 
   return (
     <>
@@ -121,7 +118,8 @@ const SideMenu = ({collapsed}) => {
           user.isLoading ? (
             <Title level={5} style={{ color: '#ffffff '}}>Loading...</Title>
           ) : (
-              <Dropdown overlay={userMenu} placement="bottom" arrow>
+              <Dropdown menu={{items}} placement="bottom" arrow>
+                <a onClick={(e) => e.preventDefault() }>
                 <Space direction='vertical' style={{ color: '#ffffff', display: 'flex', alignItems: 'center' }}>
                   <Avatar size={40} style={{ backgroundColor: '#1890ff' }} icon={<UserOutlined />} />
                   {
@@ -133,6 +131,7 @@ const SideMenu = ({collapsed}) => {
                     )
                   }
                 </Space>
+                </a>
               </Dropdown>
           )
         }

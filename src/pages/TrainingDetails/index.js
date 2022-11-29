@@ -10,13 +10,14 @@ import * as yup from 'yup'; // Import Yup validation library
 import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
 import ReactPlayer from 'react-player' //Import React Player
 import { ArrowLeftOutlined,CheckCircleOutlined, BarChartOutlined } from '@ant-design/icons'
+import { PageHeader } from '@ant-design/pro-layout';
+
 
 
 import { 
   
   Card, 
   Descriptions, 
-  PageHeader, 
   Button, 
   Tag, 
   message,
@@ -196,14 +197,14 @@ const TrainingDetails = () => {
                     <Form>
                         <Modal
                             title="Edit Training"
-                            visible={open.modal}
+                            open={open.modal}
                             onCancel={() => setOpen({ ...open, modal: false })}
                             footer={[
                                 <Button key="cancel" onClick={() => setOpen(false)}>
                                     Cancel
                                 </Button>,
                                 <SubmitWrapper key="submit" type="primary" >
-                                    Add New Training Video
+                                    Update Training Video
                                 </SubmitWrapper>
                             ]}
                         >

@@ -175,7 +175,7 @@ const Document = (props) => {
         >
             <Modal
                 title={`Reject: ${props.document?.title}`}
-                visible={isModalVisible}
+                open={isModalVisible}
                 onOk={() => setIsModalVisible(false)}
                 onCancel={() => setIsModalVisible(false)}
                 destroyOnClose={true}
