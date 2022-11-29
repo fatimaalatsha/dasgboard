@@ -1,9 +1,9 @@
-import { useState} from 'react'
+import { useState } from 'react'
+import { PageHeader } from '@ant-design/pro-layout';
 import { 
   Card, 
   Descriptions, 
   Divider, 
-  PageHeader, 
   Button, 
   Tag, 
   Modal, 
@@ -56,7 +56,7 @@ const DriverDetails = () => {
     placement: 'top',
     color: 'orange',
     title: 'Can only delete inactive drivers',
-    ...data?.status === 'inactive' && { open: false, visible: false }
+    ...data?.status === 'inactive' && { open: false, open: false }
   }
 
   const successAlert = (msg) => { // Success alert method

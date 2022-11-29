@@ -230,8 +230,8 @@ const Cities = () => {
                 <Form > 
             <Modal
                 title="Add New City"
-                destroyOnClose={true}
-                visible={open}
+                destroyOnClose = {true}
+                open={open}
                 confirmLoading={confirmLoading}
                 onCancel={handleCancel}
                 footer={[
