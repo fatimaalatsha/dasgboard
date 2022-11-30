@@ -113,8 +113,6 @@ const Trainings = () => {
       
       }
  
-        
-      
       const response = await API.post(`/v1/trainings/cc`, values, options)
       const data = await response.data
       if (data) {
@@ -157,7 +155,6 @@ const Trainings = () => {
 
 //to handle disable and enable cities select
     const handleGlobal = (value) => {
-        console.log(value)
         if (value === true) {
 
             setShowCities(false)
@@ -191,7 +188,6 @@ const Trainings = () => {
           onSubmit={async (values, actions) => {
                     await createTraining(values).then((response) => {
                         })
-                    console.log(values)
               refetch()
                setOpen(false)
                         }}           
