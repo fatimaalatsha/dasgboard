@@ -77,7 +77,6 @@ const DriverDetails = () => {
         const response = await API.put(`/v1/drivers/cc/${id}`, body, options)
         const data = await response.data
         if(data) {
-            console.log(data)
             refetch() // Refetch data
         }
     } catch (error) {

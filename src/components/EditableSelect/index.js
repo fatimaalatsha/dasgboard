@@ -15,6 +15,7 @@ const EditableSelect = (props) => {
     }
 
     const showConfirm = (value) => {
+        setIsEnable(false)// Set isEnable state to false
         confirm({
             title: 'Are you sure you want to edit this record?',
             content: 'This action cannot be undone.',
