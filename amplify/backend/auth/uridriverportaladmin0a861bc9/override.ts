@@ -27,12 +27,12 @@ export function override(resources: AmplifyAuthCognitoStackTemplate) {
 
   resources.userPool.lambdaConfig = {
     ...resources.userPool.lambdaConfig,
-     postConfirmation: "arn:aws:lambda:us-east-2:***REMOVED***:function:uri-portal-cognito-dev-post-confirmation-admin-005-04",
-     preSignUp:"arn:aws:lambda:us-east-2:***REMOVED***:function:uri-portal-cognito-dev-pre-signup-admin-005-03" 
+    postConfirmation: "arn:aws:lambda:us-east-2:***REMOVED***:function:uri-portal-cognito-dev-post-confirmation-admin-005-04",
+    preSignUp:"arn:aws:lambda:us-east-2:***REMOVED***:function:uri-portal-cognito-dev-pre-signup-admin-005-03",
   };
 
   resources.userPool.schema = [
-    ...(resources.userPool.schema as any[]), // Carry over existing attributes (example: email)
+    ...(resources.userPool.schema as any[]),
     firstNameAttribute,
     lastNameAttribute
   ]
