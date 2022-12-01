@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { DatePicker, Button, Typography, Tooltip, Space, Modal } from 'antd' // Import antd components
 import { EditOutlined } from '@ant-design/icons' // Import antd icons
-import moment from 'moment'// Import date handlers
+import dayjs from "dayjs"// Import date handlers
 
 const { Text } = Typography // Destructure Text from Typography
 const { confirm } = Modal // Destructure config from Modal 
@@ -14,6 +14,7 @@ const EditableDate = ({...props}) => {
     const dateFormat = 'YYYY-MM-DD'// Set date format
 
     const showConfirm = (value) => {
+        setIsEnable(false)// Set isEnable state to false
         confirm({
             title: 'Are you sure you want to edit this record?',
             content: 'This action cannot be undone.',
@@ -38,7 +39,7 @@ const EditableDate = ({...props}) => {
         {
             isEnable ? (
                 <DatePicker 
-                    defaultValue={moment(dateValue, dateFormat)} 
+                    defaultValue={dayjs(dayjs(dateValue).format(dateFormat))} 
                     autoFocus={isEnable}
                     open={isEnable}
                     allowClear={false}

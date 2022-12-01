@@ -14,8 +14,6 @@ const createCity = async (values) => {
         }
       
       }
-            console.log("valuse :" ,values)
-
       const response = await API.post(`/v1/cities/cc`, values, options)
       const data = await response.data
       if (data) {
@@ -48,8 +46,6 @@ const createCity = async (values) => {
           province.value = province.province_id
           return province;
         })
-        // setProvinces(provinces)
-        // console.log('provinces', data.items)
       }
     }
     catch (error) {

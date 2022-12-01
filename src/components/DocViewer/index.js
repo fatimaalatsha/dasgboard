@@ -26,7 +26,7 @@ const PdfRenderer = ({url}) => {
                 </Document>
             </Card>
             <Modal
-                visible={isModalVisible}
+                open={isModalVisible}
                 onCancel={() => setIsModalVisible(false)}
                 bodyStyle={{height: 500, overflowY: 'auto'}}
                 destroyOnClose={true}

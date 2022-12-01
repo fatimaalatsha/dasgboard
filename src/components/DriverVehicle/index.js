@@ -227,7 +227,7 @@ const VehicleList = ({vehicle, setOpen, open, refetch, sub}) => {
                 </Descriptions.Item>
             </Descriptions>
         </List.Item>
-        <Drawer title="Vehicle Photos" placement="right" size="large" onClose={() => setOpen({...open, drawer: false})} visible={open.drawer}>
+        <Drawer title="Vehicle Photos" placement="right" size="large" onClose={() => setOpen({...open, drawer: false})} open={open.drawer}>
             <VehiclePhotosFeeder vehicle={vehicle.vehicleId} sub={sub} />
         </Drawer>
         <Formik
@@ -248,7 +248,7 @@ const VehicleList = ({vehicle, setOpen, open, refetch, sub}) => {
         >
             <Modal
                 title={`Select a vehicle model.`}
-                visible={isModalVisible}
+                open={isModalVisible}
                 onOk={() => setIsModalVisible(false)}
                 onCancel={() => setIsModalVisible(false)}
                 destroyOnClose={true}
@@ -323,7 +323,7 @@ const DriverVehicle = ({ id, sub }) => {
                     <Form>
                         <Modal 
                             title="Add New Vehicle" 
-                            visible={open.modal} 
+                            open={open.modal} 
                             onCancel={() => setOpen({...open, modal: false})}
                             destroyOnClose={true}
                             footer={[

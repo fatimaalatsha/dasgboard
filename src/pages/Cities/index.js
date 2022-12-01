@@ -230,8 +230,8 @@ const Cities = () => {
                 <Form > 
             <Modal
                 title="Add New City"
-                destroyOnClose={true}
-                visible={open}
+                destroyOnClose = {true}
+                open={open}
                 confirmLoading={confirmLoading}
                 onCancel={handleCancel}
                 footer={[
@@ -245,7 +245,7 @@ const Cities = () => {
 
                     >
                     <Space direction='vertical' style={{ width: '100%'}}>
-                      <SelectWrapper type="text" name="province_id" datasource={provinces} placeholder="Province Name" />
+                      <SelectWrapper type="text" name="province_id" datasource={provinces} placeholder="Province" />
                       <InputWrapper type="text" name="name" placeholder="City Name" />
                       <InputWrapper type="text" name="email" placeholder="City Email" />
                       <SelectWrapper type="text" datasource={status} name="status" placeholder="Status" />
