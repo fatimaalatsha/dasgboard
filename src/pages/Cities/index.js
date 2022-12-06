@@ -263,6 +263,7 @@ const Cities = () => {
             pagination={tableParams.pagination}
             sortDirections={['ascend', 'descend', 'ascend']}
             onChange={handleTableChange}
+            rowClassName={() => 'clickable-row'}
             rowKey={(record) => record.city_id}
             onRow={(record) => ({
                     onClick: () => navigate(`/city/${record.city_id}`)
