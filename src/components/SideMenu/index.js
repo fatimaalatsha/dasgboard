@@ -14,7 +14,7 @@ import {
 
 import { Auth } from 'aws-amplify' // import aws-amplify auth module
 
-const { Text, Title } = Typography // destructure antd typography component
+const { Text, Title, Link } = Typography // destructure antd typography component
 
 const SideMenu = ({collapsed}) => {
   const [user, setUser] = useState({ // set user state
@@ -119,19 +119,19 @@ const SideMenu = ({collapsed}) => {
             <Title level={5} style={{ color: '#ffffff '}}>Loading...</Title>
           ) : (
               <Dropdown menu={{items}} placement="bottom" arrow>
-                <a onClick={(e) => e.preventDefault() }>
+                <Link>
                 <Space direction='vertical' style={{ color: '#ffffff', display: 'flex', alignItems: 'center' }}>
                   <Avatar size={40} style={{ backgroundColor: '#1890ff' }} icon={<UserOutlined />} />
                   {
                     !collapsed && (
-                      <Space>
+                      <Space style={{ alignItems: 'baseline'}}>
                         <Title level={5} style={{ color: '#ffffff '}}>{user.attributes.firstName}</Title>
                         <DownOutlined />
                       </Space>
                     )
                   }
                 </Space>
-                </a>
+                </Link>
               </Dropdown>
           )
         }

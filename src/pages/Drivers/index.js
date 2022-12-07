@@ -199,6 +199,7 @@ const Drivers = () => {
         rowKey="user_id"
         pagination={tableParams.pagination}
         onChange={handleTableChange}
+        rowClassName={() => 'clickable-row'}
         onRow={(driverRecord) => ({
         onClick: () => navigate(`driver/${driverRecord.user_id}`)
         })}

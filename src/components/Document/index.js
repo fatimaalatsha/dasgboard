@@ -95,11 +95,8 @@ const Document = (props) => {
     return (
         <>
         <Collapse activeKey={documentStatus.active} onChange={handleCollapseChange}>
-            <Panel header={
-                <Title level={5}>
-                    {props.document?.title}
-                </Title>
-            }
+            <Panel 
+            header={props.document?.title}
             extra={
                 <Tag {...tagConfig}>
                     {documentStatus.status}
