@@ -141,7 +141,7 @@ const Document = (props) => {
                 </Row>
                 <Row gutter={16}>
                     <Col className="gutter-row" span={12}>
-                        <Button block type="danger" size="large"
+                        <Button block type="primary" danger size="large"
                             onClick={() => setIsModalVisible(true)}
                         >
                             Reject Document
