@@ -1,3 +1,7 @@
+body {
+  margin: 0;
+}
+
 .ant-page-header-heading-title {
   line-height: 50px !important;
   font-weight: 700 !important;
@@ -49,6 +53,10 @@
 
 .anticon {
   font-size: 18px !important;
+}
+
+.clickable-row {
+  cursor: pointer;
 }
 
 [data-amplify-authenticator]{

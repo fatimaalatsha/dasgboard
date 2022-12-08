@@ -181,38 +181,37 @@ const Trainings = () => {
                    Add New Training
                 </Button>
             </Space>
-              
-        <Formik
-         initialValues={initialValues}
-         validationSchema={validationSchema}
-          onSubmit={async (values, actions) => {
-                    await createTraining(values).then((response) => {
-                        })
-              refetch()
-               setOpen(false)
-                        }}           
-        >
-        <Form >
-        <Modal
-                title="Add New Training Video" 
-                open={open}
-                confirmLoading={confirmLoading}
-                onCancel={handleCancel}
-                footer={[
-                                        <Button key="cancel" onClick={() =>  setOpen(false)}>
-                                            Cancel
-                                        </Button>,
-                                        <SubmitWrapper key="submit" type="primary" >
-                                            Add New Training Video
-                                        </SubmitWrapper>,
-                                    ]}              
+            <Formik
+                initialValues={initialValues}
+                validationSchema={validationSchema}
+                onSubmit={async (values, actions) => {
+                        await createTraining(values).then((response) => {
+                            })
+                    refetch()
+                setOpen(false)
+                }}           
             >
-                    <Space direction='vertical' style={{ width: '100%'}}>
-                            <InputWrapper type="text" name="title" placeholder="Title" />
-                            <InputWrapper type="text" name="url" placeholder="Video Link (from YouTube)" /> 
-                            <SelectWrapper name="global" placeholder="Select Video Scope" datasource={global} onSelect={handleGlobal} />
-                            { showCities &&  <SelectWrapper allowClear  name="city_id" placeholder="Select City" datasource={cities} mode="multiple"  /> } 
-                         </Space>
+                <Form >
+                    <Modal
+                        title="Add New Training Video" 
+                        open={open}
+                        confirmLoading={confirmLoading}
+                        onCancel={handleCancel}
+                        footer={[
+                            <Button key="cancel" onClick={() =>  setOpen(false)}>
+                                Cancel
+                            </Button>,
+                            <SubmitWrapper key="submit" type="primary" >
+                                Add New Training Video
+                            </SubmitWrapper>,
+                        ]}              
+                    >
+                            <Space direction='vertical' style={{ width: '100%'}}>
+                                <InputWrapper type="text" name="title" placeholder="Title" />
+                                <InputWrapper type="text" name="url" placeholder="Video Link (from YouTube)" /> 
+                                <SelectWrapper name="global" placeholder="Select Video Scope" datasource={global} onSelect={handleGlobal} />
+                                { showCities &&  <SelectWrapper allowClear  name="city_id" placeholder="Select City" datasource={cities} mode="multiple"  /> } 
+                            </Space>
                     </Modal>
                 </Form>
             </Formik>
@@ -221,6 +220,7 @@ const Trainings = () => {
                 dataSource={data?.items}
                 loading={isLoading}
                 rowKey={(record) => record.id}
+                rowClassName={() => 'clickable-row'}
                 onRow={(record) => ({
                     onClick: () => navigate(`/training/${record.id}`)
                 })}

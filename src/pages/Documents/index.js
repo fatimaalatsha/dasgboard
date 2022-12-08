@@ -143,6 +143,7 @@ const Documents = () => {
                 rowKey={record => record.id + record.type}
                 sortDirections={['ascend', 'descend', 'ascend']}
                 pagination={tableParams.pagination}
+                rowClassName={() => 'clickable-row'}
                 onRow={(driverRecord) => ({
                     onClick: () => navigate(`/driver/${driverRecord.user_id}`)
                 })}
