@@ -17,7 +17,7 @@ export function override(resources: AmplifyAuthCognitoStackTemplate) {
           email: "email",
           email_verified: "email_verified",
           'custom:first_name': "given_name",
-          'custom:last_name': "family_name",
+          'custom:last_name': "family_name"
         },
         ProviderDetails: {
           client_id: "***REMOVED***-jvk3ld5ca3ijm2q8v09i01eu062hifea.apps.googleusercontent.com",
