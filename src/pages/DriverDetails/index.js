@@ -11,8 +11,9 @@ import {
   Space,
   Tooltip, 
   message,
+  Table,  
 } from 'antd' // Import antd components
-import { SendOutlined } from '@ant-design/icons' // Import icon
+import { SendOutlined} from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import API from '../../api/BaseUrl' // Import API base URL
@@ -46,12 +47,30 @@ const SelectFeeder = (props) => {
   return  <EditableSelect updateCallback={props.updateCallback} value={props.value} options={data.items} name="city_id" />
 }
 
+//get training video 
+const tableColumns = [
+    {
+        key: '1',
+        title: 'Video Title',
+        dataIndex: 'title',
+    },
+  {
+        key: '2',
+        title: 'Status',
+        dataIndex: 'completed',
+        align: 'center',
+    render: (completed) => <Tag color={completed === true ? 'green' : 'volcano'}>
+         {completed === true ? 'Completed' : 'Pending'}
+      </Tag>,
+    },
+  
+]
+
 const DriverDetails = () => {
   const {id} = useParams(); // Get id from url
   const navigate = useNavigate(); // Get navigate method from react-router-dom
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
-
   const tooltipConfig = {
     placement: 'top',
     color: 'orange',
@@ -83,6 +102,7 @@ const DriverDetails = () => {
         console.log(error)
     }
   }
+
 
   const showConfirm = (status) => {
     setLoading(true)
@@ -279,8 +299,17 @@ const DriverDetails = () => {
            <DriverDocument id={id} sub={data.sub_id} />
            <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
            <DriverVehicle id={id} sub={data.sub_id} />
+           <Divider orientation="left"><Title level={4}>Driver Trainings</Title></Divider>
+                  <Table
+                    columns={tableColumns}
+                    dataSource={data?.trainings}
+                    loading={isLoading}
+                    pagination={false}
+                    rowKey="title"
+                    />
            <Divider orientation="left"><Title level={4}>Driver History</Title></Divider>
            <DriverTimeline id={id}/>
+           
         </Card>
   )
 };

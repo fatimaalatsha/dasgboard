@@ -26,7 +26,7 @@ const Drivers = () => {
   const [tableParams, setTableParams] = useState({ // Set table params
       pagination: {
       current: 1,
-      pageSize: 20,
+      pageSize: 50,
       showSizeChanger: true,
       },
   })
