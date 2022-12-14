@@ -178,7 +178,7 @@ const Drivers = () => {
       ],
     },
     {
-        title: 'Created At',
+        title: 'Applied Date',
         dataIndex: 'created_at',
         render: (text, record) => `${dayjs(text).format('YYYY-MM-DD - HH:mm:ss')}`,
         align: 'right',
