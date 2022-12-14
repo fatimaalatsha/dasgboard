@@ -42,7 +42,6 @@ const Document = (props) => {
         color: props.color,
         active: null,
     }) 
-    //console.log(props)
 
     const tagConfig = {
         style: {
@@ -94,7 +93,7 @@ const Document = (props) => {
 
     return (
         <>
-        <Collapse activeKey={documentStatus.active} onChange={handleCollapseChange}>
+        <Collapse activeKey={documentStatus.active} onChange={handleCollapseChange} collapsible={documentStatus.status === 'missing' && 'disabled'}>
             <Panel 
             header={props.document?.title}
             extra={
