@@ -8,6 +8,8 @@ import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import API from '../../api/BaseUrl'
 
 import qs from 'qs' // Import qs library
+import dayjs from "dayjs"// Import date handlers
+import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
@@ -15,6 +17,7 @@ import qs from 'qs' // Import qs library
     page: params.pagination?.current,
     ...params,
 })
+dayjs.extend(utc)
 
 const Drivers = () => {
   const navigate = useNavigate();
@@ -168,12 +171,20 @@ const Drivers = () => {
       }
       ,
       filters: [
-        {text:'onboard', value: 'onboard' },
+        { text:'Onboard', value: 'onboard' },
         { text: 'Pending', value: 'pending' },
         { text: 'Inactive', value: 'inactive' },
         { text: 'Active', value: 'active' },
       ],
-    }
+    },
+    {
+        title: 'Updated At',
+        dataIndex: 'created_at',
+        render: (text, record) => `${dayjs(text).format('YYYY-MM-DD - HH:mm:ss')}`,
+        align: 'right',
+        sorter: true,
+        key: 'created_at',
+    },
   ];
 
   if (error) {
