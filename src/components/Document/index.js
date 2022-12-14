@@ -42,7 +42,6 @@ const Document = (props) => {
         color: props.color,
         active: null,
     }) 
-    console.log(props)
 
     const tagConfig = {
         style: {
