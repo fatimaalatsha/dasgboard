@@ -29,6 +29,9 @@ const Drivers = () => {
       pageSize: 50,
       showSizeChanger: true,
       },
+      sort: {
+        created_at: 'desc',
+      }
   })
   const [searchText, setSearchText] = useState('');
   
