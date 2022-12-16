@@ -310,28 +310,28 @@ const DriverDetails = () => {
           pagination={false}
           rowKey="title"
           />
+        <Divider orientation="left"><Title level={4}>Note</Title></Divider>
+        <Form initialValues={{ notes: data.notes }} onFinish={(values) => updateText(values)}>
+          <Form.Item 
+            name="notes"
+            rules={[{required: true,message: 'Please type a note before submitting!'}]}
+          >
+            <TextArea
+              placeholder="Leave notes here..."
+              autoSize={{
+                minRows: 2,
+                maxRows: 6,
+              }}
+            />
+          </Form.Item>
+          <Form.Item>
+            <Button type="primary" htmlType="submit">
+              Submit
+            </Button>
+          </Form.Item>
+        </Form>
       <Divider orientation="left"><Title level={4}>Driver History</Title></Divider>
       <DriverTimeline id={id}/>
-      <Divider orientation="left"><Title level={4}>Note</Title></Divider>
-      <Form initialValues={{ notes: data.notes }} onFinish={(values) => updateText(values)}>
-        <Form.Item 
-          name="notes"
-          rules={[{required: true,message: 'Please type a note before submitting!'}]}
-        >
-          <TextArea
-            placeholder="Leave notes here..."
-            autoSize={{
-              minRows: 2,
-              maxRows: 6,
-            }}
-          />
-        </Form.Item>
-        <Form.Item>
-          <Button type="primary" htmlType="submit">
-            Submit
-          </Button>
-        </Form.Item>
-      </Form>
     </Card>
   )
 };
