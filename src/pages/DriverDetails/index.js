@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PageHeader } from '@ant-design/pro-layout';
 import { 
   Card, 
@@ -14,8 +14,11 @@ import {
   Table,
   Form,
   Input,
+  Avatar,
+  Spin,
+  Image,
 } from 'antd' // Import antd components
-import { SendOutlined} from '@ant-design/icons' // Import icon
+import { SendOutlined, UserOutlined } from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
@@ -34,6 +37,7 @@ import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import Submi
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved } from '../../utils/doc-status' // Import isAllApproved function
 import { deleteDriver, updateStatus, notifyDriver } from '../../utils/driver-status' // Import delete driver method
+import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
 
 const { confirm } = Modal // Destructure config from Modal
 const { Title, Text } = Typography // Destructure Title from Typography
@@ -51,6 +55,45 @@ const SelectFeeder = (props) => {
   }
   
   return  <EditableSelect updateCallback={props.updateCallback} value={props.value} options={data.items} name="city_id" />
+}
+
+const ProfileAvatar = ({objectKey}) => {
+  const [ url, setUrl ] = useState(null) // Create state to store the URL of the S3 object
+  const [ visible, setVisible ] = useState(false) // Create state to store the visibility of the image
+
+  const getDocument = async () => { // Create a function to retrieve the document
+      await getFromS3(objectKey).then((url) => { // Call the getFromS3 function
+          setUrl(url) // Set the URL state
+      })
+      .catch(error => console.log(error))
+  }
+
+  useEffect(() => { // Call the getDocument function on component mount
+      if(!url){
+          getDocument()
+      }
+  }, [url])
+
+  if(!url) {
+      return <Spin />
+  }
+
+
+  return (
+    <>
+      <Avatar size={72} src={url} onClick={() => setVisible(true)} style={{ cursor: 'pointer'}} />
+      <Image
+        src={url}
+        style={{
+          display: 'none',
+        }}
+        preview={{
+          visible,
+          onVisibleChange: (value) => setVisible(value),
+        }}
+      />
+    </>
+  )
 }
 
 //get training video 
@@ -198,13 +241,20 @@ const DriverDetails = () => {
       <PageHeader
         ghost={false}
         onBack={() => window.history.back()}
-        title={`${data.first_name} ${data.last_name}`}
-        tags={
-          <Tag style={{ textTransform: 'capitalize'}} 
-            color={data.status === 'active' ? 'success' : data.status === 'inactive' ? 'error' : 'warning'}
-          >
-            {data.status}
-          </Tag>
+        title={
+        <Space>
+          <ProfileAvatar objectKey={`${data.sub_id}/${data.profile_picture}`} />
+          <Space direction='vertical' size={0}>
+            <Title level={4} style={{ marginTop: 0 }}>
+              {`${data.first_name} ${data.last_name}`}
+            </Title>
+            <Tag style={{ textTransform: 'capitalize'}} 
+              color={data.status === 'active' ? 'success' : data.status === 'inactive' ? 'error' : 'warning'}
+            >
+              {data.status}
+            </Tag>
+          </Space>
+        </Space>
         }
         extra={[
           <Button 
