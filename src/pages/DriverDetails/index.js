@@ -121,6 +121,7 @@ const DriverDetails = () => {
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
+  
   const tooltipConfig = {
     placement: 'top',
     color: 'orange',
