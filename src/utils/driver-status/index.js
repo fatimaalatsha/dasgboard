@@ -52,7 +52,7 @@ const notifyDriver = async (driverId, body) => {
                 ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
             }
         }
-      const response = await API.post(`/v1/drivers/cc/${driverId}/notify-documents`, { ...(body.custom_message && body) }, options)
+      const response = await API.post(`/v1/drivers/cc/${driverId}/notify-documents`, { ...(body.message && body) }, options)
       const data = await response.data
       return data
     } catch (error) {
