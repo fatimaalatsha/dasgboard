@@ -307,7 +307,7 @@ const DriverDetails = () => {
 
       {/* Notify Driver Modal */}
       <Formik
-        initialValues={{ custom_message: '',}}
+        initialValues={{ message: '',}}
         onSubmit={ async (values, { setSubmitting }) => {
           await notifyDriver(id, values)
           .then((response) => {
@@ -348,9 +348,9 @@ const DriverDetails = () => {
                 {`You can add a custom message below, but it is not required.`}
               </Text>
               <TextArea
-                  defaultValue={props.values.custom_message}
+                  defaultValue={props.values.message}
                   onChange={props.handleChange}
-                  name="custom_message"
+                  name="message"
                   placeholder="Custom message here..."
                   autoSize={{
                     minRows: 2,
