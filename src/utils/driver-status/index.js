@@ -42,7 +42,7 @@ const updateStatus = async (status, driverId) => {
     }
 }
 
-const notifyDriver = async (driverId) => {
+const notifyDriver = async (driverId, body) => {
     try {
         const auth = await Auth.currentSession()// Get current session
         const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -52,7 +52,7 @@ const notifyDriver = async (driverId) => {
                 ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
             }
         }
-      const response = await API.post(`/v1/drivers/cc/${driverId}/notify-documents`, {}, options)
+      const response = await API.post(`/v1/drivers/cc/${driverId}/notify-documents`, { ...(body.custom_message && body) }, options)
       const data = await response.data
       return data
     } catch (error) {
