@@ -154,8 +154,7 @@ const DriverDetails = () => {
     }
   }
 
-
-  const showConfirm = (status) => {
+  const showConfirmInactive = (status) => {
     setLoading(true)
     confirm({
       title: 
@@ -170,6 +169,35 @@ const DriverDetails = () => {
           if (res) {
             setLoading(false)
             refetch()
+          }
+        })
+      },
+      onCancel() {
+        setLoading(false)
+        console.log('Cancel');
+      },
+    });
+  }
+
+
+  const showConfirm = (status) => {
+    setLoading(true)
+    confirm({
+      title: 
+          <Title level={4}>
+            {`Are you sure you want to change the status to `}
+            <Text style={{ textTransform: 'capitalize'}} mark strong>{status}?</Text>
+          </Title>,
+      content: 'This action cannot be undone, and the driver will be notified.',
+      onOk: async () => {
+        await isAllApproved(id)
+        .then((res) => {
+          if (res) {
+            setLoading(false)
+            refetch()
+          } else {
+            setLoading(false)
+            showError('active')
           }
         })
       },
@@ -262,7 +290,7 @@ const DriverDetails = () => {
             loading={loading} 
             key="2" 
             danger 
-            onClick={() => showConfirm('inactive')}
+            onClick={() => showConfirmInactive('inactive')}
             disabled={data.status === 'inactive' || data.status === 'pending' || data.status === 'onboard'}
           >
             Deactivate
@@ -271,13 +299,7 @@ const DriverDetails = () => {
             loading={loading} 
             key="1" 
             type="primary" 
-            onClick={async () => {
-              setLoading(true)
-              await isAllApproved(id)
-              .then((res) => {
-                res ? showConfirm('active') : showError('active')
-              })
-            }}
+            onClick={() => showConfirm('active')}
             disabled={data.status === 'active' || data.status === 'onboard'}
           >
             Activate Driver
