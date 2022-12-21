@@ -35,7 +35,6 @@ const vehicleSchema = object().shape({
 
 const VehiclePhotosFeeder = ({vehicle, sub}) => {
     const { data, isLoading, error } = useFetch(`/v1/vehicles/photos/cc/${vehicle}/vehicle`)// Call useFetch custom hook
-
     if (isLoading) {
         return <>Loading...</>
     }
@@ -48,7 +47,10 @@ const VehiclePhotosFeeder = ({vehicle, sub}) => {
         <Space direction="vertical" size="large">
             {
                 data.items[0]?.photo?.length !== 0 && data.items[0]?.photo !== null ? data.items.map((photo, index) => (
-                    <DocViewer key={index} objectKey={`${sub}/${photo.photo.key}`} />
+                    <>
+                        <Title level={4} >{photo.title}</Title> 
+                        <DocViewer key={index} objectKey={`${sub}/${photo.photo.key}`} />
+                    </>
                 )) : <Typography.Text>No photos found</Typography.Text>
             }
         </Space>
@@ -95,7 +97,7 @@ const VehicleModelFeeder = ({name, make_id, editable, value, handleUpdate}) => {
     )
 }
 
-const VehicleList = ({vehicle, setOpen, open, refetch, sub}) => {
+const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
     const [makeId, setMakeId] = useState(vehicle.make?.id)
     const [isModalVisible, setIsModalVisible] = useState(false) // Set modal state to false
 
@@ -119,7 +121,6 @@ const VehicleList = ({vehicle, setOpen, open, refetch, sub}) => {
                 }
             },
             onCancel: () => {
-                //console.log('Cancel')
             },
             okText: 'Yes, Delete',
             cancelText: 'Cancel',
@@ -146,7 +147,6 @@ const VehicleList = ({vehicle, setOpen, open, refetch, sub}) => {
             },
             onCancel() {
                 setOpen({ ...open, switch: false })
-                //console.log('Cancel')
                 refetch()
             },
         });
@@ -166,7 +166,6 @@ const VehicleList = ({vehicle, setOpen, open, refetch, sub}) => {
 
     const selectModel = async (value) => {
         const { make_id } = value
-        console.log(make_id)
         setMakeId(make_id)
         return setIsModalVisible(true)
     }
@@ -188,8 +187,7 @@ const VehicleList = ({vehicle, setOpen, open, refetch, sub}) => {
                 >
                     Delete
                 </Button>,
-                <Button type="primary" size="small" onClick={() => setOpen({...open, drawer: true})}>View</Button>,
-                <Switch 
+<Button type="primary" size="small" onClick={ () => setOpen({...open, drawer: { open: true, id: vehicle.vehicleId }}) }>View</Button>,                <Switch 
                     defaultChecked={vehicle.status === 'active'} 
                     loading={open.switch} 
                     disabled={vehicle.status === 'active'}
@@ -227,8 +225,10 @@ const VehicleList = ({vehicle, setOpen, open, refetch, sub}) => {
                 </Descriptions.Item>
             </Descriptions>
         </List.Item>
-        <Drawer title="Vehicle Photos" placement="right" size="large" onClose={() => setOpen({...open, drawer: false})} open={open.drawer}>
-            <VehiclePhotosFeeder vehicle={vehicle.vehicleId} sub={sub} />
+         <Drawer destroyOnClose title="Vehicle Photos" placement="right" size="large" onClose={() => setOpen({...open, drawer: {open: false, id: null}})} open={open.drawer.open}>
+            {
+               open.drawer.id && <VehiclePhotosFeeder vehicle={open.drawer.id} sub={sub} />
+            }
         </Drawer>
         <Formik
             initialValues={{
@@ -275,7 +275,10 @@ const { Title, Text } = Typography // Destructure Title from Typography
 const DriverVehicle = ({ id, sub }) => {
     const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}/vehicles`)// Call useFetch custom hook
     const [open, setOpen] = useState({// Drawer state manager
-        drawer: false,
+        drawer: {
+            open: false,
+            id: null,
+        },
         modal: false,
         switch: false,
     })
