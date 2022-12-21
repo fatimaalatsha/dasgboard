@@ -129,6 +129,13 @@ const Drivers = () => {
 
   
   const tableColumns = [
+  {
+      title: 'ID',
+      dataIndex: 'user_id',
+      key: 'user_id',
+      sorter: true,
+      align: 'center',
+    },
     {
       title: 'First Name',
       dataIndex: 'first_name',
