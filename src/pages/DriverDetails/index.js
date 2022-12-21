@@ -18,6 +18,7 @@ import {
 import { SendOutlined} from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
+import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import API from '../../api/BaseUrl' // Import API base URL
 
 
@@ -27,6 +28,8 @@ import EditableSelect from '../../components/EditableSelect' // Import editable 
 import DriverDocument from '../../components/DriverDocument' // Import Document viewers component
 import DriverTimeline from '../../components/DriverTimeline' // Import Timeline 
 import DriverVehicle from '../../components/DriverVehicle' // Import Driver Vehicle component
+
+import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved } from '../../utils/doc-status' // Import isAllApproved function
@@ -74,11 +77,12 @@ const DriverDetails = () => {
   const navigate = useNavigate(); // Get navigate method from react-router-dom
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
+  const [open, setOpen] = useState(false)// Set custom message state
   const tooltipConfig = {
     placement: 'top',
     color: 'orange',
     title: 'Can only delete inactive drivers',
-    ...data?.status === 'inactive' && { open: false, open: false }
+    ...data?.status === 'inactive' && { open: false }
   }
 
   const successAlert = (msg) => { // Success alert method
@@ -177,38 +181,6 @@ const DriverDetails = () => {
     })
   }
 
-  const showNotifyWarning = () => {
-    setLoading(true)
-    Modal.confirm({
-      title: 'Email Notification',
-      content: 
-        <Space direction="vertical">
-          <Text>
-            {`Are you sure you want to continue with this action? `} <Text mark strong>{`${data.first_name} ${data.last_name}`}</Text>{` will recieved an email notification.`}
-          </Text>
-          <Text strong>
-            {`Be wary of sending too many of these notifications, as it may be considered spam.`}
-          </Text>
-        </Space>
-        ,
-      onOk: async () => {
-        await notifyDriver(id)
-        .then((response) => {
-          if(response) {
-            setLoading(false)
-            successAlert(response.message)
-          }
-        })
-      },
-      onCancel: () => {
-        setLoading(false)
-        //console.log('Cancel')
-      },
-      okText: 'Yes, Notify',
-      cancelText: 'Cancel',
-    })
-  }
-
   if (error) {
     return <div>Something went wrong</div>
   }
@@ -297,7 +269,7 @@ const DriverDetails = () => {
             margin: ['16px 0'],
           }}
         >
-        <Button type="primary" icon={<SendOutlined />} loading={loading}  onClick={() => showNotifyWarning()}>Notify Driver</Button>
+        <Button type="primary" icon={<SendOutlined />} loading={loading}  onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
         <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
@@ -332,6 +304,64 @@ const DriverDetails = () => {
         </Form>
       <Divider orientation="left"><Title level={4}>Driver History</Title></Divider>
       <DriverTimeline id={id}/>
+
+      {/* Notify Driver Modal */}
+      <Formik
+        initialValues={{ message: '',}}
+        onSubmit={ async (values, { setSubmitting }) => {
+          await notifyDriver(id, values)
+          .then((response) => {
+            if(response) {
+              setLoading(false)
+              successAlert(response.message)
+              setOpen(false)
+              setSubmitting(false)
+              refetch()
+            }
+          })
+        }}
+    >
+      { props => (
+        <FormikForm>
+          <Modal 
+            title="Email Notification" 
+            open={open} 
+            onCancel={() => setOpen(false)}
+            destroyOnClose
+            footer={[
+              <Button key="back" onClick={() => setOpen(false)}>
+                  Cancel
+              </Button>,
+              <SubmitWrapper key="submit" type="primary">
+                  Yes, Notify
+              </SubmitWrapper>,
+            ]}
+          >
+            <Space direction="vertical">
+              <Text>
+                {`Are you sure you want to continue with this action? `} <Text mark strong>{`${data.first_name} ${data.last_name}`}</Text>{` will recieved an email notification.`}
+              </Text>
+              <Text type="danger">
+                {`Be wary of sending too many of these notifications, as it may be considered spam.`}
+              </Text>
+              <Text strong>
+                {`You can add a custom message below, but it is not required.`}
+              </Text>
+              <TextArea
+                  defaultValue={props.values.message}
+                  onChange={props.handleChange}
+                  name="message"
+                  placeholder="Custom message here..."
+                  autoSize={{
+                    minRows: 2,
+                    maxRows: 6,
+                  }}
+                />
+            </Space>
+          </Modal>
+        </FormikForm>
+      )}
+    </Formik>
     </Card>
   )
 };
