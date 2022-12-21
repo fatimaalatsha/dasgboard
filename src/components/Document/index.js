@@ -27,7 +27,15 @@ const RejectFeeder = ({name}) => {
     const reasons = [
         {value: 'wrong document', text: 'Wrong document'},
         {value: 'image is too blurry', text: 'Image is too blurry'},
-        {value: 'expired document', text: 'Expired document'},
+        { value: 'expired document', text: 'Expired document' },
+        { value: 'unqualified licence class', text: 'Unqualified licence class' },
+        { value: 'Below 25 - under age requirements', text: 'Below 25 - Under age requirements' },
+        { value: 'unqualified vehicle year / 2-door', text: 'Unqualified vehicle year / 2-door' },
+        { value: 'registered under a different name', text: 'Registered under a different name' },
+        { value: 'insurance below 2M liability', text: 'Insurance below 2M liability' },
+        { value: 'failed safety inspection', text: 'Failed safety inspection' },
+        { value: 'failed background check', text: 'Failed background check' },
+        { value: 'unqualified driver history/abstract', text: 'Unqualified driver history/abstract' },
     ]
 
     return (
