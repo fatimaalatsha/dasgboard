@@ -11,21 +11,12 @@ const isAllApproved = async (driverId) => {
             ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
         }
     }
-    const listResponse = await API.get(`/v1/documents-types/`, options)
-    const dataList = await listResponse.data.items
-    const docsResponse = await API.get(`/v1/documents/cc/drivers/${driverId}`, options)
-    const docArray = await docsResponse.data.items
-    if(dataList && docArray) {
-      const mergedArray = dataList.map(data => ({
-        ...data,
-        ...docArray.find(doc => doc.document.name === data.name)
-      }))
-        const isReady = mergedArray.every((doc) => doc.status === 'approved')
-        return isReady
-    }
-    return false
+    const response = await API.post(`/v1/drivers/cc/${driverId}/activate`, {}, options)
+    const data = await response.data
+    console.log(data)
+    return data
   } catch (error) {
-      console.log(error)
+      //console.log(error)
       return false
   }
 }

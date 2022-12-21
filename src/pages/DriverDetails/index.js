@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useState, useEffect } from 'react'
 import { PageHeader } from '@ant-design/pro-layout';
 import { 
   Card, 
@@ -14,8 +14,11 @@ import {
   Table,
   Form,
   Input,
+  Avatar,
+  Spin,
+  Image,
 } from 'antd' // Import antd components
-import { SendOutlined} from '@ant-design/icons' // Import icon
+import { SendOutlined, UserOutlined } from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
@@ -34,6 +37,7 @@ import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import Submi
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved } from '../../utils/doc-status' // Import isAllApproved function
 import { deleteDriver, updateStatus, notifyDriver } from '../../utils/driver-status' // Import delete driver method
+import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
 
 const { confirm } = Modal // Destructure config from Modal
 const { Title, Text } = Typography // Destructure Title from Typography
@@ -51,6 +55,45 @@ const SelectFeeder = (props) => {
   }
   
   return  <EditableSelect updateCallback={props.updateCallback} value={props.value} options={data.items} name="city_id" />
+}
+
+const ProfileAvatar = ({objectKey}) => {
+  const [ url, setUrl ] = useState(null) // Create state to store the URL of the S3 object
+  const [ visible, setVisible ] = useState(false) // Create state to store the visibility of the image
+
+  const getDocument = async () => { // Create a function to retrieve the document
+      await getFromS3(objectKey).then((url) => { // Call the getFromS3 function
+          setUrl(url) // Set the URL state
+      })
+      .catch(error => console.log(error))
+  }
+
+  useEffect(() => { // Call the getDocument function on component mount
+      if(!url){
+          getDocument()
+      }
+  }, [url])
+
+  if(!url) {
+      return <Spin />
+  }
+
+
+  return (
+    <>
+      <Avatar size={72} src={url} onClick={() => setVisible(true)} style={{ cursor: 'pointer'}} />
+      <Image
+        src={url}
+        style={{
+          display: 'none',
+        }}
+        preview={{
+          visible,
+          onVisibleChange: (value) => setVisible(value),
+        }}
+      />
+    </>
+  )
 }
 
 //get training video 
@@ -78,6 +121,7 @@ const DriverDetails = () => {
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
+  
   const tooltipConfig = {
     placement: 'top',
     color: 'orange',
@@ -110,8 +154,7 @@ const DriverDetails = () => {
     }
   }
 
-
-  const showConfirm = (status) => {
+  const showConfirmInactive = (status) => {
     setLoading(true)
     confirm({
       title: 
@@ -126,6 +169,35 @@ const DriverDetails = () => {
           if (res) {
             setLoading(false)
             refetch()
+          }
+        })
+      },
+      onCancel() {
+        setLoading(false)
+        console.log('Cancel');
+      },
+    });
+  }
+
+
+  const showConfirm = (status) => {
+    setLoading(true)
+    confirm({
+      title: 
+          <Title level={4}>
+            {`Are you sure you want to change the status to `}
+            <Text style={{ textTransform: 'capitalize'}} mark strong>{status}?</Text>
+          </Title>,
+      content: 'This action cannot be undone, and the driver will be notified.',
+      onOk: async () => {
+        await isAllApproved(id)
+        .then((res) => {
+          if (res) {
+            setLoading(false)
+            refetch()
+          } else {
+            setLoading(false)
+            showError('active')
           }
         })
       },
@@ -198,20 +270,27 @@ const DriverDetails = () => {
       <PageHeader
         ghost={false}
         onBack={() => window.history.back()}
-        title={`${data.first_name} ${data.last_name}`}
-        tags={
-          <Tag style={{ textTransform: 'capitalize'}} 
-            color={data.status === 'active' ? 'success' : data.status === 'inactive' ? 'error' : 'warning'}
-          >
-            {data.status}
-          </Tag>
+        title={
+        <Space>
+          <ProfileAvatar objectKey={`${data.sub_id}/${data.profile_picture}`} />
+          <Space direction='vertical' size={0}>
+            <Title level={4} style={{ marginTop: 0 }}>
+              {`${data.first_name} ${data.last_name}`}
+            </Title>
+            <Tag style={{ textTransform: 'capitalize'}} 
+              color={data.status === 'active' ? 'success' : data.status === 'inactive' ? 'error' : 'warning'}
+            >
+              {data.status}
+            </Tag>
+          </Space>
+        </Space>
         }
         extra={[
           <Button 
             loading={loading} 
             key="2" 
             danger 
-            onClick={() => showConfirm('inactive')}
+            onClick={() => showConfirmInactive('inactive')}
             disabled={data.status === 'inactive' || data.status === 'pending' || data.status === 'onboard'}
           >
             Deactivate
@@ -220,13 +299,7 @@ const DriverDetails = () => {
             loading={loading} 
             key="1" 
             type="primary" 
-            onClick={async () => {
-              setLoading(true)
-              await isAllApproved(id)
-              .then((res) => {
-                res ? showConfirm('active') : showError('active')
-              })
-            }}
+            onClick={() => showConfirm('active')}
             disabled={data.status === 'active' || data.status === 'onboard'}
           >
             Activate Driver
