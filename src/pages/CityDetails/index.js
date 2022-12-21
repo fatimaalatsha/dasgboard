@@ -44,7 +44,6 @@ const descriptionConfig = {
 
 const CityEmailTemplates = ({cityid}) => { // Email templates component
     const { data, isLoading, error, refetch } = useFetch(`/v1/cities/cc/${cityid}/settings`) // Fetch city settings
-
     if (isLoading) {
         return <>Loading...</>
     }
@@ -208,7 +207,7 @@ const CityRequirements = () => {
     )
 }
 
-const CityProfile = ({data, cityid}) => { // Editable info profile component
+const CityProfile = ({ data, cityid }) => { // Editable info profile component
     return (
         <Descriptions {...descriptionConfig}>
             <Item label="driver minimum age">
@@ -219,22 +218,12 @@ const CityProfile = ({data, cityid}) => { // Editable info profile component
             </Item>
             <Item label="total tax rate">
                 <Space align="baseline">
-                    <Text level={5}>PST + GST</Text>
-                    {/* <EditableText value="13" /> */}
-                    <Text>13</Text>
+                    <EditableText value={data?.tax_rate} />
+                    <Text>{ data?.province_id === 1 ? 'HST' : 'GST + PST' }</Text>
                 </Space>
             </Item>
-            {/* <Item label="base fare">
-                <EditableText value="13" /> 
-                <Text>13</Text>
-            </Item> */}
-            {/* <Item label="driver pay rate">
-                <EditableText value="13" />
-                <Text>13</Text>
-            </Item> */}
             <Item label="recruitment email address">
-                {/* <EditableText name="email" value="city@uridetech.com" updateCallback={value => updateCityProfile(cityid, value)}/> */}
-                <Text>city@uridetech.com</Text>
+                <EditableText name="email" value={data?.email} updateCallback={value => updateCityProfile(cityid, value)}/>
             </Item>
         </Descriptions>
     )
