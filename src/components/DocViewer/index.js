@@ -27,6 +27,7 @@ const PdfRenderer = ({url}) => {
             </Card>
             <Modal
                 open={isModalVisible}
+                width={800}
                 onCancel={() => setIsModalVisible(false)}
                 bodyStyle={{height: 500, overflowY: 'auto'}}
                 destroyOnClose={true}
@@ -41,11 +42,9 @@ const PdfRenderer = ({url}) => {
                     </Row>
                 }
             >
-                <Row justify="center">
                 <Document file={url} onLoadSuccess={onDocumentLoadSuccess}>
                     <Page pageNumber={pageNumber} scale={scale} />
                 </Document>
-                </Row>
             </Modal>
         </>
     )
@@ -74,7 +73,7 @@ const DocViewer = ({objectKey}) => {
 
     return (
         <>
-            {fileType === 'pdf' ? (
+            {fileType.toLowerCase() === 'pdf' ? (
                 <PdfRenderer url={url} />
             ) : (
                 <Image src={url} width={400} preview={true}/>
