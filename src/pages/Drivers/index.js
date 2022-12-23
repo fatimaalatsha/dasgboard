@@ -22,8 +22,8 @@ import { useFilterStore } from '../../store' // Import filter store
 dayjs.extend(utc)
 
 const Drivers = () => {
-  const filter = useFilterStore((state) => state.filter) // Get filter from store
-  const setFilter = useFilterStore((state) => state.setFilter) // Set filter to store
+  const driverFilter = useFilterStore((state) => state.driverFilter) // Get filter from store
+  const setDriverFilter = useFilterStore((state) => state.setDriverFilter) // Set filter to store
 
   const navigate = useNavigate();
   const [cities, setCities] = useState([])
@@ -48,7 +48,7 @@ const Drivers = () => {
       console.log(error)
     }  
   }
-  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(filter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
+  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(driverFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
   
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
@@ -57,10 +57,13 @@ const Drivers = () => {
         filter[key].splice(1, 1)
       }
     })
-
-    setFilter({ // Set filter to store
+console.log(filter.city_id[0] === 'in|undefined')
+    setDriverFilter({ // Set filter to store
       pagination,
-      filter,
+      filter: {
+        ...filter,
+        ...(driverFilter.filter?.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: driverFilter.filter?.city_id } ),
+      },
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
             [`${sorter.columnKey === 'city_id' ? 'name' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
@@ -70,10 +73,10 @@ const Drivers = () => {
   }
   
   const handleSearch = (selectedKeys) => {
-    setFilter({
+    setDriverFilter({
       full_name: selectedKeys ? selectedKeys[0] : null,
       pagination: {
-        ...filter.pagination,
+        ...driverFilter.pagination,
         current: 1,
       }
     })
@@ -83,9 +86,9 @@ const Drivers = () => {
   
   useEffect(() => {
     let isMounted = true
-    setFilter({ // Set filter to store
+    setDriverFilter({ // Set filter to store
       pagination: {
-        ...filter.pagination,
+        ...driverFilter.pagination,
         total: data?.total_items,
       }
     })
@@ -153,7 +156,7 @@ const Drivers = () => {
       filters: cities,
       sorter: true,
       filterSearch: true,   
-      //...( filter.filter?.city_id && { defaultFilteredValue: filter.filter?.city_id.map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),       
+      ...( driverFilter.filter?.city_id && { defaultFilteredValue: driverFilter.filter?.city_id.map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),       
     },
     {
       title: 'Email',
@@ -179,7 +182,7 @@ const Drivers = () => {
         { text: 'Inactive', value: 'inactive' },
         { text: 'Active', value: 'active' },
       ],
-      ...( filter.filter?.status && { defaultFilteredValue: filter.filter?.status.map((status) => status.replace('in|', '')) }),
+      ...( driverFilter.filter?.status && { defaultFilteredValue: driverFilter.filter?.status.map((status) => status.replace('in|', '')) }),
     },
     {
         title: 'Applied Date',
@@ -188,7 +191,7 @@ const Drivers = () => {
         align: 'right',
         sorter: true,
         key: 'created_at',
-        defaultSortOrder: filter.sort?.created_at === 'asc' ? 'ascend' : 'descend',
+        defaultSortOrder: driverFilter.sort?.created_at === 'asc' ? 'ascend' : 'descend',
     },
   ];
 
@@ -213,7 +216,7 @@ const Drivers = () => {
         columns={tableColumns}
         loading={isLoading}
         rowKey="user_id"
-        pagination={filter.pagination}
+        pagination={driverFilter.pagination}
         onChange={handleTableChange}
         rowClassName={() => 'clickable-row'}
         onRow={(driverRecord) => ({

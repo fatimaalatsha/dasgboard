@@ -2,7 +2,7 @@ import create from "zustand"
 import { devtools, persist } from "zustand/middleware"
 
 let filterStore = (set) => ({
-    filter: {
+    driverFilter: {
         pagination: {
         current: 1,
         pageSize: 50,
@@ -12,7 +12,7 @@ let filterStore = (set) => ({
           created_at: 'desc',
         }
     },
-    setFilter: (filter) => set((state) => ({ filter: { ...state.filter, ...filter } })),
+    setDriverFilter: (filter) => set((state) => ({ driverFilter: { ...state.driverFilter, ...filter } })),
 })
 
 filterStore = devtools(filterStore)
