@@ -11,6 +11,8 @@ import qs from 'qs' // Import qs library
 import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
+import { useFilterStore } from '../../store' // Import filter store
+
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
     limit: params.pagination?.pageSize,
@@ -20,19 +22,11 @@ import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 dayjs.extend(utc)
 
 const Drivers = () => {
+  const filter = useFilterStore((state) => state.filter) // Get filter from store
+  const setFilter = useFilterStore((state) => state.setFilter) // Set filter to store
+
   const navigate = useNavigate();
   const [cities, setCities] = useState([])
-// get table data 
-  const [tableParams, setTableParams] = useState({ // Set table params
-      pagination: {
-      current: 1,
-      pageSize: 50,
-      showSizeChanger: true,
-      },
-      sort: {
-        created_at: 'desc',
-      }
-  })
   const [searchText, setSearchText] = useState('');
   
   // Fetch Cities list from API
@@ -54,8 +48,7 @@ const Drivers = () => {
       console.log(error)
     }  
   }
-
-  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
+  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(filter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
   
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
@@ -64,24 +57,23 @@ const Drivers = () => {
         filter[key].splice(1, 1)
       }
     })
-     
-    setTableParams({
-      ...tableParams,
-        pagination,
-        filter,
+
+    setFilter({ // Set filter to store
+      pagination,
+      filter,
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
-           [`${sorter.columnKey === 'city_id' ? 'name' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
+            [`${sorter.columnKey === 'city_id' ? 'name' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
         }
       }),
     })
   }
   
   const handleSearch = (selectedKeys) => {
-    setTableParams({
-      ...tableParams,
+    setFilter({
       full_name: selectedKeys ? selectedKeys[0] : null,
       pagination: {
+        ...filter.pagination,
         current: 1,
       }
     })
@@ -91,13 +83,12 @@ const Drivers = () => {
   
   useEffect(() => {
     let isMounted = true
-    setTableParams({// Set table params
-        ...tableParams,
-        pagination: {
-            ...tableParams.pagination,
-            total: data?.total_items,
-        }
-    }) 
+    setFilter({ // Set filter to store
+      pagination: {
+        ...filter.pagination,
+        total: data?.total_items,
+      }
+    })
     if (isMounted) {
       getCities()
     }
@@ -218,7 +209,7 @@ const Drivers = () => {
         columns={tableColumns}
         loading={isLoading}
         rowKey="user_id"
-        pagination={tableParams.pagination}
+        pagination={filter.pagination}
         onChange={handleTableChange}
         rowClassName={() => 'clickable-row'}
         onRow={(driverRecord) => ({
