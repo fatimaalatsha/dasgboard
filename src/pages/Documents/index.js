@@ -9,13 +9,20 @@ import { useNavigate } from 'react-router-dom' // Import hook from react-router
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import API from '../../api/BaseUrl' // Import API
 
+import { useFilterStore } from '../../store' // Import filter store
+
 const getUserParams = (params) => ({ // Get table params
     limit: params.pagination?.pageSize,
     page: params.pagination?.current,
     ...params,
 })
+
 dayjs.extend(utc)
+
 const Documents = () => {
+    const documentFilter = useFilterStore((state) => state.documentFilter) // Get filter from store
+    const setDocumentFilter = useFilterStore((state) => state.setDocumentFilter) // Set filter to store
+
     const navigate = useNavigate()
     const controller = new AbortController()// Create a new abort controller
     const [tableParams, setTableParams] = useState({ // Set table params
@@ -25,7 +32,7 @@ const Documents = () => {
         },
     })
     const [cities, setCities] = useState([])
-    const { data, isLoading, error, refetch } = useFetch(`v1/documents/cc?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
+    const { data, isLoading, error, refetch } = useFetch(`v1/documents/cc?${qs.stringify(getUserParams(documentFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
 
     const handleTableChange = (pagination, filter, sorter) => { // Handle table change
         Object.keys(filter).forEach(key => {
@@ -33,13 +40,19 @@ const Documents = () => {
               filter[key].unshift('in|'+ filter[key][0])
               filter[key].splice(1, 1)
             }
-          })
-        setTableParams({
+        })
+        
+        setDocumentFilter({
             pagination,
-            filter,
-            ...(Object.keys(sorter).length !== 0 && {sort: {
-                [`${sorter.columnKey === 'c.id' ? 'city' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
-            }}),
+            filter: {
+                ...filter,
+                ...( documentFilter.filter?.['c.id'] && filter['c.id']  && filter['c.id'][0] === 'in|undefined' && { 'c.id': documentFilter.filter?.['c.id'] }),
+            },
+            ...(Object.keys(sorter).length !== 0 && {
+                sort: {
+                    [`${sorter.columnKey === 'c.id' ? 'city' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
+                }
+            }),
         })
     }
 
@@ -63,10 +76,9 @@ const Documents = () => {
       }
 
     useEffect(() => {
-        setTableParams({// Set table params
-            ...tableParams,
+        setDocumentFilter({ // Set filter to store
             pagination: {
-                ...tableParams.pagination,
+                ...documentFilter.pagination,
                 total: data?.total_items,
             }
         }) 
@@ -102,6 +114,8 @@ const Documents = () => {
             key: 'c.id',
             sorter: true,
             filterSearch: true,
+            ...( documentFilter.filter?.['c.id'] && { defaultFilteredValue: documentFilter.filter?.['c.id'].map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),       
+            ...( documentFilter.sort?.city && { defaultSortOrder: documentFilter.sort?.city === 'asc' ? 'ascend' : 'descend' }),
         },
         {
             title: 'Status',
@@ -116,6 +130,7 @@ const Documents = () => {
                 { text: 'Expiring', value: 'expiring' },
 
             ],
+            ...( documentFilter.filter?.status && { defaultFilteredValue: documentFilter.filter?.status.map((status) => status.replace('in|', '')) }),
         },
         {
             title: 'Updated At',
@@ -124,6 +139,7 @@ const Documents = () => {
             align: 'right',
             sorter: true,
             key: 'updated_at',
+            ...( documentFilter.sort?.updated_at && { defaultSortOrder: documentFilter.sort?.updated_at === 'asc' ? 'ascend' : 'descend' }),
         },
     ]
 
@@ -142,7 +158,7 @@ const Documents = () => {
                 loading={isLoading}
                 rowKey={record => record.id + record.type}
                 sortDirections={['ascend', 'descend', 'ascend']}
-                pagination={tableParams.pagination}
+                pagination={documentFilter.pagination}
                 rowClassName={() => 'clickable-row'}
                 onRow={(driverRecord) => ({
                     onClick: () => navigate(`/driver/${driverRecord.user_id}`)
