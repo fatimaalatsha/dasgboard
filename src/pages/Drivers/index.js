@@ -92,6 +92,7 @@ const Drivers = () => {
     if (isMounted) {
       getCities()
     }
+    
     return () => { isMounted = false }
   }, [data])
 
@@ -151,7 +152,8 @@ const Drivers = () => {
       key: 'city_id',
       filters: cities,
       sorter: true,
-      filterSearch: true,          
+      filterSearch: true,   
+      //...( filter.filter?.city_id && { defaultFilteredValue: filter.filter?.city_id.map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),       
     },
     {
       title: 'Email',
@@ -177,6 +179,7 @@ const Drivers = () => {
         { text: 'Inactive', value: 'inactive' },
         { text: 'Active', value: 'active' },
       ],
+      ...( filter.filter?.status && { defaultFilteredValue: filter.filter?.status.map((status) => status.replace('in|', '')) }),
     },
     {
         title: 'Applied Date',
@@ -185,6 +188,7 @@ const Drivers = () => {
         align: 'right',
         sorter: true,
         key: 'created_at',
+        defaultSortOrder: filter.sort?.created_at === 'asc' ? 'ascend' : 'descend',
     },
   ];
 
