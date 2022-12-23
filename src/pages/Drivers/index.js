@@ -27,7 +27,7 @@ const Drivers = () => {
 
   const navigate = useNavigate();
   const [cities, setCities] = useState([])
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState( driverFilter.full_name || '');
   
   // Fetch Cities list from API
   const getCities = async () => {
@@ -57,12 +57,12 @@ const Drivers = () => {
         filter[key].splice(1, 1)
       }
     })
-console.log(filter.city_id[0] === 'in|undefined')
+  
     setDriverFilter({ // Set filter to store
       pagination,
       filter: {
         ...filter,
-        ...(driverFilter.filter?.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: driverFilter.filter?.city_id } ),
+        ...(driverFilter.filter?.city_id && filter.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: driverFilter.filter?.city_id } ),
       },
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
@@ -130,12 +130,14 @@ console.log(filter.city_id[0] === 'in|undefined')
       key: 'user_id',
       sorter: true,
       align: 'center',
+      ...( driverFilter.sort?.user_id && { defaultSortOrder: driverFilter.sort?.user_id === 'asc' ? 'ascend' : 'descend' }),
     },
     {
       title: 'First Name',
       dataIndex: 'first_name',
       key: 'first_name',
       sorter: true,
+      ...( driverFilter.sort?.first_name && { defaultSortOrder: driverFilter.sort?.first_name === 'asc' ? 'ascend' : 'descend' }),
     },
     {
       title: 'Last Name',
@@ -157,6 +159,7 @@ console.log(filter.city_id[0] === 'in|undefined')
       sorter: true,
       filterSearch: true,   
       ...( driverFilter.filter?.city_id && { defaultFilteredValue: driverFilter.filter?.city_id.map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),       
+      ...( driverFilter.sort?.name && { defaultSortOrder: driverFilter.sort?.name === 'asc' ? 'ascend' : 'descend' }),
     },
     {
       title: 'Email',
@@ -191,7 +194,7 @@ console.log(filter.city_id[0] === 'in|undefined')
         align: 'right',
         sorter: true,
         key: 'created_at',
-        defaultSortOrder: driverFilter.sort?.created_at === 'asc' ? 'ascend' : 'descend',
+        ...( driverFilter.sort?.created_at && { defaultSortOrder: driverFilter.sort?.created_at === 'asc' ? 'ascend' : 'descend' }),
     },
   ];
 
