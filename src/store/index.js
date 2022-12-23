@@ -15,7 +15,7 @@ let filterStore = (set) => ({
     setDriverFilter: (filter) => set((state) => ({ driverFilter: { ...state.driverFilter, ...filter } })),
 })
 
-filterStore = devtools(filterStore)
+filterStore = devtools(filterStore, { enabled: process.env.REACT_APP_ENV === "admin_dev" })
 filterStore = persist(filterStore, { name: "filter" })
 
 export const useFilterStore = create(filterStore)
