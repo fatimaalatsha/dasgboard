@@ -25,12 +25,6 @@ const Documents = () => {
 
     const navigate = useNavigate()
     const controller = new AbortController()// Create a new abort controller
-    const [tableParams, setTableParams] = useState({ // Set table params
-        pagination: {
-          current: 1,
-          pageSize: 20,
-        },
-    })
     const [cities, setCities] = useState([])
     const { data, isLoading, error, refetch } = useFetch(`v1/documents/cc?${qs.stringify(getUserParams(documentFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
 

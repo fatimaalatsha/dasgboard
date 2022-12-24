@@ -7,6 +7,7 @@ let filterStore = (set) => ({
           current: 1,
           pageSize: 50,
           showSizeChanger: true,
+          position: ['bottomRight', 'topRight'],
         },
         sort: {
           created_at: 'desc',
@@ -18,6 +19,7 @@ let filterStore = (set) => ({
           current: 1,
           pageSize: 20,
           showSizeChanger: true,
+          position: ['bottomRight', 'topRight'],
         },
         sort: {
           updated_at: 'desc',
