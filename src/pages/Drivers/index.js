@@ -11,6 +11,8 @@ import qs from 'qs' // Import qs library
 import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
+import { useFilterStore } from '../../store' // Import filter store
+
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
     limit: params.pagination?.pageSize,
@@ -20,20 +22,12 @@ import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 dayjs.extend(utc)
 
 const Drivers = () => {
+  const driverFilter = useFilterStore((state) => state.driverFilter) // Get filter from store
+  const setDriverFilter = useFilterStore((state) => state.setDriverFilter) // Set filter to store
+
   const navigate = useNavigate();
   const [cities, setCities] = useState([])
-// get table data 
-  const [tableParams, setTableParams] = useState({ // Set table params
-      pagination: {
-      current: 1,
-      pageSize: 50,
-      showSizeChanger: true,
-      },
-      sort: {
-        created_at: 'desc',
-      }
-  })
-  const [searchText, setSearchText] = useState('');
+  const [searchText, setSearchText] = useState( driverFilter.full_name || '');
   
   // Fetch Cities list from API
   const getCities = async () => {
@@ -54,8 +48,7 @@ const Drivers = () => {
       console.log(error)
     }  
   }
-
-  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
+  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(driverFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
   
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
@@ -64,24 +57,26 @@ const Drivers = () => {
         filter[key].splice(1, 1)
       }
     })
-     
-    setTableParams({
-      ...tableParams,
-        pagination,
-        filter,
+  
+    setDriverFilter({ // Set filter to store
+      pagination,
+      filter: {
+        ...filter,
+        ...(driverFilter.filter?.city_id && filter.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: driverFilter.filter?.city_id } ),
+      },
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
-           [`${sorter.columnKey === 'city_id' ? 'name' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
+            [`${sorter.columnKey === 'city_id' ? 'name' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
         }
       }),
     })
   }
   
   const handleSearch = (selectedKeys) => {
-    setTableParams({
-      ...tableParams,
+    setDriverFilter({
       full_name: selectedKeys ? selectedKeys[0] : null,
       pagination: {
+        ...driverFilter.pagination,
         current: 1,
       }
     })
@@ -91,16 +86,16 @@ const Drivers = () => {
   
   useEffect(() => {
     let isMounted = true
-    setTableParams({// Set table params
-        ...tableParams,
-        pagination: {
-            ...tableParams.pagination,
-            total: data?.total_items,
-        }
-    }) 
+    setDriverFilter({ // Set filter to store
+      pagination: {
+        ...driverFilter.pagination,
+        total: data?.total_items,
+      }
+    })
     if (isMounted) {
       getCities()
     }
+    
     return () => { isMounted = false }
   }, [data])
 
@@ -135,12 +130,14 @@ const Drivers = () => {
       key: 'user_id',
       sorter: true,
       align: 'center',
+      ...( driverFilter.sort?.user_id && { defaultSortOrder: driverFilter.sort?.user_id === 'asc' ? 'ascend' : 'descend' }),
     },
     {
       title: 'First Name',
       dataIndex: 'first_name',
       key: 'first_name',
       sorter: true,
+      ...( driverFilter.sort?.first_name && { defaultSortOrder: driverFilter.sort?.first_name === 'asc' ? 'ascend' : 'descend' }),
     },
     {
       title: 'Last Name',
@@ -160,7 +157,9 @@ const Drivers = () => {
       key: 'city_id',
       filters: cities,
       sorter: true,
-      filterSearch: true,          
+      filterSearch: true,   
+      ...( driverFilter.filter?.city_id && { defaultFilteredValue: driverFilter.filter?.city_id.map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),       
+      ...( driverFilter.sort?.name && { defaultSortOrder: driverFilter.sort?.name === 'asc' ? 'ascend' : 'descend' }),
     },
     {
       title: 'Email',
@@ -186,6 +185,7 @@ const Drivers = () => {
         { text: 'Inactive', value: 'inactive' },
         { text: 'Active', value: 'active' },
       ],
+      ...( driverFilter.filter?.status && { defaultFilteredValue: driverFilter.filter?.status.map((status) => status.replace('in|', '')) }),
     },
     {
         title: 'Applied Date',
@@ -194,6 +194,7 @@ const Drivers = () => {
         align: 'right',
         sorter: true,
         key: 'created_at',
+        ...( driverFilter.sort?.created_at && { defaultSortOrder: driverFilter.sort?.created_at === 'asc' ? 'ascend' : 'descend' }),
     },
   ];
 
@@ -218,7 +219,7 @@ const Drivers = () => {
         columns={tableColumns}
         loading={isLoading}
         rowKey="user_id"
-        pagination={tableParams.pagination}
+        pagination={driverFilter.pagination}
         onChange={handleTableChange}
         rowClassName={() => 'clickable-row'}
         onRow={(driverRecord) => ({
