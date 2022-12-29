@@ -98,7 +98,7 @@ const Cities = () => {
         })
   }
   
-    useEffect(() => {
+  useEffect(() => {
     let isMounted = true
     setTableParams({// Set table params
         ...tableParams,
@@ -111,7 +111,7 @@ const Cities = () => {
       getProvince()
     }
     return () => { isMounted = false }
-}, [data])
+  }, [data])
 
   
 // validate schema for form
@@ -147,130 +147,131 @@ const Cities = () => {
   }
   
 
-    if (error) {
-    return <div>Something went wrong...</div>
-     }
-    const columns = [
-        {
-            title: 'City Name',
-            dataIndex: 'name',
-            key: 'province_id',
-            filters: provinces,
-        },
-         {
-          title: 'Status',
-          dataIndex: 'status',
-          key: 'status',
-          align: 'center',
-           render: (status) =>
-             <Tag color={status === 'active' ? 'green' : status === 'inactive' ? 'volcano' : 'orange'}>
-                  {status.charAt(0).toUpperCase() + status.slice(1)}
-             </Tag>,
-          filters: [
-             {
-               text: 'Active',
-               value: 'active',
-             },
-             {
-               text: 'Inactive',
-                value: 'inactive',
-             },
-           ],
-        },
-          {
-            title: 'Minimum Age',
-            dataIndex: 'min_age',
-            key: 'min_age',
-            align: 'right',
+  if (error) {
+    return <>Something went wrong...</>
+  }
 
-        },
-        {
-            title: 'Vehicle Age',
-            dataIndex: 'vehicle_age',
-            key: 'vehicle_age',
-            align: 'right',
-                        
+  const columns = [
+      {
+          title: 'City Name',
+          dataIndex: 'name',
+          key: 'province_id',
+          filters: provinces,
+      },
+      {
+        title: 'Status',
+        dataIndex: 'status',
+        key: 'status',
+        align: 'center',
+          render: (status) =>
+            <Tag color={status === 'active' ? 'green' : status === 'inactive' ? 'volcano' : 'orange'}>
+                {status.charAt(0).toUpperCase() + status.slice(1)}
+            </Tag>,
+        filters: [
+            {
+              text: 'Active',
+              value: 'active',
+            },
+            {
+              text: 'Inactive',
+              value: 'inactive',
+            },
+          ],
+      },
+      {
+          title: 'Minimum Age',
+          dataIndex: 'min_age',
+          key: 'min_age',
+          align: 'right',
+
+      },
+      {
+          title: 'Vehicle Age',
+          dataIndex: 'vehicle_age',
+          key: 'vehicle_age',
+          align: 'right',
+                      
       },        
-    ]
-    return (
-      <Card title={'Cities'} style={{ margin: 15 }}>
-            <Button
-                onClick={showModal}
-                type="primary"
-                style={{
-                  marginBottom: 20,
-                  
-                }}
-               >
-                Add a New City
-            </Button>
-          
-        <Formik
-        initialValues={initialValues}
-          validationSchema={validationSchema}
-          onSubmit={async (values, actions) => {
-                    await createCity(values).then((response) => {
-                      if (response) {
-                        actions.resetForm({
-                          values: {
-                            name: '',
-                            province_id: '',
-                            min_age: '',
-                            vehicle_age: '',
-                            email: '',
-                            status: '',
-                          }
-                        })
-                        refetch()
-                        }
-                      setOpen(false)
-                    })
-         }}           
-        >
-                <Form > 
-            <Modal
-                title="Add New City"
-                destroyOnClose = {true}
-                open={open}
-                confirmLoading={confirmLoading}
-                onCancel={handleCancel}
-                footer={[
-                                        <Button key="cancel" onClick={() =>  setOpen(false)}>
-                                            Cancel
-                                        </Button>,
-                                        <SubmitWrapper key="submit" type="primary" >
-                                            Add City
-                                        </SubmitWrapper>,
-                                    ]}
+  ]
 
-                    >
-                    <Space direction='vertical' style={{ width: '100%'}}>
-                      <SelectWrapper type="text" name="province_id" datasource={provinces} placeholder="Province" />
-                      <InputWrapper type="text" name="name" placeholder="City Name" />
-                      <InputWrapper type="text" name="email" placeholder="City Email" />
-                      <SelectWrapper type="text" datasource={status} name="status" placeholder="Status" />
-                      <InputWrapper type="text" name="min_age" placeholder="Driver Minimum Age" />
-                      <InputWrapper type="text" name="vehicle_age" placeholder="Maximum Vehicle Age" />
-                    </Space>
-                  </Modal>
-                </Form>
-              </Formik>
-           
-            <Table
-            dataSource={data.items}
-            columns={columns}
-            loading={isLoading}
-            pagination={tableParams.pagination}
-            sortDirections={['ascend', 'descend', 'ascend']}
-            onChange={handleTableChange}
-            rowClassName={() => 'clickable-row'}
-            rowKey={(record) => record.city_id}
-            onRow={(record) => ({
-                    onClick: () => navigate(`/city/${record.city_id}`)
-          })}
-            />      
-      </Card>
-    )
+  return (
+    <Card title={'Cities'} style={{ margin: 15 }}>
+          <Button
+              onClick={showModal}
+              type="primary"
+              style={{
+                marginBottom: 20,
+                
+              }}
+              >
+              Add a New City
+          </Button>
+        
+      <Formik
+      initialValues={initialValues}
+        validationSchema={validationSchema}
+        onSubmit={async (values, actions) => {
+          await createCity(values).then((response) => {
+            if (response) {
+              actions.resetForm({
+                values: {
+                  name: '',
+                  province_id: '',
+                  min_age: '',
+                  vehicle_age: '',
+                  email: '',
+                  status: '',
+                }
+              })
+              refetch()
+              }
+            setOpen(false)
+          })
+        }}           
+      >
+              <Form > 
+          <Modal
+              title="Add New City"
+              destroyOnClose = {true}
+              open={open}
+              confirmLoading={confirmLoading}
+              onCancel={handleCancel}
+              footer={[
+                <Button key="cancel" onClick={() =>  setOpen(false)}>
+                    Cancel
+                </Button>,
+                <SubmitWrapper key="submit" type="primary" >
+                    Add City
+                </SubmitWrapper>,
+              ]}
+                >
+                  <Space direction='vertical' style={{ width: '100%'}}>
+                    <SelectWrapper type="text" name="province_id" datasource={provinces} placeholder="Province" />
+                    <InputWrapper type="text" name="name" placeholder="City Name" />
+                    <InputWrapper type="text" name="email" placeholder="City Email" />
+                    <SelectWrapper type="text" datasource={status} name="status" placeholder="Status" />
+                    <InputWrapper type="text" name="min_age" placeholder="Driver Minimum Age" />
+                    <InputWrapper type="text" name="vehicle_age" placeholder="Maximum Vehicle Age" />
+                  </Space>
+                </Modal>
+              </Form>
+            </Formik>
+          
+          <Table
+          dataSource={data.items}
+          columns={columns}
+          loading={isLoading}
+          pagination={tableParams.pagination}
+          sortDirections={['ascend', 'descend', 'ascend']}
+          onChange={handleTableChange}
+          rowClassName={() => 'clickable-row'}
+          rowKey={(record) => record.city_id}
+          onRow={(record) => ({
+                  onClick: () => navigate(`/city/${record.city_id}`)
+        })}
+          />      
+    </Card>
+  )
 }
 
 export default Cities
