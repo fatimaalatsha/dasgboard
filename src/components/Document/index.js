@@ -185,6 +185,7 @@ const Document = (props) => {
                 .then(() => {
                     setIsModalVisible(false)
                     setSubmitting(false)
+                    props.refetch()
                 })
             }}
         >
