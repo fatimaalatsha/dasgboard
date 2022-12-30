@@ -108,8 +108,8 @@ const tableColumns = [
         title: 'Status',
         dataIndex: 'completed',
         align: 'center',
-    render: (completed) => <Tag color={completed === true ? 'green' : 'volcano'}>
-         {completed === true ? 'Completed' : 'Pending'}
+    render: (completed) => <Tag color={completed ? 'green' : 'volcano'}>
+         {completed ? 'Completed' : 'Pending'}
       </Tag>,
     },
   
