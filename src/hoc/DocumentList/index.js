@@ -1,7 +1,8 @@
 const DocumentList = ( Component ) => ({...props}) => {
-    const { data, sub, updateText } = props
+    const { data, sub, updateText, refetch } = props
     data.sub = sub
     data.updateText = updateText
+    data.refetch = refetch
 
     /**
      * Set the status of the document

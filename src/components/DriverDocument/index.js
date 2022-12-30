@@ -43,7 +43,7 @@ const DriverDocument = ({ id, sub }) => {
     <>
     {
       data.items.map((item, index) => (
-        <Document key={index} data={item} sub={sub} updateText={updateText} />
+        <Document key={index} data={item} sub={sub} updateText={updateText} refetch={refetch} />
       ))
     }
     </>
