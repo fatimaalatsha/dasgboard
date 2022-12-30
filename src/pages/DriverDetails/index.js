@@ -121,7 +121,7 @@ const DriverDetails = () => {
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
-  
+  console.log(data)
   const tooltipConfig = {
     placement: 'top',
     color: 'orange',
@@ -330,6 +330,9 @@ const DriverDetails = () => {
           </Descriptions.Item>
           <Descriptions.Item label="Date of Birth">
             <EditableDate name='birth_date' value={data.date_birth} updateCallback={updateText} />
+          </Descriptions.Item>
+          <Descriptions.Item label="HST Number">
+            <EditableText name='hst_number' value={data.hst_number} updateCallback={updateText} />
           </Descriptions.Item>
       </Descriptions>
       </PageHeader>
