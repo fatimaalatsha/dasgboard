@@ -8,6 +8,7 @@ import {
     Tag,
     Typography,
     Descriptions,
+    Empty,
 } from 'antd' // Import antd components
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form } from 'formik' // Import Formik form components
@@ -21,12 +22,12 @@ import EditableDate from '../../components/EditableDate' // Import Driver contac
 import API from '../../api/BaseUrl' // Import API base URL
 
 const { Panel } = Collapse // Destructure Panel from Collapse
-const { Title } = Typography // Destructure Title from Typography
+const { Text } = Typography // Destructure Text from Typography
 
 const RejectFeeder = ({name}) => {
     const reasons = [
-        {value: 'wrong document', text: 'Wrong document'},
-        {value: 'image is too blurry', text: 'Image is too blurry'},
+        { value: 'wrong document', text: 'Wrong document' },
+        { value: 'image is too blurry', text: 'Image is too blurry' },
         { value: 'expired document', text: 'Expired document' },
         { value: 'unqualified licence class', text: 'Unqualified licence class' },
         { value: 'Below 25 - under age requirements', text: 'Below 25 - Under age requirements' },
@@ -111,7 +112,7 @@ const Document = (props) => {
             }
             >
                 <Row gutter={16}>
-                    <Col span={ props.document?.has_expiration ? 12 : 24}>
+                    <Col span={12}>
                         <Row justify='center'>
                             <DocViewer objectKey={`${props.sub}/${props.key1}`} />
                         </Row>
@@ -123,27 +124,37 @@ const Document = (props) => {
                             )
                         }
                     </Col>
-                    { props.document?.has_expiration && (
-                        <Col span={12}>
-                            <Descriptions title='Document Details' layout='vertical' labelStyle={{ fontWeight:'bold' }}>
+                    <Col span={12}>
+                        <Descriptions title='Document Details' layout='vertical' labelStyle={{ fontWeight:'bold' }}>
+                            { props.document?.has_expiration && (
                                 <Descriptions.Item label="Expiration Date">
                                     <EditableDate 
                                         name='expiration_date' 
                                         value={props.expiration_date} 
                                         updateCallback={async (value) => {
                                             await props.updateText(value, props.document.type, props.id)
-                                                    .then((response) => {
-                                                        return response
-                                                    })
-                                                    .catch((err) => {
-                                                        console.log(err)
-                                                    })
+                                                .then((response) => {
+                                                    return response
+                                                })
+                                                .catch((err) => {
+                                                    console.log(err)
+                                                })
                                         }} 
                                     />
                                 </Descriptions.Item>
-                            </Descriptions>
-                        </Col>
-                    )}
+                            )}
+                            { props.notes_public && (
+                                <Descriptions.Item label="Rejection Reason">
+                                    <Text style={{ textTransform: 'capitalize' }} >{ props.notes_public }</Text>
+                                </Descriptions.Item>
+                            )}
+                            { !props.document?.has_expiration && !props.notes_public && (
+                                <Descriptions.Item>
+                                    <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
+                                </Descriptions.Item>
+                            )}
+                        </Descriptions>
+                    </Col>
 
                 </Row>
                 <Row gutter={16}>
@@ -174,6 +185,7 @@ const Document = (props) => {
                 .then(() => {
                     setIsModalVisible(false)
                     setSubmitting(false)
+                    props.refetch()
                 })
             }}
         >
