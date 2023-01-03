@@ -39,6 +39,7 @@ const Documents = () => {
         setDocumentFilter({
             pagination,
             filter: {
+                ...documentFilter.filter,
                 ...filter,
                 ...( documentFilter.filter?.['c.id'] && filter['c.id']  && filter['c.id'][0] === 'in|undefined' && { 'c.id': documentFilter.filter?.['c.id'] }),
             },
