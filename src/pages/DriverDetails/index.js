@@ -331,6 +331,9 @@ const DriverDetails = () => {
           <Descriptions.Item label="Date of Birth">
             <EditableDate name='birth_date' value={data.date_birth} updateCallback={updateText} />
           </Descriptions.Item>
+          <Descriptions.Item label="HST Number">
+            <EditableText name='hst_number' value={data.hst_number} updateCallback={updateText} />
+          </Descriptions.Item>
       </Descriptions>
       </PageHeader>
       <Divider orientation="left"><Title level={4}>Driver Documents</Title></Divider>
