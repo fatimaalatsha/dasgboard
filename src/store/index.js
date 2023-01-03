@@ -23,6 +23,9 @@ let filterStore = (set) => ({
         },
         sort: {
           updated_at: 'desc',
+        },
+        filter: {
+          current: 'eq|true',
         }
     },
     setDocumentFilter: (filter) => set((state) => ({ documentFilter: { ...state.documentFilter, ...filter } })),
