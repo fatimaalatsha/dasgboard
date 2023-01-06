@@ -221,10 +221,9 @@ const Document = (props) => {
                     <Form>
                         <Space direction='vertical' style={{ width: '100%' }}>
                             <RejectFeeder name="notes_public" />
-                            <Text strong > Private Notes </Text>
-                            <Text mark > These notes will not be visible to the user </Text>
-                            <Text> Include short note about the rejection reason </Text>
-                            <Field name="notes" as={Input} placeholder="Other Notes" />
+                            <Text strong > Private Note </Text>
+                            <Text mark > This note will not be visible to the user </Text>
+                            <Field name="notes" as={Input} placeholder="Include short note about the rejection reason" />
                         </Space>
                     </Form>
             </Modal>
