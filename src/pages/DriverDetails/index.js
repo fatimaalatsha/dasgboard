@@ -17,8 +17,14 @@ import {
   Avatar,
   Spin,
   Image,
+  Switch,
+  Row,
+  Col,
+  Popconfirm,
+  Drawer,
+  Empty,
 } from 'antd' // Import antd components
-import { SendOutlined, UserOutlined } from '@ant-design/icons' // Import icon
+import { SendOutlined, QuestionCircleOutlined } from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
@@ -121,6 +127,7 @@ const DriverDetails = () => {
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
+  const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   
   const tooltipConfig = {
     placement: 'top',
@@ -306,46 +313,54 @@ const DriverDetails = () => {
           </Button>,
         ]}
       >
-      <Descriptions labelStyle={{ fontWeight:'bold' }}  >
-          <Descriptions.Item label="First Name">
-            <EditableText name='first_name' value={data.first_name} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Last Name">
-            <EditableText name='last_name' value={data.last_name} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Email">
-            <EditableText name='email' value={data.email} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Phone Number">
-            <EditableText name='phone' value={data.phone} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Licence Number">
-            <EditableText name='license_number' value={data.license_number} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="City">
-            <SelectFeeder value={data.city?.name} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Address">
-            <EditableText name='address' value={data.address} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Date of Birth">
-            <EditableDate name='birth_date' value={data.date_birth} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="HST Number">
-            <EditableText name='hst_number' value={data.hst_number} updateCallback={updateText} />
-          </Descriptions.Item>
-      </Descriptions>
+        <Descriptions labelStyle={{ fontWeight:'bold' }}  >
+            <Descriptions.Item label="First Name">
+              <EditableText name='first_name' value={data.first_name} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Last Name">
+              <EditableText name='last_name' value={data.last_name} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Email">
+              <EditableText name='email' value={data.email} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Phone Number">
+              <EditableText name='phone' value={data.phone} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Licence Number">
+              <EditableText name='license_number' value={data.license_number} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="City">
+              <SelectFeeder value={data.city?.name} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Address">
+              <EditableText name='address' value={data.address} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Date of Birth">
+              <EditableDate name='birth_date' value={data.date_birth} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="HST Number">
+              <EditableText name='hst_number' value={data.hst_number} updateCallback={updateText} />
+            </Descriptions.Item>
+        </Descriptions>
       </PageHeader>
-      <Divider orientation="left"><Title level={4}>Driver Documents</Title></Divider>
+      <Row>
+        <Col flex={4}>
+          <Divider orientation="left">
+            <Title level={4} style={{ marginBottom: 26.6 }}>Driver Documents</Title>
+          </Divider>
+        </Col>
+        <EnableAdditionalDocs />
+      </Row>
         <Space 
           style={{
             display: 'flex',
             justifyItems: 'flex-end',
-            justifyContent: 'flex-end',
+            justifyContent: 'space-between',
             margin: ['16px 0'],
           }}
         >
-        <Button type="primary" icon={<SendOutlined />} loading={loading}  onClick={() => setOpen(true)}>Notify Driver</Button>
+          <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
+          <Button type="primary" icon={<SendOutlined />} loading={loading}  onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
         <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
@@ -381,7 +396,7 @@ const DriverDetails = () => {
       <Divider orientation="left"><Title level={4}>Driver History</Title></Divider>
       <DriverTimeline id={id}/>
 
-      {/* Notify Driver Modal */}
+    {/* Notify Driver Modal */}
       <Formik
         initialValues={{ message: '',}}
         onSubmit={ async (values, { setSubmitting }) => {
@@ -437,9 +452,86 @@ const DriverDetails = () => {
           </Modal>
         </FormikForm>
       )}
-    </Formik>
+      </Formik>
+    {/* End Notify Driver Modal */}
+
+    { /* Additional Documents Drawwer */ }
+      <AdditionalDocsDrawer open={documentDrawer} setOpen={setDocumentDrawer} />
+    { /* End Additional Documents Drawwer */}
     </Card>
   )
-};
+}
+
+const EnableAdditionalDocs = () => { // TODO: Implement enable additional docs endpoint
+  const [addDocState, setAddDocState] = useState({
+    open: false,
+    confirmLoading: false,
+    enabled: false,
+  })
+
+  const showPopconfirm = () => {
+    setAddDocState({
+      ...addDocState,
+      open: true,
+    })
+  }
+
+  const handleOk = () => {
+    setAddDocState({
+      ...addDocState,
+      confirmLoading: true,
+    })
+    setTimeout(() => {
+      setAddDocState({
+        ...addDocState,
+        open: false,
+        confirmLoading: false,
+        enabled: !addDocState.enabled,
+      })
+    }, 2000)
+  }
+
+  const handleCancel = () => {
+    setAddDocState({
+      ...addDocState,
+      open: false,
+    })
+  }
+
+  return (
+    <Space style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginLeft: 8}}>
+      Enable Additional Documents?
+      <Popconfirm
+        title="Additional Documents"
+        description={`Are you sure you want to ${addDocState.enabled ? 'disable' : 'enable'} additional documents?`}
+        icon={ <QuestionCircleOutlined style={{ color: 'red' }} /> }
+        open={addDocState.open}
+        onConfirm={handleOk}
+        okButtonProps={{
+          loading: addDocState.confirmLoading,
+        }}
+        onCancel={handleCancel}
+    >
+      <Switch checked={addDocState.enabled} loading={addDocState.confirmLoading} onChange={showPopconfirm}/>
+    </Popconfirm>
+    </Space>
+  )
+}
+
+const AdditionalDocsDrawer = ({ open, setOpen }) => {
+
+  return (
+    <Drawer
+      title="Additional Documents"
+      placement="right"
+      size="large"
+      onClose={() => setOpen(false)}
+      destroyOnClose
+      open={open}
+    >
+      <Empty />
+    </Drawer>
+  )
+}
 
 export default DriverDetails;
