@@ -503,7 +503,11 @@ const EnableAdditionalDocs = () => { // TODO: Implement enable additional docs e
       Enable Additional Documents?
       <Popconfirm
         title="Additional Documents"
-        description={`Are you sure you want to ${addDocState.enabled ? 'disable' : 'enable'} additional documents?`}
+        description={
+        <Text>
+          {`Are you sure you want to `} <Text mark strong>{addDocState.enabled ? 'disable' : 'enable'}</Text> {`additional documents?`}
+        </Text>
+      }
         icon={ <QuestionCircleOutlined style={{ color: 'red' }} /> }
         open={addDocState.open}
         onConfirm={handleOk}
