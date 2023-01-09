@@ -21,6 +21,8 @@ import {
   Row,
   Col,
   Popconfirm,
+  Drawer,
+  Empty,
 } from 'antd' // Import antd components
 import { SendOutlined, QuestionCircleOutlined } from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
@@ -125,6 +127,7 @@ const DriverDetails = () => {
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
+  const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   
   const tooltipConfig = {
     placement: 'top',
@@ -356,7 +359,7 @@ const DriverDetails = () => {
             margin: ['16px 0'],
           }}
         >
-          <Button type="primary">View Additional Documents</Button>
+          <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
           <Button type="primary" icon={<SendOutlined />} loading={loading}  onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
@@ -393,7 +396,7 @@ const DriverDetails = () => {
       <Divider orientation="left"><Title level={4}>Driver History</Title></Divider>
       <DriverTimeline id={id}/>
 
-      {/* Notify Driver Modal */}
+    {/* Notify Driver Modal */}
       <Formik
         initialValues={{ message: '',}}
         onSubmit={ async (values, { setSubmitting }) => {
@@ -449,7 +452,12 @@ const DriverDetails = () => {
           </Modal>
         </FormikForm>
       )}
-    </Formik>
+      </Formik>
+    {/* End Notify Driver Modal */}
+
+    { /* Additional Documents Drawwer */ }
+      <AdditionalDocsDrawer open={documentDrawer} setOpen={setDocumentDrawer} />
+    { /* End Additional Documents Drawwer */}
     </Card>
   )
 }
@@ -507,6 +515,22 @@ const EnableAdditionalDocs = () => { // TODO: Implement enable additional docs e
       <Switch checked={addDocState.enabled} loading={addDocState.confirmLoading} onChange={showPopconfirm}/>
     </Popconfirm>
     </Space>
+  )
+}
+
+const AdditionalDocsDrawer = ({ open, setOpen }) => {
+
+  return (
+    <Drawer
+      title="Additional Documents"
+      placement="right"
+      size="large"
+      onClose={() => setOpen(false)}
+      destroyOnClose
+      open={open}
+    >
+      <Empty />
+    </Drawer>
   )
 }
 
