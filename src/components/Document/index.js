@@ -9,9 +9,11 @@ import {
     Typography,
     Descriptions,
     Empty,
+    Input,
+    Space,
 } from 'antd' // Import antd components
 import { Auth } from 'aws-amplify'// Import Amplify auth method
-import { Formik, Form } from 'formik' // Import Formik form components
+import { Formik, Form , Field} from 'formik' // Import Formik form components
 import { object, string } from 'yup'
 
 import DocumentList from "../../hoc/DocumentList" // import DocumentList HOC
@@ -38,7 +40,6 @@ const RejectFeeder = ({name}) => {
         { value: 'failed background check', text: 'Failed background check' },
         { value: 'unqualified driver history/abstract', text: 'Unqualified driver history/abstract' },
     ]
-
     return (
         <SelectWrapper name={name} datasource={reasons} placeholder="Select a reason to reject the document" />
     )
@@ -61,9 +62,10 @@ const Document = (props) => {
 
     const rejectSchema = object().shape({
         notes_public: string().required('Required'),
+        notes: string(),
     })
 
-    const changeDocStatus = async (status, type, id, notes = '') => {
+    const changeDocStatus = async (status, type, id, notes_public, notes) => {
         try {
             const auth = await Auth.currentSession()// Get current session
             const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -76,7 +78,10 @@ const Document = (props) => {
             const body = {
                 status,
                 type,
-                ...( notes && { notes_public: notes })
+                notes: notes ,
+                // ...( notes && { notes_public: notes_public })
+                notes_public: notes_public
+
             }
             const response = await API.post(`/v1/documents/cc/${id}`, body, options)
             const data = await response.data
@@ -99,6 +104,7 @@ const Document = (props) => {
     const handleCollapseChange = (key) => { // Handle collapse change
         setDocumentStatus({...documentStatus, active: key})
     }
+    
 
     return (
         <>
@@ -143,16 +149,22 @@ const Document = (props) => {
                                     />
                                 </Descriptions.Item>
                             )}
-                            { props.notes_public && (
-                                <Descriptions.Item label="Rejection Reason">
-                                    <Text style={{ textTransform: 'capitalize' }} >{ props.notes_public }</Text>
-                                </Descriptions.Item>
+                                {props.notes_public && (
+                                    <>
+                                    <Descriptions.Item label="Rejection Reason">
+                                        <Text style={{ textTransform: 'capitalize' }} >{ props.notes_public }</Text>
+                                        </Descriptions.Item>
+                                    <Descriptions.Item label="Notes">
+                                        <Text>{ props.notes }</Text>
+                                                </Descriptions.Item>
+                                    </>
                             )}
                             { !props.document?.has_expiration && !props.notes_public && (
                                 <Descriptions.Item>
                                     <Empty image={Empty.PRESENTED_IMAGE_SIMPLE} />
                                 </Descriptions.Item>
-                            )}
+                                )}
+                            
                         </Descriptions>
                     </Col>
 
@@ -177,11 +189,13 @@ const Document = (props) => {
         </Collapse>
         <Formik
             initialValues={{
-                notes_public: '',
+                    notes_public: '',
+                    notes: '',
             }}
             validationSchema={rejectSchema}
-            onSubmit={async (values, { setSubmitting }) => {
-                await changeDocStatus('rejected', props.document.type, props.id, values.notes_public)
+                onSubmit={async (values, { setSubmitting }) => {
+                console.log(values)
+                await changeDocStatus('rejected', props.document.type, props.id, values.notes_public, values.notes)
                 .then(() => {
                     setIsModalVisible(false)
                     setSubmitting(false)
@@ -205,7 +219,12 @@ const Document = (props) => {
                 ]}
             >
                     <Form>
-                        <RejectFeeder name="notes_public" />
+                        <Space direction='vertical' style={{ width: '100%' }}>
+                            <RejectFeeder name="notes_public" />
+                            <Text strong > Private Note </Text>
+                            <Text mark > This note will not be visible to the user </Text>
+                            <Field name="notes" as={Input} placeholder="Include short note about the rejection reason" />
+                        </Space>
                     </Form>
             </Modal>
         </Formik>
