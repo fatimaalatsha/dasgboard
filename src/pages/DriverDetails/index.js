@@ -17,8 +17,14 @@ import {
   Avatar,
   Spin,
   Image,
+  Switch,
+  Row,
+  Col,
+  Popconfirm,
+  Drawer,
+  Empty,
 } from 'antd' // Import antd components
-import { SendOutlined, UserOutlined } from '@ant-design/icons' // Import icon
+import { SendOutlined, QuestionCircleOutlined } from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
@@ -31,11 +37,12 @@ import EditableSelect from '../../components/EditableSelect' // Import editable 
 import DriverDocument from '../../components/DriverDocument' // Import Document viewers component
 import DriverTimeline from '../../components/DriverTimeline' // Import Timeline 
 import DriverVehicle from '../../components/DriverVehicle' // Import Driver Vehicle component
+import DocViewer from '../../components/DocViewer' // Import DocViewer component
 
 import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
-import { isAllApproved } from '../../utils/doc-status' // Import isAllApproved function
+import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs } from '../../utils/doc-status' // Import isAllApproved function
 import { deleteDriver, updateStatus, notifyDriver } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
 
@@ -121,6 +128,7 @@ const DriverDetails = () => {
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
+  const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   
   const tooltipConfig = {
     placement: 'top',
@@ -306,46 +314,54 @@ const DriverDetails = () => {
           </Button>,
         ]}
       >
-      <Descriptions labelStyle={{ fontWeight:'bold' }}  >
-          <Descriptions.Item label="First Name">
-            <EditableText name='first_name' value={data.first_name} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Last Name">
-            <EditableText name='last_name' value={data.last_name} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Email">
-            <EditableText name='email' value={data.email} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Phone Number">
-            <EditableText name='phone' value={data.phone} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Licence Number">
-            <EditableText name='license_number' value={data.license_number} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="City">
-            <SelectFeeder value={data.city?.name} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Address">
-            <EditableText name='address' value={data.address} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="Date of Birth">
-            <EditableDate name='birth_date' value={data.date_birth} updateCallback={updateText} />
-          </Descriptions.Item>
-          <Descriptions.Item label="HST Number">
-            <EditableText name='hst_number' value={data.hst_number} updateCallback={updateText} />
-          </Descriptions.Item>
-      </Descriptions>
+        <Descriptions labelStyle={{ fontWeight:'bold' }}  >
+            <Descriptions.Item label="First Name">
+              <EditableText name='first_name' value={data.first_name} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Last Name">
+              <EditableText name='last_name' value={data.last_name} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Email">
+              <EditableText name='email' value={data.email} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Phone Number">
+              <EditableText name='phone' value={data.phone} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Licence Number">
+              <EditableText name='license_number' value={data.license_number} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="City">
+              <SelectFeeder value={data.city?.name} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Address">
+              <EditableText name='address' value={data.address} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Date of Birth">
+              <EditableDate name='birth_date' value={data.date_birth} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="HST Number">
+              <EditableText name='hst_number' value={data.hst_number} updateCallback={updateText} />
+            </Descriptions.Item>
+        </Descriptions>
       </PageHeader>
-      <Divider orientation="left"><Title level={4}>Driver Documents</Title></Divider>
+      <Row>
+        <Col flex={4}>
+          <Divider orientation="left">
+            <Title level={4} style={{ marginBottom: 26.6 }}>Driver Documents</Title>
+          </Divider>
+        </Col>
+        <EnableAdditionalDocs status={data.additional_docs} id={id} refetch={refetch} />
+      </Row>
         <Space 
           style={{
             display: 'flex',
             justifyItems: 'flex-end',
-            justifyContent: 'flex-end',
+            justifyContent: 'space-between',
             margin: ['16px 0'],
           }}
         >
-        <Button type="primary" icon={<SendOutlined />} loading={loading}  onClick={() => setOpen(true)}>Notify Driver</Button>
+          <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
+          <Button type="primary" icon={<SendOutlined />} loading={loading}  onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
         <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
@@ -381,7 +397,7 @@ const DriverDetails = () => {
       <Divider orientation="left"><Title level={4}>Driver History</Title></Divider>
       <DriverTimeline id={id}/>
 
-      {/* Notify Driver Modal */}
+    {/* Notify Driver Modal */}
       <Formik
         initialValues={{ message: '',}}
         onSubmit={ async (values, { setSubmitting }) => {
@@ -437,9 +453,194 @@ const DriverDetails = () => {
           </Modal>
         </FormikForm>
       )}
-    </Formik>
+      </Formik>
+    {/* End Notify Driver Modal */}
+
+    { /* Additional Documents Drawwer */ }
+      <AdditionalDocsDrawer open={documentDrawer} setOpen={setDocumentDrawer} driverid={id} sub={data.sub_id} />
+    { /* End Additional Documents Drawwer */}
     </Card>
   )
-};
+}
+
+const EnableAdditionalDocs = ({status, id, refetch}) => { // TODO: Implement enable additional docs endpoint
+  const [addDocState, setAddDocState] = useState({
+    open: false,
+    confirmLoading: false,
+    enabled: status,
+  })
+
+  const showPopconfirm = () => {
+    setAddDocState({
+      ...addDocState,
+      open: true,
+    })
+  }
+
+  const handleOk = async () => {
+    setAddDocState({
+      ...addDocState,
+      confirmLoading: true,
+    })
+    addDocState.enabled ? 
+    await disableAdditionalDocs(id).then((response) => {
+      if(response) {
+        message.success('Additional documents disabled.')
+       } else {
+        message.error('Something went wrong, please try again.')
+        }
+      })
+      : 
+    await enableAdditionalDocs(id).then((response) => {
+      if(response) {
+        message.success('Additional documents enabled.')
+        } else {
+          message.error('Something went wrong, please try again.')
+        }
+      })
+    setAddDocState({
+      ...addDocState,
+      open: false,
+      confirmLoading: false,
+      enabled: !addDocState.enabled,
+    })
+    refetch()
+  }
+
+  const handleCancel = () => {
+    setAddDocState({
+      ...addDocState,
+      open: false,
+    })
+  }
+
+  return (
+    <Space style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginLeft: 8}}>
+      Enable Additional Documents?
+      <Popconfirm
+        title="Additional Documents"
+        description={
+        <Text>
+          {`Are you sure you want to `} <Text mark strong>{addDocState.enabled ? 'disable' : 'enable'}</Text> {`additional documents?`}
+        </Text>
+      }
+        icon={ <QuestionCircleOutlined style={{ color: 'red' }} /> }
+        open={addDocState.open}
+        onConfirm={handleOk}
+        okButtonProps={{
+          loading: addDocState.confirmLoading,
+        }}
+        onCancel={handleCancel}
+    >
+      <Switch checked={addDocState.enabled} loading={addDocState.confirmLoading} onChange={showPopconfirm}/>
+    </Popconfirm>
+    </Space>
+  )
+}
+
+const AdditionalDocsDrawer = ({ open, setOpen, driverid, sub }) => {
+
+  return (
+    <Drawer
+      title="Additional Documents"
+      placement="right"
+      size="large"
+      onClose={() => setOpen(false)}
+      destroyOnClose
+      open={open}
+    >
+      <AdditionalDocsFeeder driverid={driverid} sub={sub} />
+    </Drawer>
+  )
+}
+
+const AdditionalDocsFeeder = ({ driverid, sub }) => {
+  const { data, isLoading, error, refetch } = useFetch(`/v1/documents/cc/additional/${driverid}`)// Call useFetch custom hook
+
+  const PopDeleteButton = ({id}) => {
+    const [ popState, setPopState ] = useState({
+      open: false,
+      confirmLoading: false,
+    })
+
+    const showPopconfirm = () => {
+      setPopState({
+        ...popState,
+        open: true,
+      })
+    }
+  
+    const handleOk = async () => {
+      setPopState({
+        ...popState,
+        confirmLoading: true,
+      })
+      await deleteAdditionalDoc(id).then((response) => {
+        if(response) {
+          message.success('Document deleted successfully')
+        } else {
+          message.error('Error deleting document')
+        }
+        setPopState({
+          ...popState,
+          open: false,
+          confirmLoading: false,
+        })
+        refetch()
+      })
+    }
+  
+    const handleCancel = () => {
+      setPopState({
+        ...popState,
+        open: false,
+      })
+    }
+
+    return (
+      <Popconfirm
+        title="Delete Document"
+        description="Are you sure to delete this document?"
+        placement="bottom"
+        open={popState.open}
+        onConfirm={handleOk}
+        okButtonProps={{
+          loading: popState.confirmLoading,
+        }}
+        onCancel={handleCancel}
+        icon={
+          <QuestionCircleOutlined
+            style={{
+              color: 'red',
+            }}
+          />
+        }
+      >
+        <Button danger type="primary" onClick={showPopconfirm} >Delete</Button>
+      </Popconfirm>
+    )
+  }
+
+  if (isLoading) return <Spin />
+
+  if (error) return <Text type="danger">Something went wrong</Text>
+
+  return (
+    <Space direction="vertical" size="large">
+      {
+        data.items.length === 0 ? <Empty /> :
+        data.items.map((doc, idx) => (
+          <Space direction="vertical" key={idx}>
+            <Space style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between'}}>
+              <Title level={4}>{doc.custom_name}</Title>
+              <PopDeleteButton id={doc.id} refetch={refetch} />
+            </Space>
+            <DocViewer key={idx} objectKey={`${sub}/${doc.key1}`} />
+          </Space>
+        ))
+      }
+    </Space>
+  )
+}
 
 export default DriverDetails;
