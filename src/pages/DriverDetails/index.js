@@ -37,11 +37,12 @@ import EditableSelect from '../../components/EditableSelect' // Import editable 
 import DriverDocument from '../../components/DriverDocument' // Import Document viewers component
 import DriverTimeline from '../../components/DriverTimeline' // Import Timeline 
 import DriverVehicle from '../../components/DriverVehicle' // Import Driver Vehicle component
+import DocViewer from '../../components/DocViewer' // Import DocViewer component
 
 import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
-import { isAllApproved } from '../../utils/doc-status' // Import isAllApproved function
+import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs } from '../../utils/doc-status' // Import isAllApproved function
 import { deleteDriver, updateStatus, notifyDriver } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
 
@@ -349,7 +350,7 @@ const DriverDetails = () => {
             <Title level={4} style={{ marginBottom: 26.6 }}>Driver Documents</Title>
           </Divider>
         </Col>
-        <EnableAdditionalDocs />
+        <EnableAdditionalDocs status={data.additional_docs} id={id} refetch={refetch} />
       </Row>
         <Space 
           style={{
@@ -456,17 +457,17 @@ const DriverDetails = () => {
     {/* End Notify Driver Modal */}
 
     { /* Additional Documents Drawwer */ }
-      <AdditionalDocsDrawer open={documentDrawer} setOpen={setDocumentDrawer} />
+      <AdditionalDocsDrawer open={documentDrawer} setOpen={setDocumentDrawer} driverid={id} sub={data.sub_id} />
     { /* End Additional Documents Drawwer */}
     </Card>
   )
 }
 
-const EnableAdditionalDocs = () => { // TODO: Implement enable additional docs endpoint
+const EnableAdditionalDocs = ({status, id, refetch}) => { // TODO: Implement enable additional docs endpoint
   const [addDocState, setAddDocState] = useState({
     open: false,
     confirmLoading: false,
-    enabled: false,
+    enabled: status,
   })
 
   const showPopconfirm = () => {
@@ -476,19 +477,34 @@ const EnableAdditionalDocs = () => { // TODO: Implement enable additional docs e
     })
   }
 
-  const handleOk = () => {
+  const handleOk = async () => {
     setAddDocState({
       ...addDocState,
       confirmLoading: true,
     })
-    setTimeout(() => {
-      setAddDocState({
-        ...addDocState,
-        open: false,
-        confirmLoading: false,
-        enabled: !addDocState.enabled,
+    addDocState.enabled ? 
+    await disableAdditionalDocs(id).then((response) => {
+      if(response) {
+        message.success('Additional documents disabled.')
+       } else {
+        message.error('Something went wrong, please try again.')
+        }
       })
-    }, 2000)
+      : 
+    await enableAdditionalDocs(id).then((response) => {
+      if(response) {
+        message.success('Additional documents enabled.')
+        } else {
+          message.error('Something went wrong, please try again.')
+        }
+      })
+    setAddDocState({
+      ...addDocState,
+      open: false,
+      confirmLoading: false,
+      enabled: !addDocState.enabled,
+    })
+    refetch()
   }
 
   const handleCancel = () => {
@@ -499,7 +515,7 @@ const EnableAdditionalDocs = () => { // TODO: Implement enable additional docs e
   }
 
   return (
-    <Space style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', gap: 8, marginLeft: 8}}>
+    <Space style={{ display: 'flex', alignItems: 'center', justifyContent: 'flex-end', marginLeft: 8}}>
       Enable Additional Documents?
       <Popconfirm
         title="Additional Documents"
@@ -522,7 +538,7 @@ const EnableAdditionalDocs = () => { // TODO: Implement enable additional docs e
   )
 }
 
-const AdditionalDocsDrawer = ({ open, setOpen }) => {
+const AdditionalDocsDrawer = ({ open, setOpen, driverid, sub }) => {
 
   return (
     <Drawer
@@ -533,8 +549,97 @@ const AdditionalDocsDrawer = ({ open, setOpen }) => {
       destroyOnClose
       open={open}
     >
-      <Empty />
+      <AdditionalDocsFeeder driverid={driverid} sub={sub} />
     </Drawer>
+  )
+}
+
+const AdditionalDocsFeeder = ({ driverid, sub }) => {
+  const { data, isLoading, error, refetch } = useFetch(`/v1/documents/cc/additional/${driverid}`)// Call useFetch custom hook
+
+  const PopDeleteButton = ({id}) => {
+    const [ popState, setPopState ] = useState({
+      open: false,
+      confirmLoading: false,
+    })
+
+    const showPopconfirm = () => {
+      setPopState({
+        ...popState,
+        open: true,
+      })
+    }
+  
+    const handleOk = async () => {
+      setPopState({
+        ...popState,
+        confirmLoading: true,
+      })
+      await deleteAdditionalDoc(id).then((response) => {
+        if(response) {
+          message.success('Document deleted successfully')
+        } else {
+          message.error('Error deleting document')
+        }
+        setPopState({
+          ...popState,
+          open: false,
+          confirmLoading: false,
+        })
+        refetch()
+      })
+    }
+  
+    const handleCancel = () => {
+      setPopState({
+        ...popState,
+        open: false,
+      })
+    }
+
+    return (
+      <Popconfirm
+        title="Delete Document"
+        description="Are you sure to delete this document?"
+        placement="bottom"
+        open={popState.open}
+        onConfirm={handleOk}
+        okButtonProps={{
+          loading: popState.confirmLoading,
+        }}
+        onCancel={handleCancel}
+        icon={
+          <QuestionCircleOutlined
+            style={{
+              color: 'red',
+            }}
+          />
+        }
+      >
+        <Button danger type="primary" onClick={showPopconfirm} >Delete</Button>
+      </Popconfirm>
+    )
+  }
+
+  if (isLoading) return <Spin />
+
+  if (error) return <Text type="danger">Something went wrong</Text>
+
+  return (
+    <Space direction="vertical" size="large">
+      {
+        data.items.length === 0 ? <Empty /> :
+        data.items.map((doc, idx) => (
+          <Space direction="vertical" key={idx}>
+            <Space style={{ display: 'flex', alignItems: 'baseline', justifyContent: 'space-between'}}>
+              <Title level={4}>{doc.custom_name}</Title>
+              <PopDeleteButton id={doc.id} refetch={refetch} />
+            </Space>
+            <DocViewer key={idx} objectKey={`${sub}/${doc.key1}`} />
+          </Space>
+        ))
+      }
+    </Space>
   )
 }
 
