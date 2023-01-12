@@ -149,14 +149,15 @@ const Document = (props) => {
                                     />
                                 </Descriptions.Item>
                             )}
-                                {props.notes_public && (
+                                {props.status === 'rejected' && (
+                                
                                     <>
                                     <Descriptions.Item label="Rejection Reason">
                                         <Text style={{ textTransform: 'capitalize' }} >{ props.notes_public }</Text>
+                                            </Descriptions.Item>
+                                        <Descriptions.Item label="Notes">
+                                            <Text >{props.notes}</Text>
                                         </Descriptions.Item>
-                                    <Descriptions.Item label="Notes">
-                                        <Text>{ props.notes }</Text>
-                                                </Descriptions.Item>
                                     </>
                             )}
                             { !props.document?.has_expiration && !props.notes_public && (
