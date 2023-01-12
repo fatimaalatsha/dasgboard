@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Card, Table, Tag, Button, Tooltip } from 'antd' // Import Ant components
+import { Card, Table, Tag, Button, Tooltip, Statistic, Row, Col, Space } from 'antd' // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import qs from 'qs' // Import qs library
 import dayjs from "dayjs"// Import date handlers
@@ -27,7 +27,7 @@ const Documents = () => {
     const controller = new AbortController()// Create a new abort controller
     const [cities, setCities] = useState([])
     const { data, isLoading, error, refetch } = useFetch(`v1/documents/cc?${qs.stringify(getUserParams(documentFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
-
+    console.log(data)
     const handleTableChange = (pagination, filter, sorter) => { // Handle table change
         Object.keys(filter).forEach(key => {
             if (filter[key]) {
@@ -144,9 +144,30 @@ const Documents = () => {
 
     return (
         <Card title={'Documents'} style={{ margin: 15 }}>
+            <Row justify="space-between">
+                <Col span={18}>
             <Tooltip title="Reload data">
                 <Button {...buttonConfig} />
-            </Tooltip>
+                    </Tooltip>
+                </Col>
+                <Col span={6}>
+                    <Card title={ <Statistic
+                                        value={data.total_items}
+                                        title="Total Number of Documents"
+                                        valueStyle={{ color: '#0c6609' }}
+                                    />}
+                            style={{ width: '250px' , height: '150px'}}
+                            align="center"
+                        >
+                        <Statistic
+                        value={data.pages}
+                        title="Total Pages"
+                        valueStyle={{ color: '#115c9e' }}
+                                />
+                    </Card>
+                </Col>        
+            </Row >
+
             <Table
                 columns={tableColumns}
                 dataSource={data?.items}
