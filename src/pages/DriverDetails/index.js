@@ -266,15 +266,7 @@ const DriverDetails = () => {
   }
   
   return (
-    <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
-      extra={
-        <Tooltip {...tooltipConfig}>
-          <Button loading={loading} type="primary" danger onClick={showWarning} disabled={data.status !== 'inactive'}>
-            Delete Driver
-          </Button>
-        </Tooltip>
-      }
-    >
+    <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}>
       <PageHeader
         ghost={false}
         onBack={() => window.history.back()}
