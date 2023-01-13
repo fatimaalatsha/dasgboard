@@ -247,7 +247,7 @@ const Drivers = () => {
         onRow={(driverRecord) => ({
         onClick: () => navigate(`driver/${driverRecord.user_id}`)
         })}
-      />
+        />
     </Card>
   )
 };

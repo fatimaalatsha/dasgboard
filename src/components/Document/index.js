@@ -96,6 +96,7 @@ const Document = (props) => {
                     active: null,
                 })
             }
+            props.refetch()
         } catch (err) {
             console.log(err)
         }
