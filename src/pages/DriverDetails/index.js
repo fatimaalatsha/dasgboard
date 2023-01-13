@@ -24,7 +24,7 @@ import {
   Drawer,
   Empty,
 } from 'antd' // Import antd components
-import { SendOutlined, QuestionCircleOutlined } from '@ant-design/icons' // Import icon
+import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined } from '@ant-design/icons' // Import icon
 import { useParams, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
@@ -266,15 +266,7 @@ const DriverDetails = () => {
   }
   
   return (
-    <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
-      extra={
-        <Tooltip {...tooltipConfig}>
-          <Button loading={loading} type="primary" danger onClick={showWarning} disabled={data.status !== 'inactive'}>
-            Delete Driver
-          </Button>
-        </Tooltip>
-      }
-    >
+    <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}>
       <PageHeader
         ghost={false}
         onBack={() => window.history.back()}
@@ -322,7 +314,12 @@ const DriverDetails = () => {
               <EditableText name='last_name' value={data.last_name} updateCallback={updateText} />
             </Descriptions.Item>
             <Descriptions.Item label="Email">
-              <EditableText name='email' value={data.email} updateCallback={updateText} />
+            <Text name='email' copyable={{
+            icon: [<CopyOutlined />, <CopyFilled key="copied-icon" />],
+              tooltips: ['Copy Email', 'Email Copied'],
+            }}>
+              {data.email}
+            </Text>
             </Descriptions.Item>
             <Descriptions.Item label="Phone Number">
               <EditableText name='phone' value={data.phone} updateCallback={updateText} />

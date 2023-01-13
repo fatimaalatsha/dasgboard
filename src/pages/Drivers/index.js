@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Card, Table, Tag, Button, Space, Input, Tooltip } from 'antd'; // Import Ant components
+import { Card, Table, Tag, Button, Space, Input, Tooltip,Statistic, Row,Col} from 'antd'; // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import { useNavigate } from 'react-router-dom'; // Import Nav component
 
@@ -12,6 +12,7 @@ import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
 import { useFilterStore } from '../../store' // Import filter store
+import { CheckCircleOutlined, BarChartOutlined } from '@ant-design/icons'
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
@@ -49,7 +50,6 @@ const Drivers = () => {
     }  
   }
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(driverFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
-  
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
       if (filter[key]) {
@@ -205,15 +205,37 @@ const Drivers = () => {
   
   return(
     <Card title={'Drivers'} style={{ margin: 15 }}>
-      <Space direction="vertical" style={{ padding: 8, display: 'flex' }}>
-        <Tooltip title="Reload data">
-            <Button {...refetchConfig} />
-        </Tooltip>
-        <Input.Group compact>
-          <Input {...searchConfig}/>
-          <Button type="primary" onClick={() => handleSearch(searchText)}>Search</Button>
-        </Input.Group>
-      </Space>
+      <Row>
+        <Col span={18}>
+          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <Tooltip title="Reload data">
+                <Button {...refetchConfig} />
+            </Tooltip>
+            <Input.Group compact>
+              <Input {...searchConfig}/>
+              <Button type="primary" onClick={() => handleSearch(searchText)}>Search</Button>
+                </Input.Group>
+            </Space>
+        </Col>
+        <Col span={6}>
+        <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                <Card title={ <Statistic
+                                value={data.total_items}
+                                title="Total Number of Drivers"
+                                valueStyle={{ color: '#0c6609' }}
+                              />}
+                      style={{ width: '200px' , height: '150px'}}
+                      align="center"
+                >
+                <Statistic
+                  value={data.pages}
+                  title="Total Pages"
+                  valueStyle={{ color: '#115c9e' }}
+                />
+                </Card>
+        </Space>
+        </Col>
+      </Row>
       <Table
         dataSource={data.items}
         columns={tableColumns}
@@ -225,7 +247,7 @@ const Drivers = () => {
         onRow={(driverRecord) => ({
         onClick: () => navigate(`driver/${driverRecord.user_id}`)
         })}
-      />
+        />
     </Card>
   )
 };
