@@ -74,9 +74,8 @@ const Drivers = () => {
   }
   
   const handleSearch = (selectedKeys) => {
-    const regex = /^(?:\s|[\d])+$/g
+    const regex = /^(?:\s|[\d]|\W)+$/g // TODO: Should be validated on the backend, temporary solution
     const found = selectedKeys ? selectedKeys[0]?.match(regex) : null // Check if search value is a number or space
-    console.log(found)
     setDriverFilter({
       full_name: selectedKeys && !found ? selectedKeys[0] : null,
       pagination: {
