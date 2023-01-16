@@ -226,24 +226,6 @@ const Drivers = () => {
         onRow={(driverRecord) => ({
         onClick: () => navigate(`driver/${driverRecord.user_id}`)
         })}
-        summary={(pageData) => {
-          let total = 0;
-          pageData.forEach(({ status }) => {
-            if (status === 'active') {
-              total += 1;
-            }
-          })
-          return (
-            <>
-              <Table.Summary.Row fixed>
-                <Table.Summary.Cell index={0}>Total</Table.Summary.Cell>
-                <Table.Summary.Cell index={1} colSpan={4}>
-                  {data.total_items} Total Drivers
-                </Table.Summary.Cell>
-                </Table.Summary.Row>
-            </>
-          )
-        }}
       />
     </Card>
   )
