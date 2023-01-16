@@ -31,6 +31,7 @@ const EditableText = ({...props}) => {
             },
             ...(!isEditing && {editing: isEditing}), // Set editing state
         },
+        ...(props.copyable && {copyable: true}), // Set copyable config
     }
 
     return (
