@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Card, Table, Tag, Button, Space, Input, Tooltip } from 'antd'; // Import Ant components
+import { Card, Table, Tag, Button, Space, Input, Tooltip,Statistic, Row,Col} from 'antd'; // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import { useNavigate } from 'react-router-dom'; // Import Nav component
 
@@ -12,6 +12,7 @@ import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
 import { useFilterStore } from '../../store' // Import filter store
+import { CheckCircleOutlined, BarChartOutlined } from '@ant-design/icons'
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
@@ -19,6 +20,7 @@ import { useFilterStore } from '../../store' // Import filter store
     page: params.pagination?.current,
     ...params,
 })
+
 dayjs.extend(utc)
 
 const Drivers = () => {
@@ -49,7 +51,6 @@ const Drivers = () => {
     }  
   }
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(driverFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
-  
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
       if (filter[key]) {
@@ -73,8 +74,10 @@ const Drivers = () => {
   }
   
   const handleSearch = (selectedKeys) => {
+    const regex = /^(?:\s|[\d]|\W)+$/g // TODO: Should be validated on the backend, temporary solution
+    const found = selectedKeys ? selectedKeys[0]?.match(regex) : null // Check if search value is a number or space
     setDriverFilter({
-      full_name: selectedKeys ? selectedKeys[0] : null,
+      full_name: selectedKeys && !found ? selectedKeys[0] : null,
       pagination: {
         ...driverFilter.pagination,
         current: 1,
@@ -90,6 +93,7 @@ const Drivers = () => {
       pagination: {
         ...driverFilter.pagination,
         total: data?.total_items,
+        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}  Applicants`,
       }
     })
     if (isMounted) {
@@ -114,6 +118,7 @@ const Drivers = () => {
     placeholder: "Full Name Search",
     addonBefore: <Button type="text" size="small" onClick={() => handleSearch(null)}>Clear</Button>,
     value: searchText,
+    type: 'text',
     onChange: (e) => setSearchText(e.target.value ? [e.target.value] : []),
     onPressEnter: () => handleSearch(searchText),
     style: {
@@ -205,15 +210,15 @@ const Drivers = () => {
   
   return(
     <Card title={'Drivers'} style={{ margin: 15 }}>
-      <Space direction="vertical" style={{ padding: 8, display: 'flex' }}>
-        <Tooltip title="Reload data">
-            <Button {...refetchConfig} />
-        </Tooltip>
-        <Input.Group compact>
-          <Input {...searchConfig}/>
-          <Button type="primary" onClick={() => handleSearch(searchText)}>Search</Button>
-        </Input.Group>
-      </Space>
+          <Space direction="vertical" size="large" style={{ width: '100%' }}>
+            <Tooltip title="Reload data">
+                <Button {...refetchConfig} />
+            </Tooltip>
+            <Input.Group compact>
+              <Input {...searchConfig}/>
+              <Button type="primary" onClick={() => handleSearch(searchText)}>Search</Button>
+                </Input.Group>
+          </Space>
       <Table
         dataSource={data.items}
         columns={tableColumns}
@@ -225,6 +230,24 @@ const Drivers = () => {
         onRow={(driverRecord) => ({
         onClick: () => navigate(`driver/${driverRecord.user_id}`)
         })}
+        summary={(pageData) => {
+          let total = 0;
+          pageData.forEach(({ status }) => {
+            if (status === 'active') {
+              total += 1;
+            }
+          })
+          return (
+            <>
+              <Table.Summary.Row fixed>
+                <Table.Summary.Cell index={0}>Total</Table.Summary.Cell>
+                <Table.Summary.Cell index={1} colSpan={4}>
+                  {data.total_items} Total Drivers
+                </Table.Summary.Cell>
+                </Table.Summary.Row>
+            </>
+          )
+        }}
       />
     </Card>
   )

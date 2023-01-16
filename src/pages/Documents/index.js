@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Card, Table, Tag, Button, Tooltip } from 'antd' // Import Ant components
+import { Card, Table, Tag, Button, Tooltip, Statistic, Row, Col, Space } from 'antd' // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import qs from 'qs' // Import qs library
 import dayjs from "dayjs"// Import date handlers
@@ -27,7 +27,6 @@ const Documents = () => {
     const controller = new AbortController()// Create a new abort controller
     const [cities, setCities] = useState([])
     const { data, isLoading, error, refetch } = useFetch(`v1/documents/cc?${qs.stringify(getUserParams(documentFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
-
     const handleTableChange = (pagination, filter, sorter) => { // Handle table change
         Object.keys(filter).forEach(key => {
             if (filter[key]) {
@@ -75,6 +74,8 @@ const Documents = () => {
             pagination: {
                 ...documentFilter.pagination,
                 total: data?.total_items,
+                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Documents`,
+
             }
         }) 
         getCities()
@@ -146,7 +147,7 @@ const Documents = () => {
         <Card title={'Documents'} style={{ margin: 15 }}>
             <Tooltip title="Reload data">
                 <Button {...buttonConfig} />
-            </Tooltip>
+                    </Tooltip>
             <Table
                 columns={tableColumns}
                 dataSource={data?.items}
