@@ -322,7 +322,7 @@ const DriverDetails = () => {
             </Text>
             </Descriptions.Item>
             <Descriptions.Item label="Phone Number">
-              <EditableText name='phone' value={data.phone} updateCallback={updateText} />
+            <EditableText name='phone' value={data.phone} updateCallback={updateText} copyable/>
             </Descriptions.Item>
             <Descriptions.Item label="Licence Number">
               <EditableText name='license_number' value={data.license_number} updateCallback={updateText} />
