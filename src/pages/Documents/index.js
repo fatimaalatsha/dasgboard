@@ -74,6 +74,8 @@ const Documents = () => {
             pagination: {
                 ...documentFilter.pagination,
                 total: data?.total_items,
+                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Documents`,
+
             }
         }) 
         getCities()
@@ -143,30 +145,9 @@ const Documents = () => {
 
     return (
         <Card title={'Documents'} style={{ margin: 15 }}>
-            <Row justify="space-between">
-                <Col span={18}>
             <Tooltip title="Reload data">
                 <Button {...buttonConfig} />
                     </Tooltip>
-                </Col>
-                <Col span={6}>
-                    <Card title={ <Statistic
-                                        value={data.total_items}
-                                        title="Total Number of Documents"
-                                        valueStyle={{ color: '#0c6609' }}
-                                    />}
-                            style={{ width: '250px' , height: '150px'}}
-                            align="center"
-                        >
-                        <Statistic
-                        value={data.pages}
-                        title="Total Pages"
-                        valueStyle={{ color: '#115c9e' }}
-                                />
-                    </Card>
-                </Col>        
-            </Row >
-
             <Table
                 columns={tableColumns}
                 dataSource={data?.items}

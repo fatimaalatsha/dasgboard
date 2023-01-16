@@ -90,6 +90,7 @@ const Drivers = () => {
       pagination: {
         ...driverFilter.pagination,
         total: data?.total_items,
+        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}  Applicants`,
       }
     })
     if (isMounted) {
@@ -205,8 +206,6 @@ const Drivers = () => {
   
   return(
     <Card title={'Drivers'} style={{ margin: 15 }}>
-      <Row>
-        <Col span={18}>
           <Space direction="vertical" size="large" style={{ width: '100%' }}>
             <Tooltip title="Reload data">
                 <Button {...refetchConfig} />
@@ -215,27 +214,7 @@ const Drivers = () => {
               <Input {...searchConfig}/>
               <Button type="primary" onClick={() => handleSearch(searchText)}>Search</Button>
                 </Input.Group>
-            </Space>
-        </Col>
-        <Col span={6}>
-        <Space direction="vertical" size="large" style={{ width: '100%' }}>
-                <Card title={ <Statistic
-                                value={data.total_items}
-                                title="Total Number of Drivers"
-                                valueStyle={{ color: '#0c6609' }}
-                              />}
-                      style={{ width: '200px' , height: '150px'}}
-                      align="center"
-                >
-                <Statistic
-                  value={data.pages}
-                  title="Total Pages"
-                  valueStyle={{ color: '#115c9e' }}
-                />
-                </Card>
-        </Space>
-        </Col>
-      </Row>
+          </Space>
       <Table
         dataSource={data.items}
         columns={tableColumns}
@@ -247,7 +226,25 @@ const Drivers = () => {
         onRow={(driverRecord) => ({
         onClick: () => navigate(`driver/${driverRecord.user_id}`)
         })}
-        />
+        summary={(pageData) => {
+          let total = 0;
+          pageData.forEach(({ status }) => {
+            if (status === 'active') {
+              total += 1;
+            }
+          })
+          return (
+            <>
+              <Table.Summary.Row fixed>
+                <Table.Summary.Cell index={0}>Total</Table.Summary.Cell>
+                <Table.Summary.Cell index={1} colSpan={4}>
+                  {data.total_items} Total Drivers
+                </Table.Summary.Cell>
+                </Table.Summary.Row>
+            </>
+          )
+        }}
+      />
     </Card>
   )
 };
