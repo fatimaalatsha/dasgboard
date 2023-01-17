@@ -9,7 +9,8 @@ import {
   DownOutlined,
   UserOutlined,
   EnvironmentOutlined,
-  AuditOutlined
+  AuditOutlined,
+  RocketOutlined,
 } from '@ant-design/icons'; // import antd navigation icons
 
 import { Auth } from 'aws-amplify' // import aws-amplify auth module
@@ -60,6 +61,11 @@ const SideMenu = ({collapsed}) => {
       key: "/",
       label: 'Drivers',
       icon: <CarOutlined />,
+    },
+    {
+      key: "/applicants",
+      label: 'Applicants',
+      icon: <RocketOutlined />,
     },
     {
       key: "/documents",
