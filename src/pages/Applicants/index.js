@@ -24,12 +24,12 @@ import { CheckCircleOutlined, BarChartOutlined } from '@ant-design/icons'
 dayjs.extend(utc)
 
 const Applicants = () => {
-  const driverFilter = useFilterStore((state) => state.driverFilter) // Get filter from store
-  const setDriverFilter = useFilterStore((state) => state.setDriverFilter) // Set filter to store
+  const applicantFilter = useFilterStore((state) => state.applicantFilter) // Get filter from store
+  const setApplicantFilter = useFilterStore((state) => state.setApplicantFilter) // Set filter to store
 
   const navigate = useNavigate();
   const [cities, setCities] = useState([])
-  const [searchText, setSearchText] = useState( driverFilter.full_name || '');
+  const [searchText, setSearchText] = useState( applicantFilter.full_name || '');
   
   // Fetch Cities list from API
   const getCities = async () => {
@@ -50,7 +50,7 @@ const Applicants = () => {
       console.log(error)
     }  
   }
-  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(driverFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
+  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(applicantFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
       if (filter[key]) {
@@ -59,11 +59,12 @@ const Applicants = () => {
       }
     })
   
-    setDriverFilter({ // Set filter to store
+    setApplicantFilter({ // Set filter to store
       pagination,
       filter: {
         ...filter,
-        ...(driverFilter.filter?.city_id && filter.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: driverFilter.filter?.city_id } ),
+        ...(applicantFilter.filter?.city_id && filter.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: applicantFilter.filter?.city_id } ),
+        ...(filter.status === null && { status: ['in|onboard', 'pending'] } ),
       },
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
@@ -76,10 +77,10 @@ const Applicants = () => {
   const handleSearch = (selectedKeys) => {
     const regex = /^(?:\s|[\d]|\W)+$/g // TODO: Should be validated on the backend, temporary solution
     const found = selectedKeys ? selectedKeys[0]?.match(regex) : null // Check if search value is a number or space
-    setDriverFilter({
+    setApplicantFilter({
       full_name: selectedKeys && !found ? selectedKeys[0] : null,
       pagination: {
-        ...driverFilter.pagination,
+        ...applicantFilter.pagination,
         current: 1,
       }
     })
@@ -89,9 +90,9 @@ const Applicants = () => {
   
   useEffect(() => {
     let isMounted = true
-    setDriverFilter({ // Set filter to store
+    setApplicantFilter({ // Set filter to store
       pagination: {
-        ...driverFilter.pagination,
+        ...applicantFilter.pagination,
         total: data?.total_items,
         showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}  Applicants`,
       }
@@ -135,14 +136,14 @@ const Applicants = () => {
       key: 'user_id',
       sorter: true,
       align: 'center',
-      ...( driverFilter.sort?.user_id && { defaultSortOrder: driverFilter.sort?.user_id === 'asc' ? 'ascend' : 'descend' }),
+      ...( applicantFilter.sort?.user_id && { defaultSortOrder: applicantFilter.sort?.user_id === 'asc' ? 'ascend' : 'descend' }),
     },
     {
       title: 'First Name',
       dataIndex: 'first_name',
       key: 'first_name',
       sorter: true,
-      ...( driverFilter.sort?.first_name && { defaultSortOrder: driverFilter.sort?.first_name === 'asc' ? 'ascend' : 'descend' }),
+      ...( applicantFilter.sort?.first_name && { defaultSortOrder: applicantFilter.sort?.first_name === 'asc' ? 'ascend' : 'descend' }),
     },
     {
       title: 'Last Name',
@@ -163,8 +164,8 @@ const Applicants = () => {
       filters: cities,
       sorter: true,
       filterSearch: true,   
-      ...( driverFilter.filter?.city_id && { defaultFilteredValue: driverFilter.filter?.city_id.map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),       
-      ...( driverFilter.sort?.name && { defaultSortOrder: driverFilter.sort?.name === 'asc' ? 'ascend' : 'descend' }),
+      ...( applicantFilter.filter?.city_id && { defaultFilteredValue: applicantFilter.filter?.city_id.map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),       
+      ...( applicantFilter.sort?.name && { defaultSortOrder: applicantFilter.sort?.name === 'asc' ? 'ascend' : 'descend' }),
     },
     {
       title: 'Email',
@@ -178,7 +179,7 @@ const Applicants = () => {
       key: 'status',
       render: (status) => {                                                                           
         return (
-          <Tag color={status === 'active' ? 'success' : status === 'inactive' ? 'error' : status=== 'pending' ? 'orange': 'blue' }>
+          <Tag color={ status === 'pending' ? 'orange' : 'blue' }>
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Tag>
         );
@@ -187,9 +188,8 @@ const Applicants = () => {
       filters: [
         { text:'Onboard', value: 'onboard' },
         { text: 'Pending', value: 'pending' },
-        { text: 'Inactive', value: 'inactive' },
       ],
-      ...( driverFilter.filter?.status && { defaultFilteredValue: driverFilter.filter?.status.map((status) => status.replace('in|', '')) }),
+      ...( applicantFilter.filter?.status && { defaultFilteredValue: applicantFilter.filter?.status.map((status) => status.replace('in|', '')) }),
     },
     {
         title: 'Applied Date',
@@ -198,7 +198,7 @@ const Applicants = () => {
         align: 'right',
         sorter: true,
         key: 'created_at',
-        ...( driverFilter.sort?.created_at && { defaultSortOrder: driverFilter.sort?.created_at === 'asc' ? 'ascend' : 'descend' }),
+        ...( applicantFilter.sort?.created_at && { defaultSortOrder: applicantFilter.sort?.created_at === 'asc' ? 'ascend' : 'descend' }),
     },
   ];
 
@@ -223,7 +223,7 @@ const Applicants = () => {
         columns={tableColumns}
         loading={isLoading}
         rowKey="user_id"
-        pagination={driverFilter.pagination}
+        pagination={applicantFilter.pagination}
         onChange={handleTableChange}
         rowClassName={() => 'clickable-row'}
         onRow={(driverRecord) => ({
