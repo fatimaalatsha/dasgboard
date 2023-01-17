@@ -11,6 +11,9 @@ let filterStore = (set) => ({
         },
         sort: {
           created_at: 'desc',
+        },
+        filter: {
+          status: ['in|active', 'inactive'],
         }
     },
     setDriverFilter: (filter) => set((state) => ({ driverFilter: { ...state.driverFilter, ...filter } })),
@@ -29,6 +32,21 @@ let filterStore = (set) => ({
         }
     },
     setDocumentFilter: (filter) => set((state) => ({ documentFilter: { ...state.documentFilter, ...filter } })),
+    applicantFilter: {
+        pagination: {
+          current: 1,
+          pageSize: 50,
+          showSizeChanger: true,
+          position: ['bottomRight', 'topRight'],
+        },
+        sort: {
+          created_at: 'desc',
+        },
+        filter: {
+          status: ['in|onboard', 'pending'],
+        }
+    },
+    setApplicantFilter: (filter) => set((state) => ({ applicantFilter: { ...state.applicantFilter, ...filter } })),
 })
 
 filterStore = devtools(filterStore, { enabled: process.env.REACT_APP_ENV === "admin_dev" })

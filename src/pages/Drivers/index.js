@@ -64,6 +64,7 @@ const Drivers = () => {
       filter: {
         ...filter,
         ...(driverFilter.filter?.city_id && filter.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: driverFilter.filter?.city_id } ),
+        ...(filter.status === null && { status: ['in|active', 'inactive'] } ),
       },
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
@@ -178,15 +179,13 @@ const Drivers = () => {
       key: 'status',
       render: (status) => {                                                                           
         return (
-          <Tag color={status === 'active' ? 'success' : status === 'inactive' ? 'error' : status=== 'pending' ? 'orange': 'blue' }>
+          <Tag color={status === 'active' ? 'success' : 'error' }>
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Tag>
         );
       }
       ,
       filters: [
-        { text:'Onboard', value: 'onboard' },
-        { text: 'Pending', value: 'pending' },
         { text: 'Inactive', value: 'inactive' },
         { text: 'Active', value: 'active' },
       ],
