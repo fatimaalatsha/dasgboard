@@ -227,7 +227,7 @@ const Applicants = () => {
         onChange={handleTableChange}
         rowClassName={() => 'clickable-row'}
         onRow={(driverRecord) => ({
-        onClick: () => navigate(`driver/${driverRecord.user_id}`)
+        onClick: () => navigate(`/driver/${driverRecord.user_id}`)
         })}
       />
     </Card>
