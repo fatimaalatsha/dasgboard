@@ -128,7 +128,10 @@ const Applicants = () => {
     }
   }
 
-  
+  /* Added filteredValue: null to the columns that are not filtered to avoid a warning with controlled and uncontrolled columns
+  * https://github.com/ant-design/ant-design/issues/28107
+  */
+
   const tableColumns = [
   {
       title: 'ID',
@@ -137,6 +140,7 @@ const Applicants = () => {
       sorter: true,
       align: 'center',
       ...( applicantFilter.sort?.user_id && { defaultSortOrder: applicantFilter.sort?.user_id === 'asc' ? 'ascend' : 'descend' }),
+      filteredValue: null,
     },
     {
       title: 'First Name',
@@ -144,17 +148,20 @@ const Applicants = () => {
       key: 'first_name',
       sorter: true,
       ...( applicantFilter.sort?.first_name && { defaultSortOrder: applicantFilter.sort?.first_name === 'asc' ? 'ascend' : 'descend' }),
+      filteredValue: null,
     },
     {
       title: 'Last Name',
       dataIndex: 'last_name',
-      key: 'last_name'
+      key: 'last_name',
+      filteredValue: null,
     },
     {
       title: 'Phone',
       dataIndex: 'phone',
       key: 'phone',
       responsive: ['md'],
+      filteredValue: null,
     },
     {
       
@@ -163,15 +170,18 @@ const Applicants = () => {
       key: 'city_id',
       filters: cities,
       sorter: true,
-      filterSearch: true,   
+      filterSearch: true,  
+      filteredValue: null,
       ...( applicantFilter.filter?.city_id && { defaultFilteredValue: applicantFilter.filter?.city_id.map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),       
       ...( applicantFilter.sort?.name && { defaultSortOrder: applicantFilter.sort?.name === 'asc' ? 'ascend' : 'descend' }),
+      ...( applicantFilter.filter?.city_id && { filteredValue: applicantFilter.filter?.city_id.map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
       responsive: ['lg'],
+      filteredValue: null,
     },
     {
       title: 'Status',
@@ -188,8 +198,10 @@ const Applicants = () => {
       filters: [
         { text:'Onboard', value: 'onboard' },
         { text: 'Pending', value: 'pending' },
-      ],
+      ],  
+      filteredValue: null,
       ...( applicantFilter.filter?.status && { defaultFilteredValue: applicantFilter.filter?.status.map((status) => status.replace('in|', '')) }),
+      ...( applicantFilter.filter?.status && { filteredValue: applicantFilter.filter?.status.map((status) => status.replace('in|', '')) }),
     },
     {
         title: 'Applied Date',
@@ -199,6 +211,7 @@ const Applicants = () => {
         sorter: true,
         key: 'created_at',
         ...( applicantFilter.sort?.created_at && { defaultSortOrder: applicantFilter.sort?.created_at === 'asc' ? 'ascend' : 'descend' }),
+        filteredValue: null,
     },
   ];
 
