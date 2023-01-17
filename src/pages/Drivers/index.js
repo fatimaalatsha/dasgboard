@@ -98,7 +98,7 @@ const Drivers = () => {
       pagination: {
         ...driverFilter.pagination,
         total: data?.total_items,
-        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}  Applicants`,
+        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Drivers`,
       }
     })
     if (isMounted) {
