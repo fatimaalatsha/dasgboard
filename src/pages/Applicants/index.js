@@ -51,6 +51,7 @@ const Applicants = () => {
     }  
   }
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(applicantFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
+
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
       if (filter[key]) {
@@ -60,7 +61,10 @@ const Applicants = () => {
     })
   
     setApplicantFilter({ // Set filter to store
-      pagination,
+      pagination: {
+        ...applicantFilter.pagination,
+        ...pagination,
+      },
       filter: {
         ...filter,
         ...(applicantFilter.filter?.city_id && filter.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: applicantFilter.filter?.city_id } ),
@@ -222,15 +226,15 @@ const Applicants = () => {
   
   return(
     <Card title={'Applicants'} style={{ margin: 15 }}>
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
-            <Tooltip title="Reload data">
-                <Button {...refetchConfig} />
-            </Tooltip>
-            <Input.Group compact>
-              <Input {...searchConfig}/>
-              <Button type="primary" onClick={() => handleSearch(searchText)}>Search</Button>
-                </Input.Group>
-          </Space>
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Tooltip title="Reload data">
+            <Button {...refetchConfig} />
+        </Tooltip>
+        <Input.Group compact>
+          <Input {...searchConfig}/>
+          <Button type="primary" onClick={() => handleSearch(searchText)}>Search</Button>
+        </Input.Group>
+      </Space>
       <Table
         dataSource={data.items}
         columns={tableColumns}

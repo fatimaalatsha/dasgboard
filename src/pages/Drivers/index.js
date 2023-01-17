@@ -51,6 +51,7 @@ const Drivers = () => {
     }  
   }
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(driverFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
+
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
 
     Object.keys(filter).forEach(key => {
@@ -61,7 +62,10 @@ const Drivers = () => {
     })
   
     setDriverFilter({ // Set filter to store
-      pagination,
+      pagination: {
+        ...driverFilter.pagination,
+        ...pagination,
+      },
       filter: {
         ...filter,
         ...(driverFilter.filter?.city_id && filter.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: driverFilter.filter?.city_id } ),
@@ -87,7 +91,6 @@ const Drivers = () => {
     })
     selectedKeys ?? setSearchText('')
   }
-  
   
   useEffect(() => {
     let isMounted = true
@@ -220,15 +223,15 @@ const Drivers = () => {
   
   return(
     <Card title={'Drivers'} style={{ margin: 15 }}>
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
-            <Tooltip title="Reload data">
-                <Button {...refetchConfig} />
-            </Tooltip>
-            <Input.Group compact>
-              <Input {...searchConfig}/>
-              <Button type="primary" onClick={() => handleSearch(searchText)}>Search</Button>
-                </Input.Group>
-          </Space>
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Tooltip title="Reload data">
+            <Button {...refetchConfig} />
+        </Tooltip>
+        <Input.Group compact>
+          <Input {...searchConfig}/>
+          <Button type="primary" onClick={() => handleSearch(searchText)}>Search</Button>
+        </Input.Group>
+      </Space>
       <Table
         dataSource={data.items}
         columns={tableColumns}
