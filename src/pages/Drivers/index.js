@@ -51,7 +51,9 @@ const Drivers = () => {
     }  
   }
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(driverFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
+
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
+
     Object.keys(filter).forEach(key => {
       if (filter[key]) {
         filter[key].unshift('in|' + filter[key][0])
@@ -60,10 +62,14 @@ const Drivers = () => {
     })
   
     setDriverFilter({ // Set filter to store
-      pagination,
+      pagination: {
+        ...driverFilter.pagination,
+        ...pagination,
+      },
       filter: {
         ...filter,
         ...(driverFilter.filter?.city_id && filter.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: driverFilter.filter?.city_id } ),
+        ...(filter.status === null && { status: ['in|active', 'inactive'] } ),
       },
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
@@ -86,14 +92,13 @@ const Drivers = () => {
     selectedKeys ?? setSearchText('')
   }
   
-  
   useEffect(() => {
     let isMounted = true
     setDriverFilter({ // Set filter to store
       pagination: {
         ...driverFilter.pagination,
         total: data?.total_items,
-        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total}  Applicants`,
+        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Drivers`,
       }
     })
     if (isMounted) {
@@ -127,7 +132,9 @@ const Drivers = () => {
     }
   }
 
-  
+  /* Added filteredValue: null to the columns that are not filtered to avoid a warning with controlled and uncontrolled columns
+  * https://github.com/ant-design/ant-design/issues/28107
+  */
   const tableColumns = [
   {
       title: 'ID',
@@ -136,6 +143,7 @@ const Drivers = () => {
       sorter: true,
       align: 'center',
       ...( driverFilter.sort?.user_id && { defaultSortOrder: driverFilter.sort?.user_id === 'asc' ? 'ascend' : 'descend' }),
+      filteredValue: null,
     },
     {
       title: 'First Name',
@@ -143,17 +151,20 @@ const Drivers = () => {
       key: 'first_name',
       sorter: true,
       ...( driverFilter.sort?.first_name && { defaultSortOrder: driverFilter.sort?.first_name === 'asc' ? 'ascend' : 'descend' }),
+      filteredValue: null,
     },
     {
       title: 'Last Name',
       dataIndex: 'last_name',
-      key: 'last_name'
+      key: 'last_name',
+      filteredValue: null,
     },
     {
       title: 'Phone',
       dataIndex: 'phone',
       key: 'phone',
       responsive: ['md'],
+      filteredValue: null,
     },
     {
       
@@ -163,14 +174,16 @@ const Drivers = () => {
       filters: cities,
       sorter: true,
       filterSearch: true,   
-      ...( driverFilter.filter?.city_id && { defaultFilteredValue: driverFilter.filter?.city_id.map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),       
+      filteredValue: null,
       ...( driverFilter.sort?.name && { defaultSortOrder: driverFilter.sort?.name === 'asc' ? 'ascend' : 'descend' }),
+      ...( driverFilter.filter?.city_id && { filteredValue: driverFilter.filter?.city_id.map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),
     },
     {
       title: 'Email',
       dataIndex: 'email',
       key: 'email',
       responsive: ['lg'],
+      filteredValue: null,
     },
     {
       title: 'Status',
@@ -178,19 +191,18 @@ const Drivers = () => {
       key: 'status',
       render: (status) => {                                                                           
         return (
-          <Tag color={status === 'active' ? 'success' : status === 'inactive' ? 'error' : status=== 'pending' ? 'orange': 'blue' }>
+          <Tag color={status === 'active' ? 'success' : 'error' }>
             {status.charAt(0).toUpperCase() + status.slice(1)}
           </Tag>
         );
       }
       ,
       filters: [
-        { text:'Onboard', value: 'onboard' },
-        { text: 'Pending', value: 'pending' },
         { text: 'Inactive', value: 'inactive' },
         { text: 'Active', value: 'active' },
       ],
-      ...( driverFilter.filter?.status && { defaultFilteredValue: driverFilter.filter?.status.map((status) => status.replace('in|', '')) }),
+      filteredValue: null,
+      ...( driverFilter.filter?.status && { filteredValue: driverFilter.filter?.status.map((status) => status.replace('in|', '')) }),
     },
     {
         title: 'Applied Date',
@@ -199,6 +211,7 @@ const Drivers = () => {
         align: 'right',
         sorter: true,
         key: 'created_at',
+        filteredValue: null,
         ...( driverFilter.sort?.created_at && { defaultSortOrder: driverFilter.sort?.created_at === 'asc' ? 'ascend' : 'descend' }),
     },
   ];
@@ -210,15 +223,15 @@ const Drivers = () => {
   
   return(
     <Card title={'Drivers'} style={{ margin: 15 }}>
-          <Space direction="vertical" size="large" style={{ width: '100%' }}>
-            <Tooltip title="Reload data">
-                <Button {...refetchConfig} />
-            </Tooltip>
-            <Input.Group compact>
-              <Input {...searchConfig}/>
-              <Button type="primary" onClick={() => handleSearch(searchText)}>Search</Button>
-                </Input.Group>
-          </Space>
+      <Space direction="vertical" size="large" style={{ width: '100%' }}>
+        <Tooltip title="Reload data">
+            <Button {...refetchConfig} />
+        </Tooltip>
+        <Input.Group compact>
+          <Input {...searchConfig}/>
+          <Button type="primary" onClick={() => handleSearch(searchText)}>Search</Button>
+        </Input.Group>
+      </Space>
       <Table
         dataSource={data.items}
         columns={tableColumns}
