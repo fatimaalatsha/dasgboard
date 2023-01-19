@@ -23,6 +23,7 @@ import {
   Drawer,
   Empty,
   Alert,
+  Popover,
 } from 'antd' // Import antd components
 import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined } from '@ant-design/icons' // Import icon
 import { useParams } from 'react-router-dom'
@@ -87,11 +88,19 @@ const ProfileAvatar = ({objectKey, driverName}) => {
       return <Spin />
   }
 
+  const content = (
+      <Button type="primary" danger onClick={() => console.log('delete')} block disabled>
+        Yes, Delete
+      </Button>
+  )
+
   return (
     <>
-      <Avatar size={72} src={url} onClick={() => setVisible(true)} style={{ cursor: 'pointer'}} >
-        {driverInitials}
-      </Avatar>
+      <Popover content={content} title="Delete Profile Picture?">
+        <Avatar size={72} src={url} onClick={() => setVisible(true)} style={{ cursor: 'pointer'}} >
+          {driverInitials}
+        </Avatar>
+      </Popover>
       <Image
         src={url}
         style={{
