@@ -9,7 +9,6 @@ import {
   Modal, 
   Typography, 
   Space,
-  Tooltip, 
   message,
   Table,
   Form,
@@ -23,9 +22,10 @@ import {
   Popconfirm,
   Drawer,
   Empty,
+  Alert,
 } from 'antd' // Import antd components
 import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined } from '@ant-design/icons' // Import icon
-import { useParams, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import API from '../../api/BaseUrl' // Import API base URL
@@ -40,10 +40,11 @@ import DriverVehicle from '../../components/DriverVehicle' // Import Driver Vehi
 import DocViewer from '../../components/DocViewer' // Import DocViewer component
 
 import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
+import SelectWrapper from '../../components/forms/SelectWrapper' // Import SelectWrapper component
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs } from '../../utils/doc-status' // Import isAllApproved function
-import { deleteDriver, updateStatus, notifyDriver } from '../../utils/driver-status' // Import delete driver method
+import { updateStatus, notifyDriver } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
 
 const { confirm } = Modal // Destructure config from Modal
@@ -124,18 +125,13 @@ const tableColumns = [
 
 const DriverDetails = () => {
   const {id} = useParams(); // Get id from url
-  const navigate = useNavigate(); // Get navigate method from react-router-dom
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
-  
-  const tooltipConfig = {
-    placement: 'top',
-    color: 'orange',
-    title: 'Can only delete inactive drivers',
-    ...data?.status === 'inactive' && { open: false }
-  }
+  const [changeStatusModal, setChangeStatusModal] = useState(false)// Set change status modal state
+  const [showSub, setShowSub] = useState(false)// Set show sub state
+ 
 
   const successAlert = (msg) => { // Success alert method
     message.success(msg)
@@ -229,36 +225,52 @@ const DriverDetails = () => {
     });
   }
 
-  const showWarning = () => {
-    setLoading(true)
-    Modal.confirm({
-      title: 'Delete driver?',
-      content: 
-        <Space direction="vertical">
-          <Text>
-            {`Are you sure you want to delete `} <Text mark strong>{`${data.first_name} ${data.last_name}`}</Text>{` ?`}
-          </Text>
-          <Text strong>
-            {`This action cannot be undone, all of the driver's documents and records will be deleted forever.`}
-          </Text>
-        </Space>
-        ,
-      onOk: async () => {
-        await deleteDriver(id)
-        .then((response) => {
-          if(response) {
-            setLoading(false)
-            navigate('/')
+
+
+  const option = [
+    { text:'Do not contact (DNC)',  value: 'Do not contact (DNC)' , key: 'Do not contact (DNC)' },
+    { text: 'Ineligible' ,value: 'Ineligible' , key: 'Ineligible' },
+    { text: 'Unresponsive',value: 'Unresponsive', key: 'Unresponsive' },
+  ];
+
+  const subOption = [
+    { text: 'Underage', value: 'Underage', key: 'Underage' },
+    { text: 'Wrong licence class', value: 'Wrong licence class', key: 'Wrong licence class' },
+    { text: 'Failed background check', value: 'Failed background check', key: 'Failed background check' },
+    { text: 'International', value: 'International', key: 'International' },
+    { text: 'Vehicle age', value: 'Vehicle age', key: 'Vehicle age' },
+    { text: 'Will reach out to Recruitment for more', value: 'Will reach out to Recruitment for more', key: 'Will reach out to Recruitment for more' },
+  ];
+  
+  const handleSubOption = (value) => {
+    if (value === 'Ineligible') {
+      setShowSub(true)
+    }
+  }
+
+  const changeApplicationStatus = async (applicationStatus, statusReason) => {
+     try {
+      const auth = await Auth.currentSession()// Get current session
+      const token = auth.getAccessToken().getJwtToken()// Get token from session
+      const options = { // Set options for fetch
+          headers: {
+              'Authorization': token,
+              ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
           }
-        })
-      },
-      onCancel: () => {
-        setLoading(false)
-        //console.log('Cancel')
-      },
-      okText: 'Yes, Delete',
-      cancelText: 'Cancel',
-    })
+      }
+      const body = {
+        application_status: applicationStatus,
+        status_reason: statusReason
+      }
+      const response = await API.put(`/v1/drivers/cc/${id}`, body, options)
+      const data = await response.data
+       if (data) {
+          setChangeStatusModal(false)
+          refetch() // Refetch data
+      }
+    } catch (error) {
+      console.log(error)
+    }
   }
 
   if (error) {
@@ -266,24 +278,37 @@ const DriverDetails = () => {
   }
   
   return (
-    <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}>
+    <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
+      extra={[
+            <Button type="primary" key='status' loading={loading} onClick={() => setChangeStatusModal(true)}>
+               Change Applicaction Status
+            </Button>
+      ]}
+    >
       <PageHeader
         ghost={false}
         onBack={() => window.history.back()}
         title={
         <Space>
           <ProfileAvatar objectKey={`${data.sub_id}/${data.profile_picture}`} />
-          <Space direction='vertical' size={0}>
+          <Space direction='vertical'  size={0}>
             <Title level={4} style={{ marginTop: 0 }}>
               {`${data.first_name} ${data.last_name}`}
-            </Title>
-            <Tag style={{ textTransform: 'capitalize'}} 
-              color={data.status === 'active' ? 'success' : data.status === 'inactive' ? 'error' : 'warning'}
-            >
-              {data.status}
-            </Tag>
+              </Title>
+              <Space size={0} direction='horizontal'>
+                <Tag style={{ textTransform: 'capitalize'}} 
+                  color={data.status === 'active' ? 'success' : data.status === 'inactive' ? 'error' : 'warning'}>
+                  {data.status}
+                  </Tag>
+                  {data.application_status &&<Tag style={{ textTransform: 'capitalize' }}
+                    color={data.application_status === 'Do not contact (DNC)' ? 'success' : data.application_status === 'Ineligible' ? 'error' : 'warning'}
+                  >
+                    {data.application_status}
+                  </Tag>}
+              </Space>
           </Space>
-        </Space>
+          </Space>
+          
         }
         extra={[
           <Button 
@@ -306,7 +331,14 @@ const DriverDetails = () => {
           </Button>,
         ]}
       >
-        <Descriptions labelStyle={{ fontWeight:'bold' }}  >
+        { data.application_status ==='Ineligible' && <Alert
+              message={data.application_status}
+              description={data.status_reason}
+              type="warning"
+              showIcon
+        />}
+        <p></p>
+            <Descriptions labelStyle={{ fontWeight: 'bold' }}  >
             <Descriptions.Item label="First Name">
               <EditableText name='first_name' value={data.first_name} updateCallback={updateText} />
             </Descriptions.Item>
@@ -455,7 +487,66 @@ const DriverDetails = () => {
 
     { /* Additional Documents Drawwer */ }
       <AdditionalDocsDrawer open={documentDrawer} setOpen={setDocumentDrawer} driverid={id} sub={data.sub_id} />
-    { /* End Additional Documents Drawwer */}
+      { /* End Additional Documents Drawwer */}
+      { /*change Application Status modal*/}
+      <Formik
+        initialValues={{ application_status: data.application_status, status_reason: data.status_reason }}
+        onSubmit={ async (values, { setSubmitting }) => {
+          console.log(values)
+          await changeApplicationStatus(values.application_status, values.status_reason )
+            .then((response) => {
+              if (response) {
+                successAlert(response.message)
+                setSubmitting(false)
+                refetch()
+              }
+            }
+          )
+        }}
+        
+      >
+        {props => (
+          <FormikForm>
+            <Modal
+              title="Change Application application_status"
+              open={changeStatusModal}
+              onCancel={() => setChangeStatusModal(false)}
+              destroyOnClose
+              footer={[
+                <Button key="Back"
+                onClick={() => setChangeStatusModal(false)}
+                >
+                  Cancel
+                </Button>,
+                <SubmitWrapper key="Submit" type="primary">
+                  Yes, Change
+                </SubmitWrapper>,
+              ]}
+            >
+              <Space direction="vertical">
+                <Text>
+                  {`Are you sure you want to continue with this action? `} <Text mark strong>{`${data.first_name} ${data.last_name}`}</Text>{` will recieved an email notification.`}
+                </Text>
+                <Text type="danger">
+                  {`Be wary of sending too many of these notifications, as it may be considered spam.`}
+                </Text>
+                <Form.Item
+                  rules={[{ required: true, message: 'Please select a status!' }]}
+                >
+                  <SelectWrapper   
+                    type="text" name="application_status" datasource={option} placeholder="Province" onSelect={handleSubOption} key={option.key} />
+                </Form.Item>
+                <Form.Item 
+                 rules={[{ required: true, message: 'Please select a status!' }]}>
+                  {showSub && <SelectWrapper type="text" name="status_reason" datasource={subOption} placeholder="more" key={subOption.key} />}  
+                </Form.Item>
+              </Space>
+            </Modal>
+          </FormikForm>
+        )}
+      </Formik>
+      { /*end change Application application_status modal*/}
+
     </Card>
   )
 }
