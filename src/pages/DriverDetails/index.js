@@ -89,7 +89,7 @@ const ProfileAvatar = ({objectKey, driverName}) => {
   }
 
   const content = (
-      <Button type="primary" danger onClick={() => console.log('delete')} block >
+      <Button type="primary" danger onClick={() => console.log('delete')} block disabled>
         Yes, Delete
       </Button>
   )
