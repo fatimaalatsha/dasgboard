@@ -246,8 +246,7 @@ const DriverDetails = () => {
     value === 'Ineligible' ? setShowSub(true) : setShowSub(false)
   }
 
-  const changeApplicationStatus = async (applicationStatus, statusReason) => {
-    statusReason = statusReason === null ? '' : statusReason
+  const changeApplicationStatus = async (applicationStatus, statusReason = null) => {
      try {
       const auth = await Auth.currentSession()// Get current session
       const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -259,7 +258,7 @@ const DriverDetails = () => {
       }
       const body = {
         application_status: applicationStatus,
-        status_reason: statusReason
+        status_reason: statusReason || ''
       }
       const response = await API.put(`/v1/drivers/cc/${id}`, body, options)
       const data = await response.data
@@ -280,7 +279,7 @@ const DriverDetails = () => {
     <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
       extra={[
         <Button type="primary" key='status' loading={loading} onClick={() => { setChangeStatusModal(true); handleSubOption(data.application_status)}}>
-               Change Applicaction Status
+               Change Application Status
             </Button>
       ]}
     >
@@ -302,12 +301,12 @@ const DriverDetails = () => {
                   {data.application_status &&<Tag style={{ textTransform: 'capitalize' }}
                     color={data.application_status === 'Do not contact (DNC)' ? 'magenta' : data.application_status === 'Ineligible' ? 'volcano' : 'red'}
                   >
-                    {data.application_status} {data.application_status ==='Ineligible' && ` - (${data.status_reason})`}
+                    {data.application_status} {data.application_status ==='Ineligible' && ` - ${data.status_reason}`}
                 </Tag>}
               </Space>
           </Space>
           </Space>
-          
+
         }
         extra={[
           <Button 
@@ -530,7 +529,7 @@ const DriverDetails = () => {
                 </Form.Item>
                 <Form.Item 
                  rules={[{ required: true, message: 'Please select a status!'}]}>
-                  { showSub  && <SelectWrapper type="text" name="status_reason" datasource={subOption} key={subOption.key} />}  
+                  { showSub  && <SelectWrapper type="text" name="status_reason" datasource={subOption} placeholder="Select one of the fowlling reasons" key={subOption.key} />}  
                 </Form.Item>
               </Space>
             </Modal>
