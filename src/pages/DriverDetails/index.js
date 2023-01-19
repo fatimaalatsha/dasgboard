@@ -254,13 +254,13 @@ const DriverDetails = () => {
     { text: 'Will reach out to Recruitment for more', value: 'Will reach out to Recruitment for more', key: 'Will reach out to Recruitment for more' },
   ];
   
+  // Handle sub option to show or hide
   const handleSubOption = (value) => {
-    if (value === 'Ineligible') {
-      setShowSub(true)
-    }
+    value === 'Ineligible' ? setShowSub(true) : setShowSub(false)
   }
 
   const changeApplicationStatus = async (applicationStatus, statusReason) => {
+    statusReason = statusReason === null ? '' : statusReason
      try {
       const auth = await Auth.currentSession()// Get current session
       const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -292,7 +292,7 @@ const DriverDetails = () => {
   return (
     <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
       extra={[
-            <Button type="primary" key='status' loading={loading} onClick={() => setChangeStatusModal(true)}>
+        <Button type="primary" key='status' loading={loading} onClick={() => { setChangeStatusModal(true); handleSubOption(data.application_status)}}>
                Change Applicaction Status
             </Button>
       ]}
@@ -313,10 +313,10 @@ const DriverDetails = () => {
                   {data.status}
                   </Tag>
                   {data.application_status &&<Tag style={{ textTransform: 'capitalize' }}
-                    color={data.application_status === 'Do not contact (DNC)' ? 'success' : data.application_status === 'Ineligible' ? 'error' : 'warning'}
+                    color={data.application_status === 'Do not contact (DNC)' ? 'magenta' : data.application_status === 'Ineligible' ? 'volcano' : 'red'}
                   >
-                    {data.application_status}
-                  </Tag>}
+                    {data.application_status} {data.application_status ==='Ineligible' && ` - (${data.status_reason})`}
+                </Tag>}
               </Space>
           </Space>
           </Space>
@@ -343,13 +343,6 @@ const DriverDetails = () => {
           </Button>,
         ]}
       >
-        { data.application_status ==='Ineligible' && <Alert
-              message={data.application_status}
-              description={data.status_reason}
-              type="warning"
-              showIcon
-        />}
-        <p></p>
             <Descriptions labelStyle={{ fontWeight: 'bold' }}  >
             <Descriptions.Item label="First Name">
               <EditableText name='first_name' value={data.first_name} updateCallback={updateText} />
@@ -549,8 +542,8 @@ const DriverDetails = () => {
                     type="text" name="application_status" datasource={option} placeholder="Province" onSelect={handleSubOption} key={option.key} />
                 </Form.Item>
                 <Form.Item 
-                 rules={[{ required: true, message: 'Please select a status!' }]}>
-                  {showSub && <SelectWrapper type="text" name="status_reason" datasource={subOption} placeholder="more" key={subOption.key} />}  
+                 rules={[{ required: true, message: 'Please select a status!'}]}>
+                  { showSub  && <SelectWrapper type="text" name="status_reason" datasource={subOption} key={subOption.key} />}  
                 </Form.Item>
               </Space>
             </Modal>
