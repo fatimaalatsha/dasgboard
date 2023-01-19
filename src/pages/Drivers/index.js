@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Card, Table, Tag, Button, Space, Input, Tooltip,Statistic, Row,Col} from 'antd'; // Import Ant components
+import { Card, Table, Tag, Button, Space, Input, Tooltip,} from 'antd'; // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import { useNavigate } from 'react-router-dom'; // Import Nav component
 
@@ -12,7 +12,6 @@ import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
 import { useFilterStore } from '../../store' // Import filter store
-import { CheckCircleOutlined, BarChartOutlined } from '@ant-design/icons'
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
