@@ -510,7 +510,7 @@ const DriverDetails = () => {
                   rules={[{ required: true, message: 'Please select a status!' }]}
                 >
                   <SelectWrapper   
-                    type="text" name="application_status" datasource={option} placeholder="Select status" onSelect={handleSubOption} key={option.key} />
+                    type="text" name="application_status" datasource={option} placeholder="Province" onSelect={handleSubOption} key={option.key} />
                 </Form.Item>
                 <Form.Item 
                  rules={[{ required: true, message: 'Please select a status!'}]}>
