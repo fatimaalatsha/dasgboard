@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import { Card, Table, Tag, Button, Space, Input, Tooltip,Statistic, Row,Col} from 'antd'; // Import Ant components
+import { Card, Table, Tag, Button, Space, Input, Tooltip, Statistic, Row, Col} from 'antd'; // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import { useNavigate } from 'react-router-dom'; // Import Nav component
 
@@ -22,6 +22,62 @@ import { CheckCircleOutlined, BarChartOutlined } from '@ant-design/icons'
 })
 
 dayjs.extend(utc)
+
+const DocumentOverviewList = (Component) => (data) => { // Document Overview list High Order Component
+  
+const count = data.reduce((acc, item) => {
+  if (item.status === 'rejected') {
+    acc['Rejected'] += 1
+  } else if (item.status === 'missing') {
+    acc['Missing'] += 1
+  } else if (item.status === 'approved') {
+    acc['Approved'] += 1
+  } else if (item.status === 'expired' || item.status === 'review') {
+    acc['Action Required'] += 1
+  }
+  return acc
+}, {['Rejected']: 0, ['Missing']: 0, ['Approved']: 0, ['Action Required']: 0})
+
+  return (
+    <Component {...count} />
+  )
+}
+
+const DocumentOverview = (props) => { // Document Overview component
+  
+  return (
+    <Space>
+      {
+        Object.keys(props).map((key, idx) => {
+          const value = props[key]
+          return (
+            <Tooltip key={idx} title={key} >
+              <Tag color={key === 'Rejected' ? 'red' : key === 'Missing' ? 'orange' : key === 'Approved' ? 'green' : 'blue'} key={key}>
+                {value}
+              </Tag>
+            </Tooltip>
+          )
+        })
+      }
+    </Space>
+  )
+}
+
+const DocumentOverviewFeeder = ({id}) => { // Document Overview row component
+  const { data, isLoading, error } = useFetch(`/v1/documents/cc/drivers/${id}`) // Fetch data from API
+
+  if (isLoading) return <>Loading...</>
+
+  if (error) return <>Error</>
+  
+  return (
+    <>
+      {
+        DocumentOverviewList(DocumentOverview)(data.items)
+      }
+    </>
+  )
+} 
 
 const Applicants = () => {
   const applicantFilter = useFilterStore((state) => state.applicantFilter) // Get filter from store
@@ -186,6 +242,16 @@ const Applicants = () => {
       key: 'email',
       responsive: ['lg'],
       filteredValue: null,
+    },
+    {
+      title: 'Document Overview',
+      dataIndex: 'user_id',
+      key: 'user_id',
+      render: (user_id) => {
+        return (
+          <DocumentOverviewFeeder id={user_id} />
+        )
+      }
     },
     {
       title: 'Status',
