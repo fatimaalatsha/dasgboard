@@ -43,7 +43,7 @@ import SelectWrapper from '../../components/forms/SelectWrapper' // Import Selec
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs } from '../../utils/doc-status' // Import isAllApproved function
-import { updateStatus, notifyDriver } from '../../utils/driver-status' // Import delete driver method
+import { updateStatus, notifyDriver,updateApplicationStatus } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
 
 const { confirm } = Modal // Destructure config from Modal
@@ -246,31 +246,6 @@ const DriverDetails = () => {
     value === 'Ineligible' ? setShowSub(true) : setShowSub(false)
   }
 
-  const changeApplicationStatus = async (applicationStatus, statusReason = null) => {
-     try {
-      const auth = await Auth.currentSession()// Get current session
-      const token = auth.getAccessToken().getJwtToken()// Get token from session
-      const options = { // Set options for fetch
-          headers: {
-              'Authorization': token,
-              ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
-          }
-      }
-      const body = {
-        application_status: applicationStatus,
-        status_reason: statusReason || ''
-      }
-      const response = await API.put(`/v1/drivers/cc/${id}`, body, options)
-      const data = await response.data
-       if (data) {
-          setChangeStatusModal(false)
-          refetch() // Refetch data
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
   if (error) {
     return <div>Something went wrong</div>
   }
@@ -306,7 +281,6 @@ const DriverDetails = () => {
               </Space>
           </Space>
           </Space>
-
         }
         extra={[
           <Button 
@@ -482,19 +456,17 @@ const DriverDetails = () => {
       { /*change Application Status modal*/}
       <Formik
         initialValues={{ application_status: data.application_status, status_reason: data.status_reason }}
-        onSubmit={ async (values, { setSubmitting }) => {
-          console.log(values)
-          await changeApplicationStatus(values.application_status, values.status_reason )
+        onSubmit={async (values, { setSubmitting }) => {
+          await updateApplicationStatus( id, values.application_status, values.status_reason)
             .then((response) => {
               if (response) {
                 successAlert(response.message)
                 setSubmitting(false)
+                setChangeStatusModal(false)
                 refetch()
               }
-            }
-          )
+            })
         }}
-        
       >
         {props => (
           <FormikForm>
