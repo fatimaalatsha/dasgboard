@@ -52,7 +52,7 @@ const DocumentOverview = (props) => { // Document Overview component
           const value = props[key]
           return (
             <Tooltip key={idx} title={key} >
-              <Tag color={key === 'Rejected' ? 'red' : key === 'Missing' ? 'orange' : key === 'Approved' ? 'green' : 'blue'} key={key}>
+              <Tag color={key === 'Rejected' ? 'red' : key === 'Missing' ? 'orange' : key === 'Approved' ? 'green' : 'blue'} >
                 {value}
               </Tag>
             </Tooltip>
