@@ -17,7 +17,7 @@ const PdfRenderer = ({url}) => {
         const canvas = document.createElement('canvas') // Create a canvas element
         for ( let i = 1; i <= _PDF_DOC.numPages; i++ ) { // Loop through the pages
             const page = await _PDF_DOC.getPage(i) // Get the page
-            const viewport = page.getViewport({ scale: 1 }) // Get the viewport
+            const viewport = page.getViewport({ scale: 2 }) // Get the viewport
             canvas.width = viewport.width // Set the canvas width
             canvas.height = viewport.height // Set the canvas height
             const renderContext = { canvasContext: canvas.getContext('2d'), viewport } // Create the render context
