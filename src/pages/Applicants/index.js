@@ -13,6 +13,7 @@ import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
 import { useFilterStore } from '../../store' // Import filter store
 import { CheckCircleOutlined, BarChartOutlined } from '@ant-design/icons'
+import { string } from 'yup/lib/locale';
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
@@ -23,7 +24,8 @@ import { CheckCircleOutlined, BarChartOutlined } from '@ant-design/icons'
 
 dayjs.extend(utc)
 
-const DocumentOverviewList = (Component) => (data) => { // Document Overview list High Order Component
+// DEPRECATED: Useful as a reference for future use
+/* const DocumentOverviewList = (Component) => (data) => { // Document Overview list High Order Component
   
 const count = data.reduce((acc, item) => {
   if (item.status === 'rejected') {
@@ -41,7 +43,7 @@ const count = data.reduce((acc, item) => {
   return (
     <Component {...count} />
   )
-}
+} */
 
 const DocumentOverview = (props) => { // Document Overview component
   
@@ -51,8 +53,8 @@ const DocumentOverview = (props) => { // Document Overview component
         Object.keys(props).map((key, idx) => {
           const value = props[key]
           return (
-            <Tooltip key={idx} title={key} >
-              <Tag color={key === 'Rejected' ? 'red' : key === 'Missing' ? 'orange' : key === 'Approved' ? 'green' : 'blue'} >
+            <Tooltip key={idx} title={key === 'action' ? 'Action Required' : key} overlayInnerStyle={{ textTransform: 'capitalize' }}>
+              <Tag color={key === 'rejected' ? 'red' : key === 'missing' ? 'orange' : key === 'approved' ? 'green' : 'blue'} >
                 {value}
               </Tag>
             </Tooltip>
@@ -63,7 +65,8 @@ const DocumentOverview = (props) => { // Document Overview component
   )
 }
 
-const DocumentOverviewFeeder = ({id}) => { // Document Overview row component
+// DEPRECATED: Useful as a reference for future use
+/* const DocumentOverviewFeeder = ({id}) => { // Document Overview row component
   const { data, isLoading, error } = useFetch(`/v1/documents/cc/drivers/${id}`) // Fetch data from API
 
   if (isLoading) return <>Loading...</>
@@ -77,7 +80,7 @@ const DocumentOverviewFeeder = ({id}) => { // Document Overview row component
       }
     </>
   )
-} 
+}  */
 
 const Applicants = () => {
   const applicantFilter = useFilterStore((state) => state.applicantFilter) // Get filter from store
@@ -245,11 +248,11 @@ const Applicants = () => {
     },
     {
       title: 'Document Overview',
-      dataIndex: 'user_id',
-      key: 'user_id',
-      render: (user_id) => {
+      dataIndex: 'documents',
+      key: 'documents',
+      render: (documents) => {
         return (
-          <DocumentOverviewFeeder id={user_id} />
+          <DocumentOverview {...documents} />
         )
       }
     },
@@ -289,7 +292,6 @@ const Applicants = () => {
     return <div>Something went wrong...</div>
   }
 
-  
   return(
     <Card title={'Applicants'} style={{ margin: 15 }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
