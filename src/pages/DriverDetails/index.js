@@ -129,7 +129,8 @@ const DriverDetails = () => {
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   const [changeStatusModal, setChangeStatusModal] = useState(false)// Set change status modal state
-  const [showSub, setShowSub] = useState(false)// Set show sub state
+  const [showSubIneligible, setShowSubIneligible] = useState(false)// Set show sub state
+  const [showSubDNC, setShowSubDNC] = useState(false)// Set show sub state
  
 
   const successAlert = (msg) => { // Success alert method
@@ -232,18 +233,26 @@ const DriverDetails = () => {
     { text: 'Unresponsive',value: 'Unresponsive', key: 'Unresponsive' },
   ];
 
-  const subOption = [
+  const subOptionIneligible = [ 
     { text: 'Underage', value: 'Underage', key: 'Underage' },
-    { text: 'Wrong licence class', value: 'Wrong licence class', key: 'Wrong licence class' },
-    { text: 'Failed background check', value: 'Failed background check', key: 'Failed background check' },
-    { text: 'International', value: 'International', key: 'International' },
-    { text: 'Vehicle age', value: 'Vehicle age', key: 'Vehicle age' },
-    { text: 'Will reach out to Recruitment for more', value: 'Will reach out to Recruitment for more', key: 'Will reach out to Recruitment for more' },
+    { text: 'Unqualified licence class', value: 'Unqualified licence class', key: 'Unqualified licence class' },
+    { text: 'Background check - Failed', value: 'Background check - Failed', key: 'Background check - Failed' },
+    { text: 'Driver Abstract - Failed', value: 'Driver Abstract - Failed', key: 'Driver Abstract - Failed' },
+    { text: 'Unqualified vehicle', value: 'Unqualified vehicle', key: 'Unqualified vehicle' },
+    { text: 'Rejected City Licence', value: 'Rejected City Licence', key: 'Rejected City Licence' },
   ];
   
+  const subOptionDNC = [
+    { text: 'Opted Out', value: 'Opted Out', key: 'Opted Out' },
+    { text: 'Banned', value: 'Banned', key: 'Banned' },
+    { text: 'International', value: 'International', key: 'International' },
+    { text: 'Rejected', value: 'Rejected', key: 'Rejected' },
+  ];
+
   // Handle sub option to show or hide
   const handleSubOption = (value) => {
-    value === 'Ineligible' ? setShowSub(true) : setShowSub(false)
+    value === 'Ineligible' ? setShowSubIneligible(true) : setShowSubIneligible(false)
+    value === 'Do not contact (DNC)' ? setShowSubDNC(true) : setShowSubDNC(false)
   }
 
   if (error) {
@@ -276,7 +285,7 @@ const DriverDetails = () => {
                   {data.application_status &&<Tag style={{ textTransform: 'capitalize' }}
                     color={data.application_status === 'Do not contact (DNC)' ? 'magenta' : data.application_status === 'Ineligible' ? 'volcano' : 'red'}
                   >
-                    {data.application_status} {data.application_status ==='Ineligible' && ` - ${data.status_reason}`}
+                    {data.application_status} {(data.application_status==='Do not contact (DNC)' || data.application_status ==='Ineligible')  && ` - ${data.status_reason}`}
                 </Tag>}
               </Space>
           </Space>
@@ -501,7 +510,8 @@ const DriverDetails = () => {
                 </Form.Item>
                 <Form.Item 
                  rules={[{ required: true, message: 'Please select a status!'}]}>
-                  { showSub  && <SelectWrapper type="text" name="status_reason" datasource={subOption} placeholder="Select one of the fowlling reasons" key={subOption.key} />}  
+                  {showSubIneligible && <SelectWrapper type="text" name="status_reason" datasource={subOptionIneligible} placeholder="Select one of the fowlling reasons" key={subOptionIneligible.key} />} 
+                  {showSubDNC && <SelectWrapper type="text" name="status_reason" datasource={subOptionDNC} placeholder="Select one of the fowlling reasons" key={subOptionDNC.key} />}
                 </Form.Item>
               </Space>
             </Modal>
