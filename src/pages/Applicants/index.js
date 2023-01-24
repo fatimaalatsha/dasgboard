@@ -12,8 +12,6 @@ import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
 import { useFilterStore } from '../../store' // Import filter store
-import { CheckCircleOutlined, BarChartOutlined } from '@ant-design/icons'
-import { string } from 'yup/lib/locale';
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
