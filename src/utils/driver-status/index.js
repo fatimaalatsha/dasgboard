@@ -42,6 +42,29 @@ const updateStatus = async (status, driverId) => {
     }
 }
 
+const updateApplicationStatus = async (driverId,applicationStatus,statusReason = null) => {
+    try {
+        const auth = await Auth.currentSession()// Get current session
+        const token = auth.getAccessToken().getJwtToken()// Get token from session
+        const options = { // Set options for fetch
+            headers: {
+                'Authorization': token,
+                ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
+            }
+        }
+        const body = {
+        'application_status': applicationStatus,
+        'status_reason': statusReason || ''
+        }
+        const response = await API.put(`/v1/drivers/cc/${driverId}`, body, options)
+        const data = await response.data
+        return data
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 const notifyDriver = async (driverId, body) => {
     try {
         const auth = await Auth.currentSession()// Get current session
@@ -61,4 +84,23 @@ const notifyDriver = async (driverId, body) => {
     }
 }
 
-export { deleteDriver, updateStatus, notifyDriver }
+const updateDriver = async (driverId, body) => { // Update driver details
+    try {
+        const auth = await Auth.currentSession()// Get current session
+        const token = auth.getAccessToken().getJwtToken()// Get token from session
+        const options = { // Set options for endpoint
+            headers: {
+                'Authorization': token,
+                ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+            }
+        }
+        const response = await API.put(`/v1/drivers/cc/${driverId}`, body, options)
+        const data = await response.data
+        return data
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+export { deleteDriver, updateStatus, notifyDriver, updateApplicationStatus, updateDriver}

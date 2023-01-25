@@ -45,7 +45,7 @@ import SelectWrapper from '../../components/forms/SelectWrapper' // Import Selec
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs } from '../../utils/doc-status' // Import isAllApproved function
-import { updateStatus, notifyDriver } from '../../utils/driver-status' // Import delete driver method
+import { updateStatus, notifyDriver,updateApplicationStatus, updateDriver } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
 
 const { confirm } = Modal // Destructure config from Modal
@@ -66,9 +66,10 @@ const SelectFeeder = (props) => {
   return  <EditableSelect updateCallback={props.updateCallback} value={props.value} options={data.items} name="city_id" />
 }
 
-const ProfileAvatar = ({objectKey, driverName}) => {
+const ProfileAvatar = ({objectKey, driverName, driverid, picture, refetch}) => {
   const [ url, setUrl ] = useState(null) // Create state to store the URL of the S3 object
   const [ visible, setVisible ] = useState(false) // Create state to store the visibility of the image
+  const [ loading, setLoading ] = useState(false) // Create state to store the loading state of the image
   const driverInitials = driverName.split(/\s/).reduce((response,word)=> response+=word.slice(0,1),'') // Get driver initials
 
   const getDocument = async () => { // Create a function to retrieve the document
@@ -77,6 +78,22 @@ const ProfileAvatar = ({objectKey, driverName}) => {
       })
       .catch(error => console.log(error))
   }
+
+  const handleConfirm = async () => { // Create a function to handle the confirmation of the delete
+      setLoading(true) // Set the loading state to true
+      await updateDriver(driverid, {"picture": "null"}) // Call the updateDriver function to delete the profile picture
+      .then(() => {
+          setLoading(false) // Set the loading state to false
+          message.success('Profile picture deleted successfully') // Display success message
+          refetch() // Refetch the driver details
+      })
+      .catch(error => {
+          setLoading(false) // Set the loading state to false
+          message.error('An error occured while deleting the profile picture') // Display error message
+          console.log(error)
+      })
+  }
+
 
   useEffect(() => { // Call the getDocument function on component mount
       if(!url){
@@ -89,14 +106,27 @@ const ProfileAvatar = ({objectKey, driverName}) => {
   }
 
   const content = (
-      <Button type="primary" danger onClick={() => console.log('delete')} block disabled>
-        Yes, Delete
+    <Popconfirm 
+      title="You are about to delete this profile picture."
+      description="Are you sure you want to delete it?"
+      onConfirm={handleConfirm}
+      okText="Yes, Delete"
+      cancelText="No, Cancel"
+      okButtonProps={{ 
+        danger: true,
+        loading: loading,
+      }}
+      disabled={!picture}
+    >
+      <Button type="primary" danger block disabled={!picture}>
+        Delete
       </Button>
+    </Popconfirm>
   )
 
   return (
     <>
-      <Popover content={content} title="Delete Profile Picture?">
+      <Popover content={content} title="Delete Profile Picture">
         <Avatar size={72} src={url} onClick={() => setVisible(true)} style={{ cursor: 'pointer'}} >
           {driverInitials}
         </Avatar>
@@ -142,7 +172,8 @@ const DriverDetails = () => {
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   const [changeStatusModal, setChangeStatusModal] = useState(false)// Set change status modal state
-  const [showSub, setShowSub] = useState(false)// Set show sub state
+  const [showSubIneligible, setShowSubIneligible] = useState(false)// Set show sub state
+  const [showSubDNC, setShowSubDNC] = useState(false)// Set show sub state
  
 
   const successAlert = (msg) => { // Success alert method
@@ -195,7 +226,6 @@ const DriverDetails = () => {
     });
   }
 
-
   const showConfirm = (status) => {
     setLoading(true)
     confirm({
@@ -237,52 +267,32 @@ const DriverDetails = () => {
     });
   }
 
-
-
   const option = [
     { text:'Do not contact (DNC)',  value: 'Do not contact (DNC)' , key: 'Do not contact (DNC)' },
     { text: 'Ineligible' ,value: 'Ineligible' , key: 'Ineligible' },
     { text: 'Unresponsive',value: 'Unresponsive', key: 'Unresponsive' },
-  ];
+  ]
 
-  const subOption = [
+  const subOptionIneligible = [ 
     { text: 'Underage', value: 'Underage', key: 'Underage' },
-    { text: 'Wrong licence class', value: 'Wrong licence class', key: 'Wrong licence class' },
-    { text: 'Failed background check', value: 'Failed background check', key: 'Failed background check' },
-    { text: 'International', value: 'International', key: 'International' },
-    { text: 'Vehicle age', value: 'Vehicle age', key: 'Vehicle age' },
-    { text: 'Will reach out to Recruitment for more', value: 'Will reach out to Recruitment for more', key: 'Will reach out to Recruitment for more' },
-  ];
+    { text: 'Unqualified licence class', value: 'Unqualified licence class', key: 'Unqualified licence class' },
+    { text: 'Background check - Failed', value: 'Background check - Failed', key: 'Background check - Failed' },
+    { text: 'Driver Abstract - Failed', value: 'Driver Abstract - Failed', key: 'Driver Abstract - Failed' },
+    { text: 'Unqualified vehicle', value: 'Unqualified vehicle', key: 'Unqualified vehicle' },
+    { text: 'Rejected City Licence', value: 'Rejected City Licence', key: 'Rejected City Licence' },
+  ]
   
+  const subOptionDNC = [
+    { text: 'Opted Out', value: 'Opted Out', key: 'Opted Out' },
+    { text: 'Banned', value: 'Banned', key: 'Banned' },
+    { text: 'International', value: 'International', key: 'International' },
+    { text: 'Rejected', value: 'Rejected', key: 'Rejected' },
+  ]
+
   // Handle sub option to show or hide
   const handleSubOption = (value) => {
-    value === 'Ineligible' ? setShowSub(true) : setShowSub(false)
-  }
-
-  const changeApplicationStatus = async (applicationStatus, statusReason) => {
-    statusReason = statusReason === null ? '' : statusReason
-     try {
-      const auth = await Auth.currentSession()// Get current session
-      const token = auth.getAccessToken().getJwtToken()// Get token from session
-      const options = { // Set options for fetch
-          headers: {
-              'Authorization': token,
-              ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
-          }
-      }
-      const body = {
-        application_status: applicationStatus,
-        status_reason: statusReason
-      }
-      const response = await API.put(`/v1/drivers/cc/${id}`, body, options)
-      const data = await response.data
-       if (data) {
-          setChangeStatusModal(false)
-          refetch() // Refetch data
-      }
-    } catch (error) {
-      console.log(error)
-    }
+    value === 'Ineligible' ? setShowSubIneligible(true) : setShowSubIneligible(false)
+    value === 'Do not contact (DNC)' ? setShowSubDNC(true) : setShowSubDNC(false)
   }
 
   if (error) {
@@ -293,7 +303,7 @@ const DriverDetails = () => {
     <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
       extra={[
         <Button disabled style={{ display: 'none' }} type="primary" key='status' loading={loading} onClick={() => { setChangeStatusModal(true); handleSubOption(data.application_status)}}>
-               Change Applicaction Status
+               Change Application Status
             </Button>
       ]}
     >
@@ -302,7 +312,7 @@ const DriverDetails = () => {
         onBack={() => window.history.back()}
         title={
         <Space>
-          <ProfileAvatar objectKey={`${data.sub_id}/${data.profile_picture}`} driverName={`${data.first_name} ${data.last_name}`} />
+          <ProfileAvatar refetch={refetch} objectKey={`${data.sub_id}/${data.profile_picture}`} driverName={`${data.first_name} ${data.last_name}`} driverid={id} picture={data.profile_picture}/>
           <Space direction='vertical' size={0}>
             <Title level={4} style={{ marginTop: 0 }}>
               {`${data.first_name} ${data.last_name}`}
@@ -315,12 +325,11 @@ const DriverDetails = () => {
                   {data.application_status &&<Tag style={{ textTransform: 'capitalize', display: 'none' }}
                     color={data.application_status === 'Do not contact (DNC)' ? 'magenta' : data.application_status === 'Ineligible' ? 'volcano' : 'red'}
                   >
-                    {data.application_status} {data.application_status ==='Ineligible' && ` - (${data.status_reason})`}
+                    {data.application_status} {(data.application_status==='Do not contact (DNC)' || data.application_status ==='Ineligible')  && ` - ${data.status_reason}`}
                 </Tag>}
               </Space>
           </Space>
           </Space>
-          
         }
         extra={[
           <Button 
@@ -496,19 +505,17 @@ const DriverDetails = () => {
       { /*change Application Status modal*/}
       <Formik
         initialValues={{ application_status: data.application_status, status_reason: data.status_reason }}
-        onSubmit={ async (values, { setSubmitting }) => {
-          console.log(values)
-          await changeApplicationStatus(values.application_status, values.status_reason )
+        onSubmit={async (values, { setSubmitting }) => {
+          await updateApplicationStatus( id, values.application_status, values.status_reason)
             .then((response) => {
               if (response) {
                 successAlert(response.message)
                 setSubmitting(false)
+                setChangeStatusModal(false)
                 refetch()
               }
-            }
-          )
+            })
         }}
-        
       >
         {props => (
           <FormikForm>
@@ -543,7 +550,8 @@ const DriverDetails = () => {
                 </Form.Item>
                 <Form.Item 
                  rules={[{ required: true, message: 'Please select a status!'}]}>
-                  { showSub  && <SelectWrapper type="text" name="status_reason" datasource={subOption} key={subOption.key} />}  
+                  {showSubIneligible && <SelectWrapper type="text" name="status_reason" datasource={subOptionIneligible} placeholder="Select one of the fowlling reasons" key={subOptionIneligible.key} />} 
+                  {showSubDNC && <SelectWrapper type="text" name="status_reason" datasource={subOptionDNC} placeholder="Select one of the fowlling reasons" key={subOptionDNC.key} />}
                 </Form.Item>
               </Space>
             </Modal>
