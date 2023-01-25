@@ -84,4 +84,23 @@ const notifyDriver = async (driverId, body) => {
     }
 }
 
-export { deleteDriver, updateStatus, notifyDriver , updateApplicationStatus}
+const updateDriver = async (driverId, body) => { // Update driver details
+    try {
+        const auth = await Auth.currentSession()// Get current session
+        const token = auth.getAccessToken().getJwtToken()// Get token from session
+        const options = { // Set options for endpoint
+            headers: {
+                'Authorization': token,
+                ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+            }
+        }
+        const response = await API.put(`/v1/drivers/cc/${driverId}`, body, options)
+        const data = await response.data
+        return data
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+export { deleteDriver, updateStatus, notifyDriver, updateApplicationStatus, updateDriver}

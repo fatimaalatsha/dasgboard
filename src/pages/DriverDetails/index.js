@@ -45,7 +45,7 @@ import SelectWrapper from '../../components/forms/SelectWrapper' // Import Selec
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs } from '../../utils/doc-status' // Import isAllApproved function
-import { updateStatus, notifyDriver,updateApplicationStatus } from '../../utils/driver-status' // Import delete driver method
+import { updateStatus, notifyDriver,updateApplicationStatus, updateDriver } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
 
 const { confirm } = Modal // Destructure config from Modal
@@ -66,9 +66,10 @@ const SelectFeeder = (props) => {
   return  <EditableSelect updateCallback={props.updateCallback} value={props.value} options={data.items} name="city_id" />
 }
 
-const ProfileAvatar = ({objectKey, driverName}) => {
+const ProfileAvatar = ({objectKey, driverName, driverid, picture, refetch}) => {
   const [ url, setUrl ] = useState(null) // Create state to store the URL of the S3 object
   const [ visible, setVisible ] = useState(false) // Create state to store the visibility of the image
+  const [ loading, setLoading ] = useState(false) // Create state to store the loading state of the image
   const driverInitials = driverName.split(/\s/).reduce((response,word)=> response+=word.slice(0,1),'') // Get driver initials
 
   const getDocument = async () => { // Create a function to retrieve the document
@@ -77,6 +78,22 @@ const ProfileAvatar = ({objectKey, driverName}) => {
       })
       .catch(error => console.log(error))
   }
+
+  const handleConfirm = async () => { // Create a function to handle the confirmation of the delete
+      setLoading(true) // Set the loading state to true
+      await updateDriver(driverid, {"picture": "null"}) // Call the updateDriver function to delete the profile picture
+      .then(() => {
+          setLoading(false) // Set the loading state to false
+          message.success('Profile picture deleted successfully') // Display success message
+          refetch() // Refetch the driver details
+      })
+      .catch(error => {
+          setLoading(false) // Set the loading state to false
+          message.error('An error occured while deleting the profile picture') // Display error message
+          console.log(error)
+      })
+  }
+
 
   useEffect(() => { // Call the getDocument function on component mount
       if(!url){
@@ -89,14 +106,27 @@ const ProfileAvatar = ({objectKey, driverName}) => {
   }
 
   const content = (
-      <Button type="primary" danger onClick={() => console.log('delete')} block disabled>
-        Yes, Delete
+    <Popconfirm 
+      title="You are about to delete this profile picture."
+      description="Are you sure you want to delete it?"
+      onConfirm={handleConfirm}
+      okText="Yes, Delete"
+      cancelText="No, Cancel"
+      okButtonProps={{ 
+        danger: true,
+        loading: loading,
+      }}
+      disabled={!picture}
+    >
+      <Button type="primary" danger block disabled={!picture}>
+        Delete
       </Button>
+    </Popconfirm>
   )
 
   return (
     <>
-      <Popover content={content} title="Delete Profile Picture?">
+      <Popover content={content} title="Delete Profile Picture">
         <Avatar size={72} src={url} onClick={() => setVisible(true)} style={{ cursor: 'pointer'}} >
           {driverInitials}
         </Avatar>
@@ -196,7 +226,6 @@ const DriverDetails = () => {
     });
   }
 
-
   const showConfirm = (status) => {
     setLoading(true)
     confirm({
@@ -238,13 +267,11 @@ const DriverDetails = () => {
     });
   }
 
-
-
   const option = [
     { text:'Do not contact (DNC)',  value: 'Do not contact (DNC)' , key: 'Do not contact (DNC)' },
     { text: 'Ineligible' ,value: 'Ineligible' , key: 'Ineligible' },
     { text: 'Unresponsive',value: 'Unresponsive', key: 'Unresponsive' },
-  ];
+  ]
 
   const subOptionIneligible = [ 
     { text: 'Underage', value: 'Underage', key: 'Underage' },
@@ -253,14 +280,14 @@ const DriverDetails = () => {
     { text: 'Driver Abstract - Failed', value: 'Driver Abstract - Failed', key: 'Driver Abstract - Failed' },
     { text: 'Unqualified vehicle', value: 'Unqualified vehicle', key: 'Unqualified vehicle' },
     { text: 'Rejected City Licence', value: 'Rejected City Licence', key: 'Rejected City Licence' },
-  ];
+  ]
   
   const subOptionDNC = [
     { text: 'Opted Out', value: 'Opted Out', key: 'Opted Out' },
     { text: 'Banned', value: 'Banned', key: 'Banned' },
     { text: 'International', value: 'International', key: 'International' },
     { text: 'Rejected', value: 'Rejected', key: 'Rejected' },
-  ];
+  ]
 
   // Handle sub option to show or hide
   const handleSubOption = (value) => {
@@ -285,7 +312,7 @@ const DriverDetails = () => {
         onBack={() => window.history.back()}
         title={
         <Space>
-          <ProfileAvatar objectKey={`${data.sub_id}/${data.profile_picture}`} driverName={`${data.first_name} ${data.last_name}`} />
+          <ProfileAvatar refetch={refetch} objectKey={`${data.sub_id}/${data.profile_picture}`} driverName={`${data.first_name} ${data.last_name}`} driverid={id} picture={data.profile_picture}/>
           <Space direction='vertical' size={0}>
             <Title level={4} style={{ marginTop: 0 }}>
               {`${data.first_name} ${data.last_name}`}
