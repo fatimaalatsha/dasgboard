@@ -304,7 +304,7 @@ const DriverDetails = () => {
     <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
       extra={[
         <Button type="primary" key='status' loading={loading} onClick={() => { setChangeStatusModal(true); handleSubOption(data.application_status)}}>
-               Change Applicaction Status
+               Change Application Status 
             </Button>
       ]}
     >
