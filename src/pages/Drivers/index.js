@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 
 import { Card, Table, Tag, Button, Space, Input, Tooltip,} from 'antd'; // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
@@ -20,11 +20,35 @@ import { useFilterStore } from '../../store' // Import filter store
     ...params,
 })
 
-dayjs.extend(utc)
+dayjs.extend(utc) 
+
+const DocumentOverview = (props) => { // Document Overview component
+  return (
+    <Space>
+      {
+        Object.keys(props).map((key, idx) => {
+          const value = props[key]
+          return (
+            <Space key={idx} >
+            { key !== 'missing' && 
+              <Tooltip  title={key === 'action' ? 'Action Required' : key} overlayInnerStyle={{ textTransform: 'capitalize' }}>
+                <Tag color={key === 'rejected' ? 'red' : key === 'approved' ? 'green' : 'blue'} >
+                  {value}
+                </Tag>
+              </Tooltip>
+            }
+            </Space>
+          )
+        })
+      }
+    </Space>
+  )
+}
 
 const Drivers = () => {
   const driverFilter = useFilterStore((state) => state.driverFilter) // Get filter from store
   const setDriverFilter = useFilterStore((state) => state.setDriverFilter) // Set filter to store
+  const componentIsMounted = useRef(false) // Create a ref to store the component mount state
 
   const navigate = useNavigate();
   const [cities, setCities] = useState([])
@@ -92,19 +116,20 @@ const Drivers = () => {
   }
   
   useEffect(() => {
-    let isMounted = true
-    setDriverFilter({ // Set filter to store
-      pagination: {
-        ...driverFilter.pagination,
-        total: data?.total_items,
-        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Drivers`,
-      }
-    })
-    if (isMounted) {
+    if(!componentIsMounted.current) { // Check if component is mounted
+      setDriverFilter({ // Set filter to store
+        pagination: {
+          ...driverFilter.pagination,
+          total: data?.total_items,
+          showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Drivers`,
+        }
+      })
       getCities()
     }
-    
-    return () => { isMounted = false }
+
+    return () => {
+        componentIsMounted.current = true // Set the component mount state to false on component unmount
+    }
   }, [data])
 
   const refetchConfig = {
@@ -183,6 +208,16 @@ const Drivers = () => {
       key: 'email',
       responsive: ['lg'],
       filteredValue: null,
+    },
+    {
+      title: 'Document Overview',
+      dataIndex: 'documents',
+      key: 'documents',
+      render: (documents) => {
+        return (
+          <DocumentOverview {...documents} />
+        )
+      }
     },
     {
       title: 'Status',
