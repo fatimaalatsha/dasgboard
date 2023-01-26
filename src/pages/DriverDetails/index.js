@@ -302,7 +302,7 @@ const DriverDetails = () => {
   return (
     <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
       extra={[
-        <Button type="primary" key='status' loading={loading} onClick={() => { setChangeStatusModal(true); handleSubOption(data.application_status)}}>
+        <Button disabled style={{ display: 'none' }} type="primary" key='status' loading={loading} onClick={() => { setChangeStatusModal(true); handleSubOption(data.application_status)}}>
                Change Application Status
             </Button>
       ]}
@@ -322,7 +322,7 @@ const DriverDetails = () => {
                   color={data.status === 'active' ? 'success' : data.status === 'inactive' ? 'error' : 'warning'}>
                   {data.status}
                   </Tag>
-                  {data.application_status &&<Tag style={{ textTransform: 'capitalize' }}
+                  {data.application_status &&<Tag style={{ textTransform: 'capitalize', display: 'none' }}
                     color={data.application_status === 'Do not contact (DNC)' ? 'magenta' : data.application_status === 'Ineligible' ? 'volcano' : 'red'}
                   >
                     {data.application_status} {(data.application_status==='Do not contact (DNC)' || data.application_status ==='Ineligible')  && ` - ${data.status_reason}`}
