@@ -116,7 +116,6 @@ const Drivers = () => {
   }
   
   useEffect(() => {
-    if(!componentIsMounted.current) { // Check if component is mounted
       setDriverFilter({ // Set filter to store
         pagination: {
           ...driverFilter.pagination,
@@ -124,8 +123,9 @@ const Drivers = () => {
           showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Drivers`,
         }
       })
-      getCities()
-    }
+      if(!componentIsMounted.current) { // Check if component is mounted
+        getCities()
+      }
 
     return () => {
         componentIsMounted.current = true // Set the component mount state to false on component unmount
