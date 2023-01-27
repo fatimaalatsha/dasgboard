@@ -279,11 +279,11 @@ const DriverDetails = () => {
               {`${data.first_name} ${data.last_name}`}
               </Title>
               <Space size={0} direction='horizontal'>
-               { (data.application_status!=='Do not contact (DNC)' && data.application_status !=='Ineligible' && data.application_status !== 'Unresponsive') && <Tag style={{ textTransform: 'capitalize'}} 
+               { ((data.application_status!=='Do not contact (DNC)' && data.application_status !=='Ineligible' && data.application_status !== 'Unresponsive') || data.status ==='active') && <Tag style={{ textTransform: 'capitalize'}} 
                   color={data.status === 'active' ? 'success' : data.status === 'inactive' ? 'error' : 'warning'}>
                   {data.status}
                   </Tag>}
-                  {data.application_status &&<Tag style={{ textTransform: 'capitalize' }}
+                  {(data.application_status && data.status !=='active' ) && <Tag style={{ textTransform: 'capitalize' }}
                     color={data.application_status === 'Do not contact (DNC)' ? 'magenta' : data.application_status === 'Ineligible' ? 'volcano' : 'red'}
                   >
                     {data.application_status} {(data.application_status==='Do not contact (DNC)' || data.application_status ==='Ineligible')  && ` - ${data.status_reason}`}
