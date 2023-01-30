@@ -269,6 +269,7 @@ const DriverDetails = () => {
 
   const option = [
     { text:'Do not contact (DNC)',  value: 'Do not contact (DNC)' , key: 'Do not contact (DNC)' },
+    { text:'Awaiting Documents',  value: 'Awaiting Documents' , key: 'Awaiting Documents' },
     { text: 'Ineligible' ,value: 'Ineligible' , key: 'Ineligible' },
     { text: 'Unresponsive',value: 'Unresponsive', key: 'Unresponsive' },
   ]
@@ -302,8 +303,8 @@ const DriverDetails = () => {
   return (
     <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
       extra={[
-        <Button disabled style={{ display: 'none' }} type="primary" key='status' loading={loading} onClick={() => { setChangeStatusModal(true); handleSubOption(data.application_status)}}>
-               Change Application Status
+        <Button type="primary" key='status' loading={loading} onClick={() => { setChangeStatusModal(true); handleSubOption(data.application_status)}}>
+               Change Application Status 
             </Button>
       ]}
     >
@@ -318,11 +319,11 @@ const DriverDetails = () => {
               {`${data.first_name} ${data.last_name}`}
               </Title>
               <Space size={0} direction='horizontal'>
-                <Tag style={{ textTransform: 'capitalize'}} 
+               { ((data.application_status!=='Do not contact (DNC)' && data.application_status !=='Ineligible' && data.application_status !== 'Unresponsive') || data.status ==='active') && <Tag style={{ textTransform: 'capitalize'}} 
                   color={data.status === 'active' ? 'success' : data.status === 'inactive' ? 'error' : 'warning'}>
                   {data.status}
-                  </Tag>
-                  {data.application_status &&<Tag style={{ textTransform: 'capitalize', display: 'none' }}
+                  </Tag>}
+                  {(data.application_status && data.status !=='active' ) && <Tag style={{ textTransform: 'capitalize' }}
                     color={data.application_status === 'Do not contact (DNC)' ? 'magenta' : data.application_status === 'Ineligible' ? 'volcano' : 'red'}
                   >
                     {data.application_status} {(data.application_status==='Do not contact (DNC)' || data.application_status ==='Ineligible')  && ` - ${data.status_reason}`}
@@ -520,7 +521,7 @@ const DriverDetails = () => {
         {props => (
           <FormikForm>
             <Modal
-              title="Change Application application_status"
+              title="Update Application Status"
               open={changeStatusModal}
               onCancel={() => setChangeStatusModal(false)}
               destroyOnClose
@@ -537,21 +538,18 @@ const DriverDetails = () => {
             >
               <Space direction="vertical">
                 <Text>
-                  {`Are you sure you want to continue with this action? `} <Text mark strong>{`${data.first_name} ${data.last_name}`}</Text>{` will recieved an email notification.`}
-                </Text>
-                <Text type="danger">
-                  {`Be wary of sending too many of these notifications, as it may be considered spam.`}
+                  {`Are you sure you want to continue with this action? `} <Text mark strong>{`${data.first_name} ${data.last_name}`}</Text>{` will have their application status changed to `} <Text mark strong>{`${props.values.application_status}`}</Text>
                 </Text>
                 <Form.Item
                   rules={[{ required: true, message: 'Please select a status!' }]}
                 >
                   <SelectWrapper   
-                    type="text" name="application_status" datasource={option} placeholder="Province" onSelect={handleSubOption} key={option.key} />
+                    type="text" name="application_status" datasource={option} placeholder="Select a status" onSelect={handleSubOption} key={option.key} />
                 </Form.Item>
                 <Form.Item 
                  rules={[{ required: true, message: 'Please select a status!'}]}>
-                  {showSubIneligible && <SelectWrapper type="text" name="status_reason" datasource={subOptionIneligible} placeholder="Select one of the fowlling reasons" key={subOptionIneligible.key} />} 
-                  {showSubDNC && <SelectWrapper type="text" name="status_reason" datasource={subOptionDNC} placeholder="Select one of the fowlling reasons" key={subOptionDNC.key} />}
+                  {showSubIneligible && <SelectWrapper type="text" name="status_reason" datasource={subOptionIneligible} placeholder="Select one of the following reasons" key={subOptionIneligible.key} />} 
+                  {showSubDNC && <SelectWrapper type="text" name="status_reason" datasource={subOptionDNC} placeholder="Select one of the following reasons" key={subOptionDNC.key} />}
                 </Form.Item>
               </Space>
             </Modal>
