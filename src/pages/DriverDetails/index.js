@@ -22,10 +22,10 @@ import {
   Popconfirm,
   Drawer,
   Empty,
-  Alert,
+  Upload,
   Popover,
 } from 'antd' // Import antd components
-import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined } from '@ant-design/icons' // Import icon
+import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined, CloudUploadOutlined , LoadingOutlined, PlusOutlined  } from '@ant-design/icons' // Import icon
 import { useParams } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
@@ -46,7 +46,8 @@ import SelectWrapper from '../../components/forms/SelectWrapper' // Import Selec
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs } from '../../utils/doc-status' // Import isAllApproved function
 import { updateStatus, notifyDriver,updateApplicationStatus, updateDriver } from '../../utils/driver-status' // Import delete driver method
-import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
+import { getFromS3, uploadToS3 } from '../../utils/s3-storage' // Import getFromS3 method
+import { isElementOfType } from 'react-dom/test-utils';
 
 const { confirm } = Modal // Destructure config from Modal
 const { Title, Text } = Typography // Destructure Title from Typography
@@ -78,6 +79,7 @@ const ProfileAvatar = ({objectKey, driverName, driverid, picture, refetch}) => {
       })
       .catch(error => console.log(error))
   }
+
 
   const handleConfirm = async () => { // Create a function to handle the confirmation of the delete
       setLoading(true) // Set the loading state to true
@@ -172,9 +174,11 @@ const DriverDetails = () => {
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   const [changeStatusModal, setChangeStatusModal] = useState(false)// Set change status modal state
+  const [showSlipModal, setShowSlipModal] = useState(false)// Set slep modal state
   const [showSubIneligible, setShowSubIneligible] = useState(false)// Set show sub state
   const [showSubDNC, setShowSubDNC] = useState(false)// Set show sub state
- 
+  const [ url, setUrl ] = useState(null) // Create state to store the URL of the S3 object
+
 
   const successAlert = (msg) => { // Success alert method
     message.success(msg)
@@ -266,6 +270,27 @@ const DriverDetails = () => {
       }
     });
   }
+
+  //upload document
+
+  const uploadDocument = async (id, file) => { // Create a function to upload the document
+    setLoading(true) // Set the loading state to true
+    await uploadToS3(id ,file).then((url) => { // Call the uploadToS3 function
+      setLoading(false) // Set the loading state to false
+      setUrl(url) // Set the URL state
+      message.success('Pink slip uploaded successfully') // Display success message
+      refetch() // Refetch the driver details
+    })
+      .catch(error => {
+        
+        setLoading(false) // Set the loading state to false
+        message.error('An error occured while uploading the pink slip') // Display error message
+        console.log(error)
+      })
+  }
+
+
+
 
   const option = [
     { text:'Do not contact (DNC)',  value: 'Do not contact (DNC)' , key: 'Do not contact (DNC)' },
@@ -405,6 +430,7 @@ const DriverDetails = () => {
           }}
         >
           <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
+          <Button type="primary" onClick={() => setShowSlipModal(true)}>Add Pink Slip</Button>
           <Button type="primary" icon={<SendOutlined />} loading={loading}  onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
@@ -558,6 +584,79 @@ const DriverDetails = () => {
       </Formik>
       { /*end change Application application_status modal*/}
 
+      { /* Upload pink slip*/}  
+      <Formik
+        initialValues={{ pink_slip: '', }}
+        onSubmit={
+       
+          async (values, { setSubmitting }) => {
+            await uploadDocument( values.pink_slip)
+            console.log(id, values)
+            .then((response) => {
+              if (response) {
+                successAlert(response.message)
+                setSubmitting(false)
+                setShowSlipModal(false)
+                refetch()
+              }
+            })
+          }
+
+        }
+      >
+        {props => (
+          <FormikForm>
+            <Modal
+              title="Upload Pink Slip"
+              open={showSlipModal}
+              onCancel={() => setShowSlipModal(false)}
+              destroyOnClose
+              footer={[
+                <Button key="Back"
+                  onClick={() => setShowSlipModal(false)}
+                >
+                  Cancel
+                </Button>,
+                <SubmitWrapper key="Submit" type="primary">
+                  Yes, Upload
+                </SubmitWrapper>,
+              ]}
+            >
+              <Space direction="vertical">
+                <Text>
+                  {`Are you sure you want to continue with this action? `} <Text mark strong>{`${data.first_name} ${data.last_name}`}</Text>{` will have their pink slip uploaded.`}
+                </Text>
+                <Form.Item
+                  rules={[{ required: true, message: 'Please upload a pink slip!' }]}
+                >
+                  <Upload 
+                    type="file"
+                    name="pink_slip"
+                    action={uploadDocument}
+                    onChange=
+                    {info => {
+                      if (info.file.status !== 'uploading') {
+                        console.log(info.file, info.fileList, info.file.type);
+                      }
+                      if (info.file.status === 'done') {
+                        message.success(`${info.file.name} file uploaded successfully`);
+                      } else if (info.file.status === 'error') {
+                        message.error(`${info.file.name} file upload failed.`);
+                      }
+                    }}
+
+                    // beforeUpload={beforeUpload}
+                  >
+                    <CloudUploadOutlined  /> Click to Upload
+                  </Upload>
+                </Form.Item>
+              </Space>
+            </Modal>
+          </FormikForm> 
+        )}
+      </Formik>
+      { /*end Upload pink slip modal*/}
+
     </Card>
   )
 }
@@ -635,6 +734,10 @@ const EnableAdditionalDocs = ({status, id, refetch}) => { // TODO: Implement ena
     </Popconfirm>
     </Space>
   )
+}
+
+const pinkSlip = (id) => {
+
 }
 
 const AdditionalDocsDrawer = ({ open, setOpen, driverid, sub }) => {
