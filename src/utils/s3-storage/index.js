@@ -26,12 +26,12 @@ const getFromS3 = async (key) => {
     }
 }
 
-const uploadToS3 = async (file, folder, label) => {
+const uploadToS3 = async (file) => {
     const todayDate = dayjs().format('YYYY-MM-DD')
     const fileType = file.name.match(/\.([^.]+)$/)[1] // Get file type
     const fileSize = file.size // Get file size
-    const fileName = `${label}_${todayDate}.${fileType.toLowerCase()}` // Set file name
-    const objectKey = `${folder}/${fileName}` // Set object key
+    const fileName = `document.pdf` // Set file name
+    const objectKey = `Pinkslip/${fileName}` // Set object key
 
     try {
         const auth = await Auth.currentCredentials() // Get cognito credentials

@@ -430,8 +430,27 @@ const DriverDetails = () => {
           }}
         >
           <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
-          <Button type="primary" onClick={() => setShowSlipModal(true)}>Add Pink Slip</Button>
-          <Button type="primary" icon={<SendOutlined />} loading={loading}  onClick={() => setOpen(true)}>Notify Driver</Button>
+          <Upload 
+                              type="file"
+                              name="pink_slip"
+                              action={uploadDocument}
+                              onChange=
+                              {info => {
+                                if (info.file.status !== 'uploading') {
+                                  console.log(info.file, info.fileList, info.file.type);
+                                }
+                                if (info.file.status === 'done') {
+                                  message.success(`${info.file.name} file uploaded successfully`);
+                                } else if (info.file.status === 'error') {
+                                  message.error(`${info.file.name} file upload failed.`);
+                                }
+                              }}
+
+                              // beforeUpload={beforeUpload}
+                            >
+                            <Button>  <CloudUploadOutlined  /> Click to Upload Pink Slip</Button>
+        </Upload>
+        <Button type="primary" icon={<SendOutlined />} loading={loading} onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
         <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
@@ -585,7 +604,7 @@ const DriverDetails = () => {
       { /*end change Application application_status modal*/}
 
       { /* Upload pink slip*/}  
-      <Formik
+      {/* <Formik
         initialValues={{ pink_slip: '', }}
         onSubmit={
        
@@ -654,7 +673,7 @@ const DriverDetails = () => {
             </Modal>
           </FormikForm> 
         )}
-      </Formik>
+      </Formik> */}
       { /*end Upload pink slip modal*/}
 
     </Card>
@@ -736,9 +755,6 @@ const EnableAdditionalDocs = ({status, id, refetch}) => { // TODO: Implement ena
   )
 }
 
-const pinkSlip = (id) => {
-
-}
 
 const AdditionalDocsDrawer = ({ open, setOpen, driverid, sub }) => {
 
