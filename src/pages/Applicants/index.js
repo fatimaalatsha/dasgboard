@@ -69,7 +69,7 @@ const Applicants = () => {
       console.log(error)
     }  
   }
-  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(applicantFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
+  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(applicantFilter), { skipNulls: true, arrayFormat: 'comma' })}`, true) // Fetch data from API//data
 
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
@@ -222,8 +222,8 @@ const Applicants = () => {
       key: 'status',
       render: (status) => {                                                                           
         return (
-          <Tag color={ status === 'pending' ? 'orange' : 'blue' }>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
+          <Tag color={ status === 'pending' ? 'orange' : 'blue' } style={{ textTransform: 'capitalize' }}>
+            {status}
           </Tag>
         );
       }
@@ -235,6 +235,17 @@ const Applicants = () => {
       filteredValue: null,
       ...( applicantFilter.filter?.status && { defaultFilteredValue: applicantFilter.filter?.status.map((status) => status.replace('in|', '')) }),
       ...( applicantFilter.filter?.status && { filteredValue: applicantFilter.filter?.status.map((status) => status.replace('in|', '')) }),
+    },
+    {
+      title: 'Application Status',
+      dataIndex: 'application_status',
+      render: (application_status) => {                                                                           
+        return (
+          <Tag color={data.application_status === 'Do not contact (DNC)' ? 'magenta' : data.application_status === 'Ineligible' ? 'volcano' : 'red'} style={{ textTransform: 'capitalize'}}>
+            {application_status}
+          </Tag>
+        )
+      },
     },
     {
         title: 'Applied Date',
@@ -251,7 +262,7 @@ const Applicants = () => {
   if (error) {
     return <div>Something went wrong...</div>
   }
-
+console.log(data)
   return(
     <Card title={'Applicants'} style={{ margin: 15 }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
