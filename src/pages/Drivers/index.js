@@ -225,10 +225,10 @@ const Drivers = () => {
       key: 'status',
       render: (status) => {                                                                           
         return (
-          <Tag color={status === 'active' ? 'success' : 'error' }>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
+          <Tag color={status === 'active' ? 'success' : 'error' } style={{ textTransform: 'capitalize' }}>
+            {status}
           </Tag>
-        );
+        )
       }
       ,
       filters: [
@@ -254,7 +254,6 @@ const Drivers = () => {
     return <div>Something went wrong...</div>
   }
 
-  
   return(
     <Card title={'Drivers'} style={{ margin: 15 }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
