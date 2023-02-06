@@ -43,7 +43,7 @@ const Layout = () => {
                     <Route path="/trainings" element={<Trainings />} />
                     <Route path="/training/:id" element={<TrainingDetails />} />
                     <Route path="/applicants" element={<Applicants />} />
-                    {['/documents/:id', '/driver/:id', '/applicants/:id'].map(path => <Route key="Details" path={path} element={<DriverDetails />} />)}
+                    {['/documents/:id', '/drivers/:id', '/applicants/:id'].map(path => <Route key="Details" path={path} element={<DriverDetails />} />)}
                 </Routes>
             </Content>
           </Container>
