@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
-
-import { Card, Table, Tag, Button, Space, Input, Tooltip, Statistic, Row, Col} from 'antd'; // Import Ant components
+import ReactDOM from 'react-dom' // Import react-dom
+import { Card, Table, Tag, Button, Space, Input, Tooltip, Menu, Dropdown, Typography } from 'antd'; // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import { useNavigate } from 'react-router-dom'; // Import Nav component
 
@@ -151,6 +151,18 @@ const Applicants = () => {
     }
   }
 
+  const items = [
+    {
+      key: '1',
+      label: 'Open Link in New Tab',
+    }
+  ]
+
+  const handleRowContextMenu = (e, record) => {
+    e.preventDefault()
+    console.log(record)
+  }
+
   /* Added filteredValue: null to the columns that are not filtered to avoid a warning with controlled and uncontrolled columns
   * https://github.com/ant-design/ant-design/issues/28107
   */
@@ -210,11 +222,9 @@ const Applicants = () => {
       title: 'Document Overview',
       dataIndex: 'documents',
       key: 'documents',
-      render: (documents) => {
-        return (
+      render: (documents) => (
           <DocumentOverview {...documents} />
         )
-      }
     },
     {
       title: 'Status',
@@ -248,9 +258,40 @@ const Applicants = () => {
     },
   ];
 
+  const EditableRow = ({
+    title,
+    editable,
+    children,
+    dataIndex,
+    record,
+    handleSave,
+    ...props
+  }) => {
+    
+    return (
+         <td {...props}>
+          <Typography.Link href={`/driver/${record?.user_id}`} style={{ padding: 8, display: 'block', color: 'inherit', wordBreak: 'inherit' }}>
+            {children}
+          </Typography.Link>
+        </td>
+    );
+  };
+
   if (error) {
     return <div>Something went wrong...</div>
   }
+
+  const columns = tableColumns.map((col) => {
+    return {
+      ...col,
+      onCell: (record) => ({
+        record,
+        editable: col.editable,
+        dataIndex: col.dataIndex,
+        title: col.title,
+      }),
+    };
+  });
 
   return(
     <Card title={'Applicants'} style={{ margin: 15 }}>
@@ -265,16 +306,23 @@ const Applicants = () => {
       </Space>
       <Table
         dataSource={data.items}
-        columns={tableColumns}
+        columns={columns}
         loading={isLoading}
         rowKey="user_id"
         pagination={applicantFilter.pagination}
         onChange={handleTableChange}
         rowClassName={() => 'clickable-row'}
+        components={{
+          body: {
+            cell: EditableRow,
+          },
+        }}
         onRow={(driverRecord) => ({
-        onClick: () => navigate(`/driver/${driverRecord.user_id}`)
+          //onClick: () => navigate(`/driver/${driverRecord.user_id}`),
+          //onContextMenu: (e) => handleRowContextMenu(e, driverRecord),
         })}
       />
+      <div id="context-menu-container"></div>
     </Card>
   )
 };
