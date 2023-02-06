@@ -26,7 +26,7 @@ import {
   Popover,
 } from 'antd' // Import antd components
 import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined } from '@ant-design/icons' // Import icon
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import API from '../../api/BaseUrl' // Import API base URL
@@ -167,6 +167,11 @@ const tableColumns = [
 
 const DriverDetails = () => {
   const {id} = useParams(); // Get id from url
+  const location = useLocation() // Get current location
+  const pathArray = location.pathname.split('/')
+  pathArray.pop()
+  const parentUrl = pathArray.join('/')
+  const navigate = useNavigate() // Navigate to other pages
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
@@ -311,7 +316,7 @@ const DriverDetails = () => {
     >
       <PageHeader
         ghost={false}
-        onBack={() => window.history.back()}
+        onBack={() => navigate(parentUrl)}
         title={
         <Space>
           <ProfileAvatar refetch={refetch} objectKey={`${data.sub_id}/${data.profile_picture}`} driverName={`${data.first_name} ${data.last_name}`} driverid={id} picture={data.profile_picture}/>

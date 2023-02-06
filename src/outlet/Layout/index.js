@@ -44,6 +44,7 @@ const Layout = () => {
                     <Route path="/trainings" element={<Trainings />} />
                     <Route path="/training/:id" element={<TrainingDetails />} />
                     <Route path="/applicants" element={<Applicants />} />
+                    <Route path="/applicants/:id" element={<DriverDetails />} />
                 </Routes>
             </Content>
           </Container>
