@@ -12,6 +12,7 @@ import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
 import { useFilterStore } from '../../store' // Import filter store
+import app_status from '../../assets/data/app_status' // Import Application Status definition
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
@@ -256,7 +257,6 @@ const Applicants = () => {
       title: 'Application Status',
       dataIndex: 'application_status',
       key: 'application_status',
-      sorter: true,
       render: (application_status) => (    
         <>                                                                     
         { application_status && (
@@ -265,7 +265,12 @@ const Applicants = () => {
           </Tag>
         )}
         </>
-      )
+      ),
+      filters: app_status,
+      filterSearch: true,  
+      filteredValue: null,
+      ...( applicantFilter.filter?.application_status && { defaultFilteredValue: applicantFilter.filter?.application_status.map((application_status) => application_status.replace('in|', '')) }),
+      ...( applicantFilter.filter?.application_status && { filteredValue: applicantFilter.filter?.application_status.map((application_status) => application_status.replace('in|', '')) }),
     },
     {
         title: 'Applied Date',
