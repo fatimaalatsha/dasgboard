@@ -37,14 +37,13 @@ const Layout = () => {
             <Content >
                 <Routes>
                     <Route path="/*" index element={<Drivers />} />
-                    <Route path="/driver/:id" element={<DriverDetails />} />
                     <Route path="/documents" element={<Documents />} />
                     <Route path="/cities" element={<Cities />} />
                     <Route path="/city/:id" element={<CityDetails />} />
                     <Route path="/trainings" element={<Trainings />} />
                     <Route path="/training/:id" element={<TrainingDetails />} />
                     <Route path="/applicants" element={<Applicants />} />
-                    <Route path="/applicants/:id" element={<DriverDetails />} />
+                    {['/documents/:id', '/driver/:id', '/applicants/:id'].map(path => <Route key="Details" path={path} element={<DriverDetails />} />)}
                 </Routes>
             </Content>
           </Container>
