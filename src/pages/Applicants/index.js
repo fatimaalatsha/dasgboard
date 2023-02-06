@@ -245,7 +245,7 @@ const Applicants = () => {
       render: (application_status) => (    
         <>                                                                     
         { application_status && (
-          <Tag color={data.application_status === 'Do not contact (DNC)' ? 'magenta' : data.application_status === 'Ineligible' ? 'volcano' : 'red'} style={{ textTransform: 'capitalize'}}>
+          <Tag color={application_status === 'Do not contact (DNC)' ? 'magenta' : application_status === 'Ineligible' ? 'volcano' : 'red'} style={{ textTransform: 'capitalize'}}>
             {application_status}
           </Tag>
         )}
