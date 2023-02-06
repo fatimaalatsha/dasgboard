@@ -218,15 +218,18 @@ const Applicants = () => {
     },
     {
       title: 'Status',
-      dataIndex: 'status',
+      dataIndex: 'app_status',
       key: 'status',
-      render: (status) => {                                                                           
-        return (
-          <Tag color={ status === 'pending' ? 'orange' : 'blue' } style={{ textTransform: 'capitalize' }}>
-            {status}
-          </Tag>
-        );
-      }
+      render: (status) => (      
+        <>
+          { !(['Do not contact (DNC)', 'Ineligible']).includes(status[1]) && (
+            <Tag color={ status[0] === 'pending' ? 'orange' : 'blue' } style={{ textTransform: 'capitalize' }}>
+              {status[0]}
+            </Tag>
+          )
+        }
+        </>
+      )
       ,
       filters: [
         { text:'Onboard', value: 'onboard' },
@@ -239,13 +242,15 @@ const Applicants = () => {
     {
       title: 'Application Status',
       dataIndex: 'application_status',
-      render: (application_status) => {                                                                           
-        return (
+      render: (application_status) => (    
+        <>                                                                     
+        { application_status && (
           <Tag color={data.application_status === 'Do not contact (DNC)' ? 'magenta' : data.application_status === 'Ineligible' ? 'volcano' : 'red'} style={{ textTransform: 'capitalize'}}>
             {application_status}
           </Tag>
-        )
-      },
+        )}
+        </>
+      )
     },
     {
         title: 'Applied Date',
@@ -262,7 +267,7 @@ const Applicants = () => {
   if (error) {
     return <div>Something went wrong...</div>
   }
-console.log(data)
+
   return(
     <Card title={'Applicants'} style={{ margin: 15 }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
