@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
-import ReactDOM from 'react-dom' // Import react-dom
-import { Card, Table, Tag, Button, Space, Input, Tooltip, Menu, Dropdown, Typography } from 'antd'; // Import Ant components
+
+import { Card, Table, Tag, Button, Space, Input, Tooltip, Typography } from 'antd'; // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
-import { useNavigate } from 'react-router-dom'; // Import Nav component
+import { useLocation } from 'react-router-dom'; // Import Nav component
 
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import API from '../../api/BaseUrl'
@@ -46,7 +46,8 @@ const Applicants = () => {
   const applicantFilter = useFilterStore((state) => state.applicantFilter) // Get filter from store
   const setApplicantFilter = useFilterStore((state) => state.setApplicantFilter) // Set filter to store
 
-  const navigate = useNavigate();
+  const location = useLocation()
+  const currentUrl = location.pathname
   const [cities, setCities] = useState([])
   const [searchText, setSearchText] = useState( applicantFilter.full_name || '');
   
@@ -110,7 +111,6 @@ const Applicants = () => {
     selectedKeys ?? setSearchText('')
   }
   
-  
   useEffect(() => {
     let isMounted = true
     setApplicantFilter({ // Set filter to store
@@ -151,16 +151,19 @@ const Applicants = () => {
     }
   }
 
-  const items = [
-    {
-      key: '1',
-      label: 'Open Link in New Tab',
-    }
-  ]
-
-  const handleRowContextMenu = (e, record) => {
-    e.preventDefault()
-    console.log(record)
+  const LinkRow = ({
+    children,
+    record,
+    ...props
+  }) => {
+    
+    return (
+         <td {...props}>
+          <Typography.Link href={`${currentUrl}/${record?.user_id}`} style={{ padding: 8, display: 'block', color: 'inherit', wordBreak: 'inherit' }}>
+            {children}
+          </Typography.Link>
+        </td>
+    )
   }
 
   /* Added filteredValue: null to the columns that are not filtered to avoid a warning with controlled and uncontrolled columns
@@ -274,26 +277,7 @@ const Applicants = () => {
         ...( applicantFilter.sort?.created_at && { defaultSortOrder: applicantFilter.sort?.created_at === 'asc' ? 'ascend' : 'descend' }),
         filteredValue: null,
     },
-  ];
-
-  const EditableRow = ({
-    title,
-    editable,
-    children,
-    dataIndex,
-    record,
-    handleSave,
-    ...props
-  }) => {
-    
-    return (
-         <td {...props}>
-          <Typography.Link href={`/driver/${record?.user_id}`} style={{ padding: 8, display: 'block', color: 'inherit', wordBreak: 'inherit' }}>
-            {children}
-          </Typography.Link>
-        </td>
-    );
-  };
+  ]
 
   if (error) {
     return <div>Something went wrong...</div>
@@ -303,13 +287,10 @@ const Applicants = () => {
     return {
       ...col,
       onCell: (record) => ({
-        record,
-        editable: col.editable,
-        dataIndex: col.dataIndex,
-        title: col.title,
+        record
       }),
-    };
-  });
+    }
+  })
 
   return(
     <Card title={'Applicants'} style={{ margin: 15 }}>
@@ -332,15 +313,10 @@ const Applicants = () => {
         rowClassName={() => 'clickable-row'}
         components={{
           body: {
-            cell: EditableRow,
+            cell: LinkRow,
           },
         }}
-        onRow={(driverRecord) => ({
-          //onClick: () => navigate(`/driver/${driverRecord.user_id}`),
-          //onContextMenu: (e) => handleRowContextMenu(e, driverRecord),
-        })}
       />
-      <div id="context-menu-container"></div>
     </Card>
   )
 };

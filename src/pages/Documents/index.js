@@ -1,10 +1,10 @@
 import { useEffect, useState } from 'react'
-import { Card, Table, Tag, Button, Tooltip, Statistic, Row, Col, Space } from 'antd' // Import Ant components
+import { Card, Table, Tag, Button, Tooltip, Typography } from 'antd' // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import qs from 'qs' // Import qs library
 import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
-import { useNavigate } from 'react-router-dom' // Import hook from react-router
+import { useLocation } from 'react-router-dom' // Import hook from react-router
 
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import API from '../../api/BaseUrl' // Import API
@@ -23,7 +23,9 @@ const Documents = () => {
     const documentFilter = useFilterStore((state) => state.documentFilter) // Get filter from store
     const setDocumentFilter = useFilterStore((state) => state.setDocumentFilter) // Set filter to store
 
-    const navigate = useNavigate()
+    const location = useLocation()
+    const currentUrl = location.pathname
+
     const controller = new AbortController()// Create a new abort controller
     const [cities, setCities] = useState([])
     const { data, isLoading, error, refetch } = useFetch(`v1/documents/cc?${qs.stringify(getUserParams(documentFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
@@ -93,6 +95,21 @@ const Documents = () => {
         },
     }
 
+    const LinkRow = ({
+      children,
+      record,
+      ...props
+    }) => {
+      
+      return (
+           <td {...props}>
+            <Typography.Link href={`${currentUrl}/${record?.user_id}`} style={{ padding: 8, display: 'block', color: 'inherit', wordBreak: 'inherit' }}>
+              {children}
+            </Typography.Link>
+          </td>
+      )
+    }
+
     const tableColumns = [
         {
             title: 'Driver',
@@ -139,6 +156,15 @@ const Documents = () => {
         },
     ]
 
+    const columns = tableColumns.map((col) => {
+      return {
+        ...col,
+        onCell: (record) => ({
+          record
+        }),
+      }
+    })
+
     if (error) {
       return <div>Something went wrong...</div>
     }
@@ -149,16 +175,18 @@ const Documents = () => {
                 <Button {...buttonConfig} />
                     </Tooltip>
             <Table
-                columns={tableColumns}
+                columns={columns}
                 dataSource={data?.items}
                 loading={isLoading}
                 rowKey={record => record.id + record.type}
                 sortDirections={['ascend', 'descend', 'ascend']}
                 pagination={documentFilter.pagination}
                 rowClassName={() => 'clickable-row'}
-                onRow={(driverRecord) => ({
-                    onClick: () => navigate(`/driver/${driverRecord.user_id}`)
-                })}
+                components={{
+                  body: {
+                    cell: LinkRow,
+                  },
+                }}
                 onChange={handleTableChange}
             />
         </Card>
