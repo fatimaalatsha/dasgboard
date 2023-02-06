@@ -242,6 +242,8 @@ const Applicants = () => {
     {
       title: 'Application Status',
       dataIndex: 'application_status',
+      key: 'application_status',
+      sorter: true,
       render: (application_status) => (    
         <>                                                                     
         { application_status && (
