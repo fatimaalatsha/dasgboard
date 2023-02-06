@@ -30,6 +30,7 @@ import { useParams } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import API from '../../api/BaseUrl' // Import API base URL
+import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
 
 
 import EditableText from '../../components/EditableText' // Import editbale string component
@@ -48,6 +49,7 @@ import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditi
 import { updateStatus, notifyDriver,updateApplicationStatus, updateDriver } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3, uploadToS3 } from '../../utils/s3-storage' // Import getFromS3 method
 import { isElementOfType } from 'react-dom/test-utils';
+import { object } from 'yup';
 
 const { confirm } = Modal // Destructure config from Modal
 const { Title, Text } = Typography // Destructure Title from Typography
@@ -170,15 +172,17 @@ const tableColumns = [
 const DriverDetails = () => {
   const {id} = useParams(); // Get id from url
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
+  console.log(data)
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   const [changeStatusModal, setChangeStatusModal] = useState(false)// Set change status modal state
-  const [showSlipModal, setShowSlipModal] = useState(false)// Set slep modal state
+  // const [showSlipModal, setShowSlipModal] = useState(false)// Set slep modal state
   const [showSubIneligible, setShowSubIneligible] = useState(false)// Set show sub state
   const [showSubDNC, setShowSubDNC] = useState(false)// Set show sub state
   const [ url, setUrl ] = useState(null) // Create state to store the URL of the S3 object
-
+  
+  
 
   const successAlert = (msg) => { // Success alert method
     message.success(msg)
@@ -288,6 +292,97 @@ const DriverDetails = () => {
         console.log(error)
       })
   }
+
+  //creat pink slip
+
+
+  const getVehicleInfo = async (id) => {
+    try {
+      const auth = await Auth.currentSession()// Get current session
+      const token = auth.getAccessToken().getJwtToken()// Get token from session
+      const options = { // Set options for fetch
+        headers: {
+          'Authorization': token,
+          ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
+        }
+      }
+      const response = await API.get(`/v1/drivers/cc/${id}/vehicles`, options)
+      const data = await response.data
+      if (data) {
+        console.log(data)
+        const vehicleInfo = data.items[data.total_items - 1]
+        console.log(vehicleInfo)
+        return vehicleInfo
+      }
+    } catch (error) {
+      console.log(error)
+    }
+  }
+
+
+
+  const PinkslipContent = 
+  `                       Motor Vehicle Liability Insurance Card/
+                      Certificat d’Assurance Automobile Responsabilité
+
+
+  Name of Insured/Nom de l’Assuré:         10311669 Canada Corp Inc. o/a Uride, any
+                                        Rideshare Driver while in the
+                                        pre-acceptance period or post-acceptance
+                                        period, any Rideshare Vehicle Owner 
+   
+  Name and Addresses of Insurance       Northbridge General Insurance
+  Company/Nom et Adresse de la          Corporation
+  Company/Nom et Adresse de la          105 Adelaide St., West, Suite 700,
+  Compagnie d’Assurance:                Toronto, ON M5H 1P9                         
+                                   
+  Agent or Broker/Agent ou Coutier:     GILLONS’ INSURANCE BROKERS LTD.
+
+  Policy Number/Police Numéro:           CBC 0669282
+  Effective Date/Date d’Entrée en Vigueur: October 7, 2022 / 7 octobre 2022
+  Date of Expiry/Date d’Expiration: April 6, 2023 / 6 avril 2023
+  Licence Plate Number/Numéro de Plaque: 
+  Insured Vehicle/Véhicule Assuré:    
+                  Year/Année : 
+                  Make/Marque: 
+                  Model/Modèle:                                                    
+  `
+
+  const createPinkSlip = async (text, folder) => { // Create a function to create the pink slip
+  const pdfDoc = await PDFDocument.create()
+  const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
+
+  const page = pdfDoc.addPage()
+  const { width, height } = page.getSize()
+    const fontSize = 14
+    //to add the pink color to the background
+    page.drawRectangle({
+      x: 0,
+      y: 0,
+      width: width,
+      height: height,
+      color: rgb(1, 0.776, 0.960),
+    })
+  
+  page.drawText(text, {
+    x: 50,
+    y: height - 4 * fontSize,
+    size: fontSize,
+    font: timesRomanFont,
+    color: rgb(0, 0, 0),
+  })
+
+    const pdfBytes = await pdfDoc.save()
+    const blob = new Blob([pdfBytes], { type: 'application/pdf' })
+    const file = new File([blob], folder, { type: 'application/pdf' })
+    const link = document.createElement('a')
+    link.href = window.URL.createObjectURL(file)
+    link.download = folder
+    link.click()
+    //upload the pink slip to s3
+    //uploadDocument(folder, file)
+}
+
 
 
 
@@ -430,6 +525,7 @@ const DriverDetails = () => {
           }}
         >
           <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
+        <Button type="primary" onClick={() => { createPinkSlip(PinkslipContent, 'pdf'); getVehicleInfo(id) }}>create Pink Slip</Button>
           <Upload 
                               type="file"
                               name="pink_slip"
