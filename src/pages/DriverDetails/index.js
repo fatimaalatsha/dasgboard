@@ -40,6 +40,7 @@ import DriverDocument from '../../components/DriverDocument' // Import Document 
 import DriverTimeline from '../../components/DriverTimeline' // Import Timeline 
 import DriverVehicle from '../../components/DriverVehicle' // Import Driver Vehicle component
 import DocViewer from '../../components/DocViewer' // Import DocViewer component
+import PinkSlipModal from '../../components/PinkSlipModal' // Import PinkSlip component
 
 import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
 import SelectWrapper from '../../components/forms/SelectWrapper' // Import SelectWrapper component
@@ -48,8 +49,8 @@ import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs } from '../../utils/doc-status' // Import isAllApproved function
 import { updateStatus, notifyDriver,updateApplicationStatus, updateDriver } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3, uploadToS3 } from '../../utils/s3-storage' // Import getFromS3 method
-import { isElementOfType } from 'react-dom/test-utils';
-import { object } from 'yup';
+import { createPinkSlip } from '../../utils/pdf-document' // Import createPinkSlip method
+
 
 const { confirm } = Modal // Destructure config from Modal
 const { Title, Text } = Typography // Destructure Title from Typography
@@ -177,12 +178,12 @@ const DriverDetails = () => {
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   const [changeStatusModal, setChangeStatusModal] = useState(false)// Set change status modal state
-  const [showSlipModal, setShowSlipModal] = useState(false)// Set slep modal state
+  const [slip, setSlip] = useState(false)// Set slep modal state
   const [showSubIneligible, setShowSubIneligible] = useState(false)// Set show sub state
   const [showSubDNC, setShowSubDNC] = useState(false)// Set show sub state
   const [ url, setUrl ] = useState(null) // Create state to store the URL of the S3 object
   const [vehicleInfo, setVehicleInfo] = useState(null) // Create state to store the URL of the S3 object
-  const [pdfLink, setPdfLink] = useState(null) // Create state to store the URL of the S3 object
+  const [pdf, setPdf] = useState(null) // Create state to store the URL of the S3 object
 
   const successAlert = (msg) => { // Success alert method
     message.success(msg)
@@ -275,114 +276,6 @@ const DriverDetails = () => {
     });
   }
 
-  //upload document
-  
-  const uploadDocument = async (file) => { // Create a function to upload the document
-    setLoading(true) // Set the loading state to true
-    await uploadToS3(data.sub_id ,file).then((url) => { // Call the uploadToS3 function
-      setLoading(false) // Set the loading state to false
-      setUrl(url) // Set the URL state
-      message.success('Pink slip uploaded successfully') // Display success message
-      refetch() // Refetch the driver details
-    })
-      .catch(error => {
-        setLoading(false) // Set the loading state to false
-        message.error('An error occured while uploading the pink slip') // Display error message
-        console.log(error)
-      })
-  }
-
-  //creat pink slip
-
-
-  const getVehicleInfo = async (id) => {
-    try {
-      const auth = await Auth.currentSession()// Get current session
-      const token = auth.getAccessToken().getJwtToken()// Get token from session
-      const options = { // Set options for fetch
-        headers: {
-          'Authorization': token,
-          ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
-        }
-      }
-      const response = await API.get(`/v1/drivers/cc/${id}/vehicles`, options)
-      const data = await response.data
-      if (data) {
-        console.log(data)
-        const vehicleInfo = data.items[data.total_items - 1]
-        setVehicleInfo(vehicleInfo)
-      }
-    } catch (error) {
-      console.log(error)
-    }
-  }
-
-
-  const PinkslipContent = 
-  `                       Motor Vehicle Liability Insurance Card/
-                      Certificat d’Assurance Automobile Responsabilité
-
-
-  Name of Insured/Nom de l’Assuré:         10311669 Canada Corp Inc. o/a Uride, any
-                                        Rideshare Driver while in the
-                                        pre-acceptance period or post-acceptance
-                                        period, any Rideshare Vehicle Owner 
-   
-  Name and Addresses of Insurance       Northbridge General Insurance
-  Company/Nom et Adresse de la          Corporation
-  Company/Nom et Adresse de la          105 Adelaide St., West, Suite 700,
-  Compagnie d’Assurance:                     Toronto, ON M5H 1P9                         
-                                   
-  Agent or Broker/Agent ou Coutier:     GILLONS’ INSURANCE BROKERS LTD.
-
-  Policy Number/Police Numéro:           CBC 0669282
-  Effective Date/Date d’Entrée en Vigueur: October 7, 2022 / 7 octobre 2022
-  Date of Expiry/Date d’Expiration: April 6, 2023 / 6 avril 2023
-  Licence Plate Number/Numéro de Plaque: ${vehicleInfo?.plate_number}
-  Insured Vehicle/Véhicule Assuré:    
-                  Year/Année : ${vehicleInfo?.year}
-                  Make/Marque: ${vehicleInfo?.make?.name}
-                  Model/Modèle: ${vehicleInfo?.model?.name}                                               
-  `
-
-  const createPinkSlip = async (text, folder) => { // Create a function to create the pink slip
-  const pdfDoc = await PDFDocument.create()
-  const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
-  const driverId = data?.user_id
-  const page = pdfDoc.addPage()
-  const { width, height } = page.getSize()
-    const fontSize = 14
-    //to add the pink color to the background
-    page.drawRectangle({
-      x: 0,
-      y: 0,
-      width: width,
-      height: height,
-      color: rgb(1, 0.776, 0.960),
-    })
-  
-  page.drawText(text, {
-    x: 50,
-    y: height - 4 * fontSize,
-    size: fontSize,
-    font: timesRomanFont,
-    color: rgb(0, 0, 0),
-  })
-
-    const pdfBytes = await pdfDoc.save()
-    const blob = new Blob([pdfBytes], { type: 'application/pdf' })
-    const file = new File([blob], folder, { type: 'application/pdf' })
-    
-    // const link = document.createElement('a')
-    // link.href = window.URL.createObjectURL(file)
-    // link.download = folder
-    // link.click()  
-    // uploadDocument(folder)
-    // console.log(driverId, file)
-    
-  }
-
-
   const option = [
     { text:'Do not contact (DNC)',  value: 'Do not contact (DNC)' , key: 'Do not contact (DNC)' },
     { text:'Awaiting Documents',  value: 'Awaiting Documents' , key: 'Awaiting Documents' },
@@ -419,8 +312,6 @@ const DriverDetails = () => {
   if (isLoading) {
     return <div>Loading...</div>
   }
-
-
   
   return (
     <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
@@ -527,27 +418,7 @@ const DriverDetails = () => {
           }}
         >
           <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
-        <Button type="primary" onClick={() => { getVehicleInfo(id); createPinkSlip(PinkslipContent, 'Pink Slip'); setShowSlipModal(true) }}>create Pink Slip</Button>
-          <Upload 
-                              type="file"
-                              name="pink_slip"
-                              action={uploadDocument}
-                              onChange=
-                              {info => {
-                                if (info.file.status !== 'uploading') {
-                                  console.log(info.file, info.fileList, info.file.type);
-                                }
-                                if (info.file.status === 'done') {
-                                  message.success(`${info.file.name} file uploaded successfully`);
-                                } else if (info.file.status === 'error') {
-                                  message.error(`${info.file.name} file upload failed.`);
-                                }
-                              }}
-
-                              // beforeUpload={beforeUpload}
-                            >
-                            <Button>  <CloudUploadOutlined  /> Click to Upload Pink Slip</Button>
-        </Upload>
+        {data.status === 'active' && <Button type="primary" onClick={() => setSlip(true)}>create Pink Slip</Button>}
         <Button type="primary" icon={<SendOutlined />} loading={loading} onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
@@ -701,14 +572,8 @@ const DriverDetails = () => {
       </Formik>
       { /*end change Application application_status modal*/}
       {/* pink slip modal */}
-      {/* <Modal
-        title="Pink Slip"
-        open={showSlipModal}
-        onCancel={() => setShowSlipModal(false)}
-        destroyOnClose
-      >
-     <DocViewer objectKey={} />
-      </Modal> */}
+      
+     { slip && <PinkSlipModal id={id} usersub={data.sub_id} open={slip} setOpen={setSlip} />}
 
       {/* end pink slip modal */}
     </Card>

@@ -5,7 +5,7 @@ import { Image, Typography, Spin } from 'antd' // Import antd components
 
 const { Text } = Typography // Destructure Text from Typography
 
-const PdfRenderer = ({url}) => {
+export const PdfRenderer = ({url}) => {
     const [image, setImage] = useState([]) // Create state to store the image
     const [loading, setLoading] = useState(true) // Create state to store the loading state
     const [visible, setVisible] = useState(false) // Create state to store the preview visibility
