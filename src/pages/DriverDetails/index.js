@@ -30,7 +30,7 @@ import { useParams } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import API from '../../api/BaseUrl' // Import API base URL
-import { PDFDocument, StandardFonts, rgb } from 'pdf-lib'
+import { PDFDocument, StandardFonts, rgb, PDFViewer , PDFText} from 'pdf-lib'
 
 
 import EditableText from '../../components/EditableText' // Import editbale string component
@@ -177,12 +177,12 @@ const DriverDetails = () => {
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   const [changeStatusModal, setChangeStatusModal] = useState(false)// Set change status modal state
-  // const [showSlipModal, setShowSlipModal] = useState(false)// Set slep modal state
+  const [showSlipModal, setShowSlipModal] = useState(false)// Set slep modal state
   const [showSubIneligible, setShowSubIneligible] = useState(false)// Set show sub state
   const [showSubDNC, setShowSubDNC] = useState(false)// Set show sub state
   const [ url, setUrl ] = useState(null) // Create state to store the URL of the S3 object
-  
-  
+  const [vehicleInfo, setVehicleInfo] = useState(null) // Create state to store the URL of the S3 object
+  const [pdfLink, setPdfLink] = useState(null) // Create state to store the URL of the S3 object
 
   const successAlert = (msg) => { // Success alert method
     message.success(msg)
@@ -276,17 +276,16 @@ const DriverDetails = () => {
   }
 
   //upload document
-
-  const uploadDocument = async (id, file) => { // Create a function to upload the document
+  
+  const uploadDocument = async (file) => { // Create a function to upload the document
     setLoading(true) // Set the loading state to true
-    await uploadToS3(id ,file).then((url) => { // Call the uploadToS3 function
+    await uploadToS3(data.sub_id ,file).then((url) => { // Call the uploadToS3 function
       setLoading(false) // Set the loading state to false
       setUrl(url) // Set the URL state
       message.success('Pink slip uploaded successfully') // Display success message
       refetch() // Refetch the driver details
     })
       .catch(error => {
-        
         setLoading(false) // Set the loading state to false
         message.error('An error occured while uploading the pink slip') // Display error message
         console.log(error)
@@ -311,14 +310,12 @@ const DriverDetails = () => {
       if (data) {
         console.log(data)
         const vehicleInfo = data.items[data.total_items - 1]
-        console.log(vehicleInfo)
-        return vehicleInfo
+        setVehicleInfo(vehicleInfo)
       }
     } catch (error) {
       console.log(error)
     }
   }
-
 
 
   const PinkslipContent = 
@@ -334,24 +331,24 @@ const DriverDetails = () => {
   Name and Addresses of Insurance       Northbridge General Insurance
   Company/Nom et Adresse de la          Corporation
   Company/Nom et Adresse de la          105 Adelaide St., West, Suite 700,
-  Compagnie d’Assurance:                Toronto, ON M5H 1P9                         
+  Compagnie d’Assurance:                     Toronto, ON M5H 1P9                         
                                    
   Agent or Broker/Agent ou Coutier:     GILLONS’ INSURANCE BROKERS LTD.
 
   Policy Number/Police Numéro:           CBC 0669282
   Effective Date/Date d’Entrée en Vigueur: October 7, 2022 / 7 octobre 2022
   Date of Expiry/Date d’Expiration: April 6, 2023 / 6 avril 2023
-  Licence Plate Number/Numéro de Plaque: 
+  Licence Plate Number/Numéro de Plaque: ${vehicleInfo?.plate_number}
   Insured Vehicle/Véhicule Assuré:    
-                  Year/Année : 
-                  Make/Marque: 
-                  Model/Modèle:                                                    
+                  Year/Année : ${vehicleInfo?.year}
+                  Make/Marque: ${vehicleInfo?.make?.name}
+                  Model/Modèle: ${vehicleInfo?.model?.name}                                               
   `
 
   const createPinkSlip = async (text, folder) => { // Create a function to create the pink slip
   const pdfDoc = await PDFDocument.create()
   const timesRomanFont = await pdfDoc.embedFont(StandardFonts.TimesRoman)
-
+  const driverId = data?.user_id
   const page = pdfDoc.addPage()
   const { width, height } = page.getSize()
     const fontSize = 14
@@ -375,16 +372,15 @@ const DriverDetails = () => {
     const pdfBytes = await pdfDoc.save()
     const blob = new Blob([pdfBytes], { type: 'application/pdf' })
     const file = new File([blob], folder, { type: 'application/pdf' })
-    const link = document.createElement('a')
-    link.href = window.URL.createObjectURL(file)
-    link.download = folder
-    link.click()
-    //upload the pink slip to s3
-    //uploadDocument(folder, file)
-}
-
-
-
+    
+    // const link = document.createElement('a')
+    // link.href = window.URL.createObjectURL(file)
+    // link.download = folder
+    // link.click()  
+    // uploadDocument(folder)
+    // console.log(driverId, file)
+    
+  }
 
 
   const option = [
@@ -419,6 +415,12 @@ const DriverDetails = () => {
   if (error) {
     return <div>Something went wrong</div>
   }
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
+
+
   
   return (
     <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
@@ -525,7 +527,7 @@ const DriverDetails = () => {
           }}
         >
           <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
-        <Button type="primary" onClick={() => { createPinkSlip(PinkslipContent, 'pdf'); getVehicleInfo(id) }}>create Pink Slip</Button>
+        <Button type="primary" onClick={() => { getVehicleInfo(id); createPinkSlip(PinkslipContent, 'Pink Slip'); setShowSlipModal(true) }}>create Pink Slip</Button>
           <Upload 
                               type="file"
                               name="pink_slip"
@@ -698,80 +700,17 @@ const DriverDetails = () => {
         )}
       </Formik>
       { /*end change Application application_status modal*/}
-
-      { /* Upload pink slip*/}  
-      {/* <Formik
-        initialValues={{ pink_slip: '', }}
-        onSubmit={
-       
-          async (values, { setSubmitting }) => {
-            await uploadDocument( values.pink_slip)
-            console.log(id, values)
-            .then((response) => {
-              if (response) {
-                successAlert(response.message)
-                setSubmitting(false)
-                setShowSlipModal(false)
-                refetch()
-              }
-            })
-          }
-
-        }
+      {/* pink slip modal */}
+      {/* <Modal
+        title="Pink Slip"
+        open={showSlipModal}
+        onCancel={() => setShowSlipModal(false)}
+        destroyOnClose
       >
-        {props => (
-          <FormikForm>
-            <Modal
-              title="Upload Pink Slip"
-              open={showSlipModal}
-              onCancel={() => setShowSlipModal(false)}
-              destroyOnClose
-              footer={[
-                <Button key="Back"
-                  onClick={() => setShowSlipModal(false)}
-                >
-                  Cancel
-                </Button>,
-                <SubmitWrapper key="Submit" type="primary">
-                  Yes, Upload
-                </SubmitWrapper>,
-              ]}
-            >
-              <Space direction="vertical">
-                <Text>
-                  {`Are you sure you want to continue with this action? `} <Text mark strong>{`${data.first_name} ${data.last_name}`}</Text>{` will have their pink slip uploaded.`}
-                </Text>
-                <Form.Item
-                  rules={[{ required: true, message: 'Please upload a pink slip!' }]}
-                >
-                  <Upload 
-                    type="file"
-                    name="pink_slip"
-                    action={uploadDocument}
-                    onChange=
-                    {info => {
-                      if (info.file.status !== 'uploading') {
-                        console.log(info.file, info.fileList, info.file.type);
-                      }
-                      if (info.file.status === 'done') {
-                        message.success(`${info.file.name} file uploaded successfully`);
-                      } else if (info.file.status === 'error') {
-                        message.error(`${info.file.name} file upload failed.`);
-                      }
-                    }}
+     <DocViewer objectKey={} />
+      </Modal> */}
 
-                    // beforeUpload={beforeUpload}
-                  >
-                    <CloudUploadOutlined  /> Click to Upload
-                  </Upload>
-                </Form.Item>
-              </Space>
-            </Modal>
-          </FormikForm> 
-        )}
-      </Formik> */}
-      { /*end Upload pink slip modal*/}
-
+      {/* end pink slip modal */}
     </Card>
   )
 }

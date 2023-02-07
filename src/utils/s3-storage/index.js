@@ -26,7 +26,7 @@ const getFromS3 = async (key) => {
     }
 }
 
-const uploadToS3 = async (file) => {
+const uploadToS3 = async (sub, file) => {
     const todayDate = dayjs().format('YYYY-MM-DD')
     const fileType = file.name.match(/\.([^.]+)$/)[1] // Get file type
     const fileSize = file.size // Get file size
@@ -36,7 +36,7 @@ const uploadToS3 = async (file) => {
     try {
         const auth = await Auth.currentCredentials() // Get cognito credentials
         const userPrefix = await Auth.currentUserInfo() // Get cognito user prefix
-        const s3ObjectKey = `private/${userPrefix.attributes.sub}/${objectKey}` // Set s3 object key
+        const s3ObjectKey = `private/${sub}/${objectKey}` // Set s3 object key
         const s3 = new S3Client({// Create new S3 client instance
             region: 'us-east-2',
             credentials: auth
@@ -68,5 +68,9 @@ const uploadToS3 = async (file) => {
         }
     }
 }
+
+
+    
+
 
 export { getFromS3, uploadToS3 }
