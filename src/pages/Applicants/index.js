@@ -269,7 +269,7 @@ const Applicants = () => {
   if (error) {
     return <div>Something went wrong...</div>
   }
-console.log(data)
+
   return(
     <Card title={'Applicants'} style={{ margin: 15 }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
