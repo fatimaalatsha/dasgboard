@@ -1,8 +1,7 @@
 import { useState, useEffect, useRef } from 'react';
 
-import { Card, Table, Tag, Button, Space, Input, Tooltip,} from 'antd'; // Import Ant components
+import { Card, Table, Tag, Button, Space, Input, Tooltip, Typography} from 'antd'; // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
-import { useNavigate } from 'react-router-dom'; // Import Nav component
 
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import API from '../../api/BaseUrl'
@@ -49,8 +48,6 @@ const Drivers = () => {
   const driverFilter = useFilterStore((state) => state.driverFilter) // Get filter from store
   const setDriverFilter = useFilterStore((state) => state.setDriverFilter) // Set filter to store
   const componentIsMounted = useRef(false) // Create a ref to store the component mount state
-
-  const navigate = useNavigate();
   const [cities, setCities] = useState([])
   const [searchText, setSearchText] = useState( driverFilter.full_name || '');
   
@@ -156,6 +153,21 @@ const Drivers = () => {
     }
   }
 
+  const LinkRow = ({
+    children,
+    record,
+    ...props
+  }) => {
+    
+    return (
+         <td {...props}>
+          <Typography.Link href={`drivers/${record?.user_id}`} style={{ padding: 8, display: 'block', color: 'inherit', wordBreak: 'inherit' }}>
+            {children}
+          </Typography.Link>
+        </td>
+    )
+  }
+
   /* Added filteredValue: null to the columns that are not filtered to avoid a warning with controlled and uncontrolled columns
   * https://github.com/ant-design/ant-design/issues/28107
   */
@@ -248,7 +260,16 @@ const Drivers = () => {
         filteredValue: null,
         ...( driverFilter.sort?.created_at && { defaultSortOrder: driverFilter.sort?.created_at === 'asc' ? 'ascend' : 'descend' }),
     },
-  ];
+  ]
+
+  const columns = tableColumns.map((col) => {
+    return {
+      ...col,
+      onCell: (record) => ({
+        record
+      }),
+    }
+  })
 
   if (error) {
     return <div>Something went wrong...</div>
@@ -268,15 +289,17 @@ const Drivers = () => {
       </Space>
       <Table
         dataSource={data.items}
-        columns={tableColumns}
+        columns={columns}
         loading={isLoading}
         rowKey="user_id"
         pagination={driverFilter.pagination}
         onChange={handleTableChange}
         rowClassName={() => 'clickable-row'}
-        onRow={(driverRecord) => ({
-        onClick: () => navigate(`driver/${driverRecord.user_id}`)
-        })}
+        components={{
+          body: {
+            cell: LinkRow,
+          },
+        }}
       />
     </Card>
   )

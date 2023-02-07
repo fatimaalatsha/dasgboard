@@ -1,8 +1,8 @@
 import { useState, useEffect } from 'react';
 
-import { Card, Table, Tag, Button, Space, Input, Tooltip, Statistic, Row, Col} from 'antd'; // Import Ant components
+import { Card, Table, Tag, Button, Space, Input, Tooltip, Typography } from 'antd'; // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
-import { useNavigate } from 'react-router-dom'; // Import Nav component
+import { useLocation } from 'react-router-dom'; // Import Nav component
 
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import API from '../../api/BaseUrl'
@@ -46,7 +46,8 @@ const Applicants = () => {
   const applicantFilter = useFilterStore((state) => state.applicantFilter) // Get filter from store
   const setApplicantFilter = useFilterStore((state) => state.setApplicantFilter) // Set filter to store
 
-  const navigate = useNavigate();
+  const location = useLocation()
+  const currentUrl = location.pathname
   const [cities, setCities] = useState([])
   const [searchText, setSearchText] = useState( applicantFilter.full_name || '');
   
@@ -110,7 +111,6 @@ const Applicants = () => {
     selectedKeys ?? setSearchText('')
   }
   
-  
   useEffect(() => {
     let isMounted = true
     setApplicantFilter({ // Set filter to store
@@ -149,6 +149,21 @@ const Applicants = () => {
       marginBottom: 8,
       width: 'calc(50% - 80px)',
     }
+  }
+
+  const LinkRow = ({
+    children,
+    record,
+    ...props
+  }) => {
+    
+    return (
+         <td {...props}>
+          <Typography.Link href={`${currentUrl}/${record?.user_id}`} style={{ padding: 8, display: 'block', color: 'inherit', wordBreak: 'inherit' }}>
+            {children}
+          </Typography.Link>
+        </td>
+    )
   }
 
   /* Added filteredValue: null to the columns that are not filtered to avoid a warning with controlled and uncontrolled columns
@@ -210,11 +225,9 @@ const Applicants = () => {
       title: 'Document Overview',
       dataIndex: 'documents',
       key: 'documents',
-      render: (documents) => {
-        return (
+      render: (documents) => (
           <DocumentOverview {...documents} />
         )
-      }
     },
     {
       title: 'Status',
@@ -246,11 +259,20 @@ const Applicants = () => {
         ...( applicantFilter.sort?.created_at && { defaultSortOrder: applicantFilter.sort?.created_at === 'asc' ? 'ascend' : 'descend' }),
         filteredValue: null,
     },
-  ];
+  ]
 
   if (error) {
     return <div>Something went wrong...</div>
   }
+
+  const columns = tableColumns.map((col) => {
+    return {
+      ...col,
+      onCell: (record) => ({
+        record
+      }),
+    }
+  })
 
   return(
     <Card title={'Applicants'} style={{ margin: 15 }}>
@@ -265,15 +287,17 @@ const Applicants = () => {
       </Space>
       <Table
         dataSource={data.items}
-        columns={tableColumns}
+        columns={columns}
         loading={isLoading}
         rowKey="user_id"
         pagination={applicantFilter.pagination}
         onChange={handleTableChange}
         rowClassName={() => 'clickable-row'}
-        onRow={(driverRecord) => ({
-        onClick: () => navigate(`/driver/${driverRecord.user_id}`)
-        })}
+        components={{
+          body: {
+            cell: LinkRow,
+          },
+        }}
       />
     </Card>
   )
