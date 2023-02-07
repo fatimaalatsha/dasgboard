@@ -3,7 +3,7 @@ import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
 
 import API from '../../api/BaseUrl'// Import API base url
 
-const useFetch = (url) => {
+const useFetch = (url, applicants = false) => {
     const [fetchedData, setFetchedData] = useState({// Set initia fetch state to empty
         data: {},
         isLoading: true,
@@ -22,14 +22,18 @@ const useFetch = (url) => {
             }
             const response = await API.get(url, options)// Fetch data from API
             const data = await response.data// Get data from response
-            if (data) {
-                setFetchedData({// Set fetched data
-                    data,
-                    isLoading: false,
-                    error: false,
+            if (applicants) {
+                data.items.map((applicant) => {
+                    applicant.app_status = [applicant.status, applicant.application_status]
+                    return applicant
                 })
             }
 
+            setFetchedData({// Set fetched data
+                data,
+                isLoading: false,
+                error: false,
+            })
         } catch (error) {
             setFetchedData({// Set fetch state to error
                 data: {},
