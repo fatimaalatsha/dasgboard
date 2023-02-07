@@ -1,4 +1,9 @@
 const app_status = [
+    {
+        text: 'Blank',
+        value: 'null',
+        sub: []
+    },
     { 
         text: 'Awaiting Documents', 
         value: 'Awaiting Documents', 

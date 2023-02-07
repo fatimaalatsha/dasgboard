@@ -79,7 +79,6 @@ const Applicants = () => {
         filter[key].splice(1, 1)
       }
     })
-  
     setApplicantFilter({ // Set filter to store
       pagination: {
         ...applicantFilter.pagination,
@@ -89,6 +88,7 @@ const Applicants = () => {
         ...filter,
         ...(applicantFilter.filter?.city_id && filter.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: applicantFilter.filter?.city_id } ),
         ...(filter.status === null && { status: ['in|onboard', 'pending'] } ),
+        ...(filter.application_status && filter.application_status[0] === 'in|null' && { application_status: ['is|null'] } ),
       },
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
@@ -222,14 +222,9 @@ const Applicants = () => {
       dataIndex: 'app_status',
       key: 'status',
       render: (status) => (      
-        <>
-          { !(['Do not contact (DNC)', 'Ineligible']).includes(status[1]) && (
-            <Tag color={ status[0] === 'pending' ? 'orange' : 'blue' } style={{ textTransform: 'capitalize' }}>
-              {status[0]}
-            </Tag>
-          )
-        }
-        </>
+        <Tag color={ status[0] === 'pending' ? 'orange' : 'blue' } style={{ textTransform: 'capitalize' }}>
+          {status[0]}
+        </Tag>
       )
       ,
       filters: [
@@ -256,8 +251,8 @@ const Applicants = () => {
       filters: app_status,
       filterSearch: true,  
       filteredValue: null,
-      ...( applicantFilter.filter?.application_status && { defaultFilteredValue: applicantFilter.filter?.application_status.map((application_status) => application_status.replace('in|', '')) }),
-      ...( applicantFilter.filter?.application_status && { filteredValue: applicantFilter.filter?.application_status.map((application_status) => application_status.replace('in|', '')) }),
+      ...( applicantFilter.filter?.application_status && { defaultFilteredValue: applicantFilter.filter?.application_status.map((application_status) => application_status.replace(/(in\||is\|)/, '')) }),
+      ...( applicantFilter.filter?.application_status && { filteredValue: applicantFilter.filter?.application_status.map((application_status) => application_status.replace(/(in\||is\|)/, '')) }),
     },
     {
         title: 'Applied Date',
@@ -274,7 +269,7 @@ const Applicants = () => {
   if (error) {
     return <div>Something went wrong...</div>
   }
-
+console.log(data)
   return(
     <Card title={'Applicants'} style={{ margin: 15 }}>
       <Space direction="vertical" size="large" style={{ width: '100%' }}>
