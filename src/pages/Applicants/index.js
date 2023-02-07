@@ -12,6 +12,7 @@ import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
 import { useFilterStore } from '../../store' // Import filter store
+import app_status from '../../assets/data/app_status' // Import Application Status definition
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
@@ -70,7 +71,7 @@ const Applicants = () => {
       console.log(error)
     }  
   }
-  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(applicantFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
+  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(applicantFilter), { skipNulls: true, arrayFormat: 'comma' })}`, true) // Fetch data from API//data
 
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
@@ -79,7 +80,6 @@ const Applicants = () => {
         filter[key].splice(1, 1)
       }
     })
-  
     setApplicantFilter({ // Set filter to store
       pagination: {
         ...applicantFilter.pagination,
@@ -89,6 +89,7 @@ const Applicants = () => {
         ...filter,
         ...(applicantFilter.filter?.city_id && filter.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: applicantFilter.filter?.city_id } ),
         ...(filter.status === null && { status: ['in|onboard', 'pending'] } ),
+        ...(filter.application_status && filter.application_status[0] === 'in|null' && { application_status: ['is|null'] } ),
       },
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
@@ -231,15 +232,13 @@ const Applicants = () => {
     },
     {
       title: 'Status',
-      dataIndex: 'status',
+      dataIndex: 'app_status',
       key: 'status',
-      render: (status) => {                                                                           
-        return (
-          <Tag color={ status === 'pending' ? 'orange' : 'blue' }>
-            {status.charAt(0).toUpperCase() + status.slice(1)}
-          </Tag>
-        );
-      }
+      render: (status) => (      
+        <Tag color={ status[0] === 'pending' ? 'orange' : 'blue' } style={{ textTransform: 'capitalize' }}>
+          {status[0]}
+        </Tag>
+      )
       ,
       filters: [
         { text:'Onboard', value: 'onboard' },
@@ -248,6 +247,25 @@ const Applicants = () => {
       filteredValue: null,
       ...( applicantFilter.filter?.status && { defaultFilteredValue: applicantFilter.filter?.status.map((status) => status.replace('in|', '')) }),
       ...( applicantFilter.filter?.status && { filteredValue: applicantFilter.filter?.status.map((status) => status.replace('in|', '')) }),
+    },
+    {
+      title: 'Application Status',
+      dataIndex: 'application_status',
+      key: 'application_status',
+      render: (application_status) => (    
+        <>                                                                     
+        { application_status && (
+          <Tag color={application_status === 'Do not contact (DNC)' ? 'magenta' : application_status === 'Ineligible' ? 'volcano' : 'red'} style={{ textTransform: 'capitalize'}}>
+            {application_status}
+          </Tag>
+        )}
+        </>
+      ),
+      filters: app_status,
+      filterSearch: true,  
+      filteredValue: null,
+      ...( applicantFilter.filter?.application_status && { defaultFilteredValue: applicantFilter.filter?.application_status.map((application_status) => application_status.replace(/(in\||is\|)/, '')) }),
+      ...( applicantFilter.filter?.application_status && { filteredValue: applicantFilter.filter?.application_status.map((application_status) => application_status.replace(/(in\||is\|)/, '')) }),
     },
     {
         title: 'Applied Date',
