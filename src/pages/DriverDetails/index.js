@@ -418,7 +418,7 @@ const DriverDetails = () => {
           }}
         >
           <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
-        {data.status === 'active' && <Button type="primary" onClick={() => setSlip(true)}>create Pink Slip</Button>}
+        {data.status === 'active'  && <Button type="primary" onClick={() => setSlip(true)}>create Pink Slip</Button>}
         <Button type="primary" icon={<SendOutlined />} loading={loading} onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
