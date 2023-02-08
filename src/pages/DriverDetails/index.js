@@ -308,7 +308,7 @@ const DriverDetails = () => {
   
   return (
     <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
-      extra={ !['active', 'inactive'].includes(data.status) && (
+      extra={ !['active'].includes(data.status) && (
         <Button type="primary" key='status' loading={loading} onClick={() => { setChangeStatusModal(true); handleSubOption(data.application_status)}}>
             Change Application Status 
         </Button>
