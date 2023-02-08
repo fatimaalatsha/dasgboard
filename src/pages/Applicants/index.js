@@ -24,7 +24,6 @@ import app_status from '../../assets/data/app_status' // Import Application Stat
 dayjs.extend(utc)
 
 const DocumentOverview = (props) => { // Document Overview component
-  
   return (
     <Space>
       {
@@ -252,12 +251,14 @@ const Applicants = () => {
       title: 'Application Status',
       dataIndex: 'application_status',
       key: 'application_status',
-      render: (application_status) => (    
+      render: (application_status, record) => (    
         <>                                                                     
         { application_status && (
-          <Tag color={application_status === 'Do not contact (DNC)' ? 'magenta' : application_status === 'Ineligible' ? 'volcano' : 'red'} style={{ textTransform: 'capitalize'}}>
-            {application_status}
-          </Tag>
+          <Tooltip title={record.status_reason}>
+            <Tag color={application_status === 'Do not contact (DNC)' ? 'magenta' : application_status === 'Ineligible' ? 'volcano' : 'red'} style={{ textTransform: 'capitalize'}}>
+              {application_status}
+            </Tag>
+          </Tooltip>
         )}
         </>
       ),
