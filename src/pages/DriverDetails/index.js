@@ -30,7 +30,6 @@ import { useParams } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import API from '../../api/BaseUrl' // Import API base URL
-import { PDFDocument, StandardFonts, rgb, PDFViewer , PDFText} from 'pdf-lib'
 
 
 import EditableText from '../../components/EditableText' // Import editbale string component
@@ -48,8 +47,7 @@ import SelectWrapper from '../../components/forms/SelectWrapper' // Import Selec
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs } from '../../utils/doc-status' // Import isAllApproved function
 import { updateStatus, notifyDriver,updateApplicationStatus, updateDriver } from '../../utils/driver-status' // Import delete driver method
-import { getFromS3, uploadToS3 } from '../../utils/s3-storage' // Import getFromS3 method
-import { createPinkSlip } from '../../utils/pdf-document' // Import createPinkSlip method
+import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
 
 
 const { confirm } = Modal // Destructure config from Modal
@@ -173,7 +171,6 @@ const tableColumns = [
 const DriverDetails = () => {
   const {id} = useParams(); // Get id from url
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
-  console.log(data)
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
@@ -181,9 +178,6 @@ const DriverDetails = () => {
   const [slip, setSlip] = useState(false)// Set slep modal state
   const [showSubIneligible, setShowSubIneligible] = useState(false)// Set show sub state
   const [showSubDNC, setShowSubDNC] = useState(false)// Set show sub state
-  const [ url, setUrl ] = useState(null) // Create state to store the URL of the S3 object
-  const [vehicleInfo, setVehicleInfo] = useState(null) // Create state to store the URL of the S3 object
-  const [pdf, setPdf] = useState(null) // Create state to store the URL of the S3 object
 
   const successAlert = (msg) => { // Success alert method
     message.success(msg)
@@ -418,7 +412,7 @@ const DriverDetails = () => {
           }}
         >
           <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
-        {data.status === 'active'  && <Button type="primary" onClick={() => setSlip(true)}>create Pink Slip</Button>}
+        {(data.status === 'active' && data.city.province_id === 1)  && <Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
         <Button type="primary" icon={<SendOutlined />} loading={loading} onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
