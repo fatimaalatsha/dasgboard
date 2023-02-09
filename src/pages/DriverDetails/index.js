@@ -22,7 +22,7 @@ import {
   Popconfirm,
   Drawer,
   Empty,
-  Alert,
+  Upload,
   Popover,
 } from 'antd' // Import antd components
 import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined } from '@ant-design/icons' // Import icon
@@ -39,6 +39,7 @@ import DriverDocument from '../../components/DriverDocument' // Import Document 
 import DriverTimeline from '../../components/DriverTimeline' // Import Timeline 
 import DriverVehicle from '../../components/DriverVehicle' // Import Driver Vehicle component
 import DocViewer from '../../components/DocViewer' // Import DocViewer component
+import PinkSlipModal from '../../components/PinkSlipModal' // Import PinkSlip component
 
 import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
 import SelectWrapper from '../../components/forms/SelectWrapper' // Import SelectWrapper component
@@ -47,6 +48,7 @@ import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs } from '../../utils/doc-status' // Import isAllApproved function
 import { updateStatus, notifyDriver,updateApplicationStatus, updateDriver } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
+
 
 const { confirm } = Modal // Destructure config from Modal
 const { Title, Text } = Typography // Destructure Title from Typography
@@ -78,6 +80,7 @@ const ProfileAvatar = ({objectKey, driverName, driverid, picture, refetch}) => {
       })
       .catch(error => console.log(error))
   }
+
 
   const handleConfirm = async () => { // Create a function to handle the confirmation of the delete
       setLoading(true) // Set the loading state to true
@@ -177,9 +180,9 @@ const DriverDetails = () => {
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   const [changeStatusModal, setChangeStatusModal] = useState(false)// Set change status modal state
+  const [slip, setSlip] = useState(false)// Set slep modal state
   const [showSubIneligible, setShowSubIneligible] = useState(false)// Set show sub state
   const [showSubDNC, setShowSubDNC] = useState(false)// Set show sub state
- 
 
   const successAlert = (msg) => { // Success alert method
     message.success(msg)
@@ -305,6 +308,10 @@ const DriverDetails = () => {
   if (error) {
     return <div>Something went wrong</div>
   }
+
+  if (isLoading) {
+    return <div>Loading...</div>
+  }
   
   return (
     <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
@@ -411,7 +418,8 @@ const DriverDetails = () => {
           }}
         >
           <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
-          <Button type="primary" icon={<SendOutlined />} loading={loading}  onClick={() => setOpen(true)}>Notify Driver</Button>
+        {(data.status === 'active' && data.city.province_id === 1)  && <Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
+        <Button type="primary" icon={<SendOutlined />} loading={loading} onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
         <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
@@ -563,7 +571,11 @@ const DriverDetails = () => {
         )}
       </Formik>
       { /*end change Application application_status modal*/}
+      {/* pink slip modal */}
+      
+     { slip && <PinkSlipModal id={id} usersub={data.sub_id} open={slip} setOpen={setSlip} />}
 
+      {/* end pink slip modal */}
     </Card>
   )
 }
@@ -642,6 +654,7 @@ const EnableAdditionalDocs = ({status, id, refetch}) => { // TODO: Implement ena
     </Space>
   )
 }
+
 
 const AdditionalDocsDrawer = ({ open, setOpen, driverid, sub }) => {
 
