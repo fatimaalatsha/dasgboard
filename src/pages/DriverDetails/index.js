@@ -22,10 +22,9 @@ import {
   Popconfirm,
   Drawer,
   Empty,
-  Upload,
   Popover,
 } from 'antd' // Import antd components
-import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined, CloudUploadOutlined , LoadingOutlined, PlusOutlined  } from '@ant-design/icons' // Import icon
+import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined } from '@ant-design/icons' // Import icon
 import { useParams } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
@@ -171,6 +170,7 @@ const tableColumns = [
 const DriverDetails = () => {
   const {id} = useParams(); // Get id from url
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
+  console.log(data)
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
