@@ -315,11 +315,11 @@ const DriverDetails = () => {
   
   return (
     <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
-      extra={[
+      extra={ !['active'].includes(data.status) && (
         <Button type="primary" key='status' loading={loading} onClick={() => { setChangeStatusModal(true); handleSubOption(data.application_status)}}>
-               Change Application Status 
-            </Button>
-      ]}
+            Change Application Status 
+        </Button>
+      )}
     >
       <PageHeader
         ghost={false}
