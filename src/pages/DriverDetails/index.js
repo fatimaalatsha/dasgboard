@@ -22,11 +22,10 @@ import {
   Popconfirm,
   Drawer,
   Empty,
-  Upload,
   Popover,
 } from 'antd' // Import antd components
 import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined } from '@ant-design/icons' // Import icon
-import { useParams, useLocation, useNavigate } from 'react-router-dom'
+import { useParams } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import API from '../../api/BaseUrl' // Import API base URL
@@ -416,10 +415,12 @@ const DriverDetails = () => {
             justifyContent: 'space-between',
             margin: ['16px 0'],
           }}
-        >
+      >
+          <Space direction="vertical">
           <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
-        {(data.status === 'active' && data.city.province_id === 1)  && <Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
-        <Button type="primary" icon={<SendOutlined />} loading={loading} onClick={() => setOpen(true)}>Notify Driver</Button>
+          {(data.status === 'active' && data.city.province_id === 1) && <Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
+          </Space>
+          <Button type="primary" icon={<SendOutlined />} loading={loading} onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
         <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
