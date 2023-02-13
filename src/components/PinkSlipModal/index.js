@@ -2,12 +2,11 @@ import { useState, useEffect} from 'react'
 import { Spin, Modal, Alert, Result, message } from 'antd'
 
 import useFetch from "../../hooks/use-fetch"
-import DocViewer, { PdfRenderer }  from "../DocViewer"
+import { PdfRenderer }  from "../DocViewer"
 import { createPinkSlip } from '../../utils/pdf-document'
 import {uint8ArrayToS3} from '../../utils/s3-storage'
 
 import { pinkSlipContent } from '../../assets/data/pinkslipcontent' // Pink skil object content
-import { withSuccess } from 'antd/es/modal/confirm'
 
 const PinkSlipModal = ({ id, usersub , open, setOpen}) => {
   const { data, error, isLoading } = useFetch(`/v1/drivers/cc/${id}/vehicles`)
@@ -16,12 +15,16 @@ const PinkSlipModal = ({ id, usersub , open, setOpen}) => {
         pdfBytes: null, 
         pdfUrl: null
     })
+   const [showAlert, setShowAlert] = useState(false);
 
     isLoading && !pinkslip.pdfUrl && < Spin />
 
     error && <p>{error}</p>
     
   const findActiveVehicle = (arr) => {
+     setTimeout(() => {
+     setShowAlert(true);
+       }, 300);
       const activeObj = arr.find((obj) => obj.status === "active")
       if (!activeObj) return false
       const keys = Object.keys(activeObj)
@@ -62,7 +65,8 @@ const PinkSlipModal = ({ id, usersub , open, setOpen}) => {
     data && createPdf()
   }, [data])
 
- 
+
+  if (pinkslip.pdfUrl && findActiveVehicle(data.items)) {
     return (
       <Modal
         title="Pink Slip"
@@ -73,17 +77,30 @@ const PinkSlipModal = ({ id, usersub , open, setOpen}) => {
         okButtonProps={{ disabled: !pinkslip.pdfUrl }}
         destroyOnClose
       >
-        {(pinkslip.pdfUrl && findActiveVehicle(data.items)) && <PdfRenderer url={pinkslip.pdfUrl} /> }
-         
-        {!pinkslip.pdfUrl && <Alert
+      <PdfRenderer url={pinkslip.pdfUrl} /> 
+      </Modal>
+    )
+  }    
+  else {
+    return (
+      <Modal
+        title="Pink Slip"
+        open={open}
+        onCancel={() => setOpen(false)}
+        okText="Upload"
+        onOk={() => uploadPinkSlip()}
+        okButtonProps={{ disabled: true }}
+        destroyOnClose
+      >
+        {showAlert && <Alert
           message="Pink Slip Creation Failed"
           description="Driver does not have all the vehicle information required."
           type="error"
           showIcon
-          />}
+        />}
       </Modal>
     )
-        
+  }
 }
 
 export default PinkSlipModal
