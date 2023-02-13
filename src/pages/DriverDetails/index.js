@@ -25,7 +25,7 @@ import {
   Popover,
 } from 'antd' // Import antd components
 import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined } from '@ant-design/icons' // Import icon
-import { useParams } from 'react-router-dom'
+import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import API from '../../api/BaseUrl' // Import API base URL
