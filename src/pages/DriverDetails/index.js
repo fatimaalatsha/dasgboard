@@ -170,7 +170,6 @@ const tableColumns = [
 const DriverDetails = () => {
   const {id} = useParams(); // Get id from url
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
-  console.log(data)
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
@@ -410,10 +409,12 @@ const DriverDetails = () => {
             justifyContent: 'space-between',
             margin: ['16px 0'],
           }}
-        >
+      >
+          <Space direction="vertical">
           <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
-        {(data.status === 'active' && data.city.province_id === 1)  && <Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
-        <Button type="primary" icon={<SendOutlined />} loading={loading} onClick={() => setOpen(true)}>Notify Driver</Button>
+          {(data.status === 'active' && data.city.province_id === 1) && <Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
+          </Space>
+          <Button type="primary" icon={<SendOutlined />} loading={loading} onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
         <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
