@@ -174,7 +174,6 @@ const DriverDetails = () => {
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   const [changeStatusModal, setChangeStatusModal] = useState(false)// Set change status modal state
-  const [slip, setSlip] = useState(false)// Set slep modal state
   const [showSubIneligible, setShowSubIneligible] = useState(false)// Set show sub state
   const [showSubDNC, setShowSubDNC] = useState(false)// Set show sub state
 
@@ -324,7 +323,6 @@ const DriverDetails = () => {
             <Title level={4} style={{ marginTop: 0 }}>
               {`${data.first_name} ${data.last_name}`}
               </Title>
-              <Space size={0} direction='horizontal'>
                { ((data.application_status!=='Do not contact (DNC)' && data.application_status !=='Ineligible' && data.application_status !== 'Unresponsive') || data.status ==='active') && <Tag style={{ textTransform: 'capitalize'}} 
                   color={data.status === 'active' ? 'success' : data.status === 'inactive' ? 'error' : 'warning'}>
                   {data.status}
@@ -334,7 +332,6 @@ const DriverDetails = () => {
                   >
                     {data.application_status} {(data.application_status==='Do not contact (DNC)' || data.application_status ==='Ineligible')  && ` - ${data.status_reason}`}
                 </Tag>}
-              </Space>
           </Space>
           </Space>
         }
@@ -410,10 +407,7 @@ const DriverDetails = () => {
             margin: ['16px 0'],
           }}
       >
-          <Space direction="vertical">
           <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
-          {(data.status === 'active' && data.city.province_id === 1) && <Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
-          </Space>
           <Button type="primary" icon={<SendOutlined />} loading={loading} onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
         <DriverDocument id={id} sub={data.sub_id} />
@@ -443,7 +437,7 @@ const DriverDetails = () => {
           </Form.Item>
           <Form.Item>
             <Button type="primary" htmlType="submit">
-              Submit
+              Submit 
             </Button>
           </Form.Item>
         </Form>
@@ -510,7 +504,7 @@ const DriverDetails = () => {
     {/* End Notify Driver Modal */}
 
     { /* Additional Documents Drawwer */ }
-      <AdditionalDocsDrawer open={documentDrawer} setOpen={setDocumentDrawer} driverid={id} sub={data.sub_id} />
+      <AdditionalDocsDrawer open={documentDrawer} setOpen={setDocumentDrawer} driverid={id} sub={data.sub_id} status={data.status} province={data.city.province_id} />
       { /* End Additional Documents Drawwer */}
       { /*change Application Status modal*/}
       <Formik
@@ -566,11 +560,7 @@ const DriverDetails = () => {
         )}
       </Formik>
       { /*end change Application application_status modal*/}
-      {/* pink slip modal */}
-      
-     { slip && <PinkSlipModal id={id} usersub={data.sub_id} open={slip} setOpen={setSlip} />}
-
-      {/* end pink slip modal */}
+     
     </Card>
   )
 }
@@ -651,25 +641,32 @@ const EnableAdditionalDocs = ({status, id, refetch}) => { // TODO: Implement ena
 }
 
 
-const AdditionalDocsDrawer = ({ open, setOpen, driverid, sub }) => {
-
+const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub  }) => {
+  const [slip, setSlip] = useState(false)// Set slep modal state
   return (
     <Drawer
       title="Additional Documents"
-      placement="right"
+      placement="right" 
       size="large"
       onClose={() => setOpen(false)}
       destroyOnClose
       open={open}
     >
-      <AdditionalDocsFeeder driverid={driverid} sub={sub} />
-    </Drawer>
+      <Space direction="vertical" style={{ width: '100%' }}>
+        { (status === 'active' && province === 1 )&&<Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
+        <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />
+        <AdditionalDocsFeeder driverid={driverid} sub={sub} />
+      </Space>
+    {/* pink slip modal */}
+      { slip && <PinkSlipModal id={driverid} usersub={sub} open={slip} setOpen={setSlip} />}
+    {/* end pink slip modal */}
+  </Drawer>
   )
 }
 
 const AdditionalDocsFeeder = ({ driverid, sub }) => {
   const { data, isLoading, error, refetch } = useFetch(`/v1/documents/cc/additional/${driverid}`)// Call useFetch custom hook
-
+ 
   const PopDeleteButton = ({id}) => {
     const [ popState, setPopState ] = useState({
       open: false,
@@ -709,7 +706,6 @@ const AdditionalDocsFeeder = ({ driverid, sub }) => {
         open: false,
       })
     }
-
     return (
       <Popconfirm
         title="Delete Document"
@@ -749,6 +745,7 @@ const AdditionalDocsFeeder = ({ driverid, sub }) => {
               <PopDeleteButton id={doc.id} refetch={refetch} />
             </Space>
             <DocViewer key={idx} objectKey={`${sub}/${doc.key1}`} />
+            <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />
           </Space>
         ))
       }
