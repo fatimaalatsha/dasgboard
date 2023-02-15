@@ -2,10 +2,11 @@ import { useEffect, useState, useRef } from "react"
 import { pdfjs } from "react-pdf/dist/esm/entry.webpack5" // Import react-pdf components
 import { getFromS3 } from "../../utils/s3-storage" // Import GET S3 object URL function
 import { Image, Typography, Spin } from 'antd' // Import antd components
+import { error } from "pdf-lib"
 
 const { Text } = Typography // Destructure Text from Typography
 
-const PdfRenderer = ({url}) => {
+export const PdfRenderer = ({url}) => {
     const [image, setImage] = useState([]) // Create state to store the image
     const [loading, setLoading] = useState(true) // Create state to store the loading state
     const [visible, setVisible] = useState(false) // Create state to store the preview visibility
@@ -83,6 +84,9 @@ const DocViewer = ({objectKey}) => {
         return <Spin size="large" />
     }
 
+    if (error) {
+        return <Text></Text>
+    }
     return (
         <>
             {fileType.toLowerCase() === 'pdf' ? (
