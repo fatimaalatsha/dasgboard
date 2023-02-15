@@ -21,6 +21,7 @@ import ReportDetails from '../../pages/ReportDetails'
 import NumberOfleads from '../../pages/NumberOfLeads' 
 import NumberOfDrivers from '../../pages/NumberOfDrivers'
 import ConversionRatesByApplication from '../../pages/ConversionRatesByApplication'
+import Schedule from '../../pages/Schedule'
 
 const { Sider, Content, Header} = Container // Destructuring Layout component
 
@@ -48,6 +49,7 @@ const Layout = () => {
                     <Route path="/trainings" element={<Trainings />} />
                     <Route path="/training/:id" element={<TrainingDetails />} />
                     <Route path="/applicants" element={<Applicants />} />
+                    <Route path="/schedule" element={<Schedule />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/reports/conversion_rates" element={<NumberOfleads />} />
                     <Route path="/reports/city_overview/:id" element={<ReportDetails />} />
