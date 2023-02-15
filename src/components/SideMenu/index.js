@@ -11,6 +11,7 @@ import {
   EnvironmentOutlined,
   AuditOutlined,
   RocketOutlined,
+  CalendarOutlined,
 } from '@ant-design/icons'; // import antd navigation icons
 
 import { Auth } from 'aws-amplify' // import aws-amplify auth module
@@ -71,6 +72,11 @@ const SideMenu = ({collapsed}) => {
       key: "/documents",
       label: 'Documents',
       icon: <FileOutlined />,
+    },
+    {
+      key: "/schedule",
+      label: 'Schedule',
+      icon: <CalendarOutlined />,
     },
     {
       key: "/cities",
