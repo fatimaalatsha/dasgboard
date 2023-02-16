@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, Divider, Table, Space, Typography, Button } from 'antd' // Import Ant components
+import { Card, Divider, Table, Space, Typography, Button, DatePicker, Select } from 'antd' // Import Ant components
 import { geekblue } from '@ant-design/colors' // Import Ant colors
 
 import dayjs from 'dayjs' // Import date handlers
@@ -47,7 +47,8 @@ const CurrentTimeLine = () => {
 }
 
 const Schedule = () => {
-    const [tabKey, setTabKey] = useState('active')
+    const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
+
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     const columns = [
       {
@@ -114,6 +115,33 @@ const Schedule = () => {
             bodyStyle={{ position: 'relative' }}
             tabList={tabList}
         >
+            <Space>
+                <Space>
+                    <Select
+                        placeholder="City"
+                        optionFilterProp="children"
+                        options={[
+                            { label: 'Thunder Bay', value: 'Thunder Bay' },
+                            { label: 'Toronto', value: 'Toronto' },
+                        ]}
+                    />
+                    <Select
+                        placeholder="Status"
+                        optionFilterProp="children"
+                        options={[
+                            { label: 'Scheduled Shifts', value: 'Scheduled Shifts' },
+                            { label: 'Available Shifts', value: 'Available Shifts' },
+                            { label: 'Unassigned Shifts', value: 'Unassigned Shifts' },
+                            { label: 'Time Off', value: 'Time Off' },
+                            { label: 'Absent', value: 'Absent' },
+                            { label: 'Early In', value: 'Early In' },
+                            { label: 'Late Out', value: 'Late Out' },
+                            { label: 'Unavailability', value: 'Unavailability' },
+                        ]}
+                    />
+                </Space>
+                <DatePicker defaultValue={dayjs()} picker="week" />
+            </Space>
             <Table 
                 columns={columns}
                 dataSource={data}
