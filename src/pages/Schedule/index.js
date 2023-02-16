@@ -115,7 +115,7 @@ const Schedule = () => {
             bodyStyle={{ position: 'relative' }}
             tabList={tabList}
         >
-            <Space>
+            <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between'}}>
                 <Space>
                     <Select
                         placeholder="City"
