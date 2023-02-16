@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react'
-import { Card, Divider, Table, Space, Typography } from 'antd' // Import Ant components
-import { geekblue, grey } from '@ant-design/colors' // Import Ant colors
+import { Card, Divider, Table, Space, Typography, Button } from 'antd' // Import Ant components
+import { geekblue } from '@ant-design/colors' // Import Ant colors
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
@@ -47,6 +47,7 @@ const CurrentTimeLine = () => {
 }
 
 const Schedule = () => {
+    const [tabKey, setTabKey] = useState('active')
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     const columns = [
       {
@@ -56,7 +57,7 @@ const Schedule = () => {
         width: 100,
         fixed: 'left',
       },
-      ...days.map((day, idx) => ({
+      ...days.map((day, idx) => ({ // Loop through the days
         title: (
             <Space direction="vertical">
                 <Title 
@@ -80,7 +81,7 @@ const Schedule = () => {
     ]
 
     const data = []
-    for (let hour = 0; hour < 24; hour++) {
+    for (let hour = 0; hour < 24; hour++) { // Loop through the hours
         data.push({
             key: hour,
             time: dayjs().hour(hour).minute(0).format('HH:mm'),
@@ -94,8 +95,25 @@ const Schedule = () => {
         })
     }
 
+    const tabList = [
+        {
+            key: 'active',
+            tab: 'Active',
+        },
+        {
+            key: 'draft',
+            tab: 'Draft',
+        }
+    ]
+
     return (
-        <Card title="Schedule" style={{ margin: 15 }} bodyStyle={{ position: 'relative' }}>
+        <Card 
+            title="Schedule"
+            extra={<Button type="primary">Create Shift</Button>}
+            style={{ margin: 15 }} 
+            bodyStyle={{ position: 'relative' }}
+            tabList={tabList}
+        >
             <Table 
                 columns={columns}
                 dataSource={data}
