@@ -28,8 +28,8 @@ const CurrentTimeLine = () => {
     const props = {
         style: {
             position: 'absolute',
+            marginTop: 30,
             top: `${percentOfDay}%`,
-            paddintTop: 79,
             left: 0,
             width: '100%',
             backgroundColor: 'red',
