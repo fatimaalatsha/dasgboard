@@ -1,10 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Card, Divider, Table } from 'antd' // Import Ant components
+import { Card, Divider, Table, Space, Typography } from 'antd' // Import Ant components
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
 dayjs.extend(utc)
+
+const { Text, Title } = Typography
 
 const CurrentTimeLine = () => {
     const [currentTime, setCurrentTime] = useState(dayjs())
@@ -28,7 +30,7 @@ const CurrentTimeLine = () => {
     const props = {
         style: {
             position: 'absolute',
-            marginTop: 30,
+            marginTop: 52,
             top: `${percentOfDay}%`,
             left: 0,
             width: '100%',
@@ -44,7 +46,7 @@ const CurrentTimeLine = () => {
 }
 
 const Schedule = () => {
-
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     const columns = [
       {
         title: 'Time',
@@ -53,41 +55,21 @@ const Schedule = () => {
         width: 100,
         fixed: 'left',
       },
-      {
-        title: 'Monday',
-        dataIndex: 'monday',
-        key: 'monday',
-      },
-      {
-        title: 'Tuesday',
-        dataIndex: 'tuesday',
-        key: 'tuesday',
-      },
-      {
-        title: 'Wednesday',
-        dataIndex: 'wednesday',
-        key: 'wednesday',
-      },
-      {
-        title: 'Thursday',
-        dataIndex: 'thursday',
-        key: 'thursday',
-      },
-      {
-        title: 'Friday',
-        dataIndex: 'friday',
-        key: 'friday',
-      },
-      {
-        title: 'Saturday',
-        dataIndex: 'saturday',
-        key: 'saturday',
-      },
-      {
-        title: 'Sunday',
-        dataIndex: 'sunday',
-        key: 'sunday',
-      },
+      ...days.map((day, idx) => ({
+        title: (
+            <Space direction="vertical">
+                <Title level={2} style={{ margin: 0 }}>
+                    {dayjs().day(idx).date()}
+                </Title>
+                <Text type="secondary">
+                    {day}
+                </Text>
+            </Space>
+        ),
+        dataIndex: day,
+        key: day,
+        align: 'center',
+      })),
     ]
 
     const data = []
@@ -95,13 +77,13 @@ const Schedule = () => {
         data.push({
             key: hour,
             time: dayjs().hour(hour).minute(0).format('HH:mm'),
-            monday: '',
-            tuesday: '',
-            wednesday: '',
-            thursday: '',
-            friday: '',
-            saturday: '',
-            sunday: '',
+            Mon: '',
+            Tue: '',
+            Wed: '',
+            Thu: '',
+            Fri: '',
+            Sat: '',
+            Sun: '',
         })
     }
 
