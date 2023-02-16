@@ -1,5 +1,6 @@
 import { useState, useEffect } from 'react'
 import { Card, Divider, Table, Space, Typography } from 'antd' // Import Ant components
+import { geekblue, grey } from '@ant-design/colors' // Import Ant colors
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
@@ -30,7 +31,7 @@ const CurrentTimeLine = () => {
     const props = {
         style: {
             position: 'absolute',
-            marginTop: 52,
+            marginTop: 48,
             top: `${percentOfDay}%`,
             left: 0,
             width: '100%',
@@ -58,10 +59,16 @@ const Schedule = () => {
       ...days.map((day, idx) => ({
         title: (
             <Space direction="vertical">
-                <Title level={2} style={{ margin: 0 }}>
+                <Title 
+                    level={2} 
+                    style={{ 
+                        margin: 0,
+                        ...(dayjs().day(idx).date() === dayjs().date() && { color: '#FFFFFF', backgroundColor: geekblue[6], padding: '2px 8px', borderRadius: 100 })
+                    }}
+                >
                     {dayjs().day(idx).date()}
                 </Title>
-                <Text type="secondary">
+                <Text type="secondary" style={{ ...(dayjs().day(idx).date() === dayjs().date() && { color: geekblue[6], fontWeight: 'bold'}) }}>
                     {day}
                 </Text>
             </Space>
