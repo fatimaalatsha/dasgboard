@@ -442,7 +442,7 @@ const showConfirm = (status) => {
         
         <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
         <Space style={{margin : ['8px']}}>
-        {data.ready_notified && <Button
+        {!data.ready_notified && <Button
           loading={loading}
           key="3"
           type="primary"
