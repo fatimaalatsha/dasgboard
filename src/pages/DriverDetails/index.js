@@ -235,28 +235,28 @@ const DriverDetails = () => {
   const showConfirmEmail = () => {
     setLoading(true)
     confirm({
-      title: 
-          <Title level={4}>
-            {`Are you sure you want to continue with this action? `}
-          </Title>,
+      title:
+        <Title level={4}>
+          {`Are you sure you want to continue with this action? `}
+        </Title>,
       content: 'This action cannot be undone, and the driver will be notified.',
       onOk: async () => {
-        await readyToDrive(id)
-        .then((res) => {
-          if (res) {
-            setLoading(false)
-            refetch()
-          } else {
-            setLoading(false)
-            showError('active')
-          }
-        })
-      },
+          await readyToDrive(id)
+            .then((res) => {
+              if (res) {
+                setLoading(false)
+                refetch()
+              } else {
+                setLoading(false)
+                showErrorEmail()
+              }
+            })
+    },
       onCancel() {
         setLoading(false)
         console.log('Cancel');
       },
-    });
+      });    
   }
 const showConfirm = (status) => {
     setLoading(true)
@@ -299,6 +299,18 @@ const showConfirm = (status) => {
     });
   }
 
+  const showErrorEmail = () => {
+    Modal.error({
+      title: 'Not all documents are approved',
+      content: 
+        <Text>
+          {`You cannot send the driver ready to drive Email until all documents are approved.`}
+        </Text>,
+      onOk: () => {
+        setLoading(false)
+      }
+    });
+  }
   const option = [
     { text:'Do not contact (DNC)',  value: 'Do not contact (DNC)' , key: 'Do not contact (DNC)' },
     { text:'Awaiting Documents',  value: 'Awaiting Documents' , key: 'Awaiting Documents' },
