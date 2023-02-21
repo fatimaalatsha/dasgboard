@@ -31,7 +31,7 @@ const CurrentTimeLine = () => {
     const props = {
         style: {
             position: 'absolute',
-            top: `calc(${percentOfDay}% + 64px)`,
+            top: `calc(${percentOfDay}% + 56px)`,
             left: 0,
             width: '100%',
             backgroundColor: 'red',
