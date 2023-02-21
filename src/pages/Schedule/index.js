@@ -1,10 +1,13 @@
 import { useState, useEffect } from 'react'
-import { Card, Divider, Table } from 'antd' // Import Ant components
+import { Card, Divider, Table, Space, Typography, Button, DatePicker, Select } from 'antd' // Import Ant components
+import { geekblue } from '@ant-design/colors' // Import Ant colors
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
 dayjs.extend(utc)
+
+const { Text, Title } = Typography
 
 const CurrentTimeLine = () => {
     const [currentTime, setCurrentTime] = useState(dayjs())
@@ -28,8 +31,7 @@ const CurrentTimeLine = () => {
     const props = {
         style: {
             position: 'absolute',
-            top: `${percentOfDay}%`,
-            paddintTop: 79,
+            top: `calc(${percentOfDay}% + 64px)`,
             left: 0,
             width: '100%',
             backgroundColor: 'red',
@@ -44,7 +46,9 @@ const CurrentTimeLine = () => {
 }
 
 const Schedule = () => {
+    const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
 
+    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
     const columns = [
       {
         title: 'Time',
@@ -53,60 +57,90 @@ const Schedule = () => {
         width: 100,
         fixed: 'left',
       },
-      {
-        title: 'Monday',
-        dataIndex: 'monday',
-        key: 'monday',
-      },
-      {
-        title: 'Tuesday',
-        dataIndex: 'tuesday',
-        key: 'tuesday',
-      },
-      {
-        title: 'Wednesday',
-        dataIndex: 'wednesday',
-        key: 'wednesday',
-      },
-      {
-        title: 'Thursday',
-        dataIndex: 'thursday',
-        key: 'thursday',
-      },
-      {
-        title: 'Friday',
-        dataIndex: 'friday',
-        key: 'friday',
-      },
-      {
-        title: 'Saturday',
-        dataIndex: 'saturday',
-        key: 'saturday',
-      },
-      {
-        title: 'Sunday',
-        dataIndex: 'sunday',
-        key: 'sunday',
-      },
+      ...days.map((day, idx) => ({ // Loop through the days
+        title: (
+            <Space direction="vertical">
+                <Title 
+                    level={2} 
+                    style={{ 
+                        margin: 0,
+                        ...(dayjs().day(idx).date() === dayjs().date() && { color: '#FFFFFF', backgroundColor: geekblue[6], padding: '2px 8px', borderRadius: 100 })
+                    }}
+                >
+                    {dayjs().day(idx).date()}
+                </Title>
+                <Text type="secondary" style={{ ...(dayjs().day(idx).date() === dayjs().date() && { color: geekblue[6], fontWeight: 'bold'}) }}>
+                    {day}
+                </Text>
+            </Space>
+        ),
+        dataIndex: day,
+        key: day,
+        align: 'center',
+      })),
     ]
 
     const data = []
-    for (let hour = 0; hour < 24; hour++) {
+    for (let hour = 0; hour < 24; hour++) { // Loop through the hours
         data.push({
             key: hour,
             time: dayjs().hour(hour).minute(0).format('HH:mm'),
-            monday: '',
-            tuesday: '',
-            wednesday: '',
-            thursday: '',
-            friday: '',
-            saturday: '',
-            sunday: '',
+            Mon: '',
+            Tue: '',
+            Wed: '',
+            Thu: '',
+            Fri: '',
+            Sat: '',
+            Sun: '',
         })
     }
 
+    const tabList = [
+        {
+            key: 'active',
+            tab: 'Active',
+        },
+        {
+            key: 'draft',
+            tab: 'Draft',
+        }
+    ]
+
     return (
-        <Card title="Schedule" style={{ margin: 15 }} bodyStyle={{ position: 'relative' }}>
+        <Card 
+            title="Schedule"
+            extra={<Button type="primary">Create Shift</Button>}
+            style={{ margin: 15 }} 
+            bodyStyle={{ position: 'relative' }}
+            tabList={tabList}
+        >
+            <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between'}}>
+                <Space>
+                    <Select
+                        placeholder="City"
+                        optionFilterProp="children"
+                        options={[
+                            { label: 'Thunder Bay', value: 'Thunder Bay' },
+                            { label: 'Toronto', value: 'Toronto' },
+                        ]}
+                    />
+                    <Select
+                        placeholder="Status"
+                        optionFilterProp="children"
+                        options={[
+                            { label: 'Scheduled Shifts', value: 'Scheduled Shifts' },
+                            { label: 'Available Shifts', value: 'Available Shifts' },
+                            { label: 'Unassigned Shifts', value: 'Unassigned Shifts' },
+                            { label: 'Time Off', value: 'Time Off' },
+                            { label: 'Absent', value: 'Absent' },
+                            { label: 'Early In', value: 'Early In' },
+                            { label: 'Late Out', value: 'Late Out' },
+                            { label: 'Unavailability', value: 'Unavailability' },
+                        ]}
+                    />
+                </Space>
+                <DatePicker defaultValue={dayjs()} picker="week" />
+            </Space>
             <Table 
                 columns={columns}
                 dataSource={data}
