@@ -20,6 +20,25 @@ const isAllApproved = async (driverId) => {
   }
 }
 
+const readyToDrive = async (driverId) => {
+  try {
+    const auth = await Auth.currentSession()// Get current session
+    const token = auth.getAccessToken().getJwtToken()// Get token from session
+    const options = { // Set options for endpoint
+        headers: {
+            'Authorization': token,
+            ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+        }
+    }
+    const response = await API.post(`/v1/drivers/cc/${driverId}/ready-email`, {}, options)
+    const data = await response.data
+    return data
+  } catch (error) {
+      //console.log(error)
+      return false
+  }
+}
+
 const deleteAdditionalDoc = async (docId) => {
   try {
     const auth = await Auth.currentSession()// Get current session
@@ -74,4 +93,4 @@ const disableAdditionalDocs = async (driverId) => {
   }
 }
 
-export { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs }
+export { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs, readyToDrive }

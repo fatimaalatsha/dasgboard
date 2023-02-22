@@ -44,7 +44,7 @@ import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import Submi
 import SelectWrapper from '../../components/forms/SelectWrapper' // Import SelectWrapper component
 
 import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
-import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs } from '../../utils/doc-status' // Import isAllApproved function
+import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs, readyToDrive } from '../../utils/doc-status' // Import isAllApproved function
 import { updateStatus, notifyDriver,updateApplicationStatus, updateDriver } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
 
@@ -232,7 +232,33 @@ const DriverDetails = () => {
     });
   }
 
-  const showConfirm = (status) => {
+  const showConfirmEmail = () => {
+    setLoading(true)
+    confirm({
+      title:
+        <Title level={4}>
+          {`Are you sure you want to continue with this action? `}
+        </Title>,
+      content: 'This action cannot be undone, and the driver will be notified.',
+      onOk: async () => {
+          await readyToDrive(id)
+            .then((res) => {
+              if (res) {
+                setLoading(false)
+                refetch()
+              } else {
+                setLoading(false)
+                showErrorEmail()
+              }
+            })
+    },
+      onCancel() {
+        setLoading(false)
+        console.log('Cancel');
+      },
+      });    
+  }
+const showConfirm = (status) => {
     setLoading(true)
     confirm({
       title: 
@@ -273,6 +299,18 @@ const DriverDetails = () => {
     });
   }
 
+  const showErrorEmail = () => {
+    Modal.error({
+      title: 'Not all documents are approved',
+      content: 
+        <Text>
+          {`You cannot send the driver ready to drive Email until all documents are approved.`}
+        </Text>,
+      onOk: () => {
+        setLoading(false)
+      }
+    });
+  }
   const option = [
     { text:'Do not contact (DNC)',  value: 'Do not contact (DNC)' , key: 'Do not contact (DNC)' },
     { text:'Awaiting Documents',  value: 'Awaiting Documents' , key: 'Awaiting Documents' },
@@ -413,9 +451,20 @@ const DriverDetails = () => {
             margin: ['16px 0'],
           }}
       >
-          <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
+        
+        <Button type="primary" onClick={() => setDocumentDrawer(true)}>View Additional Documents</Button>
+        <Space style={{margin : ['8px']}}>
+        {!data.ready_notified && <Button
+          loading={loading}
+          key="3"
+          type="primary"
+          onClick={() => showConfirmEmail()}
+        >
+          Ready to Drive
+        </Button>}
           <Button type="primary" icon={<SendOutlined />} loading={loading} onClick={() => setOpen(true)}>Notify Driver</Button>
         </Space>
+      </Space>
         <DriverDocument id={id} sub={data.sub_id} />
         <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
         <DriverVehicle id={id} sub={data.sub_id} />
