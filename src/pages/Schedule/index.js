@@ -5,6 +5,7 @@ import { LeftOutlined, RightOutlined } from '@ant-design/icons' // Import Ant ic
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
+import CellShift from '../../components/CellShift' // Import CellShift component
 
 dayjs.extend(utc)
 
@@ -94,6 +95,11 @@ const Schedule = () => {
         dataIndex: day,
         key: day,
         align: 'center',
+        onCell: (record, rowIndex) => {
+            return {
+                rowSpan: 10,
+            }
+        }
       })),
     ]
 
@@ -102,13 +108,13 @@ const Schedule = () => {
         data.push({
             key: hour,
             time: dayjs().hour(hour).minute(0).format('HH:mm'),
-            Mon: '',
-            Tue: '',
-            Wed: '',
-            Thu: '',
-            Fri: '',
-            Sat: '',
-            Sun: '',
+            Mon: <CellShift />,
+            Tue: <CellShift />,
+            Wed: <CellShift />,
+            Thu: <CellShift />,
+            Fri: <CellShift />,
+            Sat: <CellShift />,
+            Sun: <CellShift />,
         })
     }
 
