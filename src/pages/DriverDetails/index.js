@@ -175,7 +175,6 @@ const DriverDetails = () => {
   const parentUrl = pathArray.join('/')
   const navigate = useNavigate() // Navigate to other pages
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
-  console.log(data)
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
