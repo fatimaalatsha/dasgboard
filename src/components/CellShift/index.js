@@ -1,11 +1,12 @@
-import { Card, theme, Space, Row, Typography, Tag, Avatar } from 'antd'
+import { useState } from 'react'
+import { Card, theme, Space, Row, Typography, Tag, Avatar, Modal } from 'antd'
 import { ArrowRightOutlined } from '@ant-design/icons'
 
 const { useToken } = theme
 const { Text, Title } = Typography
 const { Group } = Avatar
 
-const CellShift = () => {
+const CellShift = (props) => {
     const { token } = useToken()
 
     const cardStyleConfig = {
@@ -22,8 +23,52 @@ const CellShift = () => {
         height: '100%',
     }
 
+    
+    const [hours, setHours] = useState(1);
+    const [isHovering, setIsHovering] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+  
+    const handleClick = () => {
+        setIsHovering(!isHovering)
+        showModal()
+    }
+
+    const handleHoursChange = (event) => {
+      setHours(event.target.value)
+    }
+
+    const showModal = () => {
+      setIsModalOpen(true)
+    }
+
+    const handleOk = () => {
+      setIsModalOpen(false)
+    }
+
+    const handleCancel = () => {
+      setIsModalOpen(false)
+    }
+  
+    const floatingComponentHeight = hours * 55;
+
     return (
-        <Card 
+        <>
+            <div className="container" >
+            <div className="clickable-div" style={{ width: '100%', height: 10, }} onClick={handleClick}></div>
+            {isHovering && (
+                <div className="floating-component" style={{ height: floatingComponentHeight, border: "1px solid red", position: 'absolute', top: 0, zIndex: 999 }}>
+                    <div className="content">
+                        <p>Select number of hours:</p>
+                        {/* <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} /> */}
+                    </div>
+                </div>
+            )}
+            </div>
+            <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+                <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} />
+            </Modal>
+
+{/* <Card 
             style={cardStyleConfig}
             bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}
         >
@@ -70,7 +115,8 @@ const CellShift = () => {
                     </Avatar>
                 </Group>
             </Row>
-        </Card>
+        </Card> */}
+        </>
     )
 }
 

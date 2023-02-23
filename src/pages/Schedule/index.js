@@ -103,7 +103,7 @@ const Schedule = () => {
         },
         render: (text, record, index) => {
             return (
-                {/* <CellShift /> */}
+                <CellShift /> 
             )
         }
       })),
