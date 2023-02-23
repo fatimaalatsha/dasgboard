@@ -97,8 +97,14 @@ const Schedule = () => {
         align: 'center',
         onCell: (record, rowIndex) => {
             return {
-                rowSpan: 10,
+                /* rowSpan: 11, */
+                height: '100%',
             }
+        },
+        render: (text, record, index) => {
+            return (
+                {/* <CellShift /> */}
+            )
         }
       })),
     ]
@@ -108,13 +114,13 @@ const Schedule = () => {
         data.push({
             key: hour,
             time: dayjs().hour(hour).minute(0).format('HH:mm'),
-            Mon: <CellShift />,
-            Tue: <CellShift />,
-            Wed: <CellShift />,
-            Thu: <CellShift />,
-            Fri: <CellShift />,
-            Sat: <CellShift />,
-            Sun: <CellShift />,
+            Mon: '',
+            Tue: '',
+            Wed: '',
+            Thu: '',
+            Fri: '',
+            Sat: '',
+            Sun: '',
         })
     }
 
@@ -182,6 +188,7 @@ const Schedule = () => {
                 columns={columns}
                 dataSource={data}
                 pagination={false}
+                className="schedule-week-table"
             />
             <CurrentTimeLine />
         </Card>
