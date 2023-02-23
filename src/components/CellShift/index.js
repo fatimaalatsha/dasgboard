@@ -56,12 +56,18 @@ const CellShift = (props) => {
             <div className="container" >
             <div className="clickable-div" style={{ width: '100%', height: 10, }} onClick={handleClick}></div>
             {isHovering && (
-                <div className="floating-component" style={{ height: floatingComponentHeight, border: "1px solid red", position: 'absolute', top: 0, zIndex: 999 }}>
-                    <div className="content">
-                        <p>Select number of hours:</p>
+                <>
+                <div className="floating-component" style={{ border: "1px solid red", position: 'absolute', top: 0, zIndex: 999, width: '100%' }}>
+                    <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid green", width: '50%' }}>
+                        <p>Shift</p>
+                        {/* <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} /> */}
+                    </div>
+                    <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid blue", width: '50%' }}>
+                        <p>Shift</p>
                         {/* <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} /> */}
                     </div>
                 </div>
+                </>
             )}
             </div>
             <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
