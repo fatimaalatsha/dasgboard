@@ -1,4 +1,5 @@
 import { Card, theme, Space, Row, Typography, Tag, Avatar } from 'antd'
+import { ArrowRightOutlined } from '@ant-design/icons'
 
 const { useToken } = theme
 const { Text, Title } = Typography
@@ -7,15 +8,33 @@ const { Group } = Avatar
 const CellShift = () => {
     const { token } = useToken()
 
+    const cardStyleConfig = {
+        backgroundColor: token.colorSuccessBg,
+        borderColor: token.colorSuccessBorder,
+        color: token.colorSuccessText,
+        height: '100%',
+    }
+
+    const errorStyleConfig = {
+        backgroundColor: token.colorErrorBg,
+        borderColor: token.colorErrorBorder,
+        color: token.colorErrorText,
+        height: '100%',
+    }
+
     return (
         <Card 
-            style={{ backgroundColor: token.colorSuccessBg, borderColor: token.colorSuccessBorder, color: token.colorSuccessText, height: '100%' }}
-            bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'space-between', height: '100%'}}
+            style={cardStyleConfig}
+            bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}
         >
-            <Row>
+            <Row style={{ display: 'flex', height: '100%'}}>
             <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
-                <Title level={4} style={{ margin: 0 }}>Shift</Title>
-                <Text strong type="secondary">10:00 - 18:00</Text>
+                <Title level={4} style={{ margin: 0, color: 'inherit' }}>45 / 50</Title>
+                <Space>
+                    <Text strong style={{ color: 'inherit' }}>10:00</Text>
+                    <ArrowRightOutlined />
+                    <Text strong style={{ color: 'inherit' }}>18:00</Text>
+                </Space>
             </Space>
             </Row>
             <Row>

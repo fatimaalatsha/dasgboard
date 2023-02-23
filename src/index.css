@@ -62,3 +62,7 @@ body {
 [data-amplify-authenticator]{
   background-color: rgb(250, 249, 249) !important;
 }
+
+.schedule-week-table .ant-table-content table {
+  height: 100%;
+}
