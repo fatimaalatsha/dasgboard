@@ -175,6 +175,7 @@ const DriverDetails = () => {
   const parentUrl = pathArray.join('/')
   const navigate = useNavigate() // Navigate to other pages
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
+  console.log(data)
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
@@ -432,6 +433,9 @@ const showConfirm = (status) => {
             </Descriptions.Item>
             <Descriptions.Item label="HST Number">
               <EditableText name='hst_number' value={data.hst_number} updateCallback={updateText} />
+            </Descriptions.Item>
+            <Descriptions.Item label="Last Reviewed">
+              <EditableDate name='reviewed_at' value={data.reviewed_at.split('T')[0]} updateCallback={updateText} />
             </Descriptions.Item>
         </Descriptions>
       </PageHeader>
