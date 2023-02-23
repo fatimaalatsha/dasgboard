@@ -433,6 +433,12 @@ const showConfirm = (status) => {
             <Descriptions.Item label="HST Number">
               <EditableText name='hst_number' value={data.hst_number} updateCallback={updateText} />
             </Descriptions.Item>
+            <Descriptions.Item label="Last Reviewed">
+              <EditableDate name='reviewed_at' value={data.reviewed_at.split('T')[0]} updateCallback={updateText} />
+           </Descriptions.Item>
+           <Descriptions.Item label="Application Date">
+              <Text name='created_at'>{data.created_at.split('T')[0]}</Text> 
+            </Descriptions.Item>
         </Descriptions>
       </PageHeader>
       <Row>
