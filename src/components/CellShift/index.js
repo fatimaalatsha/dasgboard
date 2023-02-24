@@ -1,19 +1,24 @@
 import { useState } from 'react'
-import { Card, theme, Space, Row, Typography, Tag, Avatar, Modal } from 'antd'
+import { Card, theme, Space, Row, Typography, Tag, Avatar, Modal, Input, Button, DatePicker, TimePicker, Checkbox, Select } from 'antd'
 import { ArrowRightOutlined } from '@ant-design/icons'
+import dayjs from 'dayjs'
 
 const { useToken } = theme
 const { Text, Title } = Typography
 const { Group } = Avatar
 
-const CellShift = (props) => {
+const CellShift = ({display}) => {
     const { token } = useToken()
+    const [hours, setHours] = useState(4);
+    const [isHovering, setIsHovering] = useState(false)
+    const [isModalOpen, setIsModalOpen] = useState(false)
+    const floatingComponentHeight = hours * 55
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
         borderColor: token.colorSuccessBorder,
         color: token.colorSuccessText,
-        height: '100%',
+        height: floatingComponentHeight,
     }
 
     const errorStyleConfig = {
@@ -22,19 +27,16 @@ const CellShift = (props) => {
         color: token.colorErrorText,
         height: '100%',
     }
-
-    
-    const [hours, setHours] = useState(1);
-    const [isHovering, setIsHovering] = useState(false)
-    const [isModalOpen, setIsModalOpen] = useState(false)
   
     const handleClick = () => {
         setIsHovering(!isHovering)
         showModal()
     }
 
-    const handleHoursChange = (event) => {
-      setHours(event.target.value)
+    const handleHoursChange = (time, timeString) => {
+        const hoursDiff = dayjs(timeString[1], 'HH:mm').diff(dayjs(timeString[0], 'HH:mm'), 'hour')
+        console.log(hoursDiff)
+      setHours(hoursDiff)
     }
 
     const showModal = () => {
@@ -47,81 +49,102 @@ const CellShift = (props) => {
 
     const handleCancel = () => {
       setIsModalOpen(false)
+      setIsHovering(!isHovering)
     }
-  
-    const floatingComponentHeight = hours * 55;
 
     return (
         <>
-            <div className="container" >
-            <div className="clickable-div" style={{ width: '100%', height: 10, }} onClick={handleClick}></div>
+            <div className="container" style={{ minHeight: 24}}>
+            {/* <div className="clickable-div" style={{ width: '100%', height: 10, }} ></div> */}
+            {display && <Button size="small" onClick={handleClick}>New Shift</Button>}
             {isHovering && (
                 <>
-                <div className="floating-component" style={{ border: "1px solid red", position: 'absolute', top: 0, zIndex: 999, width: '100%' }}>
-                    <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid green", width: '50%' }}>
+                <div className="floating-component" style={{ position: 'absolute', top: 0, zIndex: 999, width: '100%' }}>
+                    {/* <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid green", width: '50%' }}>
                         <p>Shift</p>
-                        {/* <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} /> */}
+                        <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} />
                     </div>
                     <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid blue", width: '50%' }}>
                         <p>Shift</p>
-                        {/* <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} /> */}
-                    </div>
+                    </div> */}
+                    <Card 
+                        style={cardStyleConfig}
+                        bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}
+                    >
+                        <Row style={{ display: 'flex', height: '100%'}}>
+                        <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
+                            <Title level={4} style={{ margin: 0, color: 'inherit' }}>45 / 50</Title>
+                            <Space>
+                                <Text strong style={{ color: 'inherit' }}>10:00</Text>
+                                <ArrowRightOutlined />
+                                <Text strong style={{ color: 'inherit' }}>18:00</Text>
+                            </Space>
+                        </Space>
+                        </Row>
+                        <Row>
+                            <Space>
+                                <Tag color="cyan">0</Tag>
+                                <Tag color="magenta">0</Tag>
+                                <Tag color="gold">0</Tag>
+                            </Space>
+                        </Row>
+                        <Row>
+                            <Group>
+                                <Avatar src="https://joesch.moe/api/v1/random" />
+                                <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
+                                <Avatar style={{ backgroundColor: '#87d068' }}>U</Avatar>
+                                <Avatar style={{ backgroundColor: '#1890ff', }}>A</Avatar>
+                            </Group>
+                        </Row>
+                    </Card>
                 </div>
                 </>
             )}
             </div>
-            <Modal title="Basic Modal" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} />
+            <Modal title="New Shift" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
+                <Space direction="vertical" size={16}>
+                    <Input.Group compact>
+                    <DatePicker style={{ width: '30%' }} defaultValue={dayjs()} />
+                    <TimePicker.RangePicker style={{ width: '70%' }} format="HH:mm" onChange={handleHoursChange} />
+                    </Input.Group>
+                    <Checkbox>All Day</Checkbox>
+                    <Select
+                        placeholder="Frequency"
+                        optionFilterProp="children"
+                        style={{ width: '100%' }}
+                        options={[
+                            { label: 'Does not repeat', value: 'Does not repeat' },
+                            { label: 'Daily', value: 'Daily' },
+                            { label: 'Weekly on Friday', value: 'Weekly on Friday' },
+                            { label: 'Montly on the second Friday', value: 'Montly on the second Friday' },
+                            { label: 'Annualy on February 24', value: 'Annualy on February 24' },
+                            { label: 'Every weekday (Mon to Fri)', value: 'Every weekday (Mon to Fri)' },
+                            { label: 'Custom...', value: 'Custom...' },
+                        ]}
+                    />
+                    <Select
+                        placeholder="City"
+                        optionFilterProp="children"
+                        style={{ width: '100%' }}
+                        options={[
+                            { label: 'Thunder Bay', value: 'Thunder Bay' },
+                            { label: 'Toronto', value: 'Toronto' },
+                        ]}
+                    />
+                    <Select
+                        placeholder="Drivers"
+                        optionFilterProp="children"
+                        style={{ width: '100%' }}
+                        options={[
+                            { label: 'Thunder Bay', value: 'Thunder Bay' },
+                            { label: 'Toronto', value: 'Toronto' },
+                        ]}
+                    />
+                    <Input placeholder="Driver Limit" type="number" min={10} max={50} />
+                    <Input placeholder="Start" type="number" defaultValue={hours} min={1} max={8} onChange={handleHoursChange} />
+                    <Input placeholder="End" min={5} max={8} />
+                </Space>
             </Modal>
-
-{/* <Card 
-            style={cardStyleConfig}
-            bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}
-        >
-            <Row style={{ display: 'flex', height: '100%'}}>
-            <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
-                <Title level={4} style={{ margin: 0, color: 'inherit' }}>45 / 50</Title>
-                <Space>
-                    <Text strong style={{ color: 'inherit' }}>10:00</Text>
-                    <ArrowRightOutlined />
-                    <Text strong style={{ color: 'inherit' }}>18:00</Text>
-                </Space>
-            </Space>
-            </Row>
-            <Row>
-                <Space>
-                    <Tag color="cyan">0</Tag>
-                    <Tag color="magenta">0</Tag>
-                    <Tag color="gold">0</Tag>
-                </Space>
-            </Row>
-            <Row>
-                <Group>
-                    <Avatar src="https://joesch.moe/api/v1/random" />
-                    <Avatar
-                    style={{
-                        backgroundColor: '#f56a00',
-                    }}
-                    >
-                        K
-                    </Avatar>
-                    <Avatar
-                    style={{
-                        backgroundColor: '#87d068',
-                    }}
-                    >
-                        U
-                    </Avatar>
-                    <Avatar
-                        style={{
-                        backgroundColor: '#1890ff',
-                        }}
-                    >
-                        A
-                    </Avatar>
-                </Group>
-            </Row>
-        </Card> */}
         </>
     )
 }

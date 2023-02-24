@@ -52,6 +52,7 @@ const CurrentTimeLine = () => {
 const Schedule = () => {
     const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
     const [selectedWeek, setSelectedWeek] = useState(dayjs().startOf('week')) // Create state to store the selected week's date
+    const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
 
     const columns = [
@@ -95,15 +96,19 @@ const Schedule = () => {
         dataIndex: day,
         key: day,
         align: 'center',
-        onCell: (record, rowIndex) => {
+        onCell: (record, rowIndex, colIndex) => {
             return {
-                /* rowSpan: 11, */
-                height: '100%',
+                onMouseEnter: () => { // Mouse enter event
+                    setHoveredCell({ rowIndex, colIndex })
+                },
+                onMouseLeave: () => { // Mouse leave event
+                    setHoveredCell(null)
+                },
             }
         },
-        render: (text, record, index) => {
+        render: (text, record, rowIndex, colIndex) => {
             return (
-                <CellShift /> 
+                <CellShift display={rowIndex === hoveredCell?.rowIndex} /> 
             )
         }
       })),
