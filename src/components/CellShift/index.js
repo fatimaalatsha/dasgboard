@@ -12,6 +12,12 @@ const CellShift = ({display}) => {
     const [hours, setHours] = useState(4);
     const [isHovering, setIsHovering] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    const [shift, setShift] = useState({
+        drivers: 10,
+        start: '00:00',
+        end: '00:00',
+    })
+
     const floatingComponentHeight = hours * 55
 
     const cardStyleConfig = {
@@ -34,9 +40,13 @@ const CellShift = ({display}) => {
     }
 
     const handleHoursChange = (time, timeString) => {
+        setShift({
+            ...shift,
+            start: timeString[0],
+            end: timeString[1],
+        })
         const hoursDiff = dayjs(timeString[1], 'HH:mm').diff(dayjs(timeString[0], 'HH:mm'), 'hour')
-        console.log(hoursDiff)
-      setHours(hoursDiff)
+        setHours(hoursDiff)
     }
 
     const showModal = () => {
@@ -73,11 +83,11 @@ const CellShift = ({display}) => {
                     >
                         <Row style={{ display: 'flex', height: '100%'}}>
                         <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
-                            <Title level={4} style={{ margin: 0, color: 'inherit' }}>45 / 50</Title>
+                            <Title level={4} style={{ margin: 0, color: 'inherit' }}>{`0 / ${shift.drivers}`}</Title>
                             <Space>
-                                <Text strong style={{ color: 'inherit' }}>10:00</Text>
+                                <Text strong style={{ color: 'inherit' }}>{shift.start}</Text>
                                 <ArrowRightOutlined />
-                                <Text strong style={{ color: 'inherit' }}>18:00</Text>
+                                <Text strong style={{ color: 'inherit' }}>{shift.end}</Text>
                             </Space>
                         </Space>
                         </Row>
@@ -140,7 +150,7 @@ const CellShift = ({display}) => {
                             { label: 'Toronto', value: 'Toronto' },
                         ]}
                     />
-                    <Input placeholder="Driver Limit" type="number" min={10} max={50} />
+                    <Input placeholder="Driver Limit" type="number" min={10} max={50} defaultValue={shift.drivers} onChange={(event) => {setShift({...shift, drivers: event.target.value})}} />
                     <Input placeholder="Start" type="number" defaultValue={hours} min={1} max={8} onChange={handleHoursChange} />
                     <Input placeholder="End" min={5} max={8} />
                 </Space>
