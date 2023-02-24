@@ -151,8 +151,6 @@ const CellShift = ({display}) => {
                         ]}
                     />
                     <Input placeholder="Driver Limit" type="number" min={10} max={50} defaultValue={shift.drivers} onChange={(event) => {setShift({...shift, drivers: event.target.value})}} />
-                    <Input placeholder="Start" type="number" defaultValue={hours} min={1} max={8} onChange={handleHoursChange} />
-                    <Input placeholder="End" min={5} max={8} />
                 </Space>
             </Modal>
         </>
