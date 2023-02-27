@@ -1,11 +1,12 @@
 import { useState, useEffect } from 'react'
-import { Card, Divider, Table, Space, Typography, Button, DatePicker, Select } from 'antd' // Import Ant components
+import { Card, Divider, Table, Space, Typography, Button, DatePicker, Select, Radio } from 'antd' // Import Ant components
 import { geekblue } from '@ant-design/colors' // Import Ant colors
 import { LeftOutlined, RightOutlined } from '@ant-design/icons' // Import Ant icons
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 import CellShift from '../../components/CellShift' // Import CellShift component
+import WeekView from '../../components/WeekView'
 
 dayjs.extend(utc)
 
@@ -53,7 +54,19 @@ const Schedule = () => {
     const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
     const [selectedWeek, setSelectedWeek] = useState(dayjs().startOf('week')) // Create state to store the selected week's date
     const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
+    const [eventFormValues, setEventFormValues] = useState({})
     const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    const EditableCell = ({
+      title,
+      editable,
+      children,
+      dataIndex,
+      record,
+      handleSave,
+      ...restProps
+    }) => {
+      return <td {...restProps}>{children}</td>;
+    }
 
     const columns = [
       {
@@ -94,9 +107,22 @@ const Schedule = () => {
             </Space>
         ),
         dataIndex: day,
-        key: day,
+        key: idx,
+        width: 200,
         align: 'center',
-        onCell: (record, rowIndex, colIndex) => {
+        render: (text, record) => (
+          <Button
+            onClick={() =>
+              setEventFormValues({
+                dayOfWeek: day,
+                time: record.time,
+              })
+            }
+          >
+            {text}
+          </Button>
+        ),
+        /* onCell: (record, rowIndex, colIndex) => {
             return {
                 onMouseEnter: () => { // Mouse enter event
                     setHoveredCell({ rowIndex, colIndex })
@@ -105,12 +131,12 @@ const Schedule = () => {
                     setHoveredCell(null)
                 },
             }
-        },
-        render: (text, record, rowIndex, colIndex) => {
+        }, */
+        /* render: (text, record, rowIndex, colIndex, column) => {
             return (
-                <CellShift display={rowIndex === hoveredCell?.rowIndex} /> 
+                <CellShift display={rowIndex === hoveredCell?.rowIndex} record={record} /> 
             )
-        }
+        }, */
       })),
     ]
 
@@ -119,7 +145,7 @@ const Schedule = () => {
         data.push({
             key: hour,
             time: dayjs().hour(hour).minute(0).format('HH:mm'),
-            Mon: '',
+            Mon: hour === 12 ? 'Lunch' : '',
             Tue: '',
             Wed: '',
             Thu: '',
@@ -139,6 +165,20 @@ const Schedule = () => {
             tab: 'Draft',
         }
     ]
+    const options = [
+      {
+        label: 'Day',
+        value: 'Day',
+      },
+      {
+        label: 'Week',
+        value: 'Week',
+      },
+      {
+        label: 'Month',
+        value: 'Month',
+      },
+    ]
 
     const handleWeekChange = (date) => { // Handle week change
       setSelectedWeek(dayjs(date))
@@ -149,6 +189,7 @@ const Schedule = () => {
     }
 
     return (
+        <>
         <Card 
             title="Schedule"
             extra={<Button type="primary">Create Shift</Button>}
@@ -187,6 +228,7 @@ const Schedule = () => {
                     <Button icon={<LeftOutlined />} onClick={() => setSelectedWeek(selectedWeek.subtract(1, 'week'))} />
                     <Button icon={<RightOutlined />} onClick={() => setSelectedWeek(selectedWeek.add(1, 'week'))} />
                     <DatePicker defaultValue={selectedWeek} picker="week" onChange={handleWeekChange} />
+                    <Radio.Group options={options} value="Week" optionType="button" />
                 </Space>
             </Space>
             <Table 
@@ -194,9 +236,16 @@ const Schedule = () => {
                 dataSource={data}
                 pagination={false}
                 className="schedule-week-table"
+                components={{
+                    body: {
+                      cell: EditableCell,
+                    }
+                }}
             />
             <CurrentTimeLine />
         </Card>
+        <WeekView />
+        </>
     )
 }
 
