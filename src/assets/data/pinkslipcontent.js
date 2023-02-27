@@ -24,7 +24,7 @@ export const pinkSlipContent = {
     },
     agent: {
       label: "Agent or Broker/Agent ou Coutier:",
-      value: "GILLONS' INSURANCE BROKERS LTD."
+      value: "BFL Canada Risk and Insurance Services Inc."
     },
     policy_number: {
       label: "Policy Number/Police Numéro:",
