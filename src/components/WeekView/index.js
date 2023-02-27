@@ -1,15 +1,43 @@
-import React, { useState } from "react";
-import { Table, Button, Modal, Input } from "antd";
-import dayjs from "dayjs";
+import React, { useState } from "react"
+import { Table, Button, Modal, Input, Space, Typography } from "antd"
+import { geekblue } from '@ant-design/colors' // Import Ant colors
+import dayjs from "dayjs"
+
+const { Text, Title } = Typography
+
+const hours = [];
+for (let hour = 0; hour < 24; hour++) {
+  hours.push( dayjs().hour(hour).minute(0).format('HH:mm') );
+}
 
 const WeekView = () => {
-  const [modalVisible, setModalVisible] = useState(false);
-  const [modalContent, setModalContent] = useState(null);
-  const [selectedTime, setSelectedTime] = useState(null);
-  const [selectedDay, setSelectedDay] = useState(null);
+  const [modalVisible, setModalVisible] = useState(false)
+  const [modalContent, setModalContent] = useState(null)
+  const [selectedTime, setSelectedTime] = useState(null)
+  const [selectedDay, setSelectedDay] = useState(null)
+  const [selectedWeek, setSelectedWeek] = useState(dayjs().startOf('week')) // Create state to store the selected week's date
+  const [data, setData] = useState(hours.map((time) => ({
+    key: time,
+    time,
+    monday: "",
+    tuesday: "",
+    wednesday: "",
+    thursday: "",
+    friday: "",
+    saturday: "",
+    sunday: "",
+    
+})))
+  const days = [ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ]
 
   const handleModalOk = () => {
     // Do something with the modal content, e.g. save to database
+    const newData = [...data];
+    const rowIndex = hours.indexOf(selectedTime);
+    const colIndex = days.indexOf(selectedDay);
+    newData[rowIndex][selectedDay.toLowerCase()] = modalContent;
+    console.log("New data:", newData)
+    setData(newData)
     console.log("Modal content:", modalContent);
     setModalVisible(false);
   };
@@ -29,15 +57,55 @@ const WeekView = () => {
       title: "Time",
       dataIndex: "time",
       key: "time",
-      render: (text) => <span>{text.format("h:mm A")}</span>,
+      render: (text) => <span>{text}</span>,
     },
-    {
+    ...days.map((day, idx) => ({ // Loop through the days
+      title: (
+          <Space direction="vertical">
+              <Title 
+                  level={2} 
+                  style={{ 
+                      margin: 0,
+                      ...(selectedWeek.day(idx).format('DD-MM-YYYY') === dayjs().format('DD-MM-YYYY') && { 
+                          color: '#FFFFFF', 
+                          backgroundColor: geekblue[6], 
+                          padding: '2px 8px', 
+                          borderRadius: 100 
+                      }),
+                  }}
+              >
+                  {selectedWeek.day(idx).date()}
+              </Title>
+              <Text 
+                  type="secondary" 
+                  style={{ 
+                      ...(selectedWeek.day(idx).format('DD-MM-YYYY') === dayjs().format('DD-MM-YYYY') && { 
+                          color: geekblue[6], 
+                          fontWeight: 'bold',
+                          }),
+                  }}
+              >
+                  {day}
+              </Text>
+          </Space>
+      ),
+      dataIndex: day.toLowerCase(),
+      key: idx,
+      width: 200,
+      align: 'center',
+      render: (text, record) => (
+        <Button onClick={() => handleAddClick(record.time, day)}>
+          {text}
+        </Button>
+      ),
+    })),
+    /* {
       title: "Monday",
       dataIndex: "monday",
       key: "monday",
-      render: (_, record) => (
+      render: (text, record) => (
         <Button onClick={() => handleAddClick(record.time, "monday")}>
-          Add Component
+          {text}
         </Button>
       ),
     },
@@ -100,15 +168,11 @@ const WeekView = () => {
           Add Component
         </Button>
       ),
-    },
+    }, */
   ];
 
-  const hours = [];
-  for (let i = 0; i < 24; i++) {
-    hours.push({ key: i, time: dayjs().hour(i).minute(0) });
-  }
 
-  const data = hours.map((hour) => ({
+ /*  const data = hours.map((hour) => ({
     key: hour.key.toString(),
     time: hour.time,
     monday: "",
@@ -118,7 +182,7 @@ const WeekView = () => {
     friday: "",
     saturday: "",
     sunday: "",
-}));
+})); */
 
 return (
 <>
@@ -131,12 +195,12 @@ return (
    />
 {modalVisible && (
 <Modal
-title={`Add component for ${selectedTime.format( "h:mm A" )} on ${selectedDay}`}
-visible={modalVisible}
+title={`Add component for ${selectedTime} on ${selectedDay}`}
+open={modalVisible}
 onOk={handleModalOk}
 onCancel={handleModalCancel}
 >
-<p>Selected time: {selectedTime.format("h:mm A")}</p>
+<p>Selected time: {selectedTime}</p>
 <p>Selected day: {selectedDay}</p>
 <Input
 placeholder="Enter component content"
