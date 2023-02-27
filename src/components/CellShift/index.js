@@ -7,15 +7,15 @@ const { useToken } = theme
 const { Text, Title } = Typography
 const { Group } = Avatar
 
-const CellShift = ({display}) => {
+const CellShift = ({display, record}) => {
     const { token } = useToken()
     const [hours, setHours] = useState(4);
-    const [isHovering, setIsHovering] = useState(false)
+    const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [shift, setShift] = useState({
-        drivers: 10,
-        start: '00:00',
-        end: '00:00',
+        drivers:  10,
+        start:  '00:00',
+        end:  '00:00',
     })
 
     const floatingComponentHeight = hours * 55
