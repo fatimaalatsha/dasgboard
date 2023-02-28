@@ -7,7 +7,7 @@ const { useToken } = theme
 const { Text, Title } = Typography
 const { Group } = Avatar
 
-const CellShift = ({display, record}) => {
+const CellShift = ({display, record, day, setHoveredCell}) => {
     const { token } = useToken()
     const [hours, setHours] = useState(4);
     const [isHovering, setIsHovering] = useState( false)
@@ -18,7 +18,7 @@ const CellShift = ({display, record}) => {
         end:  '00:00',
     })
 
-    const floatingComponentHeight = hours * 55
+    const floatingComponentHeight = hours * 57 + 57
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
@@ -40,6 +40,7 @@ const CellShift = ({display, record}) => {
     }
 
     const handleHoursChange = (time, timeString) => {
+        //console.log(timeString[0])
         setShift({
             ...shift,
             start: timeString[0],
@@ -47,6 +48,7 @@ const CellShift = ({display, record}) => {
         })
         const hoursDiff = dayjs(timeString[1], 'HH:mm').diff(dayjs(timeString[0], 'HH:mm'), 'hour')
         setHours(hoursDiff)
+        setHoveredCell({ time: timeString[0], day: day })
     }
 
     const showModal = () => {
