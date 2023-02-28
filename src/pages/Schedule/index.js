@@ -113,7 +113,7 @@ const Schedule = () => {
         onCell: (record) => {
             return {
                 onMouseEnter: () => { // Mouse enter event
-                    setHoveredCell({ record, day })
+                    setHoveredCell({ time: record.time, day: day })
                 },
                 onMouseLeave: () => { // Mouse leave event
                     setHoveredCell(null)
@@ -122,7 +122,12 @@ const Schedule = () => {
         },
         render: (text, record ) => {
             return (
-                <CellShift display={hoveredCell?.record.time === record.time && hoveredCell?.day === day} record={record} /> 
+                <CellShift 
+                    display={hoveredCell?.time === record.time && hoveredCell?.day === day} 
+                    record={record}
+                    day={day}
+                    setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                /> 
             )
         },
       })),
