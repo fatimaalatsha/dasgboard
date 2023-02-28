@@ -2,7 +2,7 @@ import { useEffect, useState } from 'react'
 import { Divider } from 'antd'
 import dayjs from 'dayjs'
 
-const CurrentTimeLine = () => {
+const CurrentTimeLine = ({axis}) => {
     const [currentTime, setCurrentTime] = useState(dayjs())
 
     useEffect(() => {
@@ -25,12 +25,13 @@ const CurrentTimeLine = () => {
         key: 'current-timeline',
         style: {
             position: 'absolute',
-            top: `calc(${percentOfDay}% + 48px)`,
-            left: 0,
+            top: axis ? 0 : `calc(${percentOfDay}% + 39px)`, // 48px is the height of the header
+            left: axis ? `calc(${percentOfDay}% + 39px)` : 0,
             margin: 0,
-            width: '100%',
+            width: axis ? '2px' : '100%',
+            ...(axis && { minWidth: '2px'}),
             backgroundColor: 'red',
-            height: '2px',
+            height: axis ? '100%' : '2px',
             zIndex: 999,
         }
     }
