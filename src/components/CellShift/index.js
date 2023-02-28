@@ -29,12 +29,11 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
             console.log('here')
         }
     }) */
-    const floatingComponentHeight = hours * 57 + 57
+    const floatingComponentHeight = hours * 57 + 47
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
         borderColor: token.colorSuccessBorder,
-        color: token.colorSuccessText,
         height: floatingComponentHeight,
     }
 
@@ -79,10 +78,10 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
         <>
         <div className="container" style={{ minHeight: 24}}>
             { isCellFilled ? (
-                <div className="floating-component" style={{ position: 'absolute', top: 0, left: 0, zIndex: 999, width: '100%' }}>
+                <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
                     <Card 
                         style={cardStyleConfig}
-                        bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}
+                        bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
                     >
                         <Row style={{ display: 'flex', height: '100%'}}>
                         <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
@@ -109,7 +108,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
             {display && <Button size="small" onClick={handleClick}>New Shift</Button>}
             {isHovering && (
                 <>
-                <div className="floating-component" style={{ position: 'absolute', top: 0, left: 0, zIndex: 999, width: '100%' }}>
+                <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
                     {/* <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid green", width: '50%' }}>
                         <p>Shift</p>
                         <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} />
@@ -119,7 +118,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                     </div> */}
                     <Card 
                         style={cardStyleConfig}
-                        bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}
+                        bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
                     >
                         <Row style={{ display: 'flex', height: '100%'}}>
                         <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
