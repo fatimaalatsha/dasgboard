@@ -129,7 +129,7 @@ const Schedule = () => {
                     </Space>
                 </Space>
                 { view === 1 ? <WeekView selectedWeek={selectedWeek} data={data} days={days} />
-                : view === 2 ? <div>Month View</div>
+                : view === 2 ? <div>Month View 👀</div>
                 : <DayView selectedWeek={selectedWeek} data={data} hours={hours} />
                 }
             </Card>
