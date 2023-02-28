@@ -26,18 +26,18 @@ const data = [
     key: '1',
     name: 'Conversion Rates',
    },
-  {
-    key: '2',
-    name: 'Conversion rates per stage',
-  },
-  {
-    key: '3',
-    name: 'Number of leads per stage',
-  },
-  {
-    key: '4',
-    name: 'Number of leads per city',
-  },
+  // {
+  //   key: '2',
+  //   name: 'Conversion rates per stage',
+  // },
+  // {
+  //   key: '3',
+  //   name: 'Number of leads per stage',
+  // },
+  // {
+  //   key: '4',
+  //   name: 'Number of leads per city',
+  // },
 ];
 
 const Reports = () => {

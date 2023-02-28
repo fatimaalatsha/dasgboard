@@ -31,7 +31,6 @@ const ReportsDetails = () => {
   const { data, error, isLoading } = useFetch(
     `/v1/reports/drivers-status?${getUserParams()}`
   );
-  console.log(data)
   
   // handle the date picker change
   const handleDatePick = (dates) => {
