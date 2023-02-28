@@ -51,7 +51,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     }
 
     const handleHoursChange = (time, timeString) => {
-        console.log(timeString[0])
+        //console.log(timeString[0])
         setShift({
             ...shift,
             start: timeString[0],
