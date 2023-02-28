@@ -91,7 +91,6 @@ const SideMenu = ({collapsed}) => {
     {
       key: "/reports",
       label: 'Reports',
-      disabled: true,
       icon: <ProjectOutlined />,
     },
     {
