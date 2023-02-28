@@ -15,6 +15,7 @@ const WeekView = () => {
   const [modalContent, setModalContent] = useState(null)
   const [selectedTime, setSelectedTime] = useState(null)
   const [selectedDay, setSelectedDay] = useState(null)
+  const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const [selectedWeek, setSelectedWeek] = useState(dayjs().startOf('week')) // Create state to store the selected week's date
   const [data, setData] = useState(hours.map((time) => ({
     key: time,
@@ -47,6 +48,7 @@ const WeekView = () => {
   };
 
   const handleAddClick = (time, day) => {
+    console.log("Add click:", time, day)
     setSelectedTime(time);
     setSelectedDay(day);
     setModalVisible(true);
@@ -93,11 +95,23 @@ const WeekView = () => {
       key: idx,
       width: 200,
       align: 'center',
-      render: (text, record) => (
-        <Button onClick={() => handleAddClick(record.time, day)}>
+      onCell: (record, rowIndex, colIndex) => {
+          return {
+              onMouseEnter: () => { // Mouse enter event
+                  setHoveredCell({ record, day })
+              },
+              onMouseLeave: () => { // Mouse leave event
+                  setHoveredCell(null)
+              },
+          }
+      },
+      render: (text, record) => {
+         return (
+         <Button style={{ display: hoveredCell?.record.time === record.time && hoveredCell?.day === day ? 'inline-block' : 'none'}} onClick={() => handleAddClick(record.time, day)}>
           {text}
         </Button>
-      ),
+        )
+      },
     })),
     /* {
       title: "Monday",
