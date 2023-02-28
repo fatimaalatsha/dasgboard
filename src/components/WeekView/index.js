@@ -100,4 +100,4 @@ const WeekView = ({selectedWeek, data, days }) => {
   )
 }
 
-export default WeekView;
+export default WeekView

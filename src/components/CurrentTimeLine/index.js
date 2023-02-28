@@ -8,7 +8,7 @@ const CurrentTimeLine = () => {
     useEffect(() => {
         const interval = setInterval(() => {
             setCurrentTime(dayjs())
-        }, 1000)
+        }, 60000)
 
         return () => {
             clearInterval(interval)
