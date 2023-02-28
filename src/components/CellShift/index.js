@@ -9,19 +9,26 @@ const { Group } = Avatar
 
 const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
-const CellShift = ({display, record, day, setHoveredCell}) => {
+const getFilledHours = (end, start) => {
+    const hoursDiff = dayjs(end, 'HH:mm').diff(dayjs(start, 'HH:mm'), 'hour')
+    return hoursDiff
+}
+
+const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     const { token } = useToken()
-    const [hours, setHours] = useState(4);
+    const [hours, setHours] = useState(record.start ? getFilledHours(record.end, record.start) : 4);
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [shift, setShift] = useState(null)
-
-    Object.entries(record).forEach(([key, value]) => {
+    const [shift, setShift] = useState({
+        drivers: 10,
+        start: record.start || '00:00',
+        end: record.end || '00:00',
+    })
+   /*  Object.entries(record).forEach(([key, value]) => {
         if (daysOfWeek.includes(key) && value.day === day.toString()) {
             console.log('here')
         }
-    })
-
+    }) */
     const floatingComponentHeight = hours * 57 + 57
 
     const cardStyleConfig = {
@@ -44,7 +51,7 @@ const CellShift = ({display, record, day, setHoveredCell}) => {
     }
 
     const handleHoursChange = (time, timeString) => {
-        //console.log(timeString[0])
+        console.log(timeString[0])
         setShift({
             ...shift,
             start: timeString[0],
@@ -70,10 +77,37 @@ const CellShift = ({display, record, day, setHoveredCell}) => {
 
     return (
         <>
-            <div className="container" style={{ minHeight: 24}}>
+        <div className="container" style={{ minHeight: 24}}>
+            { isCellFilled ? (
+                <div className="floating-component" style={{ position: 'absolute', top: 0, left: 0, zIndex: 999, width: '100%' }}>
+                    <Card 
+                        style={cardStyleConfig}
+                        bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: '100%' }}
+                    >
+                        <Row style={{ display: 'flex', height: '100%'}}>
+                        <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
+                            <Title level={4} style={{ margin: 0, color: 'inherit' }}>{`0 / ${record?.drivers}`}</Title>
+                            <Space>
+                                <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
+                                <ArrowRightOutlined />
+                                <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
+                            </Space>
+                        </Space>
+                        </Row>
+                        <Row>
+                            <Space>
+                                <Tag color="cyan">0</Tag>
+                                <Tag color="magenta">0</Tag>
+                                <Tag color="gold">0</Tag>
+                            </Space>
+                        </Row>
+                    </Card>
+                </div>
+            ) : (
+                    <>
             {/* <div className="clickable-div" style={{ width: '100%', height: 10, }} ></div> */}
             {display && <Button size="small" onClick={handleClick}>New Shift</Button>}
-            {shift && (
+            {isHovering && (
                 <>
                 <div className="floating-component" style={{ position: 'absolute', top: 0, left: 0, zIndex: 999, width: '100%' }}>
                     {/* <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid green", width: '50%' }}>
@@ -116,7 +150,9 @@ const CellShift = ({display, record, day, setHoveredCell}) => {
                 </div>
                 </>
             )}
-            </div>
+            </>
+            )}
+                </div>
             <Modal title="New Shift" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <Space direction="vertical" size={16}>
                     <Input.Group compact>
