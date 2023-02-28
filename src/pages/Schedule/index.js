@@ -110,33 +110,21 @@ const Schedule = () => {
         key: idx,
         width: 200,
         align: 'center',
-        render: (text, record) => (
-          <Button
-            onClick={() =>
-              setEventFormValues({
-                dayOfWeek: day,
-                time: record.time,
-              })
-            }
-          >
-            {text}
-          </Button>
-        ),
-        /* onCell: (record, rowIndex, colIndex) => {
+        onCell: (record) => {
             return {
                 onMouseEnter: () => { // Mouse enter event
-                    setHoveredCell({ rowIndex, colIndex })
+                    setHoveredCell({ record, day })
                 },
                 onMouseLeave: () => { // Mouse leave event
                     setHoveredCell(null)
                 },
             }
-        }, */
-        /* render: (text, record, rowIndex, colIndex, column) => {
+        },
+        render: (text, record ) => {
             return (
-                <CellShift display={rowIndex === hoveredCell?.rowIndex} record={record} /> 
+                <CellShift display={hoveredCell?.record.time === record.time && hoveredCell?.day === day} record={record} /> 
             )
-        }, */
+        },
       })),
     ]
 
@@ -145,7 +133,7 @@ const Schedule = () => {
         data.push({
             key: hour,
             time: dayjs().hour(hour).minute(0).format('HH:mm'),
-            Mon: hour === 12 ? 'Lunch' : '',
+            Mon: '',
             Tue: '',
             Wed: '',
             Thu: '',
@@ -236,11 +224,7 @@ const Schedule = () => {
                 dataSource={data}
                 pagination={false}
                 className="schedule-week-table"
-                components={{
-                    body: {
-                      cell: EditableCell,
-                    }
-                }}
+                bordered
             />
             <CurrentTimeLine />
         </Card>
