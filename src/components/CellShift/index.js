@@ -1,13 +1,13 @@
 import { useState } from 'react'
-import { Card, theme, Space, Row, Typography, Tag, Avatar, Modal, Input, Button, DatePicker, TimePicker, Checkbox, Select } from 'antd'
+import { Card, theme, Space, Row, Typography, Tag, Modal, Input, Button, TimePicker, Checkbox, Select } from 'antd'
 import { ArrowRightOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 
 const { useToken } = theme
 const { Text, Title } = Typography
-const { Group } = Avatar
+//const { Group } = Avatar
 
-const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+//const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 const getFilledHours = (end, start) => {
     const hoursDiff = dayjs(end, 'HH:mm').diff(dayjs(start, 'HH:mm'), 'hour')
@@ -38,12 +38,12 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
         height: floatingComponentHeight,
     }
 
-    const errorStyleConfig = {
+    /* const errorStyleConfig = {
         backgroundColor: token.colorErrorBg,
         borderColor: token.colorErrorBorder,
         color: token.colorErrorText,
         height: '100%',
-    }
+    } */
   
     const handleClick = () => {
         setIsHovering(!isHovering)
