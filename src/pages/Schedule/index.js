@@ -16,7 +16,7 @@ for (let hour = 0; hour < 24; hour++) {
 }
 
 const Schedule = () => {
-    const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
+    //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
     const [selectedWeek, setSelectedWeek] = useState(dayjs().startOf('week')) // Create state to store the selected week's date
     const [modal, setModal] = useState({ // Create state to store the modal
         open: false,
@@ -66,15 +66,14 @@ const Schedule = () => {
       setSelectedWeek(dayjs(date))
     }
 
-    const handleThisWeekClick = () => { // Handle this week click
+    /* const handleThisWeekClick = () => { // Handle this week click
       setSelectedWeek(dayjs())
-    } 
+    }  */
     
-    const handleModalOk = () => {
-        // Do something with the modal content, e.g. save to database
+    const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
         const newData = [...data]
         const rowIndex = hours.indexOf(modal.selectedTime.start)
-        const colIndex = days.indexOf(modal.selectedDay)
+        //const colIndex = days.indexOf(modal.selectedDay)
         newData[rowIndex][modal.selectedDay.dayOfWeek.toLowerCase()] = [{dayOfWeek: modal.selectedDay.dayOfWeek.toLowerCase(), day: modal.selectedDay.day, start: modal.selectedTime.start, end: modal.selectedTime.end, drivers: Number(modal.drivers)}]
         setData(newData)
         setModal({...modal, open: false})
