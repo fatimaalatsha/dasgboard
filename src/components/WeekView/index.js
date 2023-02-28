@@ -1,65 +1,23 @@
-import React, { useState } from "react"
-import { Table, Button, Modal, Input, Space, Typography } from "antd"
+import { useState } from 'react' // Import React hooks
+import { Table, Space, Typography } from 'antd' // Import Ant components
 import { geekblue } from '@ant-design/colors' // Import Ant colors
-import dayjs from "dayjs"
+import dayjs from 'dayjs' // Import dayjs
+
+import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
+import CellShift from '../CellShift' // Import CellShift component
 
 const { Text, Title } = Typography
 
-const hours = [];
-for (let hour = 0; hour < 24; hour++) {
-  hours.push( dayjs().hour(hour).minute(0).format('HH:mm') );
-}
-
-const WeekView = () => {
-  const [modalVisible, setModalVisible] = useState(false)
-  const [modalContent, setModalContent] = useState(null)
-  const [selectedTime, setSelectedTime] = useState(null)
-  const [selectedDay, setSelectedDay] = useState(null)
+const WeekView = ({selectedWeek, data, days }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
-  const [selectedWeek, setSelectedWeek] = useState(dayjs().startOf('week')) // Create state to store the selected week's date
-  const [data, setData] = useState(hours.map((time) => ({
-    key: time,
-    time,
-    monday: "",
-    tuesday: "",
-    wednesday: "",
-    thursday: "",
-    friday: "",
-    saturday: "",
-    sunday: "",
-    
-})))
-  const days = [ "Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday" ]
-
-  const handleModalOk = () => {
-    // Do something with the modal content, e.g. save to database
-    const newData = [...data];
-    const rowIndex = hours.indexOf(selectedTime);
-    const colIndex = days.indexOf(selectedDay);
-    newData[rowIndex][selectedDay.toLowerCase()] = modalContent;
-    console.log("New data:", newData)
-    setData(newData)
-    console.log("Modal content:", modalContent);
-    setModalVisible(false);
-  };
-
-  const handleModalCancel = () => {
-    setModalVisible(false);
-  };
-
-  const handleAddClick = (time, day) => {
-    console.log("Add click:", time, day)
-    setSelectedTime(time);
-    setSelectedDay(day);
-    setModalVisible(true);
-  };
 
   const columns = [
     {
-      title: "Time",
-      dataIndex: "time",
-      key: "time",
-      render: (text) => <span>{text}</span>,
+      title: 'Time',
+      dataIndex: 'time',
+      key: 'time',
+      width: 100,
+      fixed: 'left',
     },
     ...days.map((day, idx) => ({ // Loop through the days
       title: (
@@ -85,146 +43,61 @@ const WeekView = () => {
                           color: geekblue[6], 
                           fontWeight: 'bold',
                           }),
+                      textTransform: 'capitalize',
                   }}
               >
-                  {day}
+                  {day.substring(0, 3)}
               </Text>
           </Space>
       ),
-      dataIndex: day.toLowerCase(),
+      dataIndex: day,
       key: idx,
       width: 200,
       align: 'center',
-      onCell: (record, rowIndex, colIndex) => {
+      onCell: (record) => {
           return {
               onMouseEnter: () => { // Mouse enter event
-                  setHoveredCell({ record, day })
+                  setHoveredCell({ time: record.time, day: day })
               },
               onMouseLeave: () => { // Mouse leave event
                   setHoveredCell(null)
               },
           }
       },
-      render: (text, record) => {
-         return (
-         <Button style={{ display: hoveredCell?.record.time === record.time && hoveredCell?.day === day ? 'inline-block' : 'none'}} onClick={() => handleAddClick(record.time, day)}>
-          {text}
-        </Button>
-        )
+      render: (text, record ) => {
+          return (
+              <>
+             { record[day][0]?.dayOfWeek === day && record.time === record[day][0]?.start ? (
+              <CellShift
+                  isCellFilled={record[day][0]?.dayOfWeek === day && record.time === record[day][0]?.start}
+                  record={record[day][0]}
+              />
+             ) : 
+              (<CellShift 
+                  display={hoveredCell?.time === record.time && hoveredCell?.day === day} 
+                  record={record}
+                  dayWeek={day}
+                  day={selectedWeek.day(idx).date()}
+                  setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+              />) }
+              </>
+          )
       },
     })),
-    /* {
-      title: "Monday",
-      dataIndex: "monday",
-      key: "monday",
-      render: (text, record) => (
-        <Button onClick={() => handleAddClick(record.time, "monday")}>
-          {text}
-        </Button>
-      ),
-    },
-    {
-      title: "Tuesday",
-      dataIndex: "tuesday",
-      key: "tuesday",
-      render: (_, record) => (
-        <Button onClick={() => handleAddClick(record.time, "tuesday")}>
-          Add Component
-        </Button>
-      ),
-    },
-    {
-      title: "Wednesday",
-      dataIndex: "wednesday",
-      key: "wednesday",
-      render: (_, record) => (
-        <Button onClick={() => handleAddClick(record.time, "wednesday")}>
-          Add Component
-        </Button>
-      ),
-    },
-    {
-      title: "Thursday",
-      dataIndex: "thursday",
-      key: "thursday",
-      render: (_, record) => (
-        <Button onClick={() => handleAddClick(record.time, "thursday")}>
-          Add Component
-        </Button>
-      ),
-    },
-    {
-      title: "Friday",
-      dataIndex: "friday",
-      key: "friday",
-      render: (_, record) => (
-        <Button onClick={() => handleAddClick(record.time, "friday")}>
-          Add Component
-        </Button>
-      ),
-    },
-    {
-      title: "Saturday",
-      dataIndex: "saturday",
-      key: "saturday",
-      render: (_, record) => (
-        <Button onClick={() => handleAddClick(record.time, "saturday")}>
-          Add Component
-        </Button>
-      ),
-    },
-    {
-      title: "Sunday",
-      dataIndex: "sunday",
-      key: "sunday",
-      render: (_, record) => (
-        <Button onClick={() => handleAddClick(record.time, "sunday")}>
-          Add Component
-        </Button>
-      ),
-    }, */
-  ];
+  ]
 
-
- /*  const data = hours.map((hour) => ({
-    key: hour.key.toString(),
-    time: hour.time,
-    monday: "",
-    tuesday: "",
-    wednesday: "",
-    thursday: "",
-    friday: "",
-    saturday: "",
-    sunday: "",
-})); */
-
-return (
-<>
-<Table
-     columns={columns}
-     dataSource={data}
-     pagination={false}
-     bordered
-     size="small"
-   />
-{modalVisible && (
-<Modal
-title={`Add component for ${selectedTime} on ${selectedDay}`}
-open={modalVisible}
-onOk={handleModalOk}
-onCancel={handleModalCancel}
->
-<p>Selected time: {selectedTime}</p>
-<p>Selected day: {selectedDay}</p>
-<Input
-placeholder="Enter component content"
-onChange={(e) => setModalContent(e.target.value)}
-value={modalContent}
-/>
-</Modal>
-)}
-</>
-);
-};
+  return (
+    <div style={{ position: 'relative'}}>
+      <Table 
+          columns={columns}
+          dataSource={data}
+          pagination={false}
+          className="schedule-week-table"
+          bordered
+      />
+      <CurrentTimeLine />
+    </div>
+  )
+}
 
 export default WeekView;
