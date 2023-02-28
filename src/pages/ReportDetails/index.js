@@ -14,7 +14,7 @@ const ReportsDetails = () => {
       date_to: dayjs().format('YYYY-MM-DD'),
     },
   });
-
+  const [dataSet, setDataSet] = useState();
   
   const getUserParams = () => { //  get the user params to be used in the useFetch hook
     const { date_from, date_to } = date.filter;
@@ -29,9 +29,10 @@ const ReportsDetails = () => {
 
   // Fetch data from API
   const { data, error, isLoading } = useFetch(
-    `/v1/reports/conversion-rates?${getUserParams()}`
+    `/v1/reports/drivers-status?${getUserParams()}`
   );
-
+  console.log(data)
+  
   // handle the date picker change
   const handleDatePick = (dates) => {
     setDate({
@@ -45,22 +46,43 @@ const ReportsDetails = () => {
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
   if (data) {
-    const dataSet = data.items.map((item) => {
-      return {
-        percentage: item.percentage,
-        city: item.city,
-      };
-    });
+ const mapDataToObjects = (data) => {
+  const { items } = data;
+  const mappedData = [];
 
+  // Loop over each city
+  for (const cityObj of Object.values(items)) {
+    // If cityObj is an object, it contains an array of data objects
+    if (typeof cityObj === 'object' && cityObj.data) {
+      for (const dataObj of cityObj.data) {
+        mappedData.push({
+          status: dataObj.status,
+          city: cityObj.city,
+          count: dataObj.count,
+        });
+      }
+    } else {
+      // If cityObj is not an object with data, it is a single data object
+      mappedData.push({
+        status: cityObj.status,
+        city: items.city,
+        count: cityObj.count,
+      });
+    }
+  }
+   return mappedData;
+    }
     return (
       <>
         <DatePicker.RangePicker onChange={handleDatePick} />
         <Bar
-          data={dataSet}
-          xField="percentage"
+          data={mapDataToObjects(data)}
+          xField="count"
           yField="city"
-          seriesField="city"
+          seriesField="status"
           isStack={true}
+          // isPercent= {true}
+
           label={{
             position: 'middle',
             content: (item) => {
