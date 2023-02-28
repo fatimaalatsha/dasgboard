@@ -1,133 +1,41 @@
-import { useState, useEffect } from 'react'
-import { Card, Divider, Table, Space, Typography, Button, DatePicker, Select } from 'antd' // Import Ant components
-import { geekblue } from '@ant-design/colors' // Import Ant colors
+import { useState } from 'react'
+import { Card, Space, Button, DatePicker, Select, Radio, Modal, Input, TimePicker, Checkbox} from 'antd' // Import Ant components
 import { LeftOutlined, RightOutlined } from '@ant-design/icons' // Import Ant icons
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
-import CellShift from '../../components/CellShift' // Import CellShift component
+import WeekView from '../../components/WeekView'
 
 dayjs.extend(utc)
 
-const { Text, Title } = Typography
+const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
-const CurrentTimeLine = () => {
-    const [currentTime, setCurrentTime] = useState(dayjs())
-
-    useEffect(() => {
-        const interval = setInterval(() => {
-            setCurrentTime(dayjs())
-        }, 60000)
-
-        return () => {
-            clearInterval(interval)
-        }
-    }, [])
-
-    const currentHour = currentTime.hour() // Get current hour
-    const currentMinute = currentTime.minute() // Get current minute
-    const currentSecond = currentTime.second() // Get current second
-    const totalSeconds = currentHour * 3600 + currentMinute * 60 + currentSecond // Get total seconds
-    const percentOfDay = totalSeconds / 86400 * 100 // Get percentage of day
-
-    const props = {
-        key: 'current-timeline',
-        style: {
-            position: 'absolute',
-            top: `calc(${percentOfDay}% + 48px)`,
-            left: 0,
-            margin: 0,
-            width: '100%',
-            backgroundColor: 'red',
-            height: '2px',
-            zIndex: 999,
-        }
-    }
-
-    return (
-        <Divider {...props} />
-    )
+const hours = [];
+for (let hour = 0; hour < 24; hour++) {
+  hours.push( dayjs().hour(hour).minute(0).format('HH:mm') );
 }
 
 const Schedule = () => {
-    const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
+    //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
     const [selectedWeek, setSelectedWeek] = useState(dayjs().startOf('week')) // Create state to store the selected week's date
-    const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
-
-    const columns = [
-      {
-        title: 'Time',
-        dataIndex: 'time',
-        key: 'time',
-        width: 100,
-        fixed: 'left',
-      },
-      ...days.map((day, idx) => ({ // Loop through the days
-        title: (
-            <Space direction="vertical">
-                <Title 
-                    level={2} 
-                    style={{ 
-                        margin: 0,
-                        ...(selectedWeek.day(idx).format('DD-MM-YYYY') === dayjs().format('DD-MM-YYYY') && { 
-                            color: '#FFFFFF', 
-                            backgroundColor: geekblue[6], 
-                            padding: '2px 8px', 
-                            borderRadius: 100 
-                        }),
-                    }}
-                >
-                    {selectedWeek.day(idx).date()}
-                </Title>
-                <Text 
-                    type="secondary" 
-                    style={{ 
-                        ...(selectedWeek.day(idx).format('DD-MM-YYYY') === dayjs().format('DD-MM-YYYY') && { 
-                            color: geekblue[6], 
-                            fontWeight: 'bold',
-                            }),
-                    }}
-                >
-                    {day}
-                </Text>
-            </Space>
-        ),
-        dataIndex: day,
-        key: day,
-        align: 'center',
-        onCell: (record, rowIndex, colIndex) => {
-            return {
-                onMouseEnter: () => { // Mouse enter event
-                    setHoveredCell({ rowIndex, colIndex })
-                },
-                onMouseLeave: () => { // Mouse leave event
-                    setHoveredCell(null)
-                },
-            }
-        },
-        render: (text, record, rowIndex, colIndex) => {
-            return (
-                <CellShift display={rowIndex === hoveredCell?.rowIndex} /> 
-            )
-        }
-      })),
-    ]
-
-    const data = []
-    for (let hour = 0; hour < 24; hour++) { // Loop through the hours
-        data.push({
-            key: hour,
-            time: dayjs().hour(hour).minute(0).format('HH:mm'),
-            Mon: '',
-            Tue: '',
-            Wed: '',
-            Thu: '',
-            Fri: '',
-            Sat: '',
-            Sun: '',
-        })
-    }
+    const [modal, setModal] = useState({ // Create state to store the modal
+        open: false,
+        drivers: null,
+        selectedTime: null,
+        selectedDay: null,
+    })
+    const [data, setData] = useState(hours.map((time) => ({
+        key: time,
+        time,
+        monday: [],
+        tuesday: [{dayOfWeek: 'tuesday', day: '28', start: '00:00', end: '03:00', drivers: 25}],
+        wednesday: [],
+        thursday: [],
+        friday: [],
+        saturday: [],
+        sunday: [],
+        
+    })))
 
     const tabList = [
         {
@@ -139,64 +47,138 @@ const Schedule = () => {
             tab: 'Draft',
         }
     ]
+    const options = [
+      {
+        label: 'Day',
+        value: 'Day',
+      },
+      {
+        label: 'Week',
+        value: 'Week',
+      },
+      {
+        label: 'Month',
+        value: 'Month',
+      },
+    ]
 
     const handleWeekChange = (date) => { // Handle week change
       setSelectedWeek(dayjs(date))
     }
 
-    const handleThisWeekClick = () => { // Handle this week click
+    /* const handleThisWeekClick = () => { // Handle this week click
       setSelectedWeek(dayjs())
+    }  */
+    
+    const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
+        const newData = [...data]
+        const rowIndex = hours.indexOf(modal.selectedTime.start)
+        //const colIndex = days.indexOf(modal.selectedDay)
+        newData[rowIndex][modal.selectedDay.dayOfWeek.toLowerCase()] = [{dayOfWeek: modal.selectedDay.dayOfWeek.toLowerCase(), day: modal.selectedDay.day, start: modal.selectedTime.start, end: modal.selectedTime.end, drivers: Number(modal.drivers)}]
+        setData(newData)
+        setModal({...modal, open: false})
+    }
+
+    const handleModalCancel = () => {
+        setModal({...modal, open: false})
     }
 
     return (
-        <Card 
-            title="Schedule"
-            extra={<Button type="primary">Create Shift</Button>}
-            style={{ margin: 15 }} 
-            bodyStyle={{ position: 'relative' }}
-            tabList={tabList}
-        >
-            <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
-                <Space style={{ display: 'flex', width: '100%'}}>
+        <>
+            <Card 
+                title="Schedule"
+                extra={<Button onClick={() => setModal({...modal, open: true})} type="primary">Create Shift</Button>}
+                style={{ margin: 15 }} 
+                tabList={tabList}
+                bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16 }}
+            >
+                <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
+                    <Space style={{ display: 'flex', width: '100%'}}>
+                        <Select
+                            placeholder="City"
+                            optionFilterProp="children"
+                            style={{ width: 150 }}
+                            options={[
+                                { label: 'Thunder Bay', value: 'Thunder Bay' },
+                                { label: 'Toronto', value: 'Toronto' },
+                            ]}
+                        />
+                        <Select
+                            placeholder="Status"
+                            optionFilterProp="children"
+                            style={{ width: 150 }}
+                            options={[
+                                { label: 'Scheduled Shifts', value: 'Scheduled Shifts' },
+                                { label: 'Available Shifts', value: 'Available Shifts' },
+                                { label: 'Unassigned Shifts', value: 'Unassigned Shifts' },
+                                { label: 'Time Off', value: 'Time Off' },
+                                { label: 'Absent', value: 'Absent' },
+                                { label: 'Early In', value: 'Early In' },
+                                { label: 'Late Out', value: 'Late Out' },
+                                { label: 'Unavailability', value: 'Unavailability' },
+                            ]}
+                        />
+                    </Space>
+                    <Space style={{ display: 'flex', width: '100%'}}>
+                        <Button icon={<LeftOutlined />} onClick={() => setSelectedWeek(selectedWeek.subtract(1, 'week'))} />
+                        <Button icon={<RightOutlined />} onClick={() => setSelectedWeek(selectedWeek.add(1, 'week'))} />
+                        <DatePicker defaultValue={selectedWeek} picker="week" onChange={handleWeekChange} />
+                        <Radio.Group options={options} value="Week" optionType="button" />
+                    </Space>
+                </Space>
+                <WeekView selectedWeek={selectedWeek} data={data} days={days} />
+            </Card>
+            <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
+                <Space direction="vertical" size={16}>
+                    <Input.Group compact>
+                    <DatePicker 
+                        style={{ width: '30%' }}
+                        defaultValue={dayjs()} format="ddd D MMM" 
+                        onChange={(date) => setModal({ ...modal, selectedDay: {dayOfWeek: date.format('dddd'), day: date.format('DD')} }) } 
+                        />
+                    <TimePicker.RangePicker 
+                        style={{ width: '70%' }} 
+                        format="HH:mm" 
+                        onChange={(time, timeString) => setModal({ ...modal, selectedTime: {start: timeString[0], end: timeString[1]} })} 
+                    />
+                    </Input.Group>
+                    <Checkbox>All Day</Checkbox>
+                    <Select
+                        placeholder="Frequency"
+                        optionFilterProp="children"
+                        style={{ width: '100%' }}
+                        options={[
+                            { label: 'Does not repeat', value: 'Does not repeat' },
+                            { label: 'Daily', value: 'Daily' },
+                            { label: 'Weekly on Friday', value: 'Weekly on Friday' },
+                            { label: 'Montly on the second Friday', value: 'Montly on the second Friday' },
+                            { label: 'Annualy on February 24', value: 'Annualy on February 24' },
+                            { label: 'Every weekday (Mon to Fri)', value: 'Every weekday (Mon to Fri)' },
+                            { label: 'Custom...', value: 'Custom...' },
+                        ]}
+                    />
                     <Select
                         placeholder="City"
                         optionFilterProp="children"
-                        style={{ width: 150 }}
+                        style={{ width: '100%' }}
                         options={[
                             { label: 'Thunder Bay', value: 'Thunder Bay' },
                             { label: 'Toronto', value: 'Toronto' },
                         ]}
                     />
                     <Select
-                        placeholder="Status"
+                        placeholder="Drivers"
                         optionFilterProp="children"
-                        style={{ width: 150 }}
+                        style={{ width: '100%' }}
                         options={[
-                            { label: 'Scheduled Shifts', value: 'Scheduled Shifts' },
-                            { label: 'Available Shifts', value: 'Available Shifts' },
-                            { label: 'Unassigned Shifts', value: 'Unassigned Shifts' },
-                            { label: 'Time Off', value: 'Time Off' },
-                            { label: 'Absent', value: 'Absent' },
-                            { label: 'Early In', value: 'Early In' },
-                            { label: 'Late Out', value: 'Late Out' },
-                            { label: 'Unavailability', value: 'Unavailability' },
+                            { label: 'Thunder Bay', value: 'Thunder Bay' },
+                            { label: 'Toronto', value: 'Toronto' },
                         ]}
                     />
+                    <Input placeholder="Driver Limit" type="number" min={10} max={50} defaultValue={10} onChange={(event) => {setModal({ ...modal, drivers: event.target.value})}} />
                 </Space>
-                <Space style={{ display: 'flex', width: '100%'}}>
-                    <Button icon={<LeftOutlined />} onClick={() => setSelectedWeek(selectedWeek.subtract(1, 'week'))} />
-                    <Button icon={<RightOutlined />} onClick={() => setSelectedWeek(selectedWeek.add(1, 'week'))} />
-                    <DatePicker defaultValue={selectedWeek} picker="week" onChange={handleWeekChange} />
-                </Space>
-            </Space>
-            <Table 
-                columns={columns}
-                dataSource={data}
-                pagination={false}
-                className="schedule-week-table"
-            />
-            <CurrentTimeLine />
-        </Card>
+            </Modal>
+        </>
     )
 }
 
