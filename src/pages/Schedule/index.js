@@ -5,6 +5,7 @@ import { LeftOutlined, RightOutlined } from '@ant-design/icons' // Import Ant ic
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 import WeekView from '../../components/WeekView'
+import DayView from '../../components/DayView'
 
 dayjs.extend(utc)
 
@@ -129,7 +130,7 @@ const Schedule = () => {
                 </Space>
                 { view === 1 ? <WeekView selectedWeek={selectedWeek} data={data} days={days} />
                 : view === 2 ? <div>Month View</div>
-                : <div>Day View</div>
+                : <DayView selectedWeek={selectedWeek} data={data} hours={hours} />
                 }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
