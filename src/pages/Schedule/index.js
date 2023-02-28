@@ -90,6 +90,7 @@ const Schedule = () => {
                 extra={<Button onClick={() => setModal({...modal, open: true})} type="primary">Create Shift</Button>}
                 style={{ margin: 15 }} 
                 tabList={tabList}
+                bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16 }}
             >
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
                     <Space style={{ display: 'flex', width: '100%'}}>
