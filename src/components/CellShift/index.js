@@ -7,15 +7,19 @@ const { useToken } = theme
 const { Text, Title } = Typography
 const { Group } = Avatar
 
+const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
+
 const CellShift = ({display, record, day, setHoveredCell}) => {
     const { token } = useToken()
     const [hours, setHours] = useState(4);
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [shift, setShift] = useState({
-        drivers:  10,
-        start:  '00:00',
-        end:  '00:00',
+    const [shift, setShift] = useState(null)
+
+    Object.entries(record).forEach(([key, value]) => {
+        if (daysOfWeek.includes(key) && value.day === day.toString()) {
+            console.log('here')
+        }
     })
 
     const floatingComponentHeight = hours * 57 + 57
@@ -69,9 +73,9 @@ const CellShift = ({display, record, day, setHoveredCell}) => {
             <div className="container" style={{ minHeight: 24}}>
             {/* <div className="clickable-div" style={{ width: '100%', height: 10, }} ></div> */}
             {display && <Button size="small" onClick={handleClick}>New Shift</Button>}
-            {isHovering && (
+            {shift && (
                 <>
-                <div className="floating-component" style={{ position: 'absolute', top: 0, zIndex: 999, width: '100%' }}>
+                <div className="floating-component" style={{ position: 'absolute', top: 0, left: 0, zIndex: 999, width: '100%' }}>
                     {/* <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid green", width: '50%' }}>
                         <p>Shift</p>
                         <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} />
@@ -85,11 +89,11 @@ const CellShift = ({display, record, day, setHoveredCell}) => {
                     >
                         <Row style={{ display: 'flex', height: '100%'}}>
                         <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
-                            <Title level={4} style={{ margin: 0, color: 'inherit' }}>{`0 / ${shift.drivers}`}</Title>
+                            <Title level={4} style={{ margin: 0, color: 'inherit' }}>{`0 / ${shift?.drivers}`}</Title>
                             <Space>
-                                <Text strong style={{ color: 'inherit' }}>{shift.start}</Text>
+                                <Text strong style={{ color: 'inherit' }}>{shift?.start}</Text>
                                 <ArrowRightOutlined />
-                                <Text strong style={{ color: 'inherit' }}>{shift.end}</Text>
+                                <Text strong style={{ color: 'inherit' }}>{shift?.end}</Text>
                             </Space>
                         </Space>
                         </Row>
@@ -100,14 +104,14 @@ const CellShift = ({display, record, day, setHoveredCell}) => {
                                 <Tag color="gold">0</Tag>
                             </Space>
                         </Row>
-                        <Row>
+                        {/* <Row>
                             <Group>
                                 <Avatar src="https://joesch.moe/api/v1/random" />
                                 <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
                                 <Avatar style={{ backgroundColor: '#87d068' }}>U</Avatar>
                                 <Avatar style={{ backgroundColor: '#1890ff', }}>A</Avatar>
                             </Group>
-                        </Row>
+                        </Row> */}
                     </Card>
                 </div>
                 </>
@@ -116,8 +120,27 @@ const CellShift = ({display, record, day, setHoveredCell}) => {
             <Modal title="New Shift" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <Space direction="vertical" size={16}>
                     <Input.Group compact>
-                    <DatePicker style={{ width: '30%' }} defaultValue={dayjs()} />
-                    <TimePicker.RangePicker style={{ width: '70%' }} format="HH:mm" onChange={handleHoursChange} />
+                    {/* <DatePicker style={{ width: '30%' }} defaultValue={dayjs()} format="ddd D MMM" /> */}
+                    <TimePicker.RangePicker 
+                        style={{ width: '100%' }} 
+                        format="HH:mm" 
+                        defaultValue={[dayjs(record.time, 'HH:mm'), null]} 
+                        disabled={[true, false]} 
+                        onChange={handleHoursChange} 
+                        disabledTime={(current) => {
+                            return {
+                                disabledHours: () => {
+                                    const hours = []
+                                    for (let i = 0; i < 24; i++) {
+                                        if (i < dayjs(record.time, 'HH:mm').hour()) {
+                                            hours.push(i)
+                                        }
+                                    }
+                                    return hours
+                                }
+                            }
+                        }}
+                    />
                     </Input.Group>
                     <Checkbox>All Day</Checkbox>
                     <Select
@@ -152,7 +175,7 @@ const CellShift = ({display, record, day, setHoveredCell}) => {
                             { label: 'Toronto', value: 'Toronto' },
                         ]}
                     />
-                    <Input placeholder="Driver Limit" type="number" min={10} max={50} defaultValue={shift.drivers} onChange={(event) => {setShift({...shift, drivers: event.target.value})}} />
+                    <Input placeholder="Driver Limit" type="number" min={10} max={50} defaultValue={shift?.drivers} onChange={(event) => {setShift({...shift, drivers: event.target.value})}} />
                 </Space>
             </Modal>
         </>

@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react'
-import { Card, Divider, Table, Space, Typography, Button, DatePicker, Select, Radio } from 'antd' // Import Ant components
+import { Card, Divider, Table, Space, Typography, Button, DatePicker, Select, Radio, Modal, Input, TimePicker, Checkbox} from 'antd' // Import Ant components
 import { geekblue } from '@ant-design/colors' // Import Ant colors
 import { LeftOutlined, RightOutlined } from '@ant-design/icons' // Import Ant icons
 
@@ -50,12 +50,33 @@ const CurrentTimeLine = () => {
     )
 }
 
+const hours = [];
+for (let hour = 0; hour < 24; hour++) {
+  hours.push( dayjs().hour(hour).minute(0).format('HH:mm') );
+}
+
 const Schedule = () => {
     const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
     const [selectedWeek, setSelectedWeek] = useState(dayjs().startOf('week')) // Create state to store the selected week's date
     const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
+    const [modalVisible, setModalVisible] = useState(false) // Create state to store the modal visibility
+    const [modalContent, setModalContent] = useState(null) // Create state to store the modal content
+    const [selectedTime, setSelectedTime] = useState(null) // Create state to store the selected time
+    const [selectedDay, setSelectedDay] = useState(null) // Create state to store the selected day
     const [eventFormValues, setEventFormValues] = useState({})
-    const days = ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"]
+    const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+    const [data, setData] = useState(hours.map((time) => ({
+        key: time,
+        time,
+        monday: [],
+        tuesday: [{dayOfWeek: 'tuesday', day: '28', start: '00:00', end: '03:00', drivers: 25}],
+        wednesday: [],
+        thursday: [],
+        friday: [],
+        saturday: [],
+        sunday: [],
+        
+    })))
     const EditableCell = ({
       title,
       editable,
@@ -100,9 +121,10 @@ const Schedule = () => {
                             color: geekblue[6], 
                             fontWeight: 'bold',
                             }),
+                        textTransform: 'capitalize',
                     }}
                 >
-                    {day}
+                    {day.substring(0, 3)}
                 </Text>
             </Space>
         ),
@@ -121,19 +143,24 @@ const Schedule = () => {
             }
         },
         render: (text, record ) => {
+            /* console.log(record) */
             return (
-                <CellShift 
+                <>
+               { record[day][0]?.dayOfWeek === day && record.time === record[day][0]?.start ? (<>yo</>) : 
+                (<CellShift 
                     display={hoveredCell?.time === record.time && hoveredCell?.day === day} 
                     record={record}
-                    day={day}
+                    dayWeek={day}
+                    day={selectedWeek.day(idx).date()}
                     setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
-                /> 
+                />) }
+                </>
             )
         },
       })),
     ]
 
-    const data = []
+    /* const data = []
     for (let hour = 0; hour < 24; hour++) { // Loop through the hours
         data.push({
             key: hour,
@@ -146,7 +173,7 @@ const Schedule = () => {
             Sat: '',
             Sun: '',
         })
-    }
+    } */
 
     const tabList = [
         {
@@ -179,13 +206,29 @@ const Schedule = () => {
 
     const handleThisWeekClick = () => { // Handle this week click
       setSelectedWeek(dayjs())
+    } 
+    
+    const handleModalOk = () => {
+        // Do something with the modal content, e.g. save to database
+        const newData = [...data]
+        const rowIndex = hours.indexOf(selectedTime.start)
+        const colIndex = days.indexOf(selectedDay)
+        newData[rowIndex][selectedDay.dayOfWeek.toLowerCase()] = [{dayOfWeek: selectedDay.dayOfWeek.toLowerCase(), day: selectedDay.day, start: selectedTime.start, end: selectedTime.end, drivers: Number(modalContent)}]
+        console.log("New data:", newData)
+        setData(newData)
+        console.log("Modal content:", modalContent)
+        setModalVisible(false)
+    }
+
+    const handleModalCancel = () => {
+        setModalVisible(false)
     }
 
     return (
         <>
         <Card 
             title="Schedule"
-            extra={<Button type="primary">Create Shift</Button>}
+            extra={<Button onClick={() => setModalVisible(true)} type="primary">Create Shift</Button>}
             style={{ margin: 15 }} 
             bodyStyle={{ position: 'relative' }}
             tabList={tabList}
@@ -234,6 +277,56 @@ const Schedule = () => {
             <CurrentTimeLine />
         </Card>
         <WeekView />
+            <Modal title="New Shift" open={modalVisible} onOk={handleModalOk} onCancel={handleModalCancel}>
+                <Space direction="vertical" size={16}>
+                    <Input.Group compact>
+                    <DatePicker 
+                        style={{ width: '30%' }}
+                        defaultValue={dayjs()} format="ddd D MMM" 
+                        onChange={(date) => setSelectedDay({ dayOfWeek: date.format('dddd'), day: date.format('DD') }) } 
+                     />
+                    <TimePicker.RangePicker 
+                        style={{ width: '70%' }} 
+                        format="HH:mm" 
+                        onChange={(time, timeString) => setSelectedTime({ start: timeString[0], end: timeString[1] })} 
+                    />
+                    </Input.Group>
+                    <Checkbox>All Day</Checkbox>
+                    <Select
+                        placeholder="Frequency"
+                        optionFilterProp="children"
+                        style={{ width: '100%' }}
+                        options={[
+                            { label: 'Does not repeat', value: 'Does not repeat' },
+                            { label: 'Daily', value: 'Daily' },
+                            { label: 'Weekly on Friday', value: 'Weekly on Friday' },
+                            { label: 'Montly on the second Friday', value: 'Montly on the second Friday' },
+                            { label: 'Annualy on February 24', value: 'Annualy on February 24' },
+                            { label: 'Every weekday (Mon to Fri)', value: 'Every weekday (Mon to Fri)' },
+                            { label: 'Custom...', value: 'Custom...' },
+                        ]}
+                    />
+                    <Select
+                        placeholder="City"
+                        optionFilterProp="children"
+                        style={{ width: '100%' }}
+                        options={[
+                            { label: 'Thunder Bay', value: 'Thunder Bay' },
+                            { label: 'Toronto', value: 'Toronto' },
+                        ]}
+                    />
+                    <Select
+                        placeholder="Drivers"
+                        optionFilterProp="children"
+                        style={{ width: '100%' }}
+                        options={[
+                            { label: 'Thunder Bay', value: 'Thunder Bay' },
+                            { label: 'Toronto', value: 'Toronto' },
+                        ]}
+                    />
+                    <Input placeholder="Driver Limit" type="number" min={10} max={50} defaultValue={10} onChange={(event) => {setModalContent( event.target.value)}} />
+                </Space>
+            </Modal>
         </>
     )
 }
