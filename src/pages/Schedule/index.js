@@ -36,6 +36,7 @@ const Schedule = () => {
         sunday: [],
         
     })))
+    const [view, setView] = useState(1)
 
     const tabList = [
         {
@@ -50,15 +51,15 @@ const Schedule = () => {
     const options = [
       {
         label: 'Day',
-        value: 'Day',
+        value: 0,
       },
       {
         label: 'Week',
-        value: 'Week',
+        value: 1,
       },
       {
         label: 'Month',
-        value: 'Month',
+        value: 2,
       },
     ]
 
@@ -123,10 +124,13 @@ const Schedule = () => {
                         <Button icon={<LeftOutlined />} onClick={() => setSelectedWeek(selectedWeek.subtract(1, 'week'))} />
                         <Button icon={<RightOutlined />} onClick={() => setSelectedWeek(selectedWeek.add(1, 'week'))} />
                         <DatePicker defaultValue={selectedWeek} picker="week" onChange={handleWeekChange} />
-                        <Radio.Group options={options} value="Week" optionType="button" />
+                        <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>
-                <WeekView selectedWeek={selectedWeek} data={data} days={days} />
+                { view === 1 ? <WeekView selectedWeek={selectedWeek} data={data} days={days} />
+                : view === 2 ? <div>Month View</div>
+                : <div>Day View</div>
+                }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
                 <Space direction="vertical" size={16}>
