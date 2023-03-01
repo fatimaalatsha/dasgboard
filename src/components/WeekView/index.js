@@ -65,6 +65,7 @@ const WeekView = ({selectedWeek, data, days }) => {
           }
       },
       render: (text, record ) => {
+        console.log(record)
           return (
               <>
              { record[day][0]?.dayOfWeek === day && record.time === record[day][0]?.start ? (

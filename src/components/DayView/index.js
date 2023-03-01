@@ -14,20 +14,22 @@ const DayView = ({selectedWeek, data, hours }) => {
   const columns = [
     {
       title: 'Drivers',
-      dataIndex: 'time',
-      key: 'time',
-      width: 100,
+      dataIndex: 'name',
+      key: 'name',
       fixed: 'left',
+      render: (text, record) => (
+        <Text style={{ textTransform: 'capitalize' }}>{text}</Text>
+      )
     },
     ...hours.map((hour, idx) => ({ // Loop through the days
       title: `${hour}`,
       dataIndex: hour,
       key: idx,
       align: 'center',
-      /* onCell: (record) => {
+      onCell: (record) => {
           return {
               onMouseEnter: () => { // Mouse enter event
-                  setHoveredCell({ time: record.time, day: day })
+                  setHoveredCell({ name: record.name, hour: hour })
               },
               onMouseLeave: () => { // Mouse leave event
                   setHoveredCell(null)
@@ -35,24 +37,25 @@ const DayView = ({selectedWeek, data, hours }) => {
           }
       },
       render: (text, record ) => {
-          return (
+        console.log(record)
+          /* return (
               <>
-             { record[day][0]?.dayOfWeek === day && record.time === record[day][0]?.start ? (
+             { record[hour][0]?.dayOfWeek === hour && record.time === record[hour][0]?.start ? (
               <CellShift
-                  isCellFilled={record[day][0]?.dayOfWeek === day && record.time === record[day][0]?.start}
-                  record={record[day][0]}
+                  isCellFilled={record[hour][0]?.dayOfWeek === hour && record.time === record[hour][0]?.start}
+                  record={record[hour][0]}
               />
              ) : 
               (<CellShift 
-                  display={hoveredCell?.time === record.time && hoveredCell?.day === day} 
+                  display={hoveredCell?.name === record.name && hoveredCell?.hour === hour} 
                   record={record}
-                  dayWeek={day}
+                  dayWeek={hour}
                   day={selectedWeek.day(idx).date()}
-                  setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                  setHoveredCell={(values) => setHoveredCell({name: values.name, day: values.day})}
               />) }
               </>
-          )
-      }, */
+          ) */
+      },
     })),
   ]
 
