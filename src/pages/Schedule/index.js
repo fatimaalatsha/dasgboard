@@ -6,6 +6,7 @@ import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 import WeekView from '../../components/WeekView'
 import DayView from '../../components/DayView'
+import generateName from '../../utils/name-creation'
 
 dayjs.extend(utc)
 
@@ -16,9 +17,20 @@ for (let hour = 0; hour < 24; hour++) {
   hours.push( dayjs().hour(hour).minute(0).format('HH:mm') );
 }
 
+const generateNames = (numNames) => {
+    const names = [];
+    for (let i = 0; i < numNames; i++) {
+      names.push(generateName());
+    }
+    return names;
+  }
+  
+const namesArray = generateNames(30)
+
 const Schedule = () => {
     //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
     const [selectedWeek, setSelectedWeek] = useState(dayjs().startOf('week')) // Create state to store the selected week's date
+    const [names, setNames] = useState(generateName())
     const [modal, setModal] = useState({ // Create state to store the modal
         open: false,
         drivers: null,
@@ -37,7 +49,17 @@ const Schedule = () => {
         sunday: [],
         
     })))
-    const [view, setView] = useState(1)
+    const [dayData, setDayData] = useState(namesArray.map((name) => ({
+        key: name,
+        name,
+        ...hours.map((time) => ({
+            key: time,
+            time: [],
+        }))
+            
+        })))
+        
+    const [view, setView] = useState(0)
 
     const tabList = [
         {
@@ -130,7 +152,7 @@ const Schedule = () => {
                 </Space>
                 { view === 1 ? <WeekView selectedWeek={selectedWeek} data={data} days={days} />
                 : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedWeek={selectedWeek} data={data} hours={hours} />
+                : <DayView selectedWeek={selectedWeek} data={dayData} hours={hours} />
                 }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
