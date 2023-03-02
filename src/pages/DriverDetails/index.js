@@ -433,6 +433,12 @@ const showConfirm = (status) => {
             <Descriptions.Item label="HST Number">
               <EditableText name='hst_number' value={data.hst_number} updateCallback={updateText} />
             </Descriptions.Item>
+            <Descriptions.Item label="Last Reviewed">
+              <EditableDate name='reviewed_at' value={data.reviewed_at?.split('T')[0]} updateCallback={updateText} />
+           </Descriptions.Item>
+           <Descriptions.Item label="Application Date">
+              <Text name='created_at'>{data.created_at.split('T')[0]}</Text> 
+            </Descriptions.Item>
         </Descriptions>
       </PageHeader>
       <Row>
@@ -709,11 +715,11 @@ const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub 
     >
       <Space direction="vertical" style={{ width: '100%' }}>
         { (status === 'active' && province === 1 )&&<Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
-        <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />
+       { (status === 'active' && province === 1 ) && <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />}
         <AdditionalDocsFeeder driverid={driverid} sub={sub} />
       </Space>
     {/* pink slip modal */}
-      { slip && <PinkSlipModal id={driverid} usersub={sub} open={slip} setOpen={setSlip} />}
+      {slip && <PinkSlipModal id={driverid} usersub={sub} open={slip} setOpen={setSlip} />}
     {/* end pink slip modal */}
   </Drawer>
   )
