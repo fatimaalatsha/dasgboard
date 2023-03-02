@@ -16,9 +16,9 @@ const DayView = ({selectedWeek, data, hours }) => {
       title: 'Drivers',
       dataIndex: 'name',
       key: 'name',
-      fixed: 'left',
+      width: 100,
       render: (text, record) => (
-        <Text style={{ textTransform: 'capitalize' }}>{text}</Text>
+        <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '...', tooltip: true }} >{text}</Text>
       )
     },
     ...hours.map((hour, idx) => ({ // Loop through the days
