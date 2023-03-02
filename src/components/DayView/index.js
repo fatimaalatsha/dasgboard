@@ -4,7 +4,7 @@ import { geekblue } from '@ant-design/colors' // Import Ant colors
 import dayjs from 'dayjs' // Import dayjs
 
 import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
-import CellShift from '../CellShift' // Import CellShift component
+import DayCellShift from '../DayCellShift' // Import CellShift component
 
 const { Text, Title } = Typography
 
@@ -26,6 +26,7 @@ const DayView = ({selectedWeek, data, hours }) => {
       dataIndex: hour,
       key: idx,
       align: 'center',
+      width: 100,
       onCell: (record) => {
           return {
               onMouseEnter: () => { // Mouse enter event
@@ -46,7 +47,13 @@ const DayView = ({selectedWeek, data, hours }) => {
               { record[hour][0]?.start === hour && record.name === record[hour][0]?.name ? (
               <>hey</> 
               ) : (
-                hoveredCell?.name === record.name && hoveredCell?.hour === hour && <Button>add time</Button>
+                <DayCellShift 
+                  display={hoveredCell?.name === record.name && hoveredCell?.hour === hour} 
+                  record={record} 
+                  hour={hour}
+                  day={selectedWeek.day(idx).date()}
+                  setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                />
               )
               }
             </>
