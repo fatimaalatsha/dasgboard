@@ -1,5 +1,5 @@
 import { useState } from 'react' // Import React hooks
-import { Table, Space, Typography } from 'antd' // Import Ant components
+import { Table, Space, Typography, Button } from 'antd' // Import Ant components
 import { geekblue } from '@ant-design/colors' // Import Ant colors
 import dayjs from 'dayjs' // Import dayjs
 
@@ -37,24 +37,20 @@ const DayView = ({selectedWeek, data, hours }) => {
           }
       },
       render: (text, record ) => {
-        console.log(record)
-          /* return (
-              <>
-             { record[hour][0]?.dayOfWeek === hour && record.time === record[hour][0]?.start ? (
-              <CellShift
-                  isCellFilled={record[hour][0]?.dayOfWeek === hour && record.time === record[hour][0]?.start}
-                  record={record[hour][0]}
-              />
-             ) : 
-              (<CellShift 
-                  display={hoveredCell?.name === record.name && hoveredCell?.hour === hour} 
-                  record={record}
-                  dayWeek={hour}
-                  day={selectedWeek.day(idx).date()}
-                  setHoveredCell={(values) => setHoveredCell({name: values.name, day: values.day})}
-              />) }
-              </>
-          ) */
+        //console.log(record)
+        /* return (
+          hoveredCell?.name === record.name && hoveredCell?.hour === hour && <Button>add time</Button>
+        ) */
+          return (
+            <>
+              { record[hour][0]?.start === hour && record.name === record[hour][0]?.name ? (
+              <>hey</> 
+              ) : (
+                hoveredCell?.name === record.name && hoveredCell?.hour === hour && <Button>add time</Button>
+              )
+              }
+            </>
+          )
       },
     })),
   ]
