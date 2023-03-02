@@ -26,6 +26,7 @@ const generateNames = (numNames) => {
   }
   
 const namesArray = generateNames(30)
+namesArray.push('patient alpaca')
 
 const Schedule = () => {
     //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
@@ -49,15 +50,20 @@ const Schedule = () => {
         sunday: [],
         
     })))
-    const [dayData, setDayData] = useState(namesArray.map((name) => ({
-        key: name,
-        name,
-        ...hours.map((time) => ({
-            key: time,
-            time: [],
-        }))
-            
-        })))
+    const [dayData, setDayData] = useState(namesArray.reduce((acc, name) => {
+        const timeObj = hours.reduce((obj, time) => {
+          obj[time] = time === '04:00' ? [{name: 'patient alpaca', day: '28', start: time, end: '03:00', drivers: 25}] : []
+          return obj
+        }, {})
+      
+        acc.push({
+          key: name,
+          name,
+          ...timeObj
+        })
+
+        return acc
+      }, []))
         
     const [view, setView] = useState(0)
 

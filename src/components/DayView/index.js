@@ -1,10 +1,10 @@
 import { useState } from 'react' // Import React hooks
-import { Table, Space, Typography } from 'antd' // Import Ant components
+import { Table, Space, Typography, Button } from 'antd' // Import Ant components
 import { geekblue } from '@ant-design/colors' // Import Ant colors
 import dayjs from 'dayjs' // Import dayjs
 
 import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
-import CellShift from '../CellShift' // Import CellShift component
+import DayCellShift from '../DayCellShift' // Import CellShift component
 
 const { Text, Title } = Typography
 
@@ -16,9 +16,9 @@ const DayView = ({selectedWeek, data, hours }) => {
       title: 'Drivers',
       dataIndex: 'name',
       key: 'name',
-      fixed: 'left',
+      width: 100,
       render: (text, record) => (
-        <Text style={{ textTransform: 'capitalize' }}>{text}</Text>
+        <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '...', tooltip: true }} >{text}</Text>
       )
     },
     ...hours.map((hour, idx) => ({ // Loop through the days
@@ -26,6 +26,7 @@ const DayView = ({selectedWeek, data, hours }) => {
       dataIndex: hour,
       key: idx,
       align: 'center',
+      width: 100,
       onCell: (record) => {
           return {
               onMouseEnter: () => { // Mouse enter event
@@ -37,24 +38,26 @@ const DayView = ({selectedWeek, data, hours }) => {
           }
       },
       render: (text, record ) => {
-        console.log(record)
-          /* return (
-              <>
-             { record[hour][0]?.dayOfWeek === hour && record.time === record[hour][0]?.start ? (
-              <CellShift
-                  isCellFilled={record[hour][0]?.dayOfWeek === hour && record.time === record[hour][0]?.start}
-                  record={record[hour][0]}
-              />
-             ) : 
-              (<CellShift 
+        //console.log(record)
+        /* return (
+          hoveredCell?.name === record.name && hoveredCell?.hour === hour && <Button>add time</Button>
+        ) */
+          return (
+            <>
+              { record[hour][0]?.start === hour && record.name === record[hour][0]?.name ? (
+              <>hey</> 
+              ) : (
+                <DayCellShift 
                   display={hoveredCell?.name === record.name && hoveredCell?.hour === hour} 
-                  record={record}
-                  dayWeek={hour}
+                  record={record} 
+                  hour={hour}
                   day={selectedWeek.day(idx).date()}
-                  setHoveredCell={(values) => setHoveredCell({name: values.name, day: values.day})}
-              />) }
-              </>
-          ) */
+                  setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                />
+              )
+              }
+            </>
+          )
       },
     })),
   ]
