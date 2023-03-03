@@ -14,7 +14,7 @@ const getFilledHours = (end, start) => {
     return hoursDiff
 }
 
-const ShiftCard = ({record, hours, cardStyle, isHovering, handleClick, handleHoursChange, isCellFilled}) => {
+const ShiftCard = ({record, cardStyle}) => {
     return (
         <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
             <Card 
@@ -23,7 +23,7 @@ const ShiftCard = ({record, hours, cardStyle, isHovering, handleClick, handleHou
             >
                 <Row style={{ display: 'flex', height: '100%'}}>
                     <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-                        <Space style={{ gap: 2, alignItems: 'baseline' }}>
+                        <Space style={{ display: 'flex', columnGap: 2, alignItems: 'baseline' }}>
                             <Title level={1} style={{ margin: 0 }}>0</Title>
                             <Title level={4} type="secondary" style={{ margin: 0 }}>{`/ ${record?.drivers}`}</Title>
                         </Space>
@@ -59,7 +59,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
             console.log('here')
         }
     }) */
-    const floatingComponentHeight = hours * 57 + 47
+    const floatingComponentHeight = hours * 81 + 71
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
