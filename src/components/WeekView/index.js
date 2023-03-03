@@ -65,23 +65,28 @@ const WeekView = ({selectedWeek, data, days }) => {
           }
       },
       render: (text, record ) => {
-        console.log(record)
           return (
-              <>
-             { record[day][0]?.dayOfWeek === day && record.time === record[day][0]?.start ? (
-              <CellShift
-                  isCellFilled={record[day][0]?.dayOfWeek === day && record.time === record[day][0]?.start}
-                  record={record[day][0]}
-              />
-             ) : 
-              (<CellShift 
-                  display={hoveredCell?.time === record.time && hoveredCell?.day === day} 
-                  record={record}
-                  dayWeek={day}
-                  day={selectedWeek.day(idx).date()}
-                  setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
-              />) }
-              </>
+            <>
+                { record[day].length !== 0 ? (
+                    record[day].map((item, idx) => {
+                        return (
+                            <CellShift
+                                key={idx}
+                                isCellFilled={item.dayOfWeek === day && item.start === record.time}
+                                record={item}
+                            />
+                        )
+                    })
+                ) : (
+                    <CellShift 
+                        display={hoveredCell?.time === record.time && hoveredCell?.day === day} 
+                        record={record}
+                        dayWeek={day}
+                        day={selectedWeek.day(idx).date()}
+                        setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                    />
+                )}
+            </>
           )
       },
     })),
