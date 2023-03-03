@@ -14,6 +14,36 @@ const getFilledHours = (end, start) => {
     return hoursDiff
 }
 
+const ShiftCard = ({record, hours, cardStyle, isHovering, handleClick, handleHoursChange, isCellFilled}) => {
+    return (
+        <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
+            <Card 
+                style={cardStyle}
+                bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
+            >
+                <Row style={{ display: 'flex', height: '100%'}}>
+                    <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
+                        <Space style={{ gap: 2, alignItems: 'baseline' }}>
+                            <Title level={1} style={{ margin: 0 }}>0</Title>
+                            <Title level={4} type="secondary" style={{ margin: 0 }}>{`/ ${record?.drivers}`}</Title>
+                        </Space>
+                        <Space>
+                            <Text strong >{record?.start}</Text>
+                            <ArrowRightOutlined />
+                            <Text strong >{record?.end}</Text>
+                        </Space>
+                        <Space>
+                            <Tag color="cyan">0</Tag>
+                            <Tag color="magenta">0</Tag>
+                            <Tag color="gold">0</Tag>
+                        </Space>
+                    </Space>
+                </Row>
+            </Card>
+        </div>
+    )
+}
+
 const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     const { token } = useToken()
     const [hours, setHours] = useState(record.start ? getFilledHours(record.end, record.start) : 4);
@@ -78,75 +108,14 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
         <>
         <div className="container" style={{ minHeight: 24}}>
             { isCellFilled ? (
-                <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
-                    <Card 
-                        style={cardStyleConfig}
-                        bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
-                    >
-                        <Row style={{ display: 'flex', height: '100%'}}>
-                        <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
-                            <Title level={4} style={{ margin: 0, color: 'inherit' }}>{`0 / ${record?.drivers}`}</Title>
-                            <Space>
-                                <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
-                                <ArrowRightOutlined />
-                                <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
-                            </Space>
-                        </Space>
-                        </Row>
-                        <Row>
-                            <Space>
-                                <Tag color="cyan">0</Tag>
-                                <Tag color="magenta">0</Tag>
-                                <Tag color="gold">0</Tag>
-                            </Space>
-                        </Row>
-                    </Card>
-                </div>
+                <ShiftCard cardStyle={cardStyleConfig} record={record}/>
             ) : (
                     <>
             {/* <div className="clickable-div" style={{ width: '100%', height: 10, }} ></div> */}
             {display && <Button size="small" onClick={handleClick}>New Shift</Button>}
             {isHovering && (
                 <>
-                <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
-                    {/* <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid green", width: '50%' }}>
-                        <p>Shift</p>
-                        <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} />
-                    </div>
-                    <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid blue", width: '50%' }}>
-                        <p>Shift</p>
-                    </div> */}
-                    <Card 
-                        style={cardStyleConfig}
-                        bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
-                    >
-                        <Row style={{ display: 'flex', height: '100%'}}>
-                        <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
-                            <Title level={4} style={{ margin: 0, color: 'inherit' }}>{`0 / ${shift?.drivers}`}</Title>
-                            <Space>
-                                <Text strong style={{ color: 'inherit' }}>{shift?.start}</Text>
-                                <ArrowRightOutlined />
-                                <Text strong style={{ color: 'inherit' }}>{shift?.end}</Text>
-                            </Space>
-                        </Space>
-                        </Row>
-                        <Row>
-                            <Space>
-                                <Tag color="cyan">0</Tag>
-                                <Tag color="magenta">0</Tag>
-                                <Tag color="gold">0</Tag>
-                            </Space>
-                        </Row>
-                        {/* <Row>
-                            <Group>
-                                <Avatar src="https://joesch.moe/api/v1/random" />
-                                <Avatar style={{ backgroundColor: '#f56a00' }}>K</Avatar>
-                                <Avatar style={{ backgroundColor: '#87d068' }}>U</Avatar>
-                                <Avatar style={{ backgroundColor: '#1890ff', }}>A</Avatar>
-                            </Group>
-                        </Row> */}
-                    </Card>
-                </div>
+                    <ShiftCard cardStyle={cardStyleConfig} record={shift}/>
                 </>
             )}
             </>
@@ -218,3 +187,35 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
 }
 
 export default CellShift
+
+{/* <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
+        <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid green", width: '50%' }}>
+        <p>Shift</p>
+        <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} />
+    </div>
+    <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid blue", width: '50%' }}>
+        <p>Shift</p>
+    </div>
+    <Card 
+        style={cardStyleConfig} 
+        bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
+    >
+        <Row style={{ display: 'flex', height: '100%'}}>
+        <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
+            <Title level={4} style={{ margin: 0, color: 'inherit' }}>{`0 / ${shift?.drivers}`}</Title>
+            <Space>
+                <Text strong style={{ color: 'inherit' }}>{shift?.start}</Text>
+                <ArrowRightOutlined />
+                <Text strong style={{ color: 'inherit' }}>{shift?.end}</Text>
+            </Space>
+        </Space>
+        </Row>
+        <Row>
+            <Space>
+                <Tag color="cyan">0</Tag>
+                <Tag color="magenta">0</Tag>
+                <Tag color="gold">0</Tag>
+            </Space>
+        </Row>
+    </Card>
+</div> */}
