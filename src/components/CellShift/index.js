@@ -10,7 +10,7 @@ const { Text, Title } = Typography
 //const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 const getFilledHours = (end, start) => {
-    const hoursDiff = dayjs(end, 'HH:mm').diff(dayjs(start, 'HH:mm'), 'hour')
+    const hoursDiff = dayjs(end, 'HH:mm').diff(dayjs(start, 'HH:mm'), 'hour', true)
     return hoursDiff
 }
 
@@ -46,7 +46,11 @@ const ShiftCard = ({record, cardStyle}) => {
 
 const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     const { token } = useToken()
-    const [hours, setHours] = useState(record.start ? getFilledHours(record.end, record.start) : 4);
+    const [hours, setHours] = useState({
+        start: record.start,
+        end: record.end,
+        diff: record.start ? getFilledHours(record.end, record.start) : 4
+    });
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [shift, setShift] = useState({
@@ -54,12 +58,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
         start: record.start || '00:00',
         end: record.end || '00:00',
     })
-   /*  Object.entries(record).forEach(([key, value]) => {
-        if (daysOfWeek.includes(key) && value.day === day.toString()) {
-            console.log('here')
-        }
-    }) */
-    const floatingComponentHeight = hours * 81 + 71
+    
+    const floatingComponentHeight = hours.diff * 162 + 35.5 
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
@@ -80,14 +80,13 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     }
 
     const handleHoursChange = (time, timeString) => {
-        //console.log(timeString[0])
         setShift({
             ...shift,
             start: timeString[0],
             end: timeString[1],
         })
-        const hoursDiff = dayjs(timeString[1], 'HH:mm').diff(dayjs(timeString[0], 'HH:mm'), 'hour')
-        setHours(hoursDiff)
+        const hoursDiff = dayjs(timeString[1], 'HH:mm').diff(dayjs(timeString[0], 'HH:mm'), 'hour', true)
+        setHours({start: timeString[0], end: timeString[1], diff: hoursDiff})
         setHoveredCell({ time: timeString[0], day: day })
     }
 
@@ -106,31 +105,28 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
 
     return (
         <>
-        <div className="container" style={{ minHeight: 24}}>
-            { isCellFilled ? (
-                <ShiftCard cardStyle={cardStyleConfig} record={record}/>
-            ) : (
-                    <>
-            {/* <div className="clickable-div" style={{ width: '100%', height: 10, }} ></div> */}
-            {display && <Button size="small" onClick={handleClick}>New Shift</Button>}
-            {isHovering && (
+            <div className="container" style={{ minHeight: 24}}>
+                { isCellFilled ? (
+                    <ShiftCard cardStyle={cardStyleConfig} record={record}/>
+                ) : (
                 <>
-                    <ShiftCard cardStyle={cardStyleConfig} record={shift}/>
+                    {display && <Button size="small" onClick={handleClick}>New Shift</Button>}
+                        { isHovering && (
+                            <ShiftCard cardStyle={cardStyleConfig} record={shift}/>
+                        )}
                 </>
-            )}
-            </>
-            )}
-                </div>
+                )}
+            </div>
             <Modal title="New Shift" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
                 <Space direction="vertical" size={16}>
                     <Input.Group compact>
-                    {/* <DatePicker style={{ width: '30%' }} defaultValue={dayjs()} format="ddd D MMM" /> */}
                     <TimePicker.RangePicker 
                         style={{ width: '100%' }} 
                         format="HH:mm" 
                         defaultValue={[dayjs(record.time, 'HH:mm'), null]} 
                         disabled={[true, false]} 
-                        onChange={handleHoursChange} 
+                        onChange={handleHoursChange}
+                        minuteStep={30}
                         disabledTime={(current) => {
                             return {
                                 disabledHours: () => {

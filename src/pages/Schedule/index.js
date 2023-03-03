@@ -13,10 +13,13 @@ dayjs.extend(utc)
 const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
 const hours = [];
-for (let hour = 0; hour < 24; hour++) {
-  hours.push( dayjs().hour(hour).minute(0).format('HH:mm') );
+for (let hour = 0, minute = 0; hour < 24 && !(hour === 23 && minute === 30); minute += 30) {
+    if (minute === 60) {
+      hour += 1
+      minute = 0
+    }
+    hours.push( dayjs().hour(hour).minute(minute).format('HH:mm') )
 }
-
 const generateNames = (numNames) => {
     const names = [];
     for (let i = 0; i < numNames; i++) {
