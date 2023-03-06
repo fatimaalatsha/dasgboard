@@ -1,7 +1,22 @@
 import { useState } from 'react'
-import { Card, theme, Space, Row, Typography, Tag, Modal, Input, Button, TimePicker, Checkbox, Select } from 'antd'
-import { ArrowRightOutlined } from '@ant-design/icons'
+import { 
+    Card, 
+    theme, 
+    Space, 
+    Row, 
+    Typography, 
+    Tag, 
+    Modal, 
+    Input, 
+    Button, 
+    TimePicker, 
+    Checkbox, 
+    Select,
+} from 'antd'
+import { ArrowRightOutlined, UserOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
+import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
 
 const { useToken } = theme
 const { Text, Title } = Typography
@@ -58,8 +73,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
         start: record.start || '00:00',
         end: record.end || '00:00',
     })
-    
-    const floatingComponentHeight = hours.diff * 162 + 35.5 
+
+    const floatingComponentHeight = hours.diff * 81 - 10
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
@@ -117,67 +132,113 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                 </>
                 )}
             </div>
-            <Modal title="New Shift" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <Space direction="vertical" size={16}>
-                    <Input.Group compact>
-                    <TimePicker.RangePicker 
-                        style={{ width: '100%' }} 
-                        format="HH:mm" 
-                        defaultValue={[dayjs(record.time, 'HH:mm'), null]} 
-                        disabled={[true, false]} 
-                        onChange={handleHoursChange}
-                        minuteStep={30}
-                        disabledTime={(current) => {
-                            return {
-                                disabledHours: () => {
-                                    const hours = []
-                                    for (let i = 0; i < 24; i++) {
-                                        if (i < dayjs(record.time, 'HH:mm').hour()) {
-                                            hours.push(i)
+            <Formik
+                initialValues={{
+                    start: record.start || '00:00',
+                    end: record.end || '00:00',
+                    drivers: 10,
+                }}
+                onSubmit={(values, { setSubmitting }) => {
+                    console.log(values)
+                    setSubmitting(false)
+                    setIsModalOpen(false)
+                }}
+            >
+                {props => (
+                    <FormikForm>
+                        <Modal 
+                            title="New Shift" 
+                            open={isModalOpen} 
+                            onCancel={handleCancel}
+                            destroyOnClose
+                            footer={[
+                                <Button key="back" onClick={handleCancel}>
+                                    Cancel
+                                </Button>,
+                                <SubmitWrapper key="submit" type="primary">
+                                    Create Shift
+                                </SubmitWrapper>,
+                            ]}
+                        >
+                            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                <TimePicker.RangePicker 
+                                    name="end"
+                                    style={{ width: '100%' }} 
+                                    format="HH:mm" 
+                                    defaultValue={[dayjs(record.time, 'HH:mm'), null]} 
+                                    disabled={[true, false]} 
+                                    //onChange={handleHoursChange}
+                                    onChange={(time, timeString) => {
+                                        props.setFieldValue('start', timeString[0])
+                                        props.setFieldValue('end', timeString[1])
+                                        handleHoursChange(time, timeString)
+                                    }}
+                                    minuteStep={30}
+                                    disabledTime={(current) => {
+                                        return {
+                                            disabledHours: () => {
+                                                const hours = []
+                                                for (let i = 0; i < 24; i++) {
+                                                    if (i < dayjs(record.time, 'HH:mm').hour()) {
+                                                        hours.push(i)
+                                                    }
+                                                }
+                                                return hours
+                                            }
                                         }
-                                    }
-                                    return hours
-                                }
-                            }
-                        }}
-                    />
-                    </Input.Group>
-                    <Checkbox>All Day</Checkbox>
-                    <Select
-                        placeholder="Frequency"
-                        optionFilterProp="children"
-                        style={{ width: '100%' }}
-                        options={[
-                            { label: 'Does not repeat', value: 'Does not repeat' },
-                            { label: 'Daily', value: 'Daily' },
-                            { label: 'Weekly on Friday', value: 'Weekly on Friday' },
-                            { label: 'Montly on the second Friday', value: 'Montly on the second Friday' },
-                            { label: 'Annualy on February 24', value: 'Annualy on February 24' },
-                            { label: 'Every weekday (Mon to Fri)', value: 'Every weekday (Mon to Fri)' },
-                            { label: 'Custom...', value: 'Custom...' },
-                        ]}
-                    />
-                    <Select
-                        placeholder="City"
-                        optionFilterProp="children"
-                        style={{ width: '100%' }}
-                        options={[
-                            { label: 'Thunder Bay', value: 'Thunder Bay' },
-                            { label: 'Toronto', value: 'Toronto' },
-                        ]}
-                    />
-                    <Select
-                        placeholder="Drivers"
-                        optionFilterProp="children"
-                        style={{ width: '100%' }}
-                        options={[
-                            { label: 'Thunder Bay', value: 'Thunder Bay' },
-                            { label: 'Toronto', value: 'Toronto' },
-                        ]}
-                    />
-                    <Input placeholder="Driver Limit" type="number" min={10} max={50} defaultValue={shift?.drivers} onChange={(event) => {setShift({...shift, drivers: event.target.value})}} />
-                </Space>
-            </Modal>
+                                    }}
+                                />
+                                <Checkbox>All Day</Checkbox>
+                                <Select
+                                    placeholder="Frequency"
+                                    optionFilterProp="children"
+                                    style={{ width: '100%' }}
+                                    options={[
+                                        { label: 'Does not repeat', value: 'Does not repeat' },
+                                        { label: 'Daily', value: 'Daily' },
+                                        { label: 'Weekly on Friday', value: 'Weekly on Friday' },
+                                        { label: 'Montly on the second Friday', value: 'Montly on the second Friday' },
+                                        { label: 'Annualy on February 24', value: 'Annualy on February 24' },
+                                        { label: 'Every weekday (Mon to Fri)', value: 'Every weekday (Mon to Fri)' },
+                                        { label: 'Custom...', value: 'Custom...' },
+                                    ]}
+                                />
+                                <Select
+                                    placeholder="City"
+                                    optionFilterProp="children"
+                                    style={{ width: '100%' }}
+                                    options={[
+                                        { label: 'Thunder Bay', value: 'Thunder Bay' },
+                                        { label: 'Toronto', value: 'Toronto' },
+                                    ]}
+                                />
+                                <Select
+                                    placeholder="Drivers"
+                                    optionFilterProp="children"
+                                    style={{ width: '100%' }}
+                                    options={[
+                                        { label: 'Thunder Bay', value: 'Thunder Bay' },
+                                        { label: 'Toronto', value: 'Toronto' },
+                                    ]}
+                                />
+                                <Input 
+                                    name="drivers" 
+                                    prefix={<UserOutlined />} 
+                                    placeholder="Driver Limit" 
+                                    type="number" 
+                                    min={10} max={999} 
+                                    defaultValue={props.values.drivers} 
+                                    //onChange={(event) => {setShift({...shift, drivers: event.target.value})}} 
+                                    onChange={(e) => {
+                                        props.setFieldValue('drivers', e.target.value)
+                                        setShift({...shift, drivers: e.target.value})
+                                    }}
+                                />
+                            </Space>
+                        </Modal>
+                    </FormikForm>
+                )}
+            </Formik>
         </>
     )
 }
