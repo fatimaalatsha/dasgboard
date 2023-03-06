@@ -12,14 +12,25 @@ dayjs.extend(utc)
 
 const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
-const hours = [];
+/* const weekHours = [];
 for (let hour = 0, minute = 0; hour < 24 && !(hour === 23 && minute === 30); minute += 30) {
     if (minute === 60) {
       hour += 1
       minute = 0
     }
-    hours.push( dayjs().hour(hour).minute(minute).format('HH:mm') )
+    weekHours.push( dayjs().hour(hour).minute(minute).format('HH:mm') )
+} */
+
+const weekHours = [];
+for (let hour = 0; hour < 24 ; hour++) {
+    weekHours.push( dayjs().hour(hour).minute(0).format('HH:mm') )
+} 
+
+const dayHours = [];
+for (let hour = 0; hour < 24; hour++) {
+    dayHours.push( dayjs().hour(hour).minute(0).format('HH:mm') )
 }
+
 const generateNames = (numNames) => {
     const names = [];
     for (let i = 0; i < numNames; i++) {
@@ -41,7 +52,7 @@ const Schedule = () => {
         selectedTime: null,
         selectedDay: null,
     })
-    const [data, setData] = useState(hours.map((time) => ({
+    const [data, setData] = useState(weekHours.map((time) => ({
         key: time,
         time,
         monday: [],
@@ -54,7 +65,7 @@ const Schedule = () => {
         
     })))
     const [dayData, setDayData] = useState(namesArray.reduce((acc, name) => {
-        const timeObj = hours.reduce((obj, time) => {
+        const timeObj = dayHours.reduce((obj, time) => {
           obj[time] = time === '04:00' ? [{name: 'patient alpaca', day: '28', start: time, end: '03:00', drivers: 25}] : []
           return obj
         }, {})
@@ -68,7 +79,7 @@ const Schedule = () => {
         return acc
       }, []))
         
-    const [view, setView] = useState(1)
+    const [view, setView] = useState(0)
 
     const tabList = [
         {
@@ -105,7 +116,7 @@ const Schedule = () => {
     
     const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
         const newData = [...data]
-        const rowIndex = hours.indexOf(modal.selectedTime.start)
+        const rowIndex = weekHours.indexOf(modal.selectedTime.start)
         //const colIndex = days.indexOf(modal.selectedDay)
         newData[rowIndex][modal.selectedDay.dayOfWeek.toLowerCase()] = [{dayOfWeek: modal.selectedDay.dayOfWeek.toLowerCase(), day: modal.selectedDay.day, start: modal.selectedTime.start, end: modal.selectedTime.end, drivers: Number(modal.drivers)}]
         setData(newData)
@@ -161,7 +172,7 @@ const Schedule = () => {
                 </Space>
                 { view === 1 ? <WeekView selectedWeek={selectedWeek} data={data} days={days} />
                 : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedWeek={selectedWeek} data={dayData} hours={hours} />
+                : <DayView selectedWeek={selectedWeek} data={dayData} hours={dayHours} />
                 }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
