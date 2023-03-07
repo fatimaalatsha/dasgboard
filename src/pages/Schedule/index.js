@@ -7,6 +7,7 @@ import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 import WeekView from '../../components/WeekView'
 import DayView from '../../components/DayView'
 import generateName from '../../utils/name-creation'
+import { CitySelect } from '../../components/CitySelect'
 
 dayjs.extend(utc)
 
@@ -138,15 +139,7 @@ const Schedule = () => {
             >
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
                     <Space style={{ display: 'flex', width: '100%'}}>
-                        <Select
-                            placeholder="City"
-                            optionFilterProp="children"
-                            style={{ width: 150 }}
-                            options={[
-                                { label: 'Thunder Bay', value: 'Thunder Bay' },
-                                { label: 'Toronto', value: 'Toronto' },
-                            ]}
-                        />
+                        <CitySelect />
                         <Select
                             placeholder="Status"
                             optionFilterProp="children"
