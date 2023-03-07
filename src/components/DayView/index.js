@@ -45,7 +45,10 @@ const DayView = ({selectedWeek, data, hours }) => {
           return (
             <>
               { record[hour][0]?.start === hour && record.name === record[hour][0]?.name ? (
-              <>hey</> 
+              <DayCellShift 
+                isCellFilled={record[hour][0]?.start === hour && record.name === record[hour][0]?.name}
+                record={record[hour][0]}
+              /> 
               ) : (
                 <DayCellShift 
                   display={hoveredCell?.name === record.name && hoveredCell?.hour === hour} 
