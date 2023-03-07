@@ -18,15 +18,15 @@ import { ArrowRightOutlined, UserOutlined, MoreOutlined } from '@ant-design/icon
 import dayjs from 'dayjs'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import Yup for form validation
-import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
-import { CitySelect } from '../CitySelect'
+
 import { useFilterStore } from '../../store'
+
+import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
+import { CitySelect } from '../CitySelect' // Import CitySelect component
+import generateName from '../../utils/name-creation' // Dummy name array generator
 
 const { useToken } = theme
 const { Text, Title } = Typography
-//const { Group } = Avatar
-
-//const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 const getFilledHours = (end, start) => {
     const hoursDiff = dayjs(end, 'HH:mm').diff(dayjs(start, 'HH:mm'), 'hour', true)
@@ -55,6 +55,16 @@ const items = [
         label: 'Delete',
     },
 ]
+
+const generateNames = (numNames) => {
+    const names = [];
+    for (let i = 0; i < numNames; i++) {
+      names.push(generateName());
+    }
+    return names;
+  }
+  
+const namesArray = generateNames(30)
 
 const ShiftCard = ({record, cardStyle}) => {
     return (
@@ -97,6 +107,8 @@ const ShiftCard = ({record, cardStyle}) => {
 
 const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+    const [selectedItems, setSelectedItems] = useState([]) // State to hold selected options
+    const filteredOptions = namesArray.filter((o) => !selectedItems.includes(o)) // Options to show in the dropdown
     const { token } = useToken()
     const [hours, setHours] = useState({
         start: record.start,
@@ -174,6 +186,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                     start: record.start || '00:00',
                     end: '',
                     drivers: 10,
+                    city: scheduleFilter.city,
                 }}
                 validationSchema={shiftSchema}
                 onSubmit={(values, { setSubmitting }) => {
@@ -227,33 +240,23 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                     }}
                                 />
                                 <Checkbox>All Day</Checkbox>
-                                <Select
-                                    placeholder="Frequency"
-                                    optionFilterProp="children"
-                                    style={{ width: '100%' }}
-                                    options={[
-                                        { label: 'Does not repeat', value: 'Does not repeat' },
-                                        { label: 'Daily', value: 'Daily' },
-                                        { label: 'Weekly on Friday', value: 'Weekly on Friday' },
-                                        { label: 'Montly on the second Friday', value: 'Montly on the second Friday' },
-                                        { label: 'Annualy on February 24', value: 'Annualy on February 24' },
-                                        { label: 'Every weekday (Mon to Fri)', value: 'Every weekday (Mon to Fri)' },
-                                        { label: 'Custom...', value: 'Custom...' },
-                                    ]}
-                                />
                                 <CitySelect 
                                     defaultValue={scheduleFilter.city}    
                                     style={{ width: '100%' }}
                                     disabled
                                 />
                                 <Select
-                                    placeholder="Drivers"
-                                    optionFilterProp="children"
-                                    style={{ width: '100%' }}
-                                    options={[
-                                        { label: 'Thunder Bay', value: 'Thunder Bay' },
-                                        { label: 'Toronto', value: 'Toronto' },
-                                    ]}
+                                  mode="multiple"
+                                  placeholder="Drivers"
+                                  value={selectedItems}
+                                  onChange={setSelectedItems}
+                                  style={{
+                                    width: '100%',
+                                  }}
+                                  options={filteredOptions.map((item) => ({
+                                    value: item,
+                                    label: item,
+                                  }))}
                                 />
                                 <Input 
                                     name="drivers" 
