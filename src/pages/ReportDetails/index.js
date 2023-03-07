@@ -10,8 +10,7 @@ import { EditOutlined } from '@ant-design/icons';
 const { Title } = Typography;
 
 const DriversStatusPerCity= (dateFrom) => {
-  console.log(dateFrom);
-  const [chartType, setChartType] = useState('bar');
+ const [chartType, setChartType] = useState('bar');
 
   const getUserParams = () => {
     const { date_from, date_to } = dateFrom;
@@ -28,34 +27,8 @@ const DriversStatusPerCity= (dateFrom) => {
     `/v1/reports/conversion-rates?${getUserParams()}`
   );
 
-  console.log(data);
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
-
-  const mapDataToObjects = (data) => {
-    const { items } = data;
-    const mappedData = [];
-
-    for (const cityObj of Object.values(items)) {
-      if (typeof cityObj === 'object' && cityObj.data) {
-        for (const dataObj of cityObj.data) {
-          mappedData.push({
-            status: dataObj.status,
-            city: cityObj.city,
-            count: dataObj.count,
-          });
-        }
-      } else {
-        mappedData.push({
-          status: cityObj.status,
-          city: items.city,
-          count: cityObj.count,
-        });
-      }
-    }
-    return mappedData;
-  };
-
   return (
     <>
       <Card>
@@ -91,10 +64,10 @@ const DriversStatusPerCity= (dateFrom) => {
         style={{ width: '100%' }}>
         {chartType === 'bar' && (
         <Bar
-          data={mapDataToObjects(data)}
-          xField="count"
+          data={data.items}
+          xField="total"
           yField="city"
-          seriesField="status"
+          seriesField="active"
           conversionTag={{
             offsetX: 10,
             offsetY: -10,
@@ -111,9 +84,9 @@ const DriversStatusPerCity= (dateFrom) => {
           label={{
             position: 'middle',
             content: (item) => {
-              return item.count;
+              return item.total;
 
-  // const percent = ((item.count / item.data.total) * 100).toFixed(2);
+  // const percent = ((item.total / item.data.total) * 100).toFixed(2);
   //   return `${percent}%`;
             },
             style: {
@@ -135,13 +108,13 @@ const DriversStatusPerCity= (dateFrom) => {
             showMarkers: false,
           }}
           meta={{
-            count: {
+            total: {
               alias: 'Number of Leads',
             },
             city: {
               alias: 'City',
             },
-            status: {
+            active: {
               alias: 'Status',
             },
           }}
@@ -172,15 +145,15 @@ const DriversStatusPerCity= (dateFrom) => {
         )}
         {chartType === 'column' && (
            <Column
-            data={mapDataToObjects(data)}
+            data={data.items}
             xField="city"
-            yField="count"
-            seriesField="status"
+            yField="total"
+            seriesField="active"
             isStack={true}
             label={{
               position: 'middle',
               content: (item) => {
-                return item.count;
+                return item.total;
               },
               style: {
                 fill: '#fff',
@@ -197,13 +170,13 @@ const DriversStatusPerCity= (dateFrom) => {
               showMarkers: false,
             }}
             meta={{
-              count: {
+              total: {
                 alias: 'Number of Leads',
               },
               city: {
                 alias: 'City',
               },
-              status: {
+              active: {
                 alias: 'Status',
               },
             }}
@@ -243,15 +216,15 @@ const DriversStatusPerCity= (dateFrom) => {
           )}
           {chartType === 'pie' && (
             <Pie
-              data={mapDataToObjects(data)}
-              angleField="count"
+              data={data.items}
+              angleField="total"
               colorField="city"
               radius={1.0}
               label={{
                 type: 'outer',
                 offset: 60,
                 content: (item) => {
-                  return `${item.city}: ${item.count} Leads`;
+                  return `${item.city}: ${item.total} Leads`;
                 },
                 style: {
                   textAlign: 'center',
@@ -266,13 +239,13 @@ const DriversStatusPerCity= (dateFrom) => {
                 showMarkers: false,
               }}
               meta={{
-                count: {
+                total: {
                   alias: 'Number of Leads',
                 },
                 city: {
                   alias: 'City',
                 },
-                status: {
+                active: {
                   alias: 'Status',
                 },
               }}

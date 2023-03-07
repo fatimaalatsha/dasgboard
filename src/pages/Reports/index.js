@@ -1,4 +1,4 @@
-import { Card, Space, Table, Typography } from 'antd';
+import { Card, Table, Typography } from 'antd';
 import { AreaChartOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 

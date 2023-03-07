@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Typography, Card, Space, DatePicker, Button, Tooltip } from 'antd';
+import { Typography, Card, Space, DatePicker, Button, Tooltip, Result } from 'antd';
 import { Bar , Column, Pie} from '@ant-design/plots';
 import useFetch from '../../hooks/use-fetch';
 import qs from 'qs';
@@ -7,7 +7,7 @@ import dayjs from 'dayjs';
 
 import { EditOutlined } from '@ant-design/icons';
 
-const { Title } = Typography;
+const { Title, Text} = Typography;
 
 const NumberOfLead = (dateFrom) => {
   console.log(dateFrom);
@@ -28,14 +28,12 @@ const NumberOfLead = (dateFrom) => {
     `/v1/reports/drivers-status?${getUserParams()}`
   );
 
-  console.log(data);
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
 
   const mapDataToObjects = (data) => {
     const { items } = data;
     const mappedData = [];
-
     for (const cityObj of Object.values(items)) {
       if (typeof cityObj === 'object' && cityObj.data) {
         for (const dataObj of cityObj.data) {
@@ -55,11 +53,37 @@ const NumberOfLead = (dateFrom) => {
     }
     return mappedData;
   };
+ 
+  if (data.total_items === 0) {
+    return (
+      <Card
+      title={
+          <Space direction="vertical" size="large">
+            <Title level={3}>Number of Leads By Application</Title>
+          </Space>
+            }
+      >
+        <Result
+          status="warning"
+          title="No data found for the selected date range"
 
+          extra={
+          <Text type="warning">
+             Select another date range.
+            </Text >
+           }
+        />
+      </Card>
+    )
+  }
   return (
     <>
-      <Card>
-        <Title level={3}>Conversion Rates Per City</Title>
+      <Card
+        title={
+          <Space direction="vertical" size="large">
+            <Title level={3}>Number of Leads By Application</Title>
+          </Space>
+            }>
         <Space direction='horizontal' size="large" >
           <Button
             type="primary"
@@ -324,24 +348,16 @@ const NumberOfLeads = () => {
     );
   };
 
-  
-  
-  const handleDatePick = () => {
-    // setPickStats(true);
-    setShowReport(true);
-  };
 
   return (
     <>
     <Space align="start" direction="horizontal">
       <DatePicker.RangePicker
-        // autoFocus={isEnable}
         open={isEnable}
         allowClear={true}
         inputReadOnly={true}
         size="small"
         showToday={false}
-        // format={dateFormat}
         bordered={true}
         onChange={(dates) => {
           setDate({
@@ -368,7 +384,7 @@ const NumberOfLeads = () => {
               type="primary"
               onClick={() => {
                 setIsEnable(false);
-                handleDatePick();
+                setShowReport(true);
               }}
             >
               OK
