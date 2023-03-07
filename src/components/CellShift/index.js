@@ -143,7 +143,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
         showModal()
     }
 
-    const handleHoursChange = (time, timeString) => {
+    const handleHoursChange = (timeString) => {
         setShift({
             ...shift,
             start: timeString[0],
@@ -184,7 +184,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
             <Formik
                 initialValues={{
                     start: record.start || '00:00',
-                    end: '',
+                    end: null,
                     drivers: 10,
                     city: scheduleFilter.city,
                 }}
@@ -216,13 +216,13 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                     name="end"
                                     style={{ width: '100%' }} 
                                     format="HH:mm" 
-                                    defaultValue={[dayjs(record.time, 'HH:mm'), null]} 
+                                    defaultValue={[dayjs(props.values.start, 'HH:mm'), props.values.end ? dayjs(props.values.end, 'HH:mm') : null]} 
                                     disabled={[true, false]} 
                                     //onChange={handleHoursChange}
                                     onChange={(time, timeString) => {
                                         props.setFieldValue('start', timeString[0])
                                         props.setFieldValue('end', timeString[1])
-                                        handleHoursChange(time, timeString)
+                                        handleHoursChange(timeString)
                                     }}
                                     minuteStep={30}
                                     disabledTime={(current) => {
@@ -239,7 +239,15 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                         }
                                     }}
                                 />
-                                <Checkbox>All Day</Checkbox>
+                                <Checkbox 
+                                    onChange={() => {
+                                        props.setFieldValue('start', '00:00')
+                                        props.setFieldValue('end', '23:59')
+                                        handleHoursChange(['00:00', '23:59'])
+                                    }}
+                                >
+                                    All Day
+                                </Checkbox>
                                 <CitySelect 
                                     defaultValue={scheduleFilter.city}    
                                     style={{ width: '100%' }}
