@@ -1,6 +1,20 @@
 import { useState } from 'react'
-import { Card, theme, Space, Row, Typography, Tag, Modal, Input, Button, TimePicker, Checkbox, Select } from 'antd'
-import { ArrowRightOutlined } from '@ant-design/icons'
+import { 
+    Card, 
+    theme, 
+    Space, 
+    Row, 
+    Typography, 
+    Modal, 
+    Input, 
+    Button, 
+    TimePicker, 
+    Checkbox, 
+    Select, 
+    Tooltip, 
+    Dropdown 
+} from 'antd'
+import { ArrowRightOutlined, PlusOutlined, MoreOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 
 const { useToken } = theme
@@ -10,8 +24,59 @@ const { Text, Title } = Typography
 //const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 const getFilledHours = (end, start) => {
-    const hoursDiff = dayjs(end, 'HH:mm').diff(dayjs(start, 'HH:mm'), 'hour')
+    const hoursDiff = dayjs(end, 'HH:mm').diff(dayjs(start, 'HH:mm'), 'hour', true)
     return hoursDiff
+}
+
+const items = [
+    {
+        key: 1,
+        label: 'No Show',
+    },
+    {
+        key: 2,
+        label: 'Early In',
+    },
+    {
+        key: 3,
+        label: 'Early Out',
+    },
+    {
+        key: 4,
+        label: 'Late Out',
+    },
+    {
+        key: 5,
+        label: 'Edit',
+    }
+]
+
+const ShiftCard = ({ record, cardStyle }) => {
+    return (
+        <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
+            <Card 
+                style={cardStyle}
+                bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 4 }}
+            >
+                <Row style={{ display: 'flex', height: '100%'}}>
+                <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
+                    <Space>
+                        <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
+                        <ArrowRightOutlined />
+                        <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
+                    </Space>
+                    <Dropdown menu={{items}} >
+                        <a onClick={(e) => e.preventDefault()}>
+                        <Space>
+                            <MoreOutlined />
+                        </Space>
+                        </a>
+                    </Dropdown>
+                </Space>
+                </Row>
+            </Card>
+        </div>
+    )
 }
 
 const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}) => {
@@ -25,7 +90,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
         end: record.end || '00:00',
     })
 //console.log(hour)
-    const floatingComponentWidth = hours * 60.45 + 55.45
+    const floatingComponentWidth = hours * 60.45 - 5
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
@@ -44,7 +109,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
             start: timeString[0],
             end: timeString[1],
         })
-        const hoursDiff = dayjs(timeString[1], 'HH:mm').diff(dayjs(timeString[0], 'HH:mm'), 'hour')
+        const hoursDiff = dayjs(timeString[1], 'HH:mm').diff(dayjs(timeString[0], 'HH:mm'), 'hour', true)
         setHours(hoursDiff)
         setHoveredCell({ time: timeString[0], day: day })
     }
@@ -66,49 +131,16 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
         <>
         <div className="container" style={{ minHeight: 24}}>
             { isCellFilled ? (
-                <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
-                    <Card 
-                        style={cardStyleConfig}
-                        bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 4 }}
-                    >
-                        <Row style={{ display: 'flex', height: '100%'}}>
-                        <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
-                            <Space>
-                                <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
-                                <ArrowRightOutlined />
-                                <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
-                            </Space>
-                        </Space>
-                        </Row>
-                        <Row>
-                            <Space>
-                                <Tag color="cyan">0</Tag>
-                                <Tag color="magenta">0</Tag>
-                                <Tag color="gold">0</Tag>
-                            </Space>
-                        </Row>
-                    </Card>
-                </div>
+                    <ShiftCard cardStyle={cardStyleConfig} record={record}/>
             ) : (
             <>
-                {display && <Button size="small" onClick={handleClick}>New Shift</Button>}
-                {isHovering && (
-                    <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
-                        <Card 
-                            style={cardStyleConfig}
-                            bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 4 }}
-                        >
-                            <Row style={{ display: 'flex', height: '100%'}}>
-                            <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-start' }}>
-                                <Space>
-                                    <Text strong style={{ color: 'inherit' }}>{shift?.start}</Text>
-                                    <ArrowRightOutlined />
-                                    <Text strong style={{ color: 'inherit' }}>{shift?.end}</Text>
-                                </Space>
-                            </Space>
-                            </Row>
-                        </Card>
-                    </div>
+                { display && (
+                    <Tooltip title="Add shift">
+                        <Button size="small" style={{ fontSize: 8 }} onClick={handleClick} icon={<PlusOutlined />} />
+                    </Tooltip>
+                )}
+                { isHovering && (
+                    <ShiftCard cardStyle={cardStyleConfig} record={shift}/>
                 )}
             </>
             )}

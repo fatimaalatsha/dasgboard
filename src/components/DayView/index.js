@@ -1,12 +1,10 @@
 import { useState } from 'react' // Import React hooks
-import { Table, Space, Typography, Button } from 'antd' // Import Ant components
-import { geekblue } from '@ant-design/colors' // Import Ant colors
-import dayjs from 'dayjs' // Import dayjs
+import { Table, Typography } from 'antd' // Import Ant components
 
 import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import DayCellShift from '../DayCellShift' // Import CellShift component
 
-const { Text, Title } = Typography
+const { Text } = Typography
 
 const DayView = ({selectedWeek, data, hours }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
@@ -45,7 +43,10 @@ const DayView = ({selectedWeek, data, hours }) => {
           return (
             <>
               { record[hour][0]?.start === hour && record.name === record[hour][0]?.name ? (
-              <>hey</> 
+              <DayCellShift 
+                isCellFilled={record[hour][0]?.start === hour && record.name === record[hour][0]?.name}
+                record={record[hour][0]}
+              /> 
               ) : (
                 <DayCellShift 
                   display={hoveredCell?.name === record.name && hoveredCell?.hour === hour} 

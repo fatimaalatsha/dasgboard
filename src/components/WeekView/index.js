@@ -1,15 +1,19 @@
 import { useState } from 'react' // Import React hooks
-import { Table, Space, Typography } from 'antd' // Import Ant components
+import { Table, Space, Typography, Result } from 'antd' // Import Ant components
 import { geekblue } from '@ant-design/colors' // Import Ant colors
 import dayjs from 'dayjs' // Import dayjs
 
 import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import CellShift from '../CellShift' // Import CellShift component
+import { CitySelect } from '../CitySelect'
+import { useFilterStore } from '../../store'
 
 const { Text, Title } = Typography
 
 const WeekView = ({selectedWeek, data, days }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
+  const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+  const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
 
   const columns = [
     {
@@ -65,39 +69,73 @@ const WeekView = ({selectedWeek, data, days }) => {
           }
       },
       render: (text, record ) => {
-        console.log(record)
+        //console.log(record[day])
+        let content = null
           return (
-              <>
-             { record[day][0]?.dayOfWeek === day && record.time === record[day][0]?.start ? (
-              <CellShift
-                  isCellFilled={record[day][0]?.dayOfWeek === day && record.time === record[day][0]?.start}
-                  record={record[day][0]}
-              />
-             ) : 
-              (<CellShift 
-                  display={hoveredCell?.time === record.time && hoveredCell?.day === day} 
-                  record={record}
-                  dayWeek={day}
-                  day={selectedWeek.day(idx).date()}
-                  setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
-              />) }
-              </>
+            <>
+                { record[day].length !== 0  ? (
+                    record[day].map((item, idx) => {
+                        item.dayOfWeek === day && item.start === record.time 
+                        ?
+                         content = <CellShift
+                                        key={idx}
+                                        isCellFilled={item.dayOfWeek === day && item.start === record.time}
+                                        record={item}
+                                    />
+                        : 
+                        content =  <CellShift 
+                                        key={idx}
+                                        display={hoveredCell?.time === record.time && hoveredCell?.day === day} 
+                                        record={record}
+                                        dayWeek={day}
+                                        day={selectedWeek.day(idx).date()}
+                                        setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                                    />
+                        return content
+                    })
+                ) : (
+                     <CellShift 
+                        display={hoveredCell?.time === record.time && hoveredCell?.day === day} 
+                        record={record}
+                        dayWeek={day}
+                        day={selectedWeek.day(idx).date()}
+                        setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                    />
+                )}
+            </>
           )
       },
     })),
   ]
 
   return (
-    <div style={{ position: 'relative'}}>
-      <Table 
-          columns={columns}
-          dataSource={data}
-          pagination={false}
-          className="schedule-week-table"
-          bordered
-      />
-      <CurrentTimeLine />
-    </div>
+    <>
+      { scheduleFilter.city ? 
+        <div style={{ position: 'relative'}}>
+            <Table 
+                columns={columns}
+                dataSource={data}
+                pagination={false}
+                className="schedule-week-table"
+                bordered
+            />
+            <CurrentTimeLine />
+        </div>
+        :
+        <Result
+            status="error"
+            title="You have not selected a city"
+            subTitle="Please select a city to view the schedule"
+            extra={
+                <CitySelect 
+                    defaultValue={scheduleFilter.city} 
+                    onChange={value => setScheduleFilter({city: value})} 
+                    style={{ width: 200 }}
+                />
+            }
+        />
+    }
+    </>
   )
 }
 

@@ -7,14 +7,30 @@ import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 import WeekView from '../../components/WeekView'
 import DayView from '../../components/DayView'
 import generateName from '../../utils/name-creation'
+import { CitySelect } from '../../components/CitySelect'
+import { useFilterStore } from '../../store'
 
 dayjs.extend(utc)
 
 const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
-const hours = [];
+/* const weekHours = [];
+for (let hour = 0, minute = 0; hour < 24 && !(hour === 23 && minute === 30); minute += 30) {
+    if (minute === 60) {
+      hour += 1
+      minute = 0
+    }
+    weekHours.push( dayjs().hour(hour).minute(minute).format('HH:mm') )
+} */
+
+const weekHours = [];
+for (let hour = 0; hour < 24 ; hour++) {
+    weekHours.push( dayjs().hour(hour).minute(0).format('HH:mm') )
+} 
+
+const dayHours = [];
 for (let hour = 0; hour < 24; hour++) {
-  hours.push( dayjs().hour(hour).minute(0).format('HH:mm') );
+    dayHours.push( dayjs().hour(hour).minute(0).format('HH:mm') )
 }
 
 const generateNames = (numNames) => {
@@ -30,6 +46,8 @@ namesArray.push('patient alpaca')
 
 const Schedule = () => {
     //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
+    const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+    const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
     const [selectedWeek, setSelectedWeek] = useState(dayjs().startOf('week')) // Create state to store the selected week's date
     const [names, setNames] = useState(generateName())
     const [modal, setModal] = useState({ // Create state to store the modal
@@ -38,12 +56,12 @@ const Schedule = () => {
         selectedTime: null,
         selectedDay: null,
     })
-    const [data, setData] = useState(hours.map((time) => ({
+    const [data, setData] = useState(weekHours.map((time) => ({
         key: time,
         time,
         monday: [],
-        tuesday: [{dayOfWeek: 'tuesday', day: '28', start: '00:00', end: '03:00', drivers: 25}],
-        wednesday: [],
+        tuesday: [{dayOfWeek: 'tuesday', day: '28', start: '00:00', end: '03:00', drivers: 25}, {dayOfWeek: 'tuesday', day: '28', start: '04:00', end: '12:00', drivers: 25}],
+        wednesday: [{dayOfWeek: 'wednesday', day: '28', start: '00:00', end: '06:00', drivers: 25}],
         thursday: [],
         friday: [],
         saturday: [],
@@ -51,8 +69,8 @@ const Schedule = () => {
         
     })))
     const [dayData, setDayData] = useState(namesArray.reduce((acc, name) => {
-        const timeObj = hours.reduce((obj, time) => {
-          obj[time] = time === '04:00' ? [{name: 'patient alpaca', day: '28', start: time, end: '03:00', drivers: 25}] : []
+        const timeObj = dayHours.reduce((obj, time) => {
+          obj[time] = time === '04:00' ? [{name: 'patient alpaca', day: '28', start: time, end: '12:00', drivers: 25}] : []
           return obj
         }, {})
       
@@ -65,7 +83,7 @@ const Schedule = () => {
         return acc
       }, []))
         
-    const [view, setView] = useState(0)
+    const [view, setView] = useState(1)
 
     const tabList = [
         {
@@ -102,7 +120,7 @@ const Schedule = () => {
     
     const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
         const newData = [...data]
-        const rowIndex = hours.indexOf(modal.selectedTime.start)
+        const rowIndex = weekHours.indexOf(modal.selectedTime.start)
         //const colIndex = days.indexOf(modal.selectedDay)
         newData[rowIndex][modal.selectedDay.dayOfWeek.toLowerCase()] = [{dayOfWeek: modal.selectedDay.dayOfWeek.toLowerCase(), day: modal.selectedDay.day, start: modal.selectedTime.start, end: modal.selectedTime.end, drivers: Number(modal.drivers)}]
         setData(newData)
@@ -124,14 +142,10 @@ const Schedule = () => {
             >
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
                     <Space style={{ display: 'flex', width: '100%'}}>
-                        <Select
-                            placeholder="City"
-                            optionFilterProp="children"
-                            style={{ width: 150 }}
-                            options={[
-                                { label: 'Thunder Bay', value: 'Thunder Bay' },
-                                { label: 'Toronto', value: 'Toronto' },
-                            ]}
+                        <CitySelect 
+                            defaultValue={scheduleFilter.city} 
+                            onChange={value => setScheduleFilter({city: value})}   
+                            style={{ width: 200 }}
                         />
                         <Select
                             placeholder="Status"
@@ -158,7 +172,7 @@ const Schedule = () => {
                 </Space>
                 { view === 1 ? <WeekView selectedWeek={selectedWeek} data={data} days={days} />
                 : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedWeek={selectedWeek} data={dayData} hours={hours} />
+                : <DayView selectedWeek={selectedWeek} data={dayData} hours={dayHours} />
                 }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
