@@ -19,6 +19,8 @@ import dayjs from 'dayjs'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import Yup for form validation
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
+import { CitySelect } from '../CitySelect'
+import { useFilterStore } from '../../store'
 
 const { useToken } = theme
 const { Text, Title } = Typography
@@ -35,6 +37,7 @@ const shiftSchema = object().shape({
     drivers: number().required('Required'),
     start: string().required('Required'),
     end: string().required('Required'),
+    city: number().required('Required'),
 })
 
 const items = [
@@ -93,6 +96,7 @@ const ShiftCard = ({record, cardStyle}) => {
 }
 
 const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
+    const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const { token } = useToken()
     const [hours, setHours] = useState({
         start: record.start,
@@ -237,14 +241,10 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                         { label: 'Custom...', value: 'Custom...' },
                                     ]}
                                 />
-                                <Select
-                                    placeholder="City"
-                                    optionFilterProp="children"
+                                <CitySelect 
+                                    defaultValue={scheduleFilter.city}    
                                     style={{ width: '100%' }}
-                                    options={[
-                                        { label: 'Thunder Bay', value: 'Thunder Bay' },
-                                        { label: 'Toronto', value: 'Toronto' },
-                                    ]}
+                                    disabled
                                 />
                                 <Select
                                     placeholder="Drivers"
