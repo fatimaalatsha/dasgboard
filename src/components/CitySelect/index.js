@@ -1,7 +1,8 @@
-import { Select } from 'antd';
-import useFetch from '../../hooks/use-fetch';
+import { forwardRef } from 'react'
+import { Select } from 'antd'
+import useFetch from '../../hooks/use-fetch'
 
-const CitySelect = () => {
+const CitySelect = forwardRef((props, ref) => {
     const { data, error, isLoading } = useFetch('/v1/cities')
 
     const cities = data?.items?.map((city) => {
@@ -10,18 +11,22 @@ const CitySelect = () => {
         return city 
     })
 
+    const selectConfig = {
+        placeholder: "City",
+        optionFilterProp: "children",
+        style: { width: 150 },
+        options: cities,
+        ref,
+        ...props
+    }
+
     isLoading && <>Loading...</>
 
     error && <>Something went wrong!</>
     
     return ( 
-        <Select
-            placeholder="City"
-            optionFilterProp="children"
-            style={{ width: 150 }}
-            options={cities}
-        />
+        <Select {...selectConfig} />
     )
-}
+})
 
 export { CitySelect }

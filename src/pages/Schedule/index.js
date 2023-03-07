@@ -8,6 +8,7 @@ import WeekView from '../../components/WeekView'
 import DayView from '../../components/DayView'
 import generateName from '../../utils/name-creation'
 import { CitySelect } from '../../components/CitySelect'
+import { useFilterStore } from '../../store'
 
 dayjs.extend(utc)
 
@@ -45,6 +46,8 @@ namesArray.push('patient alpaca')
 
 const Schedule = () => {
     //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
+    const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+    const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
     const [selectedWeek, setSelectedWeek] = useState(dayjs().startOf('week')) // Create state to store the selected week's date
     const [names, setNames] = useState(generateName())
     const [modal, setModal] = useState({ // Create state to store the modal
@@ -139,7 +142,11 @@ const Schedule = () => {
             >
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
                     <Space style={{ display: 'flex', width: '100%'}}>
-                        <CitySelect />
+                        <CitySelect 
+                            defaultValue={scheduleFilter.city} 
+                            onChange={value => setScheduleFilter({city: value})}   
+                            style={{ width: 200 }}
+                        />
                         <Select
                             placeholder="Status"
                             optionFilterProp="children"
