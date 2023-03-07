@@ -12,10 +12,12 @@ import {
     TimePicker, 
     Checkbox, 
     Select,
+    Dropdown 
 } from 'antd'
-import { ArrowRightOutlined, UserOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined, UserOutlined, MoreOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
+import { object, string, number } from 'yup' // Import Yup for form validation
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
 
 const { useToken } = theme
@@ -29,6 +31,28 @@ const getFilledHours = (end, start) => {
     return hoursDiff
 }
 
+const shiftSchema = object().shape({
+    drivers: number().required('Required'),
+    start: string().required('Required'),
+    end: string().required('Required'),
+})
+
+const items = [
+    {
+        key: 1,
+        label: 'Edit',
+    },
+    {
+        key: 2,
+        label: 'Send to Draft',
+    },
+    {
+        key: 3,
+        danger: true,
+        label: 'Delete',
+    },
+]
+
 const ShiftCard = ({record, cardStyle}) => {
     return (
         <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
@@ -36,6 +60,15 @@ const ShiftCard = ({record, cardStyle}) => {
                 style={cardStyle}
                 bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
             >
+                <Row justify="end">
+                    <Dropdown menu={{items}} >
+                        <a onClick={(e) => e.preventDefault()}>
+                        <Space>
+                            <MoreOutlined />
+                        </Space>
+                        </a>
+                    </Dropdown>
+                </Row>
                 <Row style={{ display: 'flex', height: '100%'}}>
                     <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
                         <Space style={{ display: 'flex', columnGap: 2, alignItems: 'baseline' }}>
@@ -135,9 +168,10 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
             <Formik
                 initialValues={{
                     start: record.start || '00:00',
-                    end: record.end || '00:00',
+                    end: '',
                     drivers: 10,
                 }}
+                validationSchema={shiftSchema}
                 onSubmit={(values, { setSubmitting }) => {
                     console.log(values)
                     setSubmitting(false)

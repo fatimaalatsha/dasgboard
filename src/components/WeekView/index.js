@@ -69,17 +69,17 @@ const WeekView = ({selectedWeek, data, days }) => {
         let content = null
           return (
             <>
-                { record[day].length !== 0 ? (
+                { record[day].length !== 0  ? (
                     record[day].map((item, idx) => {
                         item.dayOfWeek === day && item.start === record.time 
-                        ? 
-                        content =   <CellShift
+                        ?
+                         content = <CellShift
                                         key={idx}
                                         isCellFilled={item.dayOfWeek === day && item.start === record.time}
                                         record={item}
                                     />
                         : 
-                        content = <CellShift 
+                        content =  <CellShift 
                                         key={idx}
                                         display={hoveredCell?.time === record.time && hoveredCell?.day === day} 
                                         record={record}

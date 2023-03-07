@@ -56,8 +56,8 @@ const Schedule = () => {
         key: time,
         time,
         monday: [],
-        tuesday: [{dayOfWeek: 'tuesday', day: '28', start: '00:00', end: '03:00', drivers: 25}, {dayOfWeek: 'tuesday', day: '28', start: '04:00', end: '06:00', drivers: 25}],
-        wednesday: [{dayOfWeek: 'wednesday', day: '28', start: '00:00', end: '03:00', drivers: 25}],
+        tuesday: [{dayOfWeek: 'tuesday', day: '28', start: '00:00', end: '03:00', drivers: 25}, {dayOfWeek: 'tuesday', day: '28', start: '04:00', end: '12:00', drivers: 25}],
+        wednesday: [{dayOfWeek: 'wednesday', day: '28', start: '00:00', end: '06:00', drivers: 25}],
         thursday: [],
         friday: [],
         saturday: [],
@@ -79,7 +79,7 @@ const Schedule = () => {
         return acc
       }, []))
         
-    const [view, setView] = useState(0)
+    const [view, setView] = useState(1)
 
     const tabList = [
         {
