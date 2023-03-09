@@ -1,12 +1,15 @@
 import { useState } from 'react';
-import { Typography, Card, Space, DatePicker, Button, Tooltip, Result } from 'antd';
-import { Bar , Column, Pie} from '@ant-design/plots';
+import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Statistic } from 'antd';
 import useFetch from '../../hooks/use-fetch';
 import qs from 'qs';
 import dayjs from 'dayjs';
 
-import { EditOutlined } from '@ant-design/icons';
-
+import { EditOutlined, BarChartOutlined } from '@ant-design/icons';
+import ChartBar from '../../components/ChartBar';
+import ChartColumn from '../../components/ChartColumn';
+import ChartPie from '../../components/ChartPie';
+import CardStatistic from '../../components/CardStatistic';
+import ChartLine from '../../components/ChartLine';
 const { Title, Text} = Typography;
 
 const NumberOfLead = (dateFrom) => {
@@ -27,13 +30,38 @@ const NumberOfLead = (dateFrom) => {
   const { data, error, isLoading } = useFetch(
     `/v1/reports/drivers-status?${getUserParams()}`
   );
+  console.log(data);
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
 
+  const countActive = (data) => {
+  var total = 0;
+  for (var i = 0; i < data.length; i++) {
+    if (data[i].status === "Active") {
+      total += data[i].count;
+    }
+    }
+    console.log(data);
+    console.log(total);
+  return total;
+  };
+  
+  const countAll = (data) => {
+    var total = 0;
+    for (var i = 0; i < data.length; i++) {
+      total += data[i].count;
+    }
+    console.log(data);
+    console.log(total);
+    return total;
+  };
+
+
   const mapDataToObjects = (data) => {
     const { items } = data;
     const mappedData = [];
+
     for (const cityObj of Object.values(items)) {
       if (typeof cityObj === 'object' && cityObj.data) {
         for (const dataObj of cityObj.data) {
@@ -51,6 +79,7 @@ const NumberOfLead = (dateFrom) => {
         });
       }
     }
+    
     return mappedData;
   };
  
@@ -78,13 +107,20 @@ const NumberOfLead = (dateFrom) => {
   }
   return (
     <>
+        
       <Card
         title={
           <Space direction="vertical" size="large">
             <Title level={3}>Number of Leads By Application</Title>
           </Space>
             }>
-        <Space direction='horizontal' size="large" >
+         <Row  align="middle">
+          <Col span={24}>
+            <Space direction='horizontal' size="large" >
+              <Button type='primary' onClick={() => {
+                countActive(mapDataToObjects(data));
+                countAll(mapDataToObjects(data));
+          }}>Test</Button>
           <Button
             type="primary"
             onClick={() => setChartType('bar')}
@@ -106,214 +142,40 @@ const NumberOfLead = (dateFrom) => {
           >
             Pie Chart
           </Button>
-
+              <Button
+                type="primary"
+                onClick={() => setChartType('line')}
+                disabled={chartType === 'line'}
+              >
+                Line Chart
+              </Button>
         </Space>
-      
+            <br />
+            <br />
 
-        <Space direction="vertical"
-          size="large"
-        style={{ width: '100%' }}>
+            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+              <Space direction="horizontal" size="large">
+                <CardStatistic title="Leads" value={countAll(mapDataToObjects(data))} color="#3f8600" />
+                <CardStatistic title="Cities" value={data.total_items} color="#3f8600" />
+                <CardStatistic title="Active" value={countActive(mapDataToObjects(data))} color="#3f8600" />
+              </Space>
         {chartType === 'bar' && (
-        <Bar
-          data={mapDataToObjects(data)}
-          xField="count"
-          yField="city"
-          seriesField="status"
-          conversionTag={{
-            offsetX: 10,
-            offsetY: -10,
-            style: {
-              fill: 'white',
-              fontSize: 12,
-              fontWeight: 500,
-              textBaseline: 'middle',
-            },
-          }}
-
-          isStack={true}
-
-          label={{
-            position: 'middle',
-            content: (item) => {
-              return item.count;
-
-  // const percent = ((item.count / item.data.total) * 100).toFixed(2);
-  //   return `${percent}%`;
-            },
-            style: {
-              fill: '#fff',
-
-            },
-            formatter: ({ value }) => {
-              console.log(value);
-              return value.toFixed(2);
-            },
-            
-
-          }}
-          legend={{
-            position: 'top',
-            flipPage: false,
-          }}
-          tooltip={{
-            showMarkers: false,
-          }}
-          meta={{
-            count: {
-              alias: 'Number of Leads',
-            },
-            city: {
-              alias: 'City',
-            },
-            status: {
-              alias: 'Status',
-            },
-          }}
-          xAxis={{
-            label: {
-              autoHide: true,
-              autoRotate: false,
-            },
-          }}
-          yAxis={{
-            label: {
-              autoHide: true,
-              autoRotate: false,
-            },
-          }}
-          responsive={true}
-          padding="auto"
-          forceFit={true}
-          theme={{
-            // colors10: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-            minBarWidth: 20,
-            maxBarWidth: 20,
-            color: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-            
-          }}
-
-            />
+            <ChartBar props={mapDataToObjects(data)} />
         )}
         {chartType === 'column' && (
-           <Column
-            data={mapDataToObjects(data)}
-            xField="city"
-            yField="count"
-            seriesField="status"
-            isStack={true}
-            label={{
-              position: 'middle',
-              content: (item) => {
-                return item.count;
-              },
-              style: {
-                fill: '#fff',
-              },
-              formatter: ({ value }) => {
-                return value.toFixed(2);
-              },
-            }}
-            legend={{
-              position: 'top',
-              flipPage: false,
-            }}
-            tooltip={{
-              showMarkers: false,
-            }}
-            meta={{
-              count: {
-                alias: 'Number of Leads',
-              },
-              city: {
-                alias: 'City',
-              },
-              status: {
-                alias: 'Status',
-              },
-            }}
-            xAxis={{
-              label: {
-                autoHide: true,
-                autoRotate: false,
-              },
-            }}
-            yAxis={{
-              label: {
-                autoHide: true,
-                autoRotate: false,
-              },
-            }}
-            responsive={true}
-            padding="auto"
-            forceFit={true}
-            theme={{
-              colors10: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-              minBarWidth: 20,
-              maxBarWidth: 20,
-              // color: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-            }}
-
-            conversionTag={{
-              offsetX: 10,
-              offsetY: -10,
-              style: {
-                fill: 'white',
-                fontSize: 12,
-                fontWeight: 500,
-                textBaseline: 'middle',
-              },
-            }}
-          />
+            <ChartColumn props={mapDataToObjects(data)} />
           )}
           {chartType === 'pie' && (
-            <Pie
-              data={mapDataToObjects(data)}
-              angleField="count"
-              colorField="city"
-              radius={1.0}
-              label={{
-                type: 'outer',
-                offset: 60,
-                content: (item) => {
-                  return `${item.city}: ${item.count} Leads`;
-                },
-                style: {
-                  textAlign: 'center',
-                  fontSize: 12,
-                },
-              }}
-              legend={{
-                position: 'bottom',
-                flipPage: false,
-              }}
-              tooltip={{
-                showMarkers: false,
-              }}
-              meta={{
-                count: {
-                  alias: 'Number of Leads',
-                },
-                city: {
-                  alias: 'City',
-                },
-                status: {
-                  alias: 'Status',
-                },
-              }}
-              responsive={true}
-              interactions={[{ type: 'element-selected' }, { type: 'element-active' }]}
-              padding="auto"
-              forceFit={true}
-              theme={{
-                colors10: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-                minBarWidth: 20,
-                maxBarWidth: 20,
-                // color: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-              }}
-            />
-          )}
+            <ChartPie props={mapDataToObjects(data)} />
+              )}
+              {chartType === 'line' && (
+                <ChartLine props={mapDataToObjects(data)} />
+              )}
 
-          </Space>
+
+            </Space>
+          </Col>
+        </Row>
       </Card>
       
     </>
