@@ -119,11 +119,11 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [shift, setShift] = useState({
         drivers: 10,
-        start: record.start || '00:00',
+        start: record.start || record.time,
         end: record.end || '00:00',
     })
 
-    const floatingComponentHeight = hours.diff * 81 - 10
+    const floatingComponentHeight = hours.diff * 57 - 10
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
@@ -139,6 +139,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     } */
   
     const handleClick = () => {
+        console.log(record)
         setIsHovering(!isHovering)
         showModal()
     }
@@ -183,7 +184,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
             </div>
             <Formik
                 initialValues={{
-                    start: record.start || '00:00',
+                    start: shift.start,
                     end: null,
                     drivers: 10,
                     city: scheduleFilter.city,
@@ -230,7 +231,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                             disabledHours: () => {
                                                 const hours = []
                                                 for (let i = 0; i < 24; i++) {
-                                                    if (i < dayjs(record.time, 'HH:mm').hour()) {
+                                                    if (i < dayjs(record.time, 'HH:mm').hour() + 1) {
                                                         hours.push(i)
                                                     }
                                                 }
