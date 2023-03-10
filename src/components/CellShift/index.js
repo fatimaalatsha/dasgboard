@@ -300,35 +300,3 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
 }
 
 export default CellShift
-
-{/* <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
-        <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid green", width: '50%' }}>
-        <p>Shift</p>
-        <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} />
-    </div>
-    <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid blue", width: '50%' }}>
-        <p>Shift</p>
-    </div>
-    <Card 
-        style={cardStyleConfig} 
-        bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
-    >
-        <Row style={{ display: 'flex', height: '100%'}}>
-        <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
-            <Title level={4} style={{ margin: 0, color: 'inherit' }}>{`0 / ${shift?.drivers}`}</Title>
-            <Space>
-                <Text strong style={{ color: 'inherit' }}>{shift?.start}</Text>
-                <ArrowRightOutlined />
-                <Text strong style={{ color: 'inherit' }}>{shift?.end}</Text>
-            </Space>
-        </Space>
-        </Row>
-        <Row>
-            <Space>
-                <Tag color="cyan">0</Tag>
-                <Tag color="magenta">0</Tag>
-                <Tag color="gold">0</Tag>
-            </Space>
-        </Row>
-    </Card>
-</div> */}
