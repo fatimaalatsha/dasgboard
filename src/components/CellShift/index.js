@@ -225,6 +225,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                         props.setFieldValue('end', timeString[1])
                                         handleHoursChange(timeString)
                                     }}
+                                    hideDisabledOptions
                                     disabledTime={(current) => {
                                         return {
                                             disabledHours: () => {
