@@ -36,29 +36,26 @@ const DayView = ({selectedWeek, data, hours }) => {
           }
       },
       render: (text, record ) => {
-        //console.log(record)
-        /* return (
-          hoveredCell?.name === record.name && hoveredCell?.hour === hour && <Button>add time</Button>
-        ) */
-          return (
-            <>
-              { record[hour][0]?.start === hour && record.name === record[hour][0]?.name ? (
+        for ( let item = 0; item < record[hour].length; item++ ) {
+          if ( record[hour][item].start === hour && record.name === record[hour][item].name ) {
+            return (
               <DayCellShift 
-                isCellFilled={record[hour][0]?.start === hour && record.name === record[hour][0]?.name}
-                record={record[hour][0]}
-              /> 
-              ) : (
-                <DayCellShift 
-                  display={hoveredCell?.name === record.name && hoveredCell?.hour === hour} 
-                  record={record} 
-                  hour={hour}
-                  day={selectedWeek.day(idx).date()}
-                  setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
-                />
-              )
-              }
-            </>
-          )
+                isCellFilled={record[hour][item].start === hour && record.name === record[hour][item].name}
+                record={record[hour][item]}
+              />
+            )
+          }
+        }
+
+        return (
+          <DayCellShift 
+            display={hoveredCell?.name === record.name && hoveredCell?.hour === hour} 
+            record={record} 
+            hour={hour}
+            day={selectedWeek.day(idx).date()}
+            setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+          />
+        )
       },
     })),
   ]
