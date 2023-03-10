@@ -71,7 +71,7 @@ const ShiftCard = ({record, cardStyle}) => {
         <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
             <Card 
                 style={cardStyle}
-                bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
+                bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
             >
                 <Row justify="end">
                     <Dropdown menu={{items}} >
@@ -225,7 +225,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                         props.setFieldValue('end', timeString[1])
                                         handleHoursChange(timeString)
                                     }}
-                                    minuteStep={30}
                                     disabledTime={(current) => {
                                         return {
                                             disabledHours: () => {
@@ -236,7 +235,17 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                                     }
                                                 }
                                                 return hours
-                                            }
+                                            },
+                                            disabledMinutes: () => {
+                                                const minuteSteps = [0, 30, 59]
+                                                const minutes = []
+                                                for (let i = 0; i < 60; i++) {
+                                                    if (!minuteSteps.includes(i)) {
+                                                        minutes.push(i)
+                                                    }
+                                                }
+                                                return minutes
+                                            },
                                         }
                                     }}
                                 />
