@@ -13,7 +13,6 @@ import ChartLine from '../../components/ChartLine';
 const { Title, Text} = Typography;
 
 const NumberOfLead = (dateFrom) => {
-  console.log(dateFrom);
   const [chartType, setChartType] = useState('bar');
 
   const getUserParams = () => {
@@ -30,7 +29,6 @@ const NumberOfLead = (dateFrom) => {
   const { data, error, isLoading } = useFetch(
     `/v1/reports/drivers-status?${getUserParams()}`
   );
-  console.log(data);
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
@@ -42,8 +40,6 @@ const NumberOfLead = (dateFrom) => {
       total += data[i].count;
     }
     }
-    console.log(data);
-    console.log(total);
   return total;
   };
   
@@ -52,8 +48,6 @@ const NumberOfLead = (dateFrom) => {
     for (var i = 0; i < data.length; i++) {
       total += data[i].count;
     }
-    console.log(data);
-    console.log(total);
     return total;
   };
 
@@ -117,10 +111,6 @@ const NumberOfLead = (dateFrom) => {
          <Row  align="middle">
           <Col span={24}>
             <Space direction='horizontal' size="large" >
-              <Button type='primary' onClick={() => {
-                countActive(mapDataToObjects(data));
-                countAll(mapDataToObjects(data));
-          }}>Test</Button>
           <Button
             type="primary"
             onClick={() => setChartType('bar')}
@@ -155,9 +145,12 @@ const NumberOfLead = (dateFrom) => {
 
             <Space direction="vertical" size="large" style={{ width: '100%' }}>
               <Space direction="horizontal" size="large">
-                <CardStatistic title="Leads" value={countAll(mapDataToObjects(data))} color="#3f8600" />
-                <CardStatistic title="Cities" value={data.total_items} color="#3f8600" />
-                <CardStatistic title="Active" value={countActive(mapDataToObjects(data))} color="#3f8600" />
+                <CardStatistic title="Total" value={countAll(mapDataToObjects(data))} color="#3f8600" />
+                <CardStatistic title="Active" value={data.total_items} color="#3f8600" />
+                <CardStatistic title="Awating" value={15} color="#1307f5" />
+                <CardStatistic title="New Leads" value={7} color="#f507c9" />
+                <CardStatistic title="Average Time" value={'3 Days'} color="#f57207" />
+                <CardStatistic title="ConversionRate" value={"23%"} color="#3f8600" />               
               </Space>
         {chartType === 'bar' && (
             <ChartBar props={mapDataToObjects(data)} />
@@ -237,7 +230,6 @@ const NumberOfLeads = () => {
                 onClick={() => {
                   setIsEnable(false);
                   setDateset(getUserParams(date.filter.date_from));
-
                 }}
             >
               Cancel
@@ -259,6 +251,7 @@ const NumberOfLeads = () => {
             <Button style={{padding: 0, height: 'auto' }} onClick={() => setIsEnable(true)} type='link' icon={<EditOutlined />} />
         </Tooltip>
       </Space>
+       
       {/* Pass date as a prop and show report if showReport is true */}
       {showReport && <NumberOfLead date_from={date.filter.date_from} date_to={date.filter.date_to} />}
     </>

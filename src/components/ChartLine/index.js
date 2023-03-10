@@ -4,8 +4,8 @@ const ChartLine = ({ props }) => {
     return (
         <Line
         data={props}
-        xField="date"
-        yField="count"
+        xField="count"
+        yField="date"
         seriesField="status"
         isStack={true}
         label={{
