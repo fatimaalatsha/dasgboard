@@ -153,18 +153,29 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
                         format="HH:mm" 
                         defaultValue={[dayjs(hour, 'HH:mm'), null]} 
                         disabled={[true, false]} 
-                        onChange={handleHoursChange} 
+                        onChange={handleHoursChange}
+                        hideDisabledOptions
                         disabledTime={(current) => {
                             return {
                                 disabledHours: () => {
                                     const hours = []
                                     for (let i = 0; i < 24; i++) {
-                                        if (i < dayjs(hour, 'HH:mm').hour()) {
+                                        if (i < dayjs(hour, 'HH:mm').hour() + 1) {
                                             hours.push(i)
                                         }
                                     }
                                     return hours
-                                }
+                                },
+                                disabledMinutes: () => {
+                                    const minuteSteps = [0, 30, 59]
+                                    const minutes = []
+                                    for (let i = 0; i < 60; i++) {
+                                        if (!minuteSteps.includes(i)) {
+                                            minutes.push(i)
+                                        }
+                                    }
+                                    return minutes
+                                },
                             }
                         }}
                     />
