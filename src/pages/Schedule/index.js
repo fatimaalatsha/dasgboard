@@ -48,7 +48,10 @@ const Schedule = () => {
     //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
-    const [selectedWeek, setSelectedWeek] = useState(dayjs().startOf('week')) // Create state to store the selected week's date
+    const [selectedDate, setSelectedDate] = useState({ // Create state to store the selected week's date
+        week: dayjs().startOf('week'),
+        day: dayjs().startOf('day'),
+    })
     const [names, setNames] = useState(generateName())
     const [modal, setModal] = useState({ // Create state to store the modal
         open: false,
@@ -70,7 +73,7 @@ const Schedule = () => {
     })))
     const [dayData, setDayData] = useState(namesArray.reduce((acc, name) => {
         const timeObj = dayHours.reduce((obj, time) => {
-          obj[time] = time === '04:00' ? [{name: 'patient alpaca', day: '28', start: time, end: '12:00', drivers: 25}] : []
+          obj[time] = time === '04:00' ? [{name: 'patient alpaca', day: '28', start: time, end: '12:00', drivers: 25}] : time === '12:00' ? [{name: 'patient alpaca', day: '28', start: '12:00', end: '18:00', drivers: 25}] : []
           return obj
         }, {})
       
@@ -111,12 +114,12 @@ const Schedule = () => {
     ]
 
     const handleWeekChange = (date) => { // Handle week change
-      setSelectedWeek(dayjs(date))
+      setSelectedDate({...selectedDate, week: dayjs(date)})
     }
 
-    /* const handleThisWeekClick = () => { // Handle this week click
-      setSelectedWeek(dayjs())
-    }  */
+    const handleTodayClick = () => { // Handle this week click
+      setSelectedDate({week: dayjs().startOf('week'), day: dayjs().startOf('day')})
+    } 
     
     const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
         const newData = [...data]
@@ -164,15 +167,16 @@ const Schedule = () => {
                         />
                     </Space>
                     <Space style={{ display: 'flex', width: '100%'}}>
-                        <Button icon={<LeftOutlined />} onClick={() => setSelectedWeek(selectedWeek.subtract(1, 'week'))} />
-                        <Button icon={<RightOutlined />} onClick={() => setSelectedWeek(selectedWeek.add(1, 'week'))} />
-                        <DatePicker defaultValue={selectedWeek} picker="week" onChange={handleWeekChange} />
+                        <Button onClick={handleTodayClick}>Today</Button>
+                        <Button icon={<LeftOutlined />} onClick={() => setSelectedDate({...selectedDate, ...(view === 1 ? { week: selectedDate.week.subtract(1, 'week') } : { day: selectedDate.day.subtract(1, 'day') })})} />
+                        <Button icon={<RightOutlined />} onClick={() => setSelectedDate({...selectedDate, ...(view === 1 ? { week: selectedDate.week.add(1, 'week') } : { day: selectedDate.day.add(1, 'day') })})} />
+                        <DatePicker defaultValue={view === 1 ? selectedDate.week : selectedDate.day} picker={ view === 1 ? "week" : "date" } onChange={handleWeekChange} />
                         <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>
-                { view === 1 ? <WeekView selectedWeek={selectedWeek} data={data} days={days} />
+                { view === 1 ? <WeekView selectedWeek={selectedDate.week} data={data} days={days} />
                 : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedWeek={selectedWeek} data={dayData} hours={dayHours} />
+                : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} />
                 }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>

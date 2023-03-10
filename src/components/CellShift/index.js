@@ -71,7 +71,7 @@ const ShiftCard = ({record, cardStyle}) => {
         <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
             <Card 
                 style={cardStyle}
-                bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
+                bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
             >
                 <Row justify="end">
                     <Dropdown menu={{items}} >
@@ -119,11 +119,11 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [shift, setShift] = useState({
         drivers: 10,
-        start: record.start || '00:00',
+        start: record.start || record.time,
         end: record.end || '00:00',
     })
 
-    const floatingComponentHeight = hours.diff * 81 - 10
+    const floatingComponentHeight = hours.diff * 57 - 10
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
@@ -139,6 +139,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     } */
   
     const handleClick = () => {
+        console.log(record)
         setIsHovering(!isHovering)
         showModal()
     }
@@ -183,7 +184,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
             </div>
             <Formik
                 initialValues={{
-                    start: record.start || '00:00',
+                    start: shift.start,
                     end: null,
                     drivers: 10,
                     city: scheduleFilter.city,
@@ -224,18 +225,28 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                         props.setFieldValue('end', timeString[1])
                                         handleHoursChange(timeString)
                                     }}
-                                    minuteStep={30}
+                                    hideDisabledOptions
                                     disabledTime={(current) => {
                                         return {
                                             disabledHours: () => {
                                                 const hours = []
                                                 for (let i = 0; i < 24; i++) {
-                                                    if (i < dayjs(record.time, 'HH:mm').hour()) {
+                                                    if (i < dayjs(record.time, 'HH:mm').hour() + 1) {
                                                         hours.push(i)
                                                     }
                                                 }
                                                 return hours
-                                            }
+                                            },
+                                            disabledMinutes: () => {
+                                                const minuteSteps = [0, 30, 59]
+                                                const minutes = []
+                                                for (let i = 0; i < 60; i++) {
+                                                    if (!minuteSteps.includes(i)) {
+                                                        minutes.push(i)
+                                                    }
+                                                }
+                                                return minutes
+                                            },
                                         }
                                     }}
                                 />
@@ -289,35 +300,3 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
 }
 
 export default CellShift
-
-{/* <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
-        <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid green", width: '50%' }}>
-        <p>Shift</p>
-        <input type="number" value={hours} min={1} max={8} onChange={handleHoursChange} />
-    </div>
-    <div className="content" style={{ height: floatingComponentHeight, float: 'left', border: "1px solid blue", width: '50%' }}>
-        <p>Shift</p>
-    </div>
-    <Card 
-        style={cardStyleConfig} 
-        bodyStyle={{ display: 'flex', gap: 16, flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
-    >
-        <Row style={{ display: 'flex', height: '100%'}}>
-        <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-end' }}>
-            <Title level={4} style={{ margin: 0, color: 'inherit' }}>{`0 / ${shift?.drivers}`}</Title>
-            <Space>
-                <Text strong style={{ color: 'inherit' }}>{shift?.start}</Text>
-                <ArrowRightOutlined />
-                <Text strong style={{ color: 'inherit' }}>{shift?.end}</Text>
-            </Space>
-        </Space>
-        </Row>
-        <Row>
-            <Space>
-                <Tag color="cyan">0</Tag>
-                <Tag color="magenta">0</Tag>
-                <Tag color="gold">0</Tag>
-            </Space>
-        </Row>
-    </Card>
-</div> */}

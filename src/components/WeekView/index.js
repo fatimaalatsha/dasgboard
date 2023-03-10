@@ -69,41 +69,23 @@ const WeekView = ({selectedWeek, data, days }) => {
           }
       },
       render: (text, record ) => {
-        //console.log(record[day])
-        let content = null
-          return (
-            <>
-                { record[day].length !== 0  ? (
-                    record[day].map((item, idx) => {
-                        item.dayOfWeek === day && item.start === record.time 
-                        ?
-                         content = <CellShift
-                                        key={idx}
-                                        isCellFilled={item.dayOfWeek === day && item.start === record.time}
-                                        record={item}
-                                    />
-                        : 
-                        content =  <CellShift 
-                                        key={idx}
-                                        display={hoveredCell?.time === record.time && hoveredCell?.day === day} 
-                                        record={record}
-                                        dayWeek={day}
-                                        day={selectedWeek.day(idx).date()}
-                                        setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
-                                    />
-                        return content
-                    })
-                ) : (
-                     <CellShift 
-                        display={hoveredCell?.time === record.time && hoveredCell?.day === day} 
-                        record={record}
-                        dayWeek={day}
-                        day={selectedWeek.day(idx).date()}
-                        setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
-                    />
-                )}
-            </>
-          )
+        for ( let item = 0; item < record[day].length; item++ ) {
+            if (record[day][item].dayOfWeek === day && record[day][item].start === record.time) {
+                return (
+                    <CellShift key={item} isCellFilled={record[day][item].dayOfWeek === day && record[day][item].start === record.time} record={record[day][item]} />
+                )
+            } 
+        }
+
+        return (
+            <CellShift
+                display={hoveredCell?.time === record.time && hoveredCell?.day === day}
+                record={record}
+                dayWeek={day}
+                day={selectedWeek.day(idx).date()}
+                setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
+            />
+        )
       },
     })),
   ]
