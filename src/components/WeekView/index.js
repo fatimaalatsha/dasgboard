@@ -69,10 +69,10 @@ const WeekView = ({selectedWeek, data, days }) => {
           }
       },
       render: (text, record ) => {
-        for ( let i = 0; i < record[day].length; i++ ) {
-            if (record[day][i].dayOfWeek === day && record[day][i].start === record.time) {
+        for ( let item = 0; item < record[day].length; item++ ) {
+            if (record[day][item].dayOfWeek === day && record[day][item].start === record.time) {
                 return (
-                    <CellShift key={i} isCellFilled={record[day][i].dayOfWeek === day && record[day][i].start === record.time} record={record[day][i]} />
+                    <CellShift key={item} isCellFilled={record[day][item].dayOfWeek === day && record[day][item].start === record.time} record={record[day][item]} />
                 )
             } 
         }
