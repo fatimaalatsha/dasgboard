@@ -170,7 +170,7 @@ const Schedule = () => {
                         <Button onClick={handleTodayClick}>Today</Button>
                         <Button icon={<LeftOutlined />} onClick={() => setSelectedDate({...selectedDate, ...(view === 1 ? { week: selectedDate.week.subtract(1, 'week') } : { day: selectedDate.day.subtract(1, 'day') })})} />
                         <Button icon={<RightOutlined />} onClick={() => setSelectedDate({...selectedDate, ...(view === 1 ? { week: selectedDate.week.add(1, 'week') } : { day: selectedDate.day.add(1, 'day') })})} />
-                        <DatePicker defaultValue={view === 1 ? selectedDate.week : selectedDate.day} picker={ view === 1 ? "week" : "day" } onChange={handleWeekChange} />
+                        <DatePicker defaultValue={view === 1 ? selectedDate.week : selectedDate.day} picker={ view === 1 ? "week" : "date" } onChange={handleWeekChange} />
                         <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>
