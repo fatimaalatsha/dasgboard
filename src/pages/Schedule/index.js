@@ -176,6 +176,7 @@ const Schedule = () => {
                             picker={ view === 1 ? "week" : "date" } 
                             onChange={handleWeekChange} 
                             value={view === 1 ? selectedDate.week : selectedDate.day}
+                            allowClear={false}
                         />
                         <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>

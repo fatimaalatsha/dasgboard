@@ -27,7 +27,6 @@ const DayView = ({selectedDay, data, hours }) => {
           dataIndex: hour,
           key: idx,
           align: 'center',
-          width: 100,
           onCell: (record) => {
               return {
                   onMouseEnter: () => { // Mouse enter event
