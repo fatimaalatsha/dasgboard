@@ -53,10 +53,10 @@ const items = [
 
 const ShiftCard = ({ record, cardStyle }) => {
     return (
-        <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
+        <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, height: '100%' }}>
             <Card 
                 style={cardStyle}
-                bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 4 }}
+                bodyStyle={{ display: 'flex', height: '100%', flexDirection: 'column', justifyContent: 'flex-end', padding: 4 }}
             >
                 <Row style={{ display: 'flex', height: '100%'}}>
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
@@ -90,12 +90,13 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
         end: record.end || '00:00',
     })
 //console.log(hour)
-    const floatingComponentWidth = hours * 60.45 - 5
+    const floatingComponentWidth = hours * 60.45 
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
         borderColor: token.colorSuccessBorder,
         width: floatingComponentWidth,
+        height: 'calc(100% + 2px)'
     }
   
     const handleClick = () => {
