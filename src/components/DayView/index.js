@@ -71,7 +71,7 @@ const DayView = ({selectedDay, data, hours }) => {
           columns={columns}
           dataSource={data}
           pagination={false}
-          className="schedule-week-table"
+          className="schedule-day-table"
           bordered
           size="small"
       />
