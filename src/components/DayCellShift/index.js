@@ -136,7 +136,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
             <>
                 { display && (
                     <Tooltip title="Add shift">
-                        <Button size="small" style={{ fontSize: 8 }} onClick={handleClick} icon={<PlusOutlined />} />
+                        <Button size="small" onClick={handleClick} icon={<PlusOutlined />} />
                     </Tooltip>
                 )}
                 { isHovering && (

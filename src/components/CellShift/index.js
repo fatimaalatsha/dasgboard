@@ -12,9 +12,10 @@ import {
     TimePicker, 
     Checkbox, 
     Select,
-    Dropdown 
+    Dropdown,
+    Tooltip,
 } from 'antd'
-import { ArrowRightOutlined, UserOutlined, MoreOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined, UserOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import Yup for form validation
@@ -70,16 +71,15 @@ const ShiftCard = ({record, cardStyle, handleEdit}) => {
 
     const onClick = ({ key }) => {
         if (key === '1') {
-            console.log(key)
             handleEdit()
         }
     }
 
     return (
-        <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
+        <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, width: 'calc(100% + 2px)' }}>
             <Card 
                 style={cardStyle}
-                bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
+                bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100%)', padding: 8 }}
             >
                 <Row justify="end">
                     <Dropdown menu={{items, onClick }} >
@@ -131,7 +131,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
         end: record.end || null,
     })
 
-    const floatingComponentHeight = hours.diff * 57 - 10
+    const floatingComponentHeight = hours.diff * 57 + 2
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
@@ -183,7 +183,11 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                     <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick}/>
                 ) : (
                 <>
-                    {display && <Button size="small" onClick={handleClick}>New Shift</Button>}
+                    {  display && (
+                    <Tooltip title="Add shift">
+                        <Button type="text" style={{ width: '100%', height: '100%', padding: 16 }} size="small" onClick={handleClick} icon={<PlusOutlined />} />
+                    </Tooltip> 
+                    )}
                         { isHovering && (
                             <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} />
                         )}
