@@ -66,7 +66,15 @@ const generateNames = (numNames) => {
   
 const namesArray = generateNames(30)
 
-const ShiftCard = ({record, cardStyle}) => {
+const ShiftCard = ({record, cardStyle, handleEdit}) => {
+
+    const onClick = ({ key }) => {
+        if (key === '1') {
+            console.log(key)
+            handleEdit()
+        }
+    }
+
     return (
         <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
             <Card 
@@ -74,7 +82,7 @@ const ShiftCard = ({record, cardStyle}) => {
                 bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
             >
                 <Row justify="end">
-                    <Dropdown menu={{items}} >
+                    <Dropdown menu={{items, onClick }} >
                         <a onClick={(e) => e.preventDefault()}>
                         <Space>
                             <MoreOutlined />
@@ -120,7 +128,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     const [shift, setShift] = useState({
         drivers: 10,
         start: record.start || record.time,
-        end: record.end || '00:00',
+        end: record.end || null,
     })
 
     const floatingComponentHeight = hours.diff * 57 - 10
@@ -139,8 +147,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     } */
   
     const handleClick = () => {
-        console.log(record)
-        setIsHovering(!isHovering)
+        //console.log(record)
+        setIsHovering(true)
         showModal()
     }
 
@@ -172,12 +180,12 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
         <>
             <div className="container" style={{ minHeight: 24}}>
                 { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={record}/>
+                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick}/>
                 ) : (
                 <>
                     {display && <Button size="small" onClick={handleClick}>New Shift</Button>}
                         { isHovering && (
-                            <ShiftCard cardStyle={cardStyleConfig} record={shift}/>
+                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} />
                         )}
                 </>
                 )}
@@ -185,13 +193,13 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
             <Formik
                 initialValues={{
                     start: shift.start,
-                    end: null,
+                    end: shift.end,
                     drivers: 10,
                     city: scheduleFilter.city,
                 }}
                 validationSchema={shiftSchema}
                 onSubmit={(values, { setSubmitting }) => {
-                    console.log(values)
+                    //console.log(values)
                     setSubmitting(false)
                     setIsModalOpen(false)
                 }}
