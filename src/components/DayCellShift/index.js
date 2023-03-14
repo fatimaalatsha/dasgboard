@@ -199,6 +199,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
                                     format="HH:mm" 
                                     //defaultValue={[dayjs(hour, 'HH:mm'), null]} 
                                     defaultValue={[dayjs(props.values.start, 'HH:mm'), props.values.end ? dayjs(props.values.end, 'HH:mm') : null]} 
+                                    allowClear={false}
                                     disabled={[true, false]} 
                                     //onChange={handleHoursChange}
                                     onChange={(time, timeString) => {
