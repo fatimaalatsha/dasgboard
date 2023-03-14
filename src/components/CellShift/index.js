@@ -27,7 +27,7 @@ import { CitySelect } from '../CitySelect' // Import CitySelect component
 import generateName from '../../utils/name-creation' // Dummy name array generator
 
 const { useToken } = theme
-const { Text, Title } = Typography
+const { Text, Title, Link } = Typography
 
 const getFilledHours = (end, start) => {
     const hoursDiff = dayjs(end, 'HH:mm').diff(dayjs(start, 'HH:mm'), 'hour', true)
@@ -84,11 +84,11 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit}) => {
             >
                 <Row justify="end">
                     <Dropdown menu={{items, onClick }} >
-                        <a onClick={(e) => e.preventDefault()}>
+                        <Link onClick={(e) => e.preventDefault()}>
                         <Space>
                             <MoreOutlined />
                         </Space>
-                        </a>
+                        </Link>
                     </Dropdown>
                 </Row>
                 <Row style={{ display: 'flex', height: '100%'}}>
@@ -169,9 +169,9 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
       setIsModalOpen(true)
     }
 
-    const handleOk = () => {
+    /* const handleOk = () => {
       setIsModalOpen(false)
-    }
+    } */
 
     const handleCancel = () => {
       setIsModalOpen(false)

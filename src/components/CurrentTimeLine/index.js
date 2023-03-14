@@ -1,13 +1,18 @@
 import { useEffect, useState } from 'react'
 import { Divider } from 'antd'
-import dayjs from 'dayjs'
+import dayjs from 'dayjs' // Import dayjs
+import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
+import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const CurrentTimeLine = ({axis}) => {
-    const [currentTime, setCurrentTime] = useState(dayjs())
+    const [currentTime, setCurrentTime] = useState(dayjs().tz('America/Thunder_Bay'))
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setCurrentTime(dayjs())
+            setCurrentTime(dayjs().tz('America/Thunder_Bay'))
         }, 60000)
 
         return () => {
