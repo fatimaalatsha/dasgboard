@@ -41,7 +41,7 @@ const generateNames = (numNames) => {
     return names;
   }
   
-const namesArray = generateNames(30)
+const namesArray = generateNames(10)
 namesArray.push('patient alpaca')
 
 const Schedule = () => {
@@ -72,7 +72,7 @@ const Schedule = () => {
     })))
     const [dayData, setDayData] = useState(namesArray.reduce((acc, name) => {
         const timeObj = dayHours.reduce((obj, time) => {
-          obj[time] = time === '04:00' ? [{name: 'patient alpaca', day: '28', start: time, end: '12:00', drivers: 25}] : time === '12:00' ? [{name: 'patient alpaca', day: '28', start: '12:00', end: '18:00', drivers: 25}] : []
+          obj[time] = time === '04:00' ? [{ name: 'patient alpaca', start: time, end: '12:00' }] : time === '12:00' ? [{name: 'patient alpaca', start: '12:00', end: '18:00' }] : []
           return obj
         }, {})
       

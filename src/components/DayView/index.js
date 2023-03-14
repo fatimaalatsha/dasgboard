@@ -44,6 +44,7 @@ const DayView = ({selectedDay, data, hours }) => {
                   <DayCellShift 
                     isCellFilled={record[hour][item].start === hour && record.name === record[hour][item].name}
                     record={record[hour][item]}
+                    setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
                   />
                 )
               }

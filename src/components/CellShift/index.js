@@ -22,7 +22,7 @@ import { object, string, number } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../store'
 
-import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
+import Submit from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import { CitySelect } from '../CitySelect' // Import CitySelect component
 import generateName from '../../utils/name-creation' // Dummy name array generator
 
@@ -67,11 +67,12 @@ const generateNames = (numNames) => {
   
 const namesArray = generateNames(30)
 
-const ShiftCard = ({record, cardStyle, handleEdit}) => {
+const ShiftCard = ({record, cardStyle, handleEdit, setEdit}) => {
 
     const onClick = ({ key }) => {
         if (key === '1') {
             handleEdit()
+            setEdit(true)
         }
     }
 
@@ -116,6 +117,7 @@ const ShiftCard = ({record, cardStyle, handleEdit}) => {
 const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [selectedItems, setSelectedItems] = useState([]) // State to hold selected options
+    const [edit, setEdit] = useState(false) // State to hold edit mode
     const filteredOptions = namesArray.filter((o) => !selectedItems.includes(o)) // Options to show in the dropdown
     const { token } = useToken()
     const [hours, setHours] = useState({
@@ -173,14 +175,16 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
 
     const handleCancel = () => {
       setIsModalOpen(false)
-      setIsHovering(!isHovering)
+      if (!edit) {
+            setIsHovering(!isHovering)
+        }
     }
 
     return (
         <>
             <div className="container" style={{ minHeight: 24}}>
                 { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick}/>
+                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} />
                 ) : (
                 <>
                     {  display && (
@@ -189,7 +193,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                     </Tooltip> 
                     )}
                         { isHovering && (
-                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} />
+                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} />
                         )}
                 </>
                 )}
@@ -219,9 +223,9 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                 <Button key="back" onClick={handleCancel}>
                                     Cancel
                                 </Button>,
-                                <SubmitWrapper key="submit" type="primary">
+                                <Submit key="submit" type="primary">
                                     Create Shift
-                                </SubmitWrapper>,
+                                </Submit>,
                             ]}
                         >
                             <Space direction="vertical" size={16} style={{ width: '100%' }}>
