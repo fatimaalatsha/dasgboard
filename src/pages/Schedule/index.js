@@ -41,7 +41,7 @@ const generateNames = (numNames) => {
     return names;
   }
   
-const namesArray = generateNames(30)
+const namesArray = generateNames(100)
 namesArray.push('patient alpaca')
 
 const Schedule = () => {
@@ -52,7 +52,6 @@ const Schedule = () => {
         week: dayjs().startOf('week'),
         day: dayjs().startOf('day'),
     })
-    const [names, setNames] = useState(generateName())
     const [modal, setModal] = useState({ // Create state to store the modal
         open: false,
         drivers: null,
@@ -73,7 +72,7 @@ const Schedule = () => {
     })))
     const [dayData, setDayData] = useState(namesArray.reduce((acc, name) => {
         const timeObj = dayHours.reduce((obj, time) => {
-          obj[time] = time === '04:00' ? [{name: 'patient alpaca', day: '28', start: time, end: '12:00', drivers: 25}] : time === '12:00' ? [{name: 'patient alpaca', day: '28', start: '12:00', end: '18:00', drivers: 25}] : []
+          obj[time] = time === '04:00' ? [{ name: 'patient alpaca', start: time, end: '12:00' }] : time === '12:00' ? [{name: 'patient alpaca', start: '12:00', end: '18:00' }] : []
           return obj
         }, {})
       
@@ -114,7 +113,10 @@ const Schedule = () => {
     ]
 
     const handleWeekChange = (date) => { // Handle week change
-      setSelectedDate({...selectedDate, week: dayjs(date)})
+      setSelectedDate({ 
+        ...selectedDate, 
+        ...(view === 1 ? { week: dayjs(date) } : { day: dayjs(date) }) 
+      })
     }
 
     const handleTodayClick = () => { // Handle this week click
@@ -124,7 +126,6 @@ const Schedule = () => {
     const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
         const newData = [...data]
         const rowIndex = weekHours.indexOf(modal.selectedTime.start)
-        //const colIndex = days.indexOf(modal.selectedDay)
         newData[rowIndex][modal.selectedDay.dayOfWeek.toLowerCase()] = [{dayOfWeek: modal.selectedDay.dayOfWeek.toLowerCase(), day: modal.selectedDay.day, start: modal.selectedTime.start, end: modal.selectedTime.end, drivers: Number(modal.drivers)}]
         setData(newData)
         setModal({...modal, open: false})
@@ -170,7 +171,13 @@ const Schedule = () => {
                         <Button onClick={handleTodayClick}>Today</Button>
                         <Button icon={<LeftOutlined />} onClick={() => setSelectedDate({...selectedDate, ...(view === 1 ? { week: selectedDate.week.subtract(1, 'week') } : { day: selectedDate.day.subtract(1, 'day') })})} />
                         <Button icon={<RightOutlined />} onClick={() => setSelectedDate({...selectedDate, ...(view === 1 ? { week: selectedDate.week.add(1, 'week') } : { day: selectedDate.day.add(1, 'day') })})} />
-                        <DatePicker defaultValue={view === 1 ? selectedDate.week : selectedDate.day} picker={ view === 1 ? "week" : "date" } onChange={handleWeekChange} />
+                        <DatePicker 
+                            defaultValue={view === 1 ? selectedDate.week : selectedDate.day} 
+                            picker={ view === 1 ? "week" : "date" } 
+                            onChange={handleWeekChange} 
+                            value={view === 1 ? selectedDate.week : selectedDate.day}
+                            allowClear={false}
+                        />
                         <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>

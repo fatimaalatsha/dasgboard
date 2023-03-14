@@ -27,7 +27,6 @@ const DayView = ({selectedDay, data, hours }) => {
           dataIndex: hour,
           key: idx,
           align: 'center',
-          width: 100,
           onCell: (record) => {
               return {
                   onMouseEnter: () => { // Mouse enter event
@@ -45,6 +44,7 @@ const DayView = ({selectedDay, data, hours }) => {
                   <DayCellShift 
                     isCellFilled={record[hour][item].start === hour && record.name === record[hour][item].name}
                     record={record[hour][item]}
+                    setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
                   />
                 )
               }
@@ -71,7 +71,7 @@ const DayView = ({selectedDay, data, hours }) => {
           columns={columns}
           dataSource={data}
           pagination={false}
-          className="schedule-week-table"
+          className="schedule-day-table"
           bordered
           size="small"
       />

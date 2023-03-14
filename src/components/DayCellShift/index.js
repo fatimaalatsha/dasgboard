@@ -16,6 +16,9 @@ import {
 } from 'antd'
 import { ArrowRightOutlined, PlusOutlined, MoreOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
+import { object, string } from 'yup' // Import Yup for form validation
+import Submit from '../forms/SubmitWrapper'
 
 const { useToken } = theme
 const { Text, Title } = Typography
@@ -28,35 +31,48 @@ const getFilledHours = (end, start) => {
     return hoursDiff
 }
 
+const timeslotSchema = object().shape({
+    start: string().required('Start time is required'),
+    end: string().required('End time is required'),
+})
+
 const items = [
     {
         key: 1,
-        label: 'No Show',
+        label: 'Edit',
     },
     {
         key: 2,
-        label: 'Early In',
+        label: 'No Show',
     },
     {
         key: 3,
-        label: 'Early Out',
+        label: 'Early In',
     },
     {
         key: 4,
-        label: 'Late Out',
+        label: 'Early Out',
     },
     {
         key: 5,
-        label: 'Edit',
-    }
+        label: 'Late Out',
+    },
 ]
 
-const ShiftCard = ({ record, cardStyle }) => {
+const ShiftCard = ({ record, cardStyle, handleEdit, setEdit }) => {
+
+    const onClick = ({ key }) => {
+        if (key === '1') {
+            handleEdit()
+            setEdit(true)
+        }
+    }
+
     return (
-        <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
+        <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, height: '100%' }}>
             <Card 
                 style={cardStyle}
-                bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 4 }}
+                bodyStyle={{ display: 'flex', height: '100%', flexDirection: 'column', justifyContent: 'flex-end', padding: 4 }}
             >
                 <Row style={{ display: 'flex', height: '100%'}}>
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
@@ -65,7 +81,7 @@ const ShiftCard = ({ record, cardStyle }) => {
                         <ArrowRightOutlined />
                         <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
                     </Space>
-                    <Dropdown menu={{items}} >
+                    <Dropdown menu={{items, onClick}} >
                         <a onClick={(e) => e.preventDefault()}>
                         <Space>
                             <MoreOutlined />
@@ -81,141 +97,156 @@ const ShiftCard = ({ record, cardStyle }) => {
 
 const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}) => {
     const { token } = useToken()
-    const [hours, setHours] = useState(record.start ? getFilledHours(record.end, record.start) : 4);
+    const [hours, setHours] = useState({
+        start: record.start || hour,
+        end: record.end,
+        diff: record.start ? getFilledHours(record.end, record.start) : 4
+    })
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [shift, setShift] = useState({
-        drivers: 10,
-        start: record.start || '00:00',
-        end: record.end || '00:00',
-    })
-//console.log(hour)
-    const floatingComponentWidth = hours * 60.45 - 5
+    const [edit, setEdit] = useState(false) // State to hold edit mode
+
+    const floatingComponentWidth = hours.diff * 60.45  // 60.45 is the width of each hour in the calendar
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
         borderColor: token.colorSuccessBorder,
         width: floatingComponentWidth,
+        height: 'calc(100% + 2px)'
     }
   
     const handleClick = () => {
-        setIsHovering(!isHovering)
+        setIsHovering(true)
         showModal()
     }
 
-    const handleHoursChange = (time, timeString) => {
-        setShift({
-            ...shift,
+    const handleHoursChange = (timeString) => {
+        const hoursDiff = dayjs(timeString[1], 'HH:mm').diff(dayjs(timeString[0], 'HH:mm'), 'hour', true)
+        setHours({
+            ...hours,
             start: timeString[0],
             end: timeString[1],
+            diff: hoursDiff
         })
-        const hoursDiff = dayjs(timeString[1], 'HH:mm').diff(dayjs(timeString[0], 'HH:mm'), 'hour', true)
-        setHours(hoursDiff)
         setHoveredCell({ time: timeString[0], day: day })
     }
 
     const showModal = () => {
-      setIsModalOpen(true)
+        setIsModalOpen(true)
     }
 
     const handleOk = () => {
-      setIsModalOpen(false)
+        setIsModalOpen(false)
     }
 
     const handleCancel = () => {
-      setIsModalOpen(false)
-      setIsHovering(!isHovering)
+        setIsModalOpen(false)
+        if (!edit) {
+            setIsHovering(!isHovering)
+        }
     }
 
     return (
         <>
         <div className="container" style={{ minHeight: 24}}>
             { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={record}/>
+                    <ShiftCard cardStyle={cardStyleConfig} record={hours} handleEdit={handleClick} setEdit={setEdit} />
             ) : (
             <>
                 { display && (
                     <Tooltip title="Add shift">
-                        <Button size="small" style={{ fontSize: 8 }} onClick={handleClick} icon={<PlusOutlined />} />
+                        <Button type="text" style={{ width: '100%', height: '100%', padding: 8 }} size="small" onClick={handleClick} icon={<PlusOutlined />} />
                     </Tooltip>
                 )}
                 { isHovering && (
-                    <ShiftCard cardStyle={cardStyleConfig} record={shift}/>
+                    <ShiftCard cardStyle={cardStyleConfig} record={hours} handleEdit={handleClick} setEdit={setEdit} />
                 )}
             </>
             )}
                 </div>
-            <Modal title="New Shift" open={isModalOpen} onOk={handleOk} onCancel={handleCancel}>
-                <Space direction="vertical" size={16}>
-                    <Input.Group compact>
-                    <TimePicker.RangePicker 
-                        style={{ width: '100%' }} 
-                        format="HH:mm" 
-                        defaultValue={[dayjs(hour, 'HH:mm'), null]} 
-                        disabled={[true, false]} 
-                        onChange={handleHoursChange}
-                        hideDisabledOptions
-                        disabledTime={(current) => {
-                            return {
-                                disabledHours: () => {
-                                    const hours = []
-                                    for (let i = 0; i < 24; i++) {
-                                        if (i < dayjs(hour, 'HH:mm').hour() + 1) {
-                                            hours.push(i)
+            {isModalOpen && (
+                <Formik
+                    initialValues={{
+                        start: hours.start,
+                        end: hours.end,
+                    }}
+                    validationSchema={timeslotSchema}
+                    onSubmit={(values, { setSubmitting }) => {
+                        console.log(values)
+                        setSubmitting(false)
+                        setIsModalOpen(false)
+                    }}
+                >
+                    { props => (
+                    <FormikForm>
+                        <Modal 
+                            title="New Timeslot" 
+                            open={isModalOpen} 
+                            onCancel={handleCancel}
+                            destroyOnClose
+                            footer={[
+                                <Button key="back" onClick={handleCancel}>
+                                    Cancel
+                                </Button>,
+                                <Submit key="submit" type="primary">
+                                    Create Timeslot
+                                </Submit>,
+                            ]}
+                        >
+                            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                <TimePicker.RangePicker 
+                                    style={{ width: '100%' }} 
+                                    format="HH:mm" 
+                                    //defaultValue={[dayjs(hour, 'HH:mm'), null]} 
+                                    defaultValue={[dayjs(props.values.start, 'HH:mm'), props.values.end ? dayjs(props.values.end, 'HH:mm') : null]} 
+                                    allowClear={false}
+                                    disabled={[true, false]} 
+                                    //onChange={handleHoursChange}
+                                    onChange={(time, timeString) => {
+                                        props.setFieldValue('start', timeString[0])
+                                        props.setFieldValue('end', timeString[1])
+                                        handleHoursChange(timeString)
+                                    }}
+                                    hideDisabledOptions
+                                    disabledTime={(current) => {
+                                        return {
+                                            disabledHours: () => {
+                                                const hours = []
+                                                for (let i = 0; i < 24; i++) {
+                                                    if (i < dayjs(hour, 'HH:mm').hour() + 1) {
+                                                        hours.push(i)
+                                                    }
+                                                }
+                                                return hours
+                                            },
+                                            disabledMinutes: () => {
+                                                const minuteSteps = [0, 30, 59]
+                                                const minutes = []
+                                                for (let i = 0; i < 60; i++) {
+                                                    if (!minuteSteps.includes(i)) {
+                                                        minutes.push(i)
+                                                    }
+                                                }
+                                                return minutes
+                                            },
                                         }
-                                    }
-                                    return hours
-                                },
-                                disabledMinutes: () => {
-                                    const minuteSteps = [0, 30, 59]
-                                    const minutes = []
-                                    for (let i = 0; i < 60; i++) {
-                                        if (!minuteSteps.includes(i)) {
-                                            minutes.push(i)
-                                        }
-                                    }
-                                    return minutes
-                                },
-                            }
-                        }}
-                    />
-                    </Input.Group>
-                    <Checkbox>All Day</Checkbox>
-                    <Select
-                        placeholder="Frequency"
-                        optionFilterProp="children"
-                        style={{ width: '100%' }}
-                        options={[
-                            { label: 'Does not repeat', value: 'Does not repeat' },
-                            { label: 'Daily', value: 'Daily' },
-                            { label: 'Weekly on Friday', value: 'Weekly on Friday' },
-                            { label: 'Montly on the second Friday', value: 'Montly on the second Friday' },
-                            { label: 'Annualy on February 24', value: 'Annualy on February 24' },
-                            { label: 'Every weekday (Mon to Fri)', value: 'Every weekday (Mon to Fri)' },
-                            { label: 'Custom...', value: 'Custom...' },
-                        ]}
-                    />
-                    <Select
-                        placeholder="City"
-                        optionFilterProp="children"
-                        style={{ width: '100%' }}
-                        options={[
-                            { label: 'Thunder Bay', value: 'Thunder Bay' },
-                            { label: 'Toronto', value: 'Toronto' },
-                        ]}
-                    />
-                    <Select
-                        placeholder="Drivers"
-                        optionFilterProp="children"
-                        style={{ width: '100%' }}
-                        options={[
-                            { label: 'Thunder Bay', value: 'Thunder Bay' },
-                            { label: 'Toronto', value: 'Toronto' },
-                        ]}
-                    />
-                    <Input placeholder="Driver Limit" type="number" min={10} max={50} defaultValue={shift?.drivers} onChange={(event) => {setShift({...shift, drivers: event.target.value})}} />
-                </Space>
-            </Modal>
+                                    }}
+                                />
+                                <Checkbox 
+                                    onChange={() => {
+                                        props.setFieldValue('start', '00:00')
+                                        props.setFieldValue('end', '23:59')
+                                        handleHoursChange(['00:00', '23:59'])
+                                    }}
+                                >
+                                    All Day
+                                </Checkbox>
+                            </Space>
+                        </Modal>
+                    </FormikForm>
+                    )}
+                </Formik>
+            )}
         </>
     )
 }

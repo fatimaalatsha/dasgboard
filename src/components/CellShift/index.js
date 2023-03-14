@@ -12,16 +12,17 @@ import {
     TimePicker, 
     Checkbox, 
     Select,
-    Dropdown 
+    Dropdown,
+    Tooltip,
 } from 'antd'
-import { ArrowRightOutlined, UserOutlined, MoreOutlined } from '@ant-design/icons'
+import { ArrowRightOutlined, UserOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../store'
 
-import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
+import Submit from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import { CitySelect } from '../CitySelect' // Import CitySelect component
 import generateName from '../../utils/name-creation' // Dummy name array generator
 
@@ -66,15 +67,23 @@ const generateNames = (numNames) => {
   
 const namesArray = generateNames(30)
 
-const ShiftCard = ({record, cardStyle}) => {
+const ShiftCard = ({record, cardStyle, handleEdit, setEdit}) => {
+
+    const onClick = ({ key }) => {
+        if (key === '1') {
+            handleEdit()
+            setEdit(true)
+        }
+    }
+
     return (
-        <div className="floating-component" style={{ position: 'absolute', top: 5, left: 5, zIndex: 999, width: 'calc(100% - 10px)' }}>
+        <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, width: 'calc(100% + 2px)' }}>
             <Card 
                 style={cardStyle}
-                bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100% - 10px)', padding: 8 }}
+                bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100%)', padding: 8 }}
             >
                 <Row justify="end">
-                    <Dropdown menu={{items}} >
+                    <Dropdown menu={{items, onClick }} >
                         <a onClick={(e) => e.preventDefault()}>
                         <Space>
                             <MoreOutlined />
@@ -108,6 +117,7 @@ const ShiftCard = ({record, cardStyle}) => {
 const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [selectedItems, setSelectedItems] = useState([]) // State to hold selected options
+    const [edit, setEdit] = useState(false) // State to hold edit mode
     const filteredOptions = namesArray.filter((o) => !selectedItems.includes(o)) // Options to show in the dropdown
     const { token } = useToken()
     const [hours, setHours] = useState({
@@ -120,10 +130,10 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     const [shift, setShift] = useState({
         drivers: 10,
         start: record.start || record.time,
-        end: record.end || '00:00',
+        end: record.end || null,
     })
 
-    const floatingComponentHeight = hours.diff * 57 - 10
+    const floatingComponentHeight = hours.diff * 57 + 2
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
@@ -139,8 +149,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     } */
   
     const handleClick = () => {
-        console.log(record)
-        setIsHovering(!isHovering)
+        //console.log(record)
+        setIsHovering(true)
         showModal()
     }
 
@@ -165,19 +175,25 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
 
     const handleCancel = () => {
       setIsModalOpen(false)
-      setIsHovering(!isHovering)
+      if (!edit) {
+            setIsHovering(!isHovering)
+        }
     }
 
     return (
         <>
             <div className="container" style={{ minHeight: 24}}>
                 { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={record}/>
+                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} />
                 ) : (
                 <>
-                    {display && <Button size="small" onClick={handleClick}>New Shift</Button>}
+                    {  display && (
+                    <Tooltip title="Add shift">
+                        <Button type="text" style={{ width: '100%', height: '100%', padding: 16 }} size="small" onClick={handleClick} icon={<PlusOutlined />} />
+                    </Tooltip> 
+                    )}
                         { isHovering && (
-                            <ShiftCard cardStyle={cardStyleConfig} record={shift}/>
+                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} />
                         )}
                 </>
                 )}
@@ -185,13 +201,13 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
             <Formik
                 initialValues={{
                     start: shift.start,
-                    end: null,
+                    end: shift.end,
                     drivers: 10,
                     city: scheduleFilter.city,
                 }}
                 validationSchema={shiftSchema}
                 onSubmit={(values, { setSubmitting }) => {
-                    console.log(values)
+                    //console.log(values)
                     setSubmitting(false)
                     setIsModalOpen(false)
                 }}
@@ -207,9 +223,9 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                 <Button key="back" onClick={handleCancel}>
                                     Cancel
                                 </Button>,
-                                <SubmitWrapper key="submit" type="primary">
+                                <Submit key="submit" type="primary">
                                     Create Shift
-                                </SubmitWrapper>,
+                                </Submit>,
                             ]}
                         >
                             <Space direction="vertical" size={16} style={{ width: '100%' }}>
@@ -218,6 +234,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                     style={{ width: '100%' }} 
                                     format="HH:mm" 
                                     defaultValue={[dayjs(props.values.start, 'HH:mm'), props.values.end ? dayjs(props.values.end, 'HH:mm') : null]} 
+                                    allowClear={false}
                                     disabled={[true, false]} 
                                     //onChange={handleHoursChange}
                                     onChange={(time, timeString) => {

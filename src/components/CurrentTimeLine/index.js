@@ -26,7 +26,7 @@ const CurrentTimeLine = ({axis}) => {
         style: {
             position: 'absolute',
             top: axis ? 0 : `calc(${percentOfDay}% + 39px)`, // 48px is the height of the header
-            left: axis ? `calc(${percentOfDay}% + 39px)` : 0,
+            left: axis ? `calc(${percentOfDay}% + 45.45px)` : 0,
             margin: 0,
             width: axis ? '2px' : '100%',
             ...(axis && { minWidth: '2px'}),

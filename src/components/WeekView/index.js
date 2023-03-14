@@ -72,7 +72,11 @@ const WeekView = ({selectedWeek, data, days }) => {
         for ( let item = 0; item < record[day].length; item++ ) {
             if (record[day][item].dayOfWeek === day && record[day][item].start === record.time) {
                 return (
-                    <CellShift key={item} isCellFilled={record[day][item].dayOfWeek === day && record[day][item].start === record.time} record={record[day][item]} />
+                    <CellShift 
+                        key={item} 
+                        isCellFilled={record[day][item].dayOfWeek === day && record[day][item].start === record.time} record={record[day][item]} 
+                        setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
+                    />
                 )
             } 
         }
