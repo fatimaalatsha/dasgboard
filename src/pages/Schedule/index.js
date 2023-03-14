@@ -3,7 +3,9 @@ import { Card, Space, Button, DatePicker, Select, Radio, Modal, Input, TimePicke
 import { LeftOutlined, RightOutlined } from '@ant-design/icons' // Import Ant icons
 
 import dayjs from 'dayjs' // Import date handlers
-import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
+import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
+import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
+
 import WeekView from '../../components/WeekView'
 import DayView from '../../components/DayView'
 import generateName from '../../utils/name-creation'
@@ -11,6 +13,7 @@ import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
 
 dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
@@ -166,6 +169,9 @@ const Schedule = () => {
                                 { label: 'Unavailability', value: 'Unavailability' },
                             ]}
                         />
+                        <div>
+                            {dayjs().tz('America/Thunder_Bay').format('HH:mm')}
+                        </div>
                     </Space>
                     <Space style={{ display: 'flex', width: '100%'}}>
                         <Button onClick={handleTodayClick}>Today</Button>

@@ -6,11 +6,9 @@ import {
     Row, 
     Typography, 
     Modal, 
-    Input, 
     Button, 
     TimePicker, 
     Checkbox, 
-    Select, 
     Tooltip, 
     Dropdown 
 } from 'antd'
@@ -21,7 +19,7 @@ import { object, string } from 'yup' // Import Yup for form validation
 import Submit from '../forms/SubmitWrapper'
 
 const { useToken } = theme
-const { Text, Title } = Typography
+const { Text, Link } = Typography
 //const { Group } = Avatar
 
 //const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
@@ -82,11 +80,11 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit }) => {
                         <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
                     </Space>
                     <Dropdown menu={{items, onClick}} >
-                        <a onClick={(e) => e.preventDefault()}>
+                        <Link onClick={(e) => e.preventDefault()}>
                         <Space>
                             <MoreOutlined />
                         </Space>
-                        </a>
+                        </Link>
                     </Dropdown>
                 </Space>
                 </Row>
@@ -135,9 +133,9 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
         setIsModalOpen(true)
     }
 
-    const handleOk = () => {
+    /* const handleOk = () => {
         setIsModalOpen(false)
-    }
+    } */
 
     const handleCancel = () => {
         setIsModalOpen(false)
