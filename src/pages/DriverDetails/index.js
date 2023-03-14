@@ -55,7 +55,6 @@ const { TextArea } = Input // Destructure TextArea from Input
 
 const SelectFeeder = (props) => {
   const { data, isLoading, error } = useFetch(`/v1/cities`)// Call useFetch custom hook
-
   if (isLoading) {
     return <>Loading...</>
   }
@@ -175,6 +174,7 @@ const DriverDetails = () => {
   const parentUrl = pathArray.join('/')
   const navigate = useNavigate() // Navigate to other pages
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
+  console.log(data)
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
@@ -702,7 +702,7 @@ const EnableAdditionalDocs = ({status, id, refetch}) => { // TODO: Implement ena
 }
 
 
-const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub  }) => {
+const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub, pink_slip  }) => {
   const [slip, setSlip] = useState(false)// Set slep modal state
   return (
     <Drawer
@@ -715,7 +715,7 @@ const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub 
     >
       <Space direction="vertical" style={{ width: '100%' }}>
         { (status === 'active' && province === 1 )&&<Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
-       { (status === 'active' && province === 1 ) && <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />}
+       {( status === 'active' && pink_slip) && <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />}
         <AdditionalDocsFeeder driverid={driverid} sub={sub} />
       </Space>
     {/* pink slip modal */}
