@@ -106,7 +106,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [edit, setEdit] = useState(false) // State to hold edit mode
 
-    const floatingComponentWidth = hours.diff * 60.45  // 60.45 is the width of each hour in the calendar
+    const floatingComponentWidth = hours.diff * 60.9936  // 60.9936 is the average width of each hour in the calendar
 
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
