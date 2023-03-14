@@ -1,14 +1,14 @@
 import { Column } from '@ant-design/plots';
 
 
-const ChartColumn = ({props}) => {
+const ChartColumn = ({props, xField, yField, seriesField}) => {
 
     return (
         <Column
             data={props}
-            xField="city"
-            yField="count"
-            seriesField="status"
+            xField={xField}
+            yField={yField}
+            seriesField={seriesField}
             isStack={true}
             label={{
               position: 'middle',

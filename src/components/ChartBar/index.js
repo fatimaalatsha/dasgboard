@@ -1,13 +1,13 @@
 import { Bar } from '@ant-design/plots';
 
-const ChartBar = ({props}) => {
+const ChartBar = ({props, xField, yField, seriesField}) => {
 
     return (
         <Bar
           data={props}
-          xField="count"
-          yField="city"
-          seriesField="status"
+          xField={xField}
+          yField={yField}
+          seriesField={seriesField}
           conversionTag={{
             offsetX: 10,
             offsetY: -10,

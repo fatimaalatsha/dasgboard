@@ -10,6 +10,7 @@ import ChartColumn from '../../components/ChartColumn';
 import ChartPie from '../../components/ChartPie';
 import CardStatistic from '../../components/CardStatistic';
 import ChartLine from '../../components/ChartLine';
+import ChartRadialBar from '../../components/ChartRadialBar';
 const { Title, Text} = Typography;
 
 const NumberOfLead = (dateFrom) => {
@@ -29,7 +30,8 @@ const NumberOfLead = (dateFrom) => {
   const { data, error, isLoading } = useFetch(
     `/v1/reports/drivers-status?${getUserParams()}`
   );
-
+ 
+  console.log(data);
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
 
@@ -51,32 +53,33 @@ const NumberOfLead = (dateFrom) => {
     return total;
   };
 
+  
 
   const mapDataToObjects = (data) => {
     const { items } = data;
     const mappedData = [];
 
-    for (const cityObj of Object.values(items)) {
-      if (typeof cityObj === 'object' && cityObj.data) {
-        for (const dataObj of cityObj.data) {
+    for (const statusObj of Object.values(items)) {
+      if (typeof statusObj === 'object' && statusObj.data) {
+        for (const dataObj of statusObj.data) {
           mappedData.push({
-            status: dataObj.status,
-            city: cityObj.city,
+            city: dataObj.city,
+            status: statusObj.status,
             count: dataObj.count,
           });
         }
       } else {
         mappedData.push({
-          status: cityObj.status,
-          city: items.city,
-          count: cityObj.count,
+          city: statusObj.city,
+          status: items.status,
+          count: statusObj.count,
         });
       }
     }
     
     return mappedData;
   };
- 
+ console.log(mapDataToObjects(data));
   if (data.total_items === 0) {
     return (
       <Card
@@ -149,14 +152,14 @@ const NumberOfLead = (dateFrom) => {
                 <CardStatistic title="Active" value={data.total_items} color="#3f8600" />
                 <CardStatistic title="Awating" value={15} color="#1307f5" />
                 <CardStatistic title="New Leads" value={7} color="#f507c9" />
-                <CardStatistic title="Average Time" value={'3 Days'} color="#f57207" />
+                <CardStatistic title="Average Time" value={'3 Days'} color="#07f5b5" />
                 <CardStatistic title="ConversionRate" value={"23%"} color="#3f8600" />               
               </Space>
         {chartType === 'bar' && (
-            <ChartBar props={mapDataToObjects(data)} />
+            <ChartBar props={mapDataToObjects(data)} xField="count" yField="status" seriesField="city"/>
         )}
         {chartType === 'column' && (
-            <ChartColumn props={mapDataToObjects(data)} />
+            <ChartColumn props={mapDataToObjects(data)}  xField="city" yField="count" seriesField="status"/>
           )}
           {chartType === 'pie' && (
             <ChartPie props={mapDataToObjects(data)} />
@@ -165,7 +168,7 @@ const NumberOfLead = (dateFrom) => {
                 <ChartLine props={mapDataToObjects(data)} />
               )}
 
-
+            <ChartRadialBar props={mapDataToObjects(data)} />
             </Space>
           </Col>
         </Row>

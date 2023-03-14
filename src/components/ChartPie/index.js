@@ -1,7 +1,7 @@
 import { Pie } from '@ant-design/plots';
 
 
-const ChartPie = ({props}) => {
+const ChartPie = ({props, count , city}) => {
 
     return (
         <Pie

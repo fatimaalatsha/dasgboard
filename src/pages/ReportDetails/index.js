@@ -26,7 +26,7 @@ const DriversStatusPerCity= (dateFrom) => {
   const { data, error, isLoading } = useFetch(
     `/v1/reports/conversion-rates?${getUserParams()}`
   );
-
+  console.log(data);
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
   return (

@@ -1,6 +1,12 @@
-import { Card, Table, Typography } from 'antd';
+import { Card, Table, Typography,Space } from 'antd';
 import { AreaChartOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
+import useFetch from '../../hooks/use-fetch';
+import CardStatistic from '../../components/CardStatistic';
+import ChartColumn from '../../components/ChartColumn';
+import ChartLine from '../../components/ChartLine';
+import qs from 'qs';
+
 
 const { Title } = Typography;
 
@@ -19,7 +25,7 @@ const columns = [
   },
 ];
 
-const data = [
+const dataSet = [
   {
     key: 'conversion_rates',
     name: 'Conversion Rates Per City',
@@ -40,16 +46,51 @@ const data = [
 
 const Reports = () => {
   const navigate = useNavigate();
-
   const handleRowClick = (record) => {
     navigate(`/reports/${record.key}`);
   };
 
+  const dateFrom = {  
+    date_from: '2021-01-01',
+    date_to: '2024-01-31',
+  };
+ const getUserParams = () => {
+    const { date_from, date_to } = dateFrom;
+    return qs.stringify(
+      {
+        date_from,
+        date_to,
+      },
+      { skipNulls: true, arrayFormat: 'comma' }
+    );
+  };
+
+  const { data, error, isLoading } = useFetch(
+    `/v1/reports/conversion-rates?${getUserParams()}`
+  );
+  console.log(data);
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Something went wrong...</p>;
   return (
     <Card title={<Title level={2}>Reports</Title>}>
+      <Space direction="horizontal" size="large">
+                <CardStatistic title="Total Leads" value={980} color="#3f8600" />
+                <CardStatistic title="Active" value={460} color="#3f8600" />
+                <CardStatistic title="Awating" value={15} color="#1307f5" />
+                <CardStatistic title="New Leads" value={7} color="#f507c9" />
+                <CardStatistic title="Cities " value={15} color="#f57207" />
+                <CardStatistic title="Total Rides" value={"23%"} color="#3f8600" />               
+      </Space> 
+      
+      <Card>
+        <ChartColumn props={data.items} />
+      </Card>
+      <Card>
+        <ChartLine props={data.items} />
+      </Card>
       <Table
         columns={columns}
-        dataSource={data}
+        dataSource={dataSet}
         onRow={(record) => ({
           onClick: () => handleRowClick(record),
         })}
