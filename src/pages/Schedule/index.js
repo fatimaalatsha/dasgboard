@@ -41,7 +41,7 @@ const generateNames = (numNames) => {
     return names;
   }
   
-const namesArray = generateNames(10)
+const namesArray = generateNames(100)
 namesArray.push('patient alpaca')
 
 const Schedule = () => {
