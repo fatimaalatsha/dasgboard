@@ -1,12 +1,12 @@
 import { Line } from '@ant-design/plots';
 
-const ChartLine = ({ props }) => {
+const ChartLine = ({ props, xField, yField, seriesField }) => {
     return (
         <Line
         data={props}
-        xField="count"
-        yField="date"
-        seriesField="status"
+        xField={xField}
+        yField={yField}
+        seriesField={seriesField}
         isStack={true}
         label={{
             position: 'middle',

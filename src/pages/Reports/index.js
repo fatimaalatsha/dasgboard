@@ -83,10 +83,10 @@ const Reports = () => {
       </Space> 
       
       <Card>
-        <ChartColumn props={data.items} />
+        <ChartColumn props={data.items} xField='city' yField='active' seriesField='active' />
       </Card>
       <Card>
-        <ChartLine props={data.items} />
+        <ChartLine props={data.items} yField='total' xField='city' />
       </Card>
       <Table
         columns={columns}
