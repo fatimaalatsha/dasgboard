@@ -6,7 +6,7 @@ import DayCellShift from '../DayCellShift' // Import CellShift component
 
 const { Text, Title } = Typography
 
-const DayView = ({selectedDay, data, hours }) => {
+const DayView = ({selectedDay, data, hours, tz }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
 
   const columns = [
@@ -75,7 +75,7 @@ const DayView = ({selectedDay, data, hours }) => {
           bordered
           size="small"
       />
-      <CurrentTimeLine axis />
+      <CurrentTimeLine axis tz={tz} />
     </div>
   )
 }
