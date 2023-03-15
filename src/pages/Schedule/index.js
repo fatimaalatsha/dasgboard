@@ -3,14 +3,18 @@ import { Card, Space, Button, DatePicker, Select, Radio, Modal, Input, TimePicke
 import { LeftOutlined, RightOutlined } from '@ant-design/icons' // Import Ant icons
 
 import dayjs from 'dayjs' // Import date handlers
-import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
+import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
+import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
+
 import WeekView from '../../components/WeekView'
 import DayView from '../../components/DayView'
 import generateName from '../../utils/name-creation'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
+import { getCityTimezone } from '../../utils/city-status'
 
 dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
 
@@ -41,7 +45,7 @@ const generateNames = (numNames) => {
     return names;
   }
   
-const namesArray = generateNames(100)
+const namesArray = generateNames(30)
 namesArray.push('patient alpaca')
 
 const Schedule = () => {
@@ -148,7 +152,7 @@ const Schedule = () => {
                     <Space style={{ display: 'flex', width: '100%'}}>
                         <CitySelect 
                             defaultValue={scheduleFilter.city} 
-                            onChange={value => setScheduleFilter({city: value})}   
+                            onChange={value => setScheduleFilter({ city: value, tz: getCityTimezone(value) })}   
                             style={{ width: 200 }}
                         />
                         <Select
@@ -181,9 +185,9 @@ const Schedule = () => {
                         <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>
-                { view === 1 ? <WeekView selectedWeek={selectedDate.week} data={data} days={days} />
+                { view === 1 ? <WeekView selectedWeek={selectedDate.week} data={data} days={days} tz={scheduleFilter.tz} />
                 : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} />
+                : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} tz={scheduleFilter.tz} />
                 }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>

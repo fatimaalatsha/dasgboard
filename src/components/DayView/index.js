@@ -3,10 +3,11 @@ import { Table, Typography } from 'antd' // Import Ant components
 
 import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import DayCellShift from '../DayCellShift' // Import CellShift component
+import dayjs from 'dayjs' // Import dayjs
 
 const { Text, Title } = Typography
 
-const DayView = ({selectedDay, data, hours }) => {
+const DayView = ({selectedDay, data, hours, tz }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
 
   const columns = [
@@ -20,7 +21,9 @@ const DayView = ({selectedDay, data, hours }) => {
       )
     },
     {
-      title: (<Title level={5}>{selectedDay.format('MMM, dddd DD - YYYY')}</Title>),
+      title: (
+      <Title level={5}>{`${selectedDay.format('MMM, dddd DD - YYYY')} ${dayjs().tz(tz).format('HH:mm')} ${dayjs().tz(tz).format('zZ')} `}</Title>
+      ),
       children: [
         ...hours.map((hour, idx) => ({ // Loop through the days
           title: `${hour}`,
@@ -75,7 +78,7 @@ const DayView = ({selectedDay, data, hours }) => {
           bordered
           size="small"
       />
-      <CurrentTimeLine axis />
+      <CurrentTimeLine axis tz={tz} />
     </div>
   )
 }

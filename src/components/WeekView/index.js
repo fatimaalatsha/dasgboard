@@ -7,21 +7,28 @@ import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import CellShift from '../CellShift' // Import CellShift component
 import { CitySelect } from '../CitySelect'
 import { useFilterStore } from '../../store'
+import { getCityTimezone } from '../../utils/city-status'
 
 const { Text, Title } = Typography
 
-const WeekView = ({selectedWeek, data, days }) => {
+const WeekView = ({selectedWeek, data, days, tz }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
   const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
 
   const columns = [
     {
-      title: 'Time',
+      title: (
+        <Space direction="vertical" align="center" style={{ width: '100%' }}>
+            <Title level={5} style={{ margin: 0 }}>Time</Title>
+            <Text>{`${dayjs().tz(tz).format('HH:mm')} ${dayjs().tz(tz).format('zZ')}`}</Text>
+        </Space>
+        ),
       dataIndex: 'time',
       key: 'time',
-      width: 100,
-      fixed: 'left',
+      render: (text, record) => (
+        <Text strong align="center" style={{ textTransform: 'capitalize', width: '100%', display: 'block' }}>{text}</Text>
+        ),
     },
     ...days.map((day, idx) => ({ // Loop through the days
       title: (
@@ -105,7 +112,7 @@ const WeekView = ({selectedWeek, data, days }) => {
                 className="schedule-week-table"
                 bordered
             />
-            <CurrentTimeLine />
+            <CurrentTimeLine tz={tz} />
         </div>
         :
         <Result
@@ -115,7 +122,7 @@ const WeekView = ({selectedWeek, data, days }) => {
             extra={
                 <CitySelect 
                     defaultValue={scheduleFilter.city} 
-                    onChange={value => setScheduleFilter({city: value})} 
+                    onChange={value => setScheduleFilter({ city: value, tz: getCityTimezone(value) })} 
                     style={{ width: 200 }}
                 />
             }
