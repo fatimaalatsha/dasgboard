@@ -230,15 +230,6 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
                                         }
                                     }}
                                 />
-                                <Checkbox 
-                                    onChange={() => {
-                                        props.setFieldValue('start', '00:00')
-                                        props.setFieldValue('end', '23:59')
-                                        handleHoursChange(['00:00', '23:59'])
-                                    }}
-                                >
-                                    All Day
-                                </Checkbox>
                             </Space>
                         </Modal>
                     </FormikForm>
