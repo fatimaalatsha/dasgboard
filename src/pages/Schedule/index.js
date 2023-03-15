@@ -170,9 +170,6 @@ const Schedule = () => {
                                 { label: 'Unavailability', value: 'Unavailability' },
                             ]}
                         />
-                        <div>
-                            {dayjs().tz(scheduleFilter.tz).format('HH:mm')}
-                        </div>
                     </Space>
                     <Space style={{ display: 'flex', width: '100%'}}>
                         <Button onClick={handleTodayClick}>Today</Button>
