@@ -11,6 +11,7 @@ import DayView from '../../components/DayView'
 import generateName from '../../utils/name-creation'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
+import { getCityTimezone } from '../../utils/city-status'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -151,7 +152,7 @@ const Schedule = () => {
                     <Space style={{ display: 'flex', width: '100%'}}>
                         <CitySelect 
                             defaultValue={scheduleFilter.city} 
-                            onChange={value => setScheduleFilter({city: value})}   
+                            onChange={value => setScheduleFilter({ city: value, tz: getCityTimezone(value) })}   
                             style={{ width: 200 }}
                         />
                         <Select

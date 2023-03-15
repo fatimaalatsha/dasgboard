@@ -7,6 +7,7 @@ import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import CellShift from '../CellShift' // Import CellShift component
 import { CitySelect } from '../CitySelect'
 import { useFilterStore } from '../../store'
+import { getCityTimezone } from '../../utils/city-status'
 
 const { Text, Title } = Typography
 
@@ -115,7 +116,7 @@ const WeekView = ({selectedWeek, data, days }) => {
             extra={
                 <CitySelect 
                     defaultValue={scheduleFilter.city} 
-                    onChange={value => setScheduleFilter({city: value})} 
+                    onChange={value => setScheduleFilter({ city: value, tz: getCityTimezone(value) })} 
                     style={{ width: 200 }}
                 />
             }
