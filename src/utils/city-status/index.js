@@ -1,5 +1,6 @@
 import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
 import API from '../../api/BaseUrl' // Import API base URL
+import city_timezones from '../../assets/data/city_timezones'
 import  { message }  from 'antd'
 
 //
@@ -99,5 +100,9 @@ const updateEmailTemplate = async (id, payload) => {
     }
 }
 
+const getCityTimezone =  (id) => {
+    const city = city_timezones.find((city) => city.city_id === id)
+    return city.tz
+}
   
-export { createCity, getProvince, updateCityProfile, updateEmailTemplate }
+export { createCity, getProvince, updateCityProfile, updateEmailTemplate, getCityTimezone }
