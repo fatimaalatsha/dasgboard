@@ -7,18 +7,18 @@ import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-const CurrentTimeLine = ({axis}) => {
-    const [currentTime, setCurrentTime] = useState(dayjs().tz('America/Thunder_Bay'))
+const CurrentTimeLine = ({axis, tz}) => {
+    const [currentTime, setCurrentTime] = useState(dayjs().tz(tz))
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setCurrentTime(dayjs().tz('America/Thunder_Bay'))
+            setCurrentTime(dayjs().tz(tz))
         }, 60000)
 
         return () => {
             clearInterval(interval)
         }
-    }, [])
+    }, [tz])
 
     const currentHour = currentTime.hour() // Get current hour
     const currentMinute = currentTime.minute() // Get current minute

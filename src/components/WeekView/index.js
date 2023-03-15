@@ -11,7 +11,7 @@ import { getCityTimezone } from '../../utils/city-status'
 
 const { Text, Title } = Typography
 
-const WeekView = ({selectedWeek, data, days }) => {
+const WeekView = ({selectedWeek, data, days, tz }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
   const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
@@ -106,7 +106,7 @@ const WeekView = ({selectedWeek, data, days }) => {
                 className="schedule-week-table"
                 bordered
             />
-            <CurrentTimeLine />
+            <CurrentTimeLine tz={tz} />
         </div>
         :
         <Result

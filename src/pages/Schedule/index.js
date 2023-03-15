@@ -171,7 +171,7 @@ const Schedule = () => {
                             ]}
                         />
                         <div>
-                            {dayjs().tz('America/Thunder_Bay').format('HH:mm')}
+                            {dayjs().tz(scheduleFilter.tz).format('HH:mm')}
                         </div>
                     </Space>
                     <Space style={{ display: 'flex', width: '100%'}}>
@@ -188,9 +188,9 @@ const Schedule = () => {
                         <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>
-                { view === 1 ? <WeekView selectedWeek={selectedDate.week} data={data} days={days} />
+                { view === 1 ? <WeekView selectedWeek={selectedDate.week} data={data} days={days} tz={scheduleFilter.tz} />
                 : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} />
+                : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} tz={scheduleFilter.tz} />
                 }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
