@@ -18,11 +18,17 @@ const WeekView = ({selectedWeek, data, days, tz }) => {
 
   const columns = [
     {
-      title: 'Time',
+      title: (
+        <Space direction="vertical" align="center" style={{ width: '100%' }}>
+            <Title level={5} style={{ margin: 0 }}>Time</Title>
+            <Text>{`${dayjs().tz(tz).format('HH:mm')} ${dayjs().tz(tz).format('zZ')}`}</Text>
+        </Space>
+        ),
       dataIndex: 'time',
       key: 'time',
-      width: 100,
-      fixed: 'left',
+      render: (text, record) => (
+        <Text strong align="center" style={{ textTransform: 'capitalize', width: '100%', display: 'block' }}>{text}</Text>
+        ),
     },
     ...days.map((day, idx) => ({ // Loop through the days
       title: (
