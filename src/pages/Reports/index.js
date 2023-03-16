@@ -106,10 +106,10 @@ const Reports = () => {
       <Space direction="horizontal" size="large">
           <CardStatistic title="Total Leads" value={countAll(data.items)} color="#3f8600" popInfo="Total number of leads " />
           <CardStatistic title="Active" value={countActive(data.items)} popInfo="Total active drivers" color="#3f8600" />
-          <CardStatistic title="Awating" value={countAll(data.items)-countActive(data.items)} color="#1307f5" popInfo="Number of applicants who are in the process" />
+          <CardStatistic title="Awaiting " value={countAll(data.items)-countActive(data.items)} color="#1307f5" popInfo="Number of applicants who are in the process" />
           <CardStatistic title="New Leads" value={7} color="#f507c9" popInfo="Number of new leads in the last month(hard coded)" />
           <CardStatistic title="Cities " value={data.total_items} color="#f57207" popInfo="Number of active cities"/>
-          <CardStatistic title="Total Rides" value={700} color="#3f8600" popInfo="Rides given acrros all cities(Hard coded)" />               
+          <CardStatistic title="Ineligible " value={700} color="#3f8600" popInfo="(Hard coded)" />               
       </Space> 
       <br />
       <br />
@@ -176,7 +176,7 @@ const Reports = () => {
             }
             }
             
-        onRow={(record) => ({
+        onRow={() => ({
           onClick: () => {
             navigate(`/reports/conversion_rates_per_stage`);
           },

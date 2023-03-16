@@ -48,7 +48,19 @@ const NumberOfLead = (dateFrom) => {
     return total;
   };
 
-  const conversionRate = (data) => {
+  const conversionRateEligible = (data) => {
+    var total = 0;
+    for (var i = 0; i < data.length; i++) {
+      if (data[i].status === "Active") {
+        total += data[i].count;
+      }
+    }
+
+    const eligible = countAll(data) - countIneligible(data);
+    return (total / eligible * 100).toFixed(2);
+  };
+
+  const conversionRateAll = (data) => {
     var total = 0;
     for (var i = 0; i < data.length; i++) {
       if (data[i].status === "Active") {
@@ -57,6 +69,7 @@ const NumberOfLead = (dateFrom) => {
     }
     return (total / countAll(data) * 100).toFixed(2);
   };
+
 
 const countIneligible = (data) => {
   let total = 0;
@@ -116,9 +129,9 @@ const countIneligible = (data) => {
     )
   }
   return (
-    <>
-        
+    <>    
       <Card
+        style={{ width: '100%', height: '100%'}}
         title={
           <Space direction="vertical" size="large">
             <Title level={3}> Number of Drivers Status Per City </Title>
@@ -127,14 +140,15 @@ const countIneligible = (data) => {
          <Row  align="middle">
           <Col span={24}>     
            <Space direction="vertical" size="large" style={{ width: '100%' }}>
-              <Space direction="horizontal" size="large">
-                <CardStatistic title="Total" value={countAll(mapDataToObjects(data))} color="#3f8600" popInfo="Total Number of leads shown"/>
+              <Space direction="horizontal" size="small" style={{ width: '100%' }} >
+                <CardStatistic title="Total Applicants" width={160} value={countAll(mapDataToObjects(data))} color="#3f8600" popInfo="Total Number of leads shown"/>
                 <CardStatistic title="Active" value={countActive(mapDataToObjects(data))} color="#3f8600" popInfo={` Number of Activated drivers in the selected period`} />
-                <CardStatistic title="Awating" value={(countAll(mapDataToObjects(data)) - countActive(mapDataToObjects(data)))-countIneligible(mapDataToObjects(data))} color="#1307f5" popInfo="In the process to be activated" />
+                <CardStatistic title="Awaiting " value={(countAll(mapDataToObjects(data)) - countActive(mapDataToObjects(data)))-countIneligible(mapDataToObjects(data))} color="#1307f5" popInfo="In the process to be activated" />
                 <CardStatistic title="Ineligible" value={countIneligible(mapDataToObjects(data))} color="#f50707" popInfo="Number of drivers that are not eligible to be activated & DNC" />
                 <CardStatistic title="New Leads" value={7} color="#f507c9" popInfo="Hard coded" />
                 <CardStatistic title="Average Time" value={'3 Days'} color="#07f5b5" popInfo="Hard coded" />
-                <CardStatistic title="ConversionRate" value={conversionRate(mapDataToObjects(data)) + "%"} color="#3f8600" popInfo="Conversion Rate across all cities" />
+                <CardStatistic title="Conversion Rate Total" width={165} fontSize={1.20} value={conversionRateAll(mapDataToObjects(data)) + "%"} color="#3f8600" popInfo="Total Conversion Rate across all cities" />
+                <CardStatistic title="Conversion Rate Eligible" width={165} fontSize={1.20} value={conversionRateEligible(mapDataToObjects(data)) + "%"} color="#3f8600" popInfo="Eligible Conversion Rate across all cities" />
               </Space>
               <ChartColumn props={mapDataToObjects(data)} xField="status" yField="count" seriesField="city" />
             </Space>
