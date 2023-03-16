@@ -1,9 +1,10 @@
-import { Card, Table, Typography,Space } from 'antd';
+import { Card, Table, Typography,Space, Divider} from 'antd';
 import { AreaChartOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import useFetch from '../../hooks/use-fetch';
 import CardStatistic from '../../components/CardStatistic';
 import ChartColumn from '../../components/ChartColumn';
+import ChartPie from '../../components/ChartPie';
 import ChartLine from '../../components/ChartLine';
 import qs from 'qs';
 
@@ -28,7 +29,7 @@ const columns = [
 const dataSet = [
   {
     key: 'conversion_rates',
-    name: 'Conversion Rates Per City',
+    name: 'Number of Drivers Status Per City',
   },
   {
     key: 'conversion_rates_per_stage',
@@ -51,8 +52,8 @@ const Reports = () => {
   };
 
   const dateFrom = {  
-    date_from: '2021-01-01',
-    date_to: '2024-01-31',
+    date_from: '2020-01-01',
+    date_to: '2023-04-16',
   };
  const getUserParams = () => {
     const { date_from, date_to } = dateFrom;
@@ -65,6 +66,7 @@ const Reports = () => {
     );
   };
 
+
   const { data, error, isLoading } = useFetch(
     `/v1/reports/conversion-rates?${getUserParams()}`
   );
@@ -74,27 +76,99 @@ const Reports = () => {
   return (
     <Card title={<Title level={2}>Reports</Title>}>
       <Space direction="horizontal" size="large">
-                <CardStatistic title="Total Leads" value={980} color="#3f8600" />
-                <CardStatistic title="Active" value={460} color="#3f8600" />
-                <CardStatistic title="Awating" value={15} color="#1307f5" />
-                <CardStatistic title="New Leads" value={7} color="#f507c9" />
-                <CardStatistic title="Cities " value={15} color="#f57207" />
-                <CardStatistic title="Total Rides" value={"23%"} color="#3f8600" />               
+          <CardStatistic title="Total Leads" value={980} color="#3f8600" popInfo="Total number of leads" />
+          <CardStatistic title="Active" value={460} popInfo="Total active drivers" color="#3f8600" />
+          <CardStatistic title="Awating" value={15} color="#1307f5" popInfo="Number of applicants who are in the process" />
+          <CardStatistic title="New Leads" value={7} color="#f507c9" popInfo="Number of new leads in the last month" />
+          <CardStatistic title="Cities " value={15} color="#f57207" popInfo="Number of active cities"/>
+          <CardStatistic title="Total Rides" value={700} color="#3f8600" popInfo="Rides given acrros all cities" />               
       </Space> 
-      
-      <Card>
-        <ChartColumn props={data.items} xField='city' yField='active' seriesField='active' />
-      </Card>
-      <Card>
-        <ChartLine props={data.items} yField='total' xField='city' />
-      </Card>
+      <br />
+      <br />
+      {/* <Card>
+        <ChartColumn props={data.items} xField='city' yField='active' seriesField='city' />
+      </Card> */}
+      {/* <Space direction="horizontal" size={200}
+        style={{ marginTop: '20px' }}
+      > */}
+          {/* <ChartLine props={data.items} yField='total' xField='city'/> */}
+        
+          {/* <ChartPie props={data.items} angleField='total' colorField='active' /> */}
+       <Divider orientation="left">Number Of Leads</Divider>
+     
+          <ChartColumn props={data.items} xField='city' yField='total'  seriesField='city' />
+{/* 
+      </Space> */}
+    
+      <br/>
+      <Divider orientation="left"></Divider>
+
+      <Space direction="horizontal" size={70}
+        style={{ marginTop: '10px' }}
+      >
+        <Card
+          title={<Title level={3}>Multi-city Reports</Title>}
+          style={{ width: 500 }}
+         >
+        <Table
+      columns={columns}
+      dataSource={dataSet}
+      onRow={(record) => ({
+        onClick: () => handleRowClick(record),
+      })}
+          />
+        </Card>
+         <Card
+          title={<Title level={3}>Inter-city Reports</Title>}
+          style={{ width: 500 }}
+         >
       <Table
-        columns={columns}
-        dataSource={dataSet}
+        columns={
+          [
+            {
+              title: 'City',
+              dataIndex: 'city',
+              key: 'city',
+            },
+            {
+              title: 'Total',
+              dataIndex: 'total',
+              key: 'total',
+              },
+              {
+                title: 'Active',
+                dataIndex: 'active',
+                key: 'active',
+              },
+              {
+                title: 'Converison Rate',
+                dataIndex: 'percentage',
+                key: 'percentage',
+              },
+
+            
+          ]
+
+        }
+        dataSource={data.items}
+            pagination={
+              {
+                pageSize: 4,
+                showSizeChanger: false,
+                hideOnSinglePage: true,
+
+            }
+            }
+            
         onRow={(record) => ({
-          onClick: () => handleRowClick(record),
+          onClick: () => {
+            navigate(`/reports/conversion_rates`);
+          },
         })}
+
       />
+     </Card>
+      </Space>
     </Card>
   );
 };

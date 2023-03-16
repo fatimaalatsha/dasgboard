@@ -1,20 +1,18 @@
 import { useState } from 'react';
-import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Statistic } from 'antd';
+import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Table} from 'antd';
 import useFetch from '../../hooks/use-fetch';
 import qs from 'qs';
 import dayjs from 'dayjs';
 
 import { EditOutlined, BarChartOutlined } from '@ant-design/icons';
-import ChartBar from '../../components/ChartBar';
 import ChartColumn from '../../components/ChartColumn';
-import ChartPie from '../../components/ChartPie';
 import CardStatistic from '../../components/CardStatistic';
 import ChartLine from '../../components/ChartLine';
-import ChartRadialBar from '../../components/ChartRadialBar';
 const { Title, Text} = Typography;
 
 const NumberOfLead = (dateFrom) => {
   const [chartType, setChartType] = useState('bar');
+
 
   const getUserParams = () => {
     const { date_from, date_to } = dateFrom;
@@ -53,6 +51,25 @@ const NumberOfLead = (dateFrom) => {
     return total;
   };
 
+  const conversionRate = (data) => {
+    var total = 0;
+    for (var i = 0; i < data.length; i++) {
+      if (data[i].status === "Active") {
+        total += data[i].count;
+      }
+    }
+    return (total / countAll(data) * 100).toFixed(2);
+  };
+
+const countIneligible = (data) => {
+  let total = 0;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].status.includes("Ineligible") || data[i].status.includes("DNC") ) {
+      total += data[i].count;
+    }
+  }
+  return total;
+};
   
 
   const mapDataToObjects = (data) => {
@@ -108,72 +125,26 @@ const NumberOfLead = (dateFrom) => {
       <Card
         title={
           <Space direction="vertical" size="large">
-            <Title level={3}>Number of Leads By Application</Title>
+            <Title level={3}> Number of Drivers Status Per City </Title>
           </Space>
             }>
          <Row  align="middle">
-          <Col span={24}>
-            <Space direction='horizontal' size="large" >
-          <Button
-            type="primary"
-            onClick={() => setChartType('bar')}
-            disabled={chartType === 'bar'}
-          >
-            Bar Chart
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => setChartType('column')}
-            disabled={chartType === 'column'}
-          >
-            Column Chart
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => setChartType('pie')}
-            disabled={chartType === 'pie'}
-          >
-            Pie Chart
-          </Button>
-              <Button
-                type="primary"
-                onClick={() => setChartType('line')}
-                disabled={chartType === 'line'}
-              >
-                Line Chart
-              </Button>
-        </Space>
-            <br />
-            <br />
-
-            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+          <Col span={24}>     
+           <Space direction="vertical" size="large" style={{ width: '100%' }}>
               <Space direction="horizontal" size="large">
-                <CardStatistic title="Total" value={countAll(mapDataToObjects(data))} color="#3f8600" />
-                <CardStatistic title="Active" value={data.total_items} color="#3f8600" />
-                <CardStatistic title="Awating" value={15} color="#1307f5" />
-                <CardStatistic title="New Leads" value={7} color="#f507c9" />
-                <CardStatistic title="Average Time" value={'3 Days'} color="#07f5b5" />
-                <CardStatistic title="ConversionRate" value={"23%"} color="#3f8600" />               
+                <CardStatistic title="Total" value={countAll(mapDataToObjects(data))} color="#3f8600" popInfo="Total Number of leads shown"/>
+                <CardStatistic title="Active" value={countActive(mapDataToObjects(data))} color="#3f8600" popInfo={` Number of Activated drivers in the selected period`} />
+                <CardStatistic title="Awating" value={(countAll(mapDataToObjects(data)) - countActive(mapDataToObjects(data)))-countIneligible(mapDataToObjects(data))} color="#1307f5" popInfo="In the process to be activated" />
+                <CardStatistic title="Ineligible" value={countIneligible(mapDataToObjects(data))} color="#f50707" popInfo="Number of drivers that are not eligible to be activated & DNC" />
+                <CardStatistic title="New Leads" value={7} color="#f507c9" popInfo="Hard coded" />
+                <CardStatistic title="Average Time" value={'3 Days'} color="#07f5b5" popInfo="Hard coded" />
+                <CardStatistic title="ConversionRate" value={conversionRate(mapDataToObjects(data)) + "%"} color="#3f8600" popInfo="Conversion Rate across all cities" />
               </Space>
-        {chartType === 'bar' && (
-            <ChartBar props={mapDataToObjects(data)} xField="count" yField="status" seriesField="city"/>
-        )}
-        {chartType === 'column' && (
-            <ChartColumn props={mapDataToObjects(data)}  xField="city" yField="count" seriesField="status"/>
-          )}
-          {chartType === 'pie' && (
-            <ChartPie props={mapDataToObjects(data)} />
-              )}
-              {chartType === 'line' && (
-                <ChartLine props={mapDataToObjects(data)} />
-              )}
-
-            <ChartRadialBar props={mapDataToObjects(data)} />
+              <ChartColumn props={mapDataToObjects(data)} xField="status" yField="count" seriesField="city" />
             </Space>
           </Col>
         </Row>
-      </Card>
-      
+      </Card>      
     </>
   );
 };
@@ -205,7 +176,6 @@ const NumberOfLeads = () => {
       { skipNulls: true, arrayFormat: 'comma' }
     );
   };
-
 
   return (
     <>

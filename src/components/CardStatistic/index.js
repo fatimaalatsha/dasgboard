@@ -1,9 +1,19 @@
-import { Card, Statistic } from 'antd';
+import { Card, Statistic, Popover, Typography } from 'antd';
 
-const CardStatistic = ({ title, value, color }) => {
-    return(
+const { Text } = Typography;
+
+const CardStatistic = ({ title, value, color, popInfo }) => {
+    return (
+        <Popover
+            content={
+                <Text style={{ color: color }}>
+                   {popInfo}
+                </Text>
+
+            }
+        >
         <Card
-            style={{ width: 150, height: 100, textAlign: 'center', backgroundColor: '#f0f2f5' }}
+            style={{ width: 145, height: 100, textAlign: 'center', backgroundColor: '#f0f2f5' }}
         >
                   <Statistic
                   title={title}
@@ -12,7 +22,8 @@ const CardStatistic = ({ title, value, color }) => {
                   valueStyle={{ color: color }}
                   suffix=""
         />
-        </Card>
+            </Card>
+        </Popover>
     )
 }
 

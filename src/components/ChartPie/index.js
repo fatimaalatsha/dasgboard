@@ -1,20 +1,20 @@
 import { Pie } from '@ant-design/plots';
 
 
-const ChartPie = ({props, count , city}) => {
+const ChartPie = ({props, angleField , colorField}) => {
 
     return (
         <Pie
               appendPadding= {10}
               data={props}
-              angleField="count"
-              colorField="city"
+              angleField={angleField}
+              colorField={colorField}
               radius={0.8}
               label={{
                 type: 'spider',
                labelHeight: 28,
                 content: (item) => {
-                  return `${item.city}: ${item.count}`;
+                  return `${angleField}: ${colorField}`;
                 },
                 style: {
                   textAlign: 'center',
