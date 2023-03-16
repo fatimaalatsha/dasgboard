@@ -1,17 +1,16 @@
 import { useState } from 'react';
-import { Typography, Card, Space, DatePicker, Button, Tooltip, Result } from 'antd';
-import { Bar , Column, Pie} from '@ant-design/plots';
+import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Table} from 'antd';
 import useFetch from '../../hooks/use-fetch';
 import qs from 'qs';
 import dayjs from 'dayjs';
 
 import { EditOutlined } from '@ant-design/icons';
-
+import ChartColumn from '../../components/ChartColumn';
+import CardStatistic from '../../components/CardStatistic';
 const { Title, Text} = Typography;
 
 const NumberOfLead = (dateFrom) => {
-  console.log(dateFrom);
-  const [chartType, setChartType] = useState('bar');
+
 
   const getUserParams = () => {
     const { date_from, date_to } = dateFrom;
@@ -27,33 +26,73 @@ const NumberOfLead = (dateFrom) => {
   const { data, error, isLoading } = useFetch(
     `/v1/reports/drivers-status?${getUserParams()}`
   );
-
+ 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
+
+  const countActive = (data) => {
+  var total = 0;
+  for (var i = 0; i < data.length; i++) {
+    if (data[i].status === "Active") {
+      total += data[i].count;
+    }
+    }
+  return total;
+  };
+  
+  const countAll = (data) => {
+    var total = 0;
+    for (var i = 0; i < data.length; i++) {
+      total += data[i].count;
+    }
+    return total;
+  };
+
+  const conversionRate = (data) => {
+    var total = 0;
+    for (var i = 0; i < data.length; i++) {
+      if (data[i].status === "Active") {
+        total += data[i].count;
+      }
+    }
+    return (total / countAll(data) * 100).toFixed(2);
+  };
+
+const countIneligible = (data) => {
+  let total = 0;
+  for (let i = 0; i < data.length; i++) {
+    if (data[i].status.includes("Ineligible") || data[i].status.includes("DNC") ) {
+      total += data[i].count;
+    }
+  }
+  return total;
+};
+  
 
   const mapDataToObjects = (data) => {
     const { items } = data;
     const mappedData = [];
-    for (const cityObj of Object.values(items)) {
-      if (typeof cityObj === 'object' && cityObj.data) {
-        for (const dataObj of cityObj.data) {
+
+    for (const statusObj of Object.values(items)) {
+      if (typeof statusObj === 'object' && statusObj.data) {
+        for (const dataObj of statusObj.data) {
           mappedData.push({
-            status: dataObj.status,
-            city: cityObj.city,
+            city: dataObj.city,
+            status: statusObj.status,
             count: dataObj.count,
           });
         }
       } else {
         mappedData.push({
-          status: cityObj.status,
-          city: items.city,
-          count: cityObj.count,
+          city: statusObj.city,
+          status: items.status,
+          count: statusObj.count,
         });
       }
     }
+    
     return mappedData;
   };
- 
   if (data.total_items === 0) {
     return (
       <Card
@@ -78,244 +117,30 @@ const NumberOfLead = (dateFrom) => {
   }
   return (
     <>
+        
       <Card
         title={
           <Space direction="vertical" size="large">
-            <Title level={3}>Number of Leads By Application</Title>
+            <Title level={3}> Number of Drivers Status Per City </Title>
           </Space>
             }>
-        <Space direction='horizontal' size="large" >
-          <Button
-            type="primary"
-            onClick={() => setChartType('bar')}
-            disabled={chartType === 'bar'}
-          >
-            Bar Chart
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => setChartType('column')}
-            disabled={chartType === 'column'}
-          >
-            Column Chart
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => setChartType('pie')}
-            disabled={chartType === 'pie'}
-          >
-            Pie Chart
-          </Button>
-
-        </Space>
-      
-
-        <Space direction="vertical"
-          size="large"
-        style={{ width: '100%' }}>
-        {chartType === 'bar' && (
-        <Bar
-          data={mapDataToObjects(data)}
-          xField="count"
-          yField="city"
-          seriesField="status"
-          conversionTag={{
-            offsetX: 10,
-            offsetY: -10,
-            style: {
-              fill: 'white',
-              fontSize: 12,
-              fontWeight: 500,
-              textBaseline: 'middle',
-            },
-          }}
-
-          isStack={true}
-
-          label={{
-            position: 'middle',
-            content: (item) => {
-              return item.count;
-
-  // const percent = ((item.count / item.data.total) * 100).toFixed(2);
-  //   return `${percent}%`;
-            },
-            style: {
-              fill: '#fff',
-
-            },
-            formatter: ({ value }) => {
-              console.log(value);
-              return value.toFixed(2);
-            },
-            
-
-          }}
-          legend={{
-            position: 'top',
-            flipPage: false,
-          }}
-          tooltip={{
-            showMarkers: false,
-          }}
-          meta={{
-            count: {
-              alias: 'Number of Leads',
-            },
-            city: {
-              alias: 'City',
-            },
-            status: {
-              alias: 'Status',
-            },
-          }}
-          xAxis={{
-            label: {
-              autoHide: true,
-              autoRotate: false,
-            },
-          }}
-          yAxis={{
-            label: {
-              autoHide: true,
-              autoRotate: false,
-            },
-          }}
-          responsive={true}
-          padding="auto"
-          forceFit={true}
-          theme={{
-            // colors10: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-            minBarWidth: 20,
-            maxBarWidth: 20,
-            color: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-            
-          }}
-
-            />
-        )}
-        {chartType === 'column' && (
-           <Column
-            data={mapDataToObjects(data)}
-            xField="city"
-            yField="count"
-            seriesField="status"
-            isStack={true}
-            label={{
-              position: 'middle',
-              content: (item) => {
-                return item.count;
-              },
-              style: {
-                fill: '#fff',
-              },
-              formatter: ({ value }) => {
-                return value.toFixed(2);
-              },
-            }}
-            legend={{
-              position: 'top',
-              flipPage: false,
-            }}
-            tooltip={{
-              showMarkers: false,
-            }}
-            meta={{
-              count: {
-                alias: 'Number of Leads',
-              },
-              city: {
-                alias: 'City',
-              },
-              status: {
-                alias: 'Status',
-              },
-            }}
-            xAxis={{
-              label: {
-                autoHide: true,
-                autoRotate: false,
-              },
-            }}
-            yAxis={{
-              label: {
-                autoHide: true,
-                autoRotate: false,
-              },
-            }}
-            responsive={true}
-            padding="auto"
-            forceFit={true}
-            theme={{
-              colors10: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-              minBarWidth: 20,
-              maxBarWidth: 20,
-              // color: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-            }}
-
-            conversionTag={{
-              offsetX: 10,
-              offsetY: -10,
-              style: {
-                fill: 'white',
-                fontSize: 12,
-                fontWeight: 500,
-                textBaseline: 'middle',
-              },
-            }}
-          />
-          )}
-          {chartType === 'pie' && (
-            <Pie
-              data={mapDataToObjects(data)}
-              angleField="count"
-              colorField="city"
-              radius={1.0}
-              label={{
-                type: 'outer',
-                offset: 60,
-                content: (item) => {
-                  return `${item.city}: ${item.count} Leads`;
-                },
-                style: {
-                  textAlign: 'center',
-                  fontSize: 12,
-                },
-              }}
-              legend={{
-                position: 'bottom',
-                flipPage: false,
-              }}
-              tooltip={{
-                showMarkers: false,
-              }}
-              meta={{
-                count: {
-                  alias: 'Number of Leads',
-                },
-                city: {
-                  alias: 'City',
-                },
-                status: {
-                  alias: 'Status',
-                },
-              }}
-              responsive={true}
-              interactions={[{ type: 'element-selected' }, { type: 'element-active' }]}
-              padding="auto"
-              forceFit={true}
-              theme={{
-                colors10: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-                minBarWidth: 20,
-                maxBarWidth: 20,
-                // color: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-              }}
-            />
-          )}
-
-          </Space>
-      </Card>
-      
+         <Row  align="middle">
+          <Col span={24}>     
+           <Space direction="vertical" size="large" style={{ width: '100%' }}>
+              <Space direction="horizontal" size="large">
+                <CardStatistic title="Total" value={countAll(mapDataToObjects(data))} color="#3f8600" popInfo="Total Number of leads shown"/>
+                <CardStatistic title="Active" value={countActive(mapDataToObjects(data))} color="#3f8600" popInfo={` Number of Activated drivers in the selected period`} />
+                <CardStatistic title="Awating" value={(countAll(mapDataToObjects(data)) - countActive(mapDataToObjects(data)))-countIneligible(mapDataToObjects(data))} color="#1307f5" popInfo="In the process to be activated" />
+                <CardStatistic title="Ineligible" value={countIneligible(mapDataToObjects(data))} color="#f50707" popInfo="Number of drivers that are not eligible to be activated & DNC" />
+                <CardStatistic title="New Leads" value={7} color="#f507c9" popInfo="Hard coded" />
+                <CardStatistic title="Average Time" value={'3 Days'} color="#07f5b5" popInfo="Hard coded" />
+                <CardStatistic title="ConversionRate" value={conversionRate(mapDataToObjects(data)) + "%"} color="#3f8600" popInfo="Conversion Rate across all cities" />
+              </Space>
+              <ChartColumn props={mapDataToObjects(data)} xField="status" yField="count" seriesField="city" />
+            </Space>
+          </Col>
+        </Row>
+      </Card>      
     </>
   );
 };
@@ -348,7 +173,6 @@ const NumberOfLeads = () => {
     );
   };
 
-
   return (
     <>
     <Space align="start" direction="horizontal">
@@ -375,7 +199,6 @@ const NumberOfLeads = () => {
                 onClick={() => {
                   setIsEnable(false);
                   setDateset(getUserParams(date.filter.date_from));
-
                 }}
             >
               Cancel
@@ -397,6 +220,7 @@ const NumberOfLeads = () => {
             <Button style={{padding: 0, height: 'auto' }} onClick={() => setIsEnable(true)} type='link' icon={<EditOutlined />} />
         </Tooltip>
       </Space>
+       
       {/* Pass date as a prop and show report if showReport is true */}
       {showReport && <NumberOfLead date_from={date.filter.date_from} date_to={date.filter.date_to} />}
     </>
