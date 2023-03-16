@@ -42,14 +42,14 @@ const ChartColumn = ({props, xField, yField, seriesField}) => {
             }}
             xAxis={{
               label: {
-                autoHide: true,
-                autoRotate: false,
+                autoHide: false,
+                autoRotate: true,
               },
             }}
             yAxis={{
               label: {
-                autoHide: true,
-                autoRotate: false,
+                autoHide: false,
+                autoRotate: true,
               },
             }}
             responsive={true}
@@ -57,8 +57,9 @@ const ChartColumn = ({props, xField, yField, seriesField}) => {
             forceFit={true}
             theme={{
               colors10: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-              minBarWidth: 20,
-              maxBarWidth: 20,
+              minBarWidth: 250,
+              maxBarWidth: 250,
+              
               // color: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
             }}
 
@@ -71,7 +72,10 @@ const ChartColumn = ({props, xField, yField, seriesField}) => {
                 fontWeight: 500,
                 textBaseline: 'middle',
               },
-            }}
+        }}
+        
+
+        
         />
     );
 };
