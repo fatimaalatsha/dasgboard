@@ -4,14 +4,12 @@ import useFetch from '../../hooks/use-fetch';
 import qs from 'qs';
 import dayjs from 'dayjs';
 
-import { EditOutlined, BarChartOutlined } from '@ant-design/icons';
+import { EditOutlined } from '@ant-design/icons';
 import ChartColumn from '../../components/ChartColumn';
 import CardStatistic from '../../components/CardStatistic';
-import ChartLine from '../../components/ChartLine';
 const { Title, Text} = Typography;
 
 const NumberOfLead = (dateFrom) => {
-  const [chartType, setChartType] = useState('bar');
 
 
   const getUserParams = () => {
@@ -29,7 +27,6 @@ const NumberOfLead = (dateFrom) => {
     `/v1/reports/drivers-status?${getUserParams()}`
   );
  
-  console.log(data);
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
 
@@ -96,7 +93,6 @@ const countIneligible = (data) => {
     
     return mappedData;
   };
- console.log(mapDataToObjects(data));
   if (data.total_items === 0) {
     return (
       <Card

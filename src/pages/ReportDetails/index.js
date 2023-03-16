@@ -18,104 +18,104 @@ const NumberOfLead = (dateFrom) => {
 
   const dummyData = [
     {
-      year: '1991',
+      year: '01',
       value: 3,
       city: 'Tunder Bay',
     },
     {
-      year: '1992',
+      year: '02',
       value: 4,
       city: 'Tunder Bay',
     },
     {
-      year: '1993',
+      year: '03',
       value: 3.5,
       city: 'Tunder Bay',
     },
     {
-      year: '1994',
+      year: '04',
       value: 5,
       city: 'Tunder Bay',
 
     },
     {
-      year: '1995',
+      year: '05',
       value: 4.9,
       city: 'Tunder Bay',
 
     },
     {
-      year: '1996',
+      year: '06',
       value: 6,
       city: 'Tunder Bay',
 
     },
     {
-      year: '1997',
+      year: '07',
       value: 7,
             city: 'Tunder Bay',
 
     },
     {
-      year: '1998',
+      year: '08',
       value: 9,
       city: 'Tunder Bay',
 
     },
     {
-      year: '1999',
+      year: '09',
       value: 13,
       city: 'Tunder Bay',
 
     },
        {
-      year: '1991',
+      year: '01',
       value: 3,
       city: 'north bay',
     },
     {
-      year: '1992',
+      year: '02',
       value: 4,
       city: 'north bay',
     },
     {
-      year: '1993',
+      year: '03',
       value: 3.5,
       city: 'north bay',
     },
     {
-      year: '1994',
+      year: '04',
       value: 5,
       city: 'north bay',
 
     },
     {
-      year: '1995',
-      value: 4.9,
+      year: '05',
+      value: 19,
       city: 'north bay',
 
     },
     {
-      year: '1996',
+      year: '06',
       value: 6,
       city: 'north bay',
 
     },
     {
-      year: '1997',
+      year: '07',
       value: 7,
             city: 'north bay',
 
     },
     {
-      year: '1998',
-      value: 9,
+      year: '08',
+      value: 19,
       city: 'north bay',
 
     },
     {
-      year: '1999',
-      value: 13,
+      year: '09',
+      value: 16,
       city: 'north bay',
 
     },
@@ -179,7 +179,6 @@ const NumberOfLead = (dateFrom) => {
     `/v1/reports/drivers-status?${getUserParams()}`
   );
  
-  console.log(data);
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
 
@@ -227,7 +226,6 @@ const NumberOfLead = (dateFrom) => {
     
     return mappedData;
   };
- console.log(mapDataToObjects(data));
   if (data.total_items === 0) {
     return (
       <Card
@@ -262,34 +260,6 @@ const NumberOfLead = (dateFrom) => {
          <Row  align="middle">
           <Col span={24}>
             <Space direction='horizontal' size="large" >
-          {/* <Button
-            type="primary"
-            onClick={() => setChartType('bar')}
-            disabled={chartType === 'bar'}
-          >
-            Bar Chart
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => setChartType('column')}
-            disabled={chartType === 'column'}
-          >
-            Column Chart
-          </Button>
-          <Button
-            type="primary"
-            onClick={() => setChartType('pie')}
-            disabled={chartType === 'pie'}
-          >
-            Pie Chart
-          </Button>
-              <Button
-                type="primary"
-                onClick={() => setChartType('line')}
-                disabled={chartType === 'line'}
-              >
-                Line Chart
-              </Button> */}
         </Space>
        
            <Space direction="vertical" size="large" style={{ width: '100%' }}>

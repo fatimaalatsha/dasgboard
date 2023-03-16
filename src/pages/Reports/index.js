@@ -4,8 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import useFetch from '../../hooks/use-fetch';
 import CardStatistic from '../../components/CardStatistic';
 import ChartColumn from '../../components/ChartColumn';
-import ChartPie from '../../components/ChartPie';
-import ChartLine from '../../components/ChartLine';
 import qs from 'qs';
 
 
@@ -34,14 +32,17 @@ const dataSet = [
   {
     key: 'conversion_rates_per_stage',
     name: 'Drivers Status Per City',
+    disabled: true,
   },
   {
     key: 'number_of_leads_per_stage',
     name: 'Number of Leads per Stage',
+    disabled: true,
   },
   {
     key: 'number_of_leads_per_city',
     name: 'Number of Leads per City',
+    disabled: true,
   },
 ];
 
@@ -70,36 +71,51 @@ const Reports = () => {
   const { data, error, isLoading } = useFetch(
     `/v1/reports/conversion-rates?${getUserParams()}`
   );
-  console.log(data);
+
+  const countActive = (data) => {
+    var active = 0;
+    for (var i = 0; i < data.length; i++) {
+        active += data[i].active;
+      
+    }
+    return active; 
+  };
+
+  const countAll = (data) => {
+    var total = 0;
+    for (var i = 0; i < data.length; i++) {
+      total += data[i].total;
+    }
+    return total;
+  };
+
+  const conversionRate = (data) => {
+    var total = 0;
+    for (var i = 0; i < data.length; i++) {
+      if (data[i].status === "Active") {
+        total += data[i].active;
+      }
+    }
+    return (total / countAll(data)) * 100;
+  };
+
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
   return (
     <Card title={<Title level={2}>Reports</Title>}>
       <Space direction="horizontal" size="large">
-          <CardStatistic title="Total Leads" value={980} color="#3f8600" popInfo="Total number of leads" />
-          <CardStatistic title="Active" value={460} popInfo="Total active drivers" color="#3f8600" />
-          <CardStatistic title="Awating" value={15} color="#1307f5" popInfo="Number of applicants who are in the process" />
-          <CardStatistic title="New Leads" value={7} color="#f507c9" popInfo="Number of new leads in the last month" />
-          <CardStatistic title="Cities " value={15} color="#f57207" popInfo="Number of active cities"/>
-          <CardStatistic title="Total Rides" value={700} color="#3f8600" popInfo="Rides given acrros all cities" />               
+          <CardStatistic title="Total Leads" value={countAll(data.items)} color="#3f8600" popInfo="Total number of leads " />
+          <CardStatistic title="Active" value={countActive(data.items)} popInfo="Total active drivers" color="#3f8600" />
+          <CardStatistic title="Awating" value={countAll(data.items)-countActive(data.items)} color="#1307f5" popInfo="Number of applicants who are in the process" />
+          <CardStatistic title="New Leads" value={7} color="#f507c9" popInfo="Number of new leads in the last month(hard coded)" />
+          <CardStatistic title="Cities " value={data.total_items} color="#f57207" popInfo="Number of active cities"/>
+          <CardStatistic title="Total Rides" value={700} color="#3f8600" popInfo="Rides given acrros all cities(Hard coded)" />               
       </Space> 
       <br />
       <br />
-      {/* <Card>
-        <ChartColumn props={data.items} xField='city' yField='active' seriesField='city' />
-      </Card> */}
-      {/* <Space direction="horizontal" size={200}
-        style={{ marginTop: '20px' }}
-      > */}
-          {/* <ChartLine props={data.items} yField='total' xField='city'/> */}
-        
-          {/* <ChartPie props={data.items} angleField='total' colorField='active' /> */}
-       <Divider orientation="left">Number Of Leads</Divider>
      
+       <Divider orientation="left">Number Of Leads</Divider>
           <ChartColumn props={data.items} xField='city' yField='total'  seriesField='city' />
-{/* 
-      </Space> */}
-    
       <br/>
       <Divider orientation="left"></Divider>
 
@@ -162,7 +178,7 @@ const Reports = () => {
             
         onRow={(record) => ({
           onClick: () => {
-            navigate(`/reports/conversion_rates`);
+            navigate(`/reports/conversion_rates_per_stage`);
           },
         })}
 
