@@ -43,10 +43,21 @@ const generateNames = (numNames) => {
       names.push(generateName());
     }
     return names;
-  }
+}
   
 const namesArray = generateNames(150)
-namesArray.push('patient alpaca')
+
+const generateRandomHour = () => { // Generate a random hour
+    const randomHour = Math.floor(Math.random() * 20)
+    return `${randomHour < 10 ? '0' : ''}${randomHour}:00`
+}
+
+const addFourHours = (hourString) => { // Add 4 hours to a time string
+    const [hour, minute] = hourString.split(':')
+    const newHour = (parseInt(hour, 10) + 4) % 24
+    return `${newHour < 10 ? '0' : ''}${newHour}:${minute}`
+  }
+
 
 const Schedule = () => {
     //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
@@ -76,7 +87,7 @@ const Schedule = () => {
     })))
     const [dayData, setDayData] = useState(namesArray.reduce((acc, name) => {
         const timeObj = dayHours.reduce((obj, time) => {
-          obj[time] = time === '04:00' ? [{ name: 'patient alpaca', start: time, end: '12:00' }] : time === '12:00' ? [{name: 'patient alpaca', start: '12:00', end: '18:00' }] : []
+          obj[time] = time === generateRandomHour() ? [{ name: name, start: time, end: addFourHours(time) }] : []
           return obj
         }, {})
       
