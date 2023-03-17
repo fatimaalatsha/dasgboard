@@ -254,7 +254,7 @@ const NumberOfLead = (dateFrom) => {
       <Card
         title={
           <Space direction="vertical" size="large">
-            <Title level={3}>Number of Leads By Application in Thunder Bay </Title>
+            <Title level={3}>Number Of Drivers Status Per City</Title>
           </Space>
             }>
          <Row  align="middle">
