@@ -45,15 +45,6 @@ const uint8ArrayToS3 = async (sub, file) => {
         }
         const data = await s3.send(new PutObjectCommand(params))
         if (data) {
-            // Change endpoint to true on success
-            const endpoint = 'portal-api.uride.app/v1/drivers/cc/{sub}/pinkslip'
-            await fetch(endpoint, {
-                method: 'POST',
-                body: JSON.stringify({ endpoint: true }),
-                headers: {
-                    'Content-Type': 'application/json'
-                }
-            })
             return {
                 key: objectKey,
                 complete: true,

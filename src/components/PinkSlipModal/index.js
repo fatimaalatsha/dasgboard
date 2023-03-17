@@ -5,8 +5,8 @@ import useFetch from "../../hooks/use-fetch"
 import { PdfRenderer }  from "../DocViewer"
 import { createPinkSlip } from '../../utils/pdf-document'
 import {uint8ArrayToS3} from '../../utils/s3-storage'
-
 import { pinkSlipContent } from '../../assets/data/pinkslipcontent' // Pink skil object content
+import { updatePinkSlipStatus } from '../../utils/doc-status'
 
 const PinkSlipModal = ({ id, usersub , open, setOpen}) => {
   const { data, error, isLoading } = useFetch(`/v1/drivers/cc/${id}/vehicles`)
@@ -55,9 +55,12 @@ const PinkSlipModal = ({ id, usersub , open, setOpen}) => {
     const uploadPinkSlip = async () => {
       await uint8ArrayToS3(usersub, pinkslip.pdfBytes)
         .then((res) => {
+          updatePinkSlipStatus(id)
+          .then(() => {
           open && setOpen(false)
-          message.success('Pink Slip Uploaded successfully!')        
+          message.success('Pink Slip Uploaded successfully!')
           })
+        })
     }
 
 
@@ -73,7 +76,7 @@ const PinkSlipModal = ({ id, usersub , open, setOpen}) => {
         open={open}
         onCancel={() => setOpen(false)}
         okText="Upload"
-        onOk={() => uploadPinkSlip()}
+        onOk={() => uploadPinkSlip() }
         okButtonProps={{ disabled: !pinkslip.pdfUrl }}
         destroyOnClose
       >

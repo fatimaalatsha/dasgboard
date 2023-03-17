@@ -174,7 +174,6 @@ const DriverDetails = () => {
   const parentUrl = pathArray.join('/')
   const navigate = useNavigate() // Navigate to other pages
   const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
-  console.log(data)
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
@@ -565,7 +564,7 @@ const showConfirm = (status) => {
     {/* End Notify Driver Modal */}
 
     { /* Additional Documents Drawwer */ }
-      <AdditionalDocsDrawer open={documentDrawer} setOpen={setDocumentDrawer} driverid={id} sub={data.sub_id} status={data.status} province={data.city.province_id} />
+      <AdditionalDocsDrawer open={documentDrawer} setOpen={setDocumentDrawer} driverid={id} sub={data.sub_id} status={data.status} province={data.city.province_id} pinkSlip={data.pink_slip} />
       { /* End Additional Documents Drawwer */}
       { /*change Application Status modal*/}
       <Formik
@@ -702,8 +701,10 @@ const EnableAdditionalDocs = ({status, id, refetch}) => { // TODO: Implement ena
 }
 
 
-const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub, pink_slip  }) => {
+const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub, pinkSlip  }) => {
   const [slip, setSlip] = useState(false)// Set slep modal state
+  const [pinkSlipState, setPinkSlipState] = useState(pinkSlip) // Set pink slip state
+ 
   return (
     <Drawer
       title="Additional Documents"
@@ -715,7 +716,7 @@ const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub,
     >
       <Space direction="vertical" style={{ width: '100%' }}>
         { (status === 'active' && province === 1 )&&<Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
-       {( status === 'active' && pink_slip) && <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />}
+       {( status ==='active'&& pinkSlipState) && <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />}
         <AdditionalDocsFeeder driverid={driverid} sub={sub} />
       </Space>
     {/* pink slip modal */}
