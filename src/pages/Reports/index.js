@@ -27,23 +27,23 @@ const columns = [
 const dataSet = [
   {
     key: 'conversion_rates',
-    name: 'Number of Drivers Status Per City',
+    name: 'Number Of Leads By Application Status',
   },
   {
-    key: 'conversion_rates_per_stage',
-    name: 'Drivers Status Per City',
+    key: 'number_of_drivers',
+    name: 'Number Of Drivers Status Per City',
     disabled: true,
   },
-  {
-    key: 'number_of_leads_per_stage',
-    name: 'Number of Leads per Stage',
-    disabled: true,
-  },
-  {
-    key: 'number_of_leads_per_city',
-    name: 'Number of Leads per City',
-    disabled: true,
-  },
+  // {
+  //   key: 'number_of_leads_per_stage',
+  //   name: 'Number of Leads per Stage',
+  //   disabled: true,
+  // },
+  // {
+  //   key: 'number_of_leads_per_city',
+  //   name: 'Number of Leads per City',
+  //   disabled: true,
+  // },
 ];
 
 const Reports = () => {
@@ -109,7 +109,7 @@ const Reports = () => {
           <CardStatistic title="Awaiting " value={countAll(data.items)-countActive(data.items)} color="#1307f5" popInfo="Number of applicants who are in the process" />
           <CardStatistic title="New Leads" value={7} color="#f507c9" popInfo="Number of new leads in the last month(hard coded)" />
           <CardStatistic title="Cities " value={data.total_items} color="#f57207" popInfo="Number of active cities"/>
-          <CardStatistic title="Ineligible " value={700} color="#3f8600" popInfo="(Hard coded)" />               
+          <CardStatistic title="Ineligible " value={17} color="#3f8600" popInfo="(Hard coded)" />               
       </Space> 
       <br />
       <br />
@@ -176,11 +176,11 @@ const Reports = () => {
             }
             }
             
-        onRow={() => ({
-          onClick: () => {
-            navigate(`/reports/conversion_rates_per_stage`);
-          },
-        })}
+        // onRow={() => ({
+        //   onClick: () => {
+        //     navigate(`/reports/conversion_rates_per_stage`);
+        //   },
+       // })}
 
       />
      </Card>

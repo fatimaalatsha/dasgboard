@@ -111,7 +111,7 @@ const countIneligible = (data) => {
       <Card
       title={
           <Space direction="vertical" size="large">
-            <Title level={3}>Number of Leads By Application</Title>
+            <Title level={3}>Number Of Leads By Application Status</Title>
           </Space>
             }
       >
