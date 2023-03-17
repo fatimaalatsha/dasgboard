@@ -8,11 +8,19 @@ import {
     Modal, 
     Button, 
     TimePicker, 
-    Checkbox, 
     Tooltip, 
-    Dropdown 
+    Dropdown,
+    Tag,
 } from 'antd'
-import { ArrowRightOutlined, PlusOutlined, MoreOutlined } from '@ant-design/icons'
+import { 
+    ArrowRightOutlined, 
+    PlusOutlined, 
+    MoreOutlined,
+    HistoryOutlined, // Late out Icon
+    FieldTimeOutlined,  // Early outn Icon
+    ClockCircleOutlined, // Early in Icon
+
+} from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string } from 'yup' // Import Yup for form validation
@@ -36,33 +44,72 @@ const timeslotSchema = object().shape({
 
 const items = [
     {
-        key: 1,
+        key: 'edit',
         label: 'Edit',
     },
     {
-        key: 2,
+        key: 'no-show',
         label: 'No Show',
     },
     {
-        key: 3,
+        key: 'early-in',
         label: 'Early In',
     },
     {
-        key: 4,
+        key: 'early-out',
         label: 'Early Out',
     },
     {
-        key: 5,
+        key: 'late-out',
         label: 'Late Out',
     },
 ]
 
-const ShiftCard = ({ record, cardStyle, handleEdit, setEdit }) => {
+const CardStatus = ({ status }) => {
+
+    return (
+        <Space size={0}>
+            { status.hasOwnProperty('break') && (
+                <Tooltip title="Break">
+                    <Tag color="purple">
+                        <ClockCircleOutlined />
+                    </Tag>
+                </Tooltip>
+            )}
+            { status.hasOwnProperty('early-in') && (
+                <Tooltip title="Early In">
+                    <Tag color="green">
+                        <HistoryOutlined style={{ transform: "scaleX(-1)" }} />
+                    </Tag>
+                </Tooltip>
+            )}
+            { status.hasOwnProperty('early-out') &&(
+                <Tooltip title="Early Out">
+                    <Tag color="red">
+                        <HistoryOutlined />
+                    </Tag>
+                </Tooltip>
+            )}
+            { status.hasOwnProperty('late-out') && (
+                <Tooltip title="Late Out">
+                    <Tag color="magenta">
+                        <FieldTimeOutlined />
+                    </Tag>
+                </Tooltip>
+            )}
+        </Space>
+    )
+}
+
+const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus }) => {
 
     const onClick = ({ key }) => {
-        if (key === '1') {
+        if (key === 'edit') {
             handleEdit()
             setEdit(true)
+        }
+        if (key !== 'edit') {
+            setStatus(key)
         }
     }
 
@@ -73,12 +120,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit }) => {
                 bodyStyle={{ display: 'flex', height: '100%', flexDirection: 'column', justifyContent: 'flex-end', padding: 4 }}
             >
                 <Row style={{ display: 'flex', height: '100%'}}>
-                <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
-                    <Space>
-                        <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
-                        <ArrowRightOutlined />
-                        <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
-                    </Space>
+                <Space style={{ display: 'flex', width: '100%', justifyContent: 'flex-start' }}>
                     <Dropdown menu={{items, onClick}} >
                         <Link onClick={(e) => e.preventDefault()}>
                         <Space>
@@ -86,6 +128,12 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit }) => {
                         </Space>
                         </Link>
                     </Dropdown>
+                    <Space size={3}>
+                        <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
+                        <ArrowRightOutlined />
+                        <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
+                    </Space>
+                    <CardStatus status={record?.status} />
                 </Space>
                 </Row>
             </Card>
@@ -98,7 +146,8 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
     const [hours, setHours] = useState({
         start: record.start || hour,
         end: record.end,
-        diff: record.start ? getFilledHours(record.end, record.start) : 4
+        diff: record.start ? getFilledHours(record.end, record.start) : 4,
+        status: {}
     })
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -107,8 +156,8 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
     const floatingComponentWidth = hours.diff * 60.9936  // 60.9936 is the average width of each hour in the calendar
 
     const cardStyleConfig = {
-        backgroundColor: token.colorSuccessBg,
-        borderColor: token.colorSuccessBorder,
+        backgroundColor: token['geekblue-1'],
+        borderColor: token['geekblue-3'],
         width: floatingComponentWidth,
         height: 'calc(100% + 2px)'
     }
@@ -148,7 +197,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
         <>
         <div className="container" style={{ minHeight: 24}}>
             { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={hours} handleEdit={handleClick} setEdit={setEdit} />
+                    <ShiftCard cardStyle={cardStyleConfig} record={hours} handleEdit={handleClick} setEdit={setEdit} setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} />
             ) : (
             <>
                 { display && (
@@ -157,7 +206,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
                     </Tooltip>
                 )}
                 { isHovering && (
-                    <ShiftCard cardStyle={cardStyleConfig} record={hours} handleEdit={handleClick} setEdit={setEdit} />
+                    <ShiftCard cardStyle={cardStyleConfig} record={hours} handleEdit={handleClick} setEdit={setEdit} setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} />
                 )}
             </>
             )}
@@ -230,15 +279,6 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
                                         }
                                     }}
                                 />
-                                <Checkbox 
-                                    onChange={() => {
-                                        props.setFieldValue('start', '00:00')
-                                        props.setFieldValue('end', '23:59')
-                                        handleHoursChange(['00:00', '23:59'])
-                                    }}
-                                >
-                                    All Day
-                                </Checkbox>
                             </Space>
                         </Modal>
                     </FormikForm>
