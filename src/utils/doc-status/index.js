@@ -93,7 +93,7 @@ const disableAdditionalDocs = async (driverId) => {
   }
 }
 
-const updatePinkSlipStatus = async (driverId, refetch) => {
+const updatePinkSlipStatus = async (driverId, setPinkSlipStatus) => {
   try {
     const auth = await Auth.currentSession()// Get current session
     const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -106,6 +106,7 @@ const updatePinkSlipStatus = async (driverId, refetch) => {
     const body = {'pink_slip': true}
     const response = await API.put(`/v1/drivers/cc/${driverId}`, body, options)
     const data = await response.data
+    setPinkSlipStatus(true) // Update the state of the variable
     return data
   } catch (error) {
     //console.log(error)

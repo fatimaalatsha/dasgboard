@@ -720,7 +720,7 @@ const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub,
         <AdditionalDocsFeeder driverid={driverid} sub={sub} />
       </Space>
     {/* pink slip modal */}
-      {slip && <PinkSlipModal id={driverid} usersub={sub} open={slip} setOpen={setSlip} />}
+      {slip && <PinkSlipModal id={driverid} usersub={sub} open={slip} setOpen={setSlip} pinkslipStatus={setPinkSlipState} />}
     {/* end pink slip modal */}
   </Drawer>
   )
