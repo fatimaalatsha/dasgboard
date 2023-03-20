@@ -55,7 +55,6 @@ const { TextArea } = Input // Destructure TextArea from Input
 
 const SelectFeeder = (props) => {
   const { data, isLoading, error } = useFetch(`/v1/cities`)// Call useFetch custom hook
-
   if (isLoading) {
     return <>Loading...</>
   }
@@ -565,7 +564,7 @@ const showConfirm = (status) => {
     {/* End Notify Driver Modal */}
 
     { /* Additional Documents Drawwer */ }
-      <AdditionalDocsDrawer open={documentDrawer} setOpen={setDocumentDrawer} driverid={id} sub={data.sub_id} status={data.status} province={data.city.province_id} />
+      <AdditionalDocsDrawer open={documentDrawer} setOpen={setDocumentDrawer} driverid={id} sub={data.sub_id} status={data.status} province={data.city.province_id} pinkSlip={data.pink_slip} />
       { /* End Additional Documents Drawwer */}
       { /*change Application Status modal*/}
       <Formik
@@ -702,8 +701,10 @@ const EnableAdditionalDocs = ({status, id, refetch}) => { // TODO: Implement ena
 }
 
 
-const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub  }) => {
+const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub, pinkSlip  }) => {
   const [slip, setSlip] = useState(false)// Set slep modal state
+  const [pinkSlipState, setPinkSlipState] = useState(pinkSlip) // Set pink slip state
+ 
   return (
     <Drawer
       title="Additional Documents"
@@ -715,11 +716,11 @@ const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub 
     >
       <Space direction="vertical" style={{ width: '100%' }}>
         { (status === 'active' && province === 1 )&&<Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
-       { (status === 'active' && province === 1 ) && <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />}
+       {( status ==='active'&& pinkSlipState) && <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />}
         <AdditionalDocsFeeder driverid={driverid} sub={sub} />
       </Space>
     {/* pink slip modal */}
-      {slip && <PinkSlipModal id={driverid} usersub={sub} open={slip} setOpen={setSlip} />}
+      {slip && <PinkSlipModal id={driverid} usersub={sub} open={slip} setOpen={setSlip} pinkslipStatus={setPinkSlipState} />}
     {/* end pink slip modal */}
   </Drawer>
   )
