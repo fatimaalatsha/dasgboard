@@ -16,6 +16,10 @@ import CityDetails from "../../pages/CityDetails"
 import Trainings from '../../pages/Trainings'
 import TrainingDetails from '../../pages/TrainingDetails'
 import Applicants from '../../pages/Applicants'
+import Reports from '../../pages/Reports'
+import ReportDetails from '../../pages/ReportDetails'
+import NumberOfleads from '../../pages/NumberOfLeads' 
+import NumberOfDrivers from '../../pages/NumberOfDrivers'
 
 const { Sider, Content, Header} = Container // Destructuring Layout component
 
@@ -43,6 +47,10 @@ const Layout = () => {
                     <Route path="/trainings" element={<Trainings />} />
                     <Route path="/training/:id" element={<TrainingDetails />} />
                     <Route path="/applicants" element={<Applicants />} />
+                    <Route path="/reports" element={<Reports />} />
+                    <Route path="/reports/conversion_rates" element={<NumberOfleads />} />
+                    <Route path="/reports/conversion_rates_per_stage" element={<ReportDetails />} />
+                    <Route path='/reports/number_of_drivers' element={<NumberOfDrivers />} />
                     {['/documents/:id', '/drivers/:id', '/applicants/:id'].map(path => <Route key="Details" path={path} element={<DriverDetails />} />)}
                 </Routes>
             </Content>
