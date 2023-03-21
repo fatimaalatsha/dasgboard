@@ -122,8 +122,7 @@ const Reports = () => {
 <Divider orientation="left" />
 
 <Space direction="horizontal" size={200} style={{ marginTop: '10px' }}>
-  <Card  style={{ width: 500 }}>
-    <Divider orientation="left">Inter-city Reports</Divider>
+  <Card title={<Title level={4}>Inter-city Reports</Title>} style={{ width: 500 }}>
     <Table
       columns={[
         {
@@ -165,9 +164,7 @@ const Reports = () => {
       // })}
     />
   </Card>
-  <Card style={{ width: 500,}}>
-      <Divider orientation="left">Inter-city Reports</Divider>
-
+  <Card title={<Title level={4}>Inter-city Reports</Title>} style={{ width: 500,}}>
     <Table
       columns={columns}
       dataSource={dataSet}
