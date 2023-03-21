@@ -3,9 +3,11 @@ import { Column } from '@ant-design/plots';
 
 const ChartColumn = ({props, xField, yField, seriesField}) => {
 
+  const sortedData = props.sort((a, b) => b[yField] - a[yField]);
+
     return (
         <Column
-            data={props}
+            data={sortedData}
             xField={xField}
             yField={yField}
             seriesField={seriesField}
@@ -53,7 +55,8 @@ const ChartColumn = ({props, xField, yField, seriesField}) => {
               },
             }}
             responsive={true}
-            padding="auto"
+            padding="fixed"
+        
             forceFit={true}
             theme={{
               colors10: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],

@@ -15,7 +15,8 @@ const columns = [
     dataIndex: 'icon',
     key: 'icon',
     width: 50,
-    render: () => <AreaChartOutlined />,
+    
+    render: () => <AreaChartOutlined  style={{ fontSize: '25px', color: '#08c' }}/>,
   },
   {
     title: 'Report Name',
@@ -32,12 +33,13 @@ const dataSet = [
   {
     key: 'number_of_drivers',
     name: 'Number Of Drivers Status Per City',
-    disabled: true,
+    // disabled: true,
   },
   // {
   //   key: 'number_of_leads_per_stage',
   //   name: 'Number of Leads per Stage',
   //   disabled: true,
+    
   // },
   // {
   //   key: 'number_of_leads_per_city',
@@ -89,15 +91,15 @@ const Reports = () => {
     return total;
   };
 
-  const conversionRate = (data) => {
-    var total = 0;
-    for (var i = 0; i < data.length; i++) {
-      if (data[i].status === "Active") {
-        total += data[i].active;
-      }
-    }
-    return (total / countAll(data)) * 100;
-  };
+  // const conversionRate = (data) => {
+  //   var total = 0;
+  //   for (var i = 0; i < data.length; i++) {
+  //     if (data[i].status === "Active") {
+  //       total += data[i].active;
+  //     }
+  //   }
+  //   return (total / countAll(data)) * 100;
+  // };
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
@@ -114,77 +116,73 @@ const Reports = () => {
       <br />
       <br />
      
-       <Divider orientation="left">Number Of Leads</Divider>
-          <ChartColumn props={data.items} xField='city' yField='total'  seriesField='city' />
-      <br/>
-      <Divider orientation="left"></Divider>
+      <Divider orientation="left">Number of Leads</Divider>
+<ChartColumn props={data.items} xField="city" yField="total" seriesField="city" />
+<br />
+<Divider orientation="left" />
 
-      <Space direction="horizontal" size={70}
-        style={{ marginTop: '10px' }}
-      >
-        <Card
-          title={<Title level={3}>Multi-city Reports</Title>}
-          style={{ width: 500 }}
-         >
-        <Table
+<Space direction="horizontal" size={200} style={{ marginTop: '10px' }}>
+  <Card title={<Title level={4}>Inter-city Reports</Title>} style={{ width: 500 }}>
+    <Table
+      columns={[
+        {
+          title: 'City',
+          dataIndex: 'city',
+          key: 'city',
+        },
+        {
+          title: 'Total',
+          dataIndex: 'total',
+          key: 'total',
+        },
+        {
+          title: 'Active',
+          dataIndex: 'active',
+          key: 'active',
+        },
+        {
+          title: 'Conversion Rate',
+          dataIndex: 'percentage',
+          key: 'percentage',
+          render: (text) => <span>{text}%</span>,
+        },
+      ]}
+      dataSource={data.items}
+      style={{ width: 500, height: 500, overflow: 'auto',  color: '#b7eb8f' }}     
+      // pagination={{
+      //   pageSize: 4,
+      //   showSizeChanger: false,
+      //   hideOnSinglePage: true,
+      //       }}
+      scroll={{ y: 400 }}
+      pagination={false}
+      order={{columnKey: 'total', order: 'descend', }}
+      // onRow={() => ({
+      //   onClick: () => {
+      //     navigate(`/reports/conversion_rates_per_stage`);
+      //   },
+      // })}
+    />
+  </Card>
+  <Card title={<Title level={4}>Inter-city Reports</Title>} style={{ width: 500,}}>
+    <Table
       columns={columns}
       dataSource={dataSet}
       onRow={(record) => ({
-        onClick: () => handleRowClick(record),
-      })}
-          />
-        </Card>
-         <Card
-          title={<Title level={3}>Inter-city Reports</Title>}
-          style={{ width: 500 }}
-         >
-      <Table
-        columns={
-          [
-            {
-              title: 'City',
-              dataIndex: 'city',
-              key: 'city',
-            },
-            {
-              title: 'Total',
-              dataIndex: 'total',
-              key: 'total',
-              },
-              {
-                title: 'Active',
-                dataIndex: 'active',
-                key: 'active',
-              },
-              {
-                title: 'Converison Rate',
-                dataIndex: 'percentage',
-                key: 'percentage',
-              },
+        onClick: () => {
+          if (!record.disabled) {
+            handleRowClick(record);
+          }
+        },
+            })}
+      pagination={false}
+      style={{ width: 500, height: 500, overflow: 'auto',  color: '#b7eb8f' }}     
 
-            
-          ]
+    />
+  </Card>
+  
+</Space>
 
-        }
-        dataSource={data.items}
-            pagination={
-              {
-                pageSize: 4,
-                showSizeChanger: false,
-                hideOnSinglePage: true,
-
-            }
-            }
-            
-        // onRow={() => ({
-        //   onClick: () => {
-        //     navigate(`/reports/conversion_rates_per_stage`);
-        //   },
-       // })}
-
-      />
-     </Card>
-      </Space>
     </Card>
   );
 };
