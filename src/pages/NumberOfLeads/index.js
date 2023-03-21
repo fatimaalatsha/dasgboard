@@ -106,6 +106,8 @@ const countIneligible = (data) => {
     
     return mappedData;
   };
+
+  
   if (data.total_items === 0) {
     return (
       <Card
@@ -150,8 +152,11 @@ const countIneligible = (data) => {
                 <CardStatistic title="Conversion Rate Total" width={165} fontSize={1.20} value={conversionRateAll(mapDataToObjects(data)) + "%"} color="#3f8600" popInfo="Total Conversion Rate across all cities" />
                 <CardStatistic title="Conversion Rate Eligible" width={165} fontSize={1.20} value={conversionRateEligible(mapDataToObjects(data)) + "%"} color="#3f8600" popInfo="Eligible Conversion Rate across all cities" />
               </Space>
-              <ChartColumn props={mapDataToObjects(data)} xField="status" yField="count" seriesField="city" />
+              <div style={{ height: "700px" }}>
+                <ChartColumn props={mapDataToObjects(data)} xField="status" yField="count" seriesField="city" />
+              </div>
             </Space>
+            
           </Col>
         </Row>
       </Card>      
