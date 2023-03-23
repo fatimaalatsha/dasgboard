@@ -3,6 +3,9 @@ import { Table, Space, Typography, Result } from 'antd' // Import Ant components
 import { geekblue } from '@ant-design/colors' // Import Ant colors
 import dayjs from 'dayjs' // Import dayjs
 
+import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
+import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
+
 import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import CellShift from '../CellShift' // Import CellShift component
 import { CitySelect } from '../CitySelect'
@@ -10,6 +13,9 @@ import { useFilterStore } from '../../store'
 import { getCityTimezone } from '../../utils/city-status'
 
 const { Text, Title } = Typography
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const WeekView = ({selectedWeek, data, days, tz }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state

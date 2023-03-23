@@ -13,7 +13,7 @@ import {
     Tag,
 } from 'antd'
 import { 
-    ArrowRightOutlined, 
+    SwapRightOutlined, 
     PlusOutlined, 
     MoreOutlined,
     HistoryOutlined, // Late out Icon
@@ -117,10 +117,9 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus }) => {
         <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, height: '100%' }}>
             <Card 
                 style={cardStyle}
-                bodyStyle={{ display: 'flex', height: '100%', flexDirection: 'column', justifyContent: 'flex-end', padding: 4 }}
+                bodyStyle={{ height: '100%', padding: 4 }}
             >
-                <Row style={{ display: 'flex', height: '100%'}}>
-                <Space style={{ display: 'flex', width: '100%', justifyContent: 'flex-start' }}>
+                <Space direction="horizontal" style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'flex-start' }}>
                     <Dropdown menu={{items, onClick}} >
                         <Link onClick={(e) => e.preventDefault()}>
                         <Space>
@@ -128,14 +127,21 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus }) => {
                         </Space>
                         </Link>
                     </Dropdown>
-                    <Space size={3}>
-                        <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
-                        <ArrowRightOutlined />
-                        <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
+                    <Space direction="vertical" size={0}>
+                        <Row>
+                            <Space>
+                                <Space size={3}>
+                                    <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
+                                    <SwapRightOutlined />
+                                    <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
+                                </Space>
+                            </Space>
+                        </Row>
+                        <Row>
+                            <CardStatus status={record?.status} />
+                        </Row>
                     </Space>
-                    <CardStatus status={record?.status} />
                 </Space>
-                </Row>
             </Card>
         </div>
     )
