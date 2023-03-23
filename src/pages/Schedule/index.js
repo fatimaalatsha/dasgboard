@@ -16,7 +16,7 @@ import { getCityTimezone } from '../../utils/city-status'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-const days = ["sunday", "monday", "tuesday", "wednesday", "thursday", "friday", "saturday"]
+const days = ["sunday","monday", "tuesday", "wednesday", "thursday", "friday", "saturday",]
 
 /* const weekHours = [];
 for (let hour = 0, minute = 0; hour < 24 && !(hour === 23 && minute === 30); minute += 30) {
@@ -60,6 +60,7 @@ const addFourHours = (hourString) => { // Add 4 hours to a time string
 
 
 const Schedule = () => {
+    dayjs.locale('en');
     //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)

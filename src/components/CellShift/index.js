@@ -15,7 +15,7 @@ import {
     Dropdown,
     Tooltip,
 } from 'antd'
-import { ArrowRightOutlined, UserOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons'
+import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import Yup for form validation
@@ -98,9 +98,9 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit}) => {
                             <Title level={4} type="secondary" style={{ margin: 0 }}>{`/ ${record?.drivers}`}</Title>
                         </Space>
                         <Space>
-                            <Text strong >{record?.start}</Text>
-                            <ArrowRightOutlined />
-                            <Text strong >{record?.end}</Text>
+                            <Text strong style={{ color: 'inherit', fontSize: 12 }}>{record?.start}</Text>
+                            <SwapRightOutlined />
+                            <Text strong style={{ color: 'inherit', fontSize: 12 }}>{record?.end}</Text>
                         </Space>
                         <Space>
                             <Tooltip title="Present">
