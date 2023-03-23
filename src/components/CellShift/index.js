@@ -103,9 +103,15 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit}) => {
                             <Text strong >{record?.end}</Text>
                         </Space>
                         <Space>
-                            <Tag color="cyan">0</Tag>
-                            <Tag color="magenta">0</Tag>
-                            <Tag color="gold">0</Tag>
+                            <Tooltip title="Present">
+                                <Tag color="cyan">0</Tag>
+                            </Tooltip>
+                            <Tooltip title="Absent">
+                                <Tag color="magenta">0</Tag>
+                            </Tooltip>
+                            <Tooltip title="Late">
+                                <Tag color="gold">0</Tag>
+                            </Tooltip>
                         </Space>
                     </Space>
                 </Row>
