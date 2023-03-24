@@ -27,42 +27,48 @@ const DayView = ({selectedDay, data, hours, tz }) => {
       children: [
         ...hours.map((hour, idx) => ({ // Loop through the days
           title: `${hour}`,
-          dataIndex: hour,
-          key: idx,
           align: 'center',
-          onCell: (record) => {
-              return {
-                  onMouseEnter: () => { // Mouse enter event
-                      setHoveredCell({ name: record.name, hour: hour })
-                  },
-                  onMouseLeave: () => { // Mouse leave event
-                      setHoveredCell(null)
-                  },
-              }
-          },
-          render: (text, record ) => {
-            for ( let item = 0; item < record[hour].length; item++ ) {
-              if ( record[hour][item].start === hour && record.name === record[hour][item].name ) {
+          children: [
+            {
+              title: (<Text type="secondary" code >{`${hour.substring(1,2) + idx}`}</Text>),
+              dataIndex: hour,
+              key: idx,
+              align: 'center',
+              onCell: (record) => {
+                  return {
+                      onMouseEnter: () => { // Mouse enter event
+                          setHoveredCell({ name: record.name, hour: hour })
+                      },
+                      onMouseLeave: () => { // Mouse leave event
+                          setHoveredCell(null)
+                      },
+                  }
+              },
+              render: (text, record ) => {
+                for ( let item = 0; item < record[hour].length; item++ ) {
+                  if ( record[hour][item].start === hour && record.name === record[hour][item].name ) {
+                    return (
+                      <DayCellShift 
+                        isCellFilled={record[hour][item].start === hour && record.name === record[hour][item].name}
+                        record={record[hour][item]}
+                        setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                      />
+                    )
+                  }
+                }
+    
                 return (
                   <DayCellShift 
-                    isCellFilled={record[hour][item].start === hour && record.name === record[hour][item].name}
-                    record={record[hour][item]}
+                    display={hoveredCell?.name === record.name && hoveredCell?.hour === hour} 
+                    record={record} 
+                    hour={hour}
+                    day={selectedDay}
                     setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
                   />
                 )
-              }
+              },
             }
-
-            return (
-              <DayCellShift 
-                display={hoveredCell?.name === record.name && hoveredCell?.hour === hour} 
-                record={record} 
-                hour={hour}
-                day={selectedDay}
-                setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
-              />
-            )
-          },
+          ],
         })),
       ]
     }
