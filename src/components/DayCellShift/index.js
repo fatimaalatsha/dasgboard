@@ -11,19 +11,22 @@ import {
     Tooltip, 
     Dropdown,
     Tag,
+    Checkbox, 
+    Input,
 } from 'antd'
 import { 
-    ArrowRightOutlined, 
+    SwapRightOutlined, 
     PlusOutlined, 
     MoreOutlined,
     HistoryOutlined, // Late out Icon
     FieldTimeOutlined,  // Early outn Icon
     ClockCircleOutlined, // Early in Icon
+    DollarOutlined, // Guarantee Icon
 
 } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean } from 'yup' // Import Yup for form validation
 import Submit from '../forms/SubmitWrapper'
 
 const { useToken } = theme
@@ -40,6 +43,13 @@ const getFilledHours = (end, start) => {
 const timeslotSchema = object().shape({
     start: string().required('Start time is required'),
     end: string().required('End time is required'),
+    checked: boolean(),
+    guarantee: number()
+                .when('checked', {
+                    is: true,
+                    then: number().min(1, 'Guarantee must be greater than 0').max(1000, 'Guarantee must be less than 1000').required('Guarantee is required'),
+                    otherwise: number().notRequired()
+                }),
 })
 
 const items = [
@@ -65,8 +75,7 @@ const items = [
     },
 ]
 
-const CardStatus = ({ status }) => {
-
+const CardStatus = ({ status, guarantee }) => {
     return (
         <Space size={0}>
             { status.hasOwnProperty('break') && (
@@ -97,6 +106,13 @@ const CardStatus = ({ status }) => {
                     </Tag>
                 </Tooltip>
             )}
+            { !!guarantee && (
+                <Tooltip title={`Guarantee: $${guarantee}`}>
+                    <Tag color="gold">
+                        <DollarOutlined /> 
+                    </Tag>
+                </Tooltip>
+            )}
         </Space>
     )
 }
@@ -117,10 +133,9 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus }) => {
         <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, height: '100%' }}>
             <Card 
                 style={cardStyle}
-                bodyStyle={{ display: 'flex', height: '100%', flexDirection: 'column', justifyContent: 'flex-end', padding: 4 }}
+                bodyStyle={{ height: '100%', padding: 4 }}
             >
-                <Row style={{ display: 'flex', height: '100%'}}>
-                <Space style={{ display: 'flex', width: '100%', justifyContent: 'flex-start' }}>
+                <Space direction="horizontal" style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'flex-start' }}>
                     <Dropdown menu={{items, onClick}} >
                         <Link onClick={(e) => e.preventDefault()}>
                         <Space>
@@ -128,14 +143,21 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus }) => {
                         </Space>
                         </Link>
                     </Dropdown>
-                    <Space size={3}>
-                        <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
-                        <ArrowRightOutlined />
-                        <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
+                    <Space direction="vertical" size={0}>
+                        <Row>
+                            <Space>
+                                <Space size={3}>
+                                    <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
+                                    <SwapRightOutlined />
+                                    <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
+                                </Space>
+                            </Space>
+                        </Row>
+                        <Row>
+                            <CardStatus status={record?.status} guarantee={record?.guarantee?.amount}/>
+                        </Row>
                     </Space>
-                    <CardStatus status={record?.status} />
                 </Space>
-                </Row>
             </Card>
         </div>
     )
@@ -147,7 +169,11 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
         start: record.start || hour,
         end: record.end,
         diff: record.start ? getFilledHours(record.end, record.start) : 4,
-        status: {}
+        status: {},
+        guarantee: {
+            amount: 0,
+            active: false,
+        },
     })
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -216,6 +242,8 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
                     initialValues={{
                         start: hours.start,
                         end: hours.end,
+                        checked: false,
+                        guarantee: hours.guarantee.amount,
                     }}
                     validationSchema={timeslotSchema}
                     onSubmit={(values, { setSubmitting }) => {
@@ -279,6 +307,34 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
                                         }
                                     }}
                                 />
+                                <Checkbox 
+                                    onChange={(e) => {
+                                        props.setFieldValue('checked', e.target.checked)
+                                        setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, active: e.target.checked } }))
+                                        if (!e.target.checked) {
+                                            props.setFieldValue('guarantee', 0)
+                                            setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, amount: 0 } }))
+                                        }
+                                    }}>
+                                    Guarantee?
+                                </Checkbox>
+                                { hours.guarantee.active && (
+                                    <Input 
+                                        name="guarantee"
+                                        placeholder="Guarantee amount"
+                                        type="number"
+                                        min={0}
+                                        max={1000}
+                                        prefix="$" 
+                                        suffix="CAD" 
+                                        defaultValue={props.values.guarantee}
+                                        onChange={(e) => {
+                                            const value = Number(e.target.value)
+                                            props.setFieldValue('guarantee', value)
+                                            setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, amount: value } }))
+                                        }}
+                                    />
+                                )}
                             </Space>
                         </Modal>
                     </FormikForm>
