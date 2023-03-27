@@ -39,6 +39,7 @@ import DriverTimeline from '../../components/DriverTimeline' // Import Timeline
 import DriverVehicle from '../../components/DriverVehicle' // Import Driver Vehicle component
 import DocViewer from '../../components/DocViewer' // Import DocViewer component
 import PinkSlipModal from '../../components/PinkSlipModal' // Import PinkSlip component
+import DriverDetailsNotes from '../../components/DriverDetailsNotes' // Import DriverDetailsNotes component
 
 import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
 import SelectWrapper from '../../components/forms/SelectWrapper' // Import SelectWrapper component
@@ -503,6 +504,7 @@ const showConfirm = (status) => {
         </Form>
       <Divider orientation="left"><Title level={4}>Driver History</Title></Divider>
       <DriverTimeline id={id}/>
+      <DriverDetailsNotes id={id} />
 
     {/* Notify Driver Modal */}
       <Formik
