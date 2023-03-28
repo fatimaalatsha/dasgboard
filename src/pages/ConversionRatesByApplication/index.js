@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Divider} from 'antd';
+import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Divider, Table} from 'antd';
 import useNewFetch from '../../hooks/use-new-fetch';
 import qs from 'qs';
 import dayjs from 'dayjs';
@@ -24,7 +24,6 @@ const NumberOfEligiblLeads = (dateFrom) => {
   };
 
   const { data, error, isLoading } = useNewFetch(`/v1/reports/conversion-rates?${getUserParams()}`);
-  console.log(data);
  
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
@@ -80,8 +79,6 @@ const processData = (data) => {
     // push the new object into the result array
     result.push(activeObj);
   });
-
-  console.log(result);
   return result;
 };
 
@@ -118,26 +115,66 @@ const processData = (data) => {
             }>
          <Row  align="middle">
           <Col span={24}>
-            <Space direction='horizontal' size="large" >
-        </Space>
-       
-           <Space direction="vertical" size="large" style={{ width: '100%' }}>
-              <Space direction="horizontal"  style={{ width: '100%' }} >
-                    <CardStatistic title="Total Applicants" width={165} value={countAll(data.items)} color="#3f8600" popInfo="Total Number of leads shown"/>
-                    <CardStatistic title="Active" value={countActive(data.items)} color="#3f8600" popInfo={` Number of Activated drivers in the selected period`} />
-                    <CardStatistic title="Eligible" value={countEligible(data.items)} color="#f50707" popInfo="Number of drivers that are not eligible to be activated & DNC" />
-                    <CardStatistic title="Conversion Rate Total" fontSize={1.20} value={88} color="#3f8600" popInfo="Total Conversion Rate across all cities" />
-                    <CardStatistic title="Conversion Rate Eligible"  fontSize={1.20} value={77} color="#3f8600" popInfo="Eligible Conversion Rate across all cities" />
-              </Space>
-                <Divider orientation="left" plain>
-                <Text strong>Eligible and Active Users for Selected Time </Text>
-                </Divider>
-              <ChartColumn props={processData(data)} xField="city" yField="count" seriesField="status" isGroup={true} isStack={false}  />
-              {/* <Divider orientation="left" plain>
-                <Text strong>Ieligible and Active Users for Selected Time </Text>
-              
-              </Divider> */}
+            <Space direction="vertical" size="large" style={{ width: '100%' }} >
+                  <Space direction="horizontal" size="large"  style={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
+                        <CardStatistic title="Total Applicants" width={165} value={countAll(data.items)} color="#3f8600" popInfo="Total Number of leads shown"/>
+                        <CardStatistic title="Active" value={countActive(data.items)} color="#3f8600" popInfo={` Number of Activated drivers in the selected period`} />
+                        <CardStatistic title="Eligible" value={countEligible(data.items)} color="#f50707" popInfo="Number of Eligible Drivers " />
+                        <CardStatistic title=" Active Rate Total" fontSize={1.20} value={88} color="#3f8600" popInfo="Total Conversion Rate across all cities (hard coded)" />
+                        <CardStatistic title=" Eligible Rate Total "  fontSize={1.20} value={77} color="#3f8600" popInfo="Eligible Rate across all cities (hard coded)" />
+                    </Space>
+                    <Divider orientation="left" plain>
+                      <Text>Eligible and Active Users form <Text strong>{dateFrom.date_from} </Text> to <Text strong>{dateFrom.date_to}</Text> </Text>
+                    </Divider>
+                  <ChartColumn props={processData(data)} xField="city" yField="count" seriesField="status" isGroup={true} isStack={false} />
             </Space>
+                <Space direction="vertical" size="large" style={{ width: '100%' }}>
+                  <Divider orientation="left" plain>
+                    <Text>Eligible Rate and Active Rate Users from <Text strong >{dateFrom.date_from}</Text>  to <Text strong>{dateFrom.date_to} </Text>per City </Text>
+                  </Divider>
+                      <Table
+                        dataSource={data.items}
+                        columns={[
+                          {
+                            title: 'City',
+                            dataIndex: 'city',
+                            key: 'city',
+                            render: (text) => <Text strong>{text}</Text>,
+                          },
+                          {
+                            title: 'Total Applicants',
+                            dataIndex: 'total',
+                            key: 'total',
+                            render: (text) => <Text strong>{text}</Text>,
+                          },
+                          {
+                            title: 'Active',
+                            dataIndex: 'active',
+                            key: 'active',
+                            render: (text) => <Text strong>{text}</Text>,
+                          },
+                          {
+                            title: 'Eligible',
+                            dataIndex: 'eligible',
+                            key: 'eligible',
+                            render: (text) => <Text strong>{text}</Text>,
+                          },
+                          {
+                            title: 'Total Rate ',
+                            dataIndex: 'total_rate',
+                            key: 'total_rate',
+                            render: (text) => <Text strong>{text}%</Text>,
+                          },
+                          {
+                            title: 'Eligible Rate ',
+                            dataIndex: 'eligible_rate',
+                            key: 'eligible_rate',
+                            render: (text) => <Text strong>{text} %</Text>,
+                          },
+                        ]}
+                      />
+                </Space>
+                
           </Col>
         </Row>
       </Card>
@@ -146,7 +183,6 @@ const processData = (data) => {
   );
 };
 
-// const NumberOfIneligibleLeads = (dateFrom) => {
 
 //   const getUserParams = () => {
 //     const { date_from, date_to } = dateFrom;
@@ -154,7 +190,7 @@ const processData = (data) => {
 //       {
 //         date_from,
 //         date_to,
-//         type: ineligible,
+//         type: 'ineligible',
 //       },
 //       { skipNulls: true, arrayFormat: 'comma' }
 //     );
@@ -361,7 +397,6 @@ const ConversionRatesByApplication = () => {
       {/* Pass date as a prop and show report if showReport is true */}
       {showReport && <NumberOfEligiblLeads date_from={date.filter.date_from} date_to={date.filter.date_to} />}
 
-      {/* <NumberOfIneligibleLeads date_from={date.filter.date_from} date_to={date.filter.date_to} /> */}
     </>
   );
 };
