@@ -33,14 +33,14 @@ const dataSet = [
   {
     key: 'number_of_drivers',
     name: 'Number Of Drivers Status Per City',
-    // disabled: true,
+   disabled: true,
   },
-  // {
-  //   key: 'number_of_leads_per_stage',
-  //   name: 'Number of Leads per Stage',
-  //   disabled: true,
+  {
+    key: 'conversion_rates_by_application',
+    name: 'Conversion Rates By Application',
+    // disabled: true,
     
-  // },
+  },
   // {
   //   key: 'number_of_leads_per_city',
   //   name: 'Number of Leads per City',
