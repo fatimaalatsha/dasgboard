@@ -144,6 +144,7 @@ const DriverDetailsNotes = () => {
                                     <Text strong>{dayjs(item.note_date).format('dddd DD, MMM YYYY - HH:mm')}</Text>
                                     <Text type="secondary">{item.note_type}</Text>
                                     <Text>{item.note_description}</Text>
+                                    <Text italic>— User</Text>
                                 </Space>
                             </Timeline.Item>
                         ))
