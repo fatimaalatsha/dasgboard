@@ -1,165 +1,16 @@
 import { useState } from 'react';
-import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Table} from 'antd';
+import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Divider} from 'antd';
 import useNewFetch from '../../hooks/use-new-fetch';
 import qs from 'qs';
 import dayjs from 'dayjs';
 
-import { EditOutlined, BarChartOutlined } from '@ant-design/icons';
+import { EditOutlined } from '@ant-design/icons';
 import ChartColumn from '../../components/ChartColumn';
 import CardStatistic from '../../components/CardStatistic';
-import ChartLine from '../../components/ChartLine';
+
 const { Title, Text} = Typography;
 
-const NumberOfLeads = (dateFrom) => {
-  const [chartType, setChartType] = useState('bar');
-
-  const dummyData = [
-    {
-      year: '01',
-      value: 3,
-      city: 'Tunder Bay',
-    },
-    {
-      year: '02',
-      value: 4,
-      city: 'Tunder Bay',
-    },
-    {
-      year: '03',
-      value: 3.5,
-      city: 'Tunder Bay',
-    },
-    {
-      year: '04',
-      value: 5,
-      city: 'Tunder Bay',
-
-    },
-    {
-      year: '05',
-      value: 4.9,
-      city: 'Tunder Bay',
-
-    },
-    {
-      year: '06',
-      value: 6,
-      city: 'Tunder Bay',
-
-    },
-    {
-      year: '07',
-      value: 7,
-            city: 'Tunder Bay',
-
-    },
-    {
-      year: '08',
-      value: 9,
-      city: 'Tunder Bay',
-
-    },
-    {
-      year: '09',
-      value: 13,
-      city: 'Tunder Bay',
-
-    },
-       {
-      year: '01',
-      value: 3,
-      city: 'north bay',
-    },
-    {
-      year: '02',
-      value: 4,
-      city: 'north bay',
-    },
-    {
-      year: '03',
-      value: 3.5,
-      city: 'north bay',
-    },
-    {
-      year: '04',
-      value: 5,
-      city: 'north bay',
-
-    },
-    {
-      year: '05',
-      value: 19,
-      city: 'north bay',
-
-    },
-    {
-      year: '06',
-      value: 6,
-      city: 'north bay',
-
-    },
-    {
-      year: '07',
-      value: 7,
-            city: 'north bay',
-
-    },
-    {
-      year: '08',
-      value: 19,
-      city: 'north bay',
-
-    },
-    {
-      year: '09',
-      value: 16,
-      city: 'north bay',
-
-    },
-  ];
-
-  const dummyData2 = [
-    {
-      name: "john doe",
-      status: "Ready to drive",
-      applied: "2021-01-01",
-      city: "Tunder Bay",
-      
-    },
-    {
-      name: "john Cena",
-      status: "unable to contact",
-      applied: "2021-02-01",
-      city: "Tunder Bay",
-    },
-      {
-      name: "john F. Kennedy",
-      status: "unqualified",
-      applied: "2021-01-01",
-      city: "Tunder Bay",
-      
-    },
-    {
-      name: "john  Lennon",
-      status: "awaiting",
-      applied: "2021-01-01",
-      city: "Tunder Bay",
-    },
-      {
-      name: "john Stamos",
-      status: "pending",
-      applied: "2021-01-01",
-      city: "Tunder Bay",
-      
-    },
-    {
-      name: "john Travolta",
-      status: "Step 1",
-      applied: "2021-01-01",
-      city: "Tunder Bay",
-    }
-  ];
-
+const NumberOfEligiblLeads = (dateFrom) => {
 
   const getUserParams = () => {
     const { date_from, date_to } = dateFrom;
@@ -202,31 +53,38 @@ const countActive = (data) => {
     return total;
   };
 
+const processData = (data) => {
+  const result = [];
 
-  // const mapDataToObjects = (data) => {
-  //   const { items } = data;
-  //   const mappedData = [];
+  // loop over the items array
+  data.items.forEach((item) => {
+    // create a new object for eligible users with the required properties
+    const eligibleObj = {
+      city: item.city,
+      count: item.eligible,
+      status: 'eligible',
+    };
 
-  //   for (const statusObj of Object.values(items)) {
-  //     if (typeof statusObj === 'object' && statusObj.data) {
-  //       for (const dataObj of statusObj.data) {
-  //         mappedData.push({
-  //           city: dataObj.city,
-  //           status: statusObj.status,
-  //           count: dataObj.count,
-  //         });
-  //       }
-  //     } else {
-  //       mappedData.push({
-  //         city: statusObj.city,
-  //         status: items.status,
-  //         count: statusObj.count,
-  //       });
-  //     }
-  //   }
-  //   console.log(mappedData);
-  //   return mappedData;
-  // };
+    // push the new object into the result array
+    result.push(eligibleObj);
+
+    // create a new object for active users with the required properties
+    const activeObj = {
+      city: item.city,
+      count: item.active,
+      status: 'active',
+    };
+
+    
+
+    // push the new object into the result array
+    result.push(activeObj);
+  });
+
+  console.log(result);
+  return result;
+};
+
   if (data.total_items === 0) {
     return (
       <Card
@@ -264,15 +122,21 @@ const countActive = (data) => {
         </Space>
        
            <Space direction="vertical" size="large" style={{ width: '100%' }}>
-              <Space direction="horizontal" size="small" style={{ width: '100%' }} >
-                    <CardStatistic title="Total Applicants" width={160} value={countAll(data.items)} color="#3f8600" popInfo="Total Number of leads shown"/>
+              <Space direction="horizontal"  style={{ width: '100%' }} >
+                    <CardStatistic title="Total Applicants" width={165} value={countAll(data.items)} color="#3f8600" popInfo="Total Number of leads shown"/>
                     <CardStatistic title="Active" value={countActive(data.items)} color="#3f8600" popInfo={` Number of Activated drivers in the selected period`} />
                     <CardStatistic title="Eligible" value={countEligible(data.items)} color="#f50707" popInfo="Number of drivers that are not eligible to be activated & DNC" />
-                    <CardStatistic title="New Leads" value={7} color="#f507c9" popInfo="Hard coded" />
-                    <CardStatistic title="Conversion Rate Total" width={165} fontSize={1.20} value={88} color="#3f8600" popInfo="Total Conversion Rate across all cities" />
-                    <CardStatistic title="Conversion Rate Eligible" width={165} fontSize={1.20} value={77} color="#3f8600" popInfo="Eligible Conversion Rate across all cities" />
-                </Space>
-              <ChartColumn props={data.items} xField="city" yField="total" seriesField="city" />
+                    <CardStatistic title="Conversion Rate Total" fontSize={1.20} value={88} color="#3f8600" popInfo="Total Conversion Rate across all cities" />
+                    <CardStatistic title="Conversion Rate Eligible"  fontSize={1.20} value={77} color="#3f8600" popInfo="Eligible Conversion Rate across all cities" />
+              </Space>
+                <Divider orientation="left" plain>
+                <Text strong>Eligible and Active Users for Selected Time </Text>
+                </Divider>
+              <ChartColumn props={processData(data)} xField="city" yField="count" seriesField="status" isGroup={true} isStack={false}  />
+              {/* <Divider orientation="left" plain>
+                <Text strong>Ieligible and Active Users for Selected Time </Text>
+              
+              </Divider> */}
             </Space>
           </Col>
         </Row>
@@ -282,7 +146,142 @@ const countActive = (data) => {
   );
 };
 
+// const NumberOfIneligibleLeads = (dateFrom) => {
 
+//   const getUserParams = () => {
+//     const { date_from, date_to } = dateFrom;
+//     return qs.stringify(
+//       {
+//         date_from,
+//         date_to,
+//         type: ineligible,
+//       },
+//       { skipNulls: true, arrayFormat: 'comma' }
+//     );
+//   };
+
+//   const { data, error, isLoading } = useNewFetch(`/v1/reports/conversion-rates?${getUserParams()}`);
+//   console.log(data);
+ 
+//   if (isLoading) return <p>Loading...</p>;
+//   if (error) return <p>Something went wrong...</p>;
+
+// const countActive = (data) => {
+//  var total = 0;
+//     for (var i = 0; i < data.length; i++) {
+//       total += data[i].active;
+//     }
+//     return total;
+//   };
+  
+//   const countAll = (data) => {
+//     var total = 0;
+//     for (var i = 0; i < data.length; i++) {
+//       total += data[i].total;
+//     }
+//     return total;
+//   };
+
+//   const countEligible = (data) => {
+//     var total = 0;
+//     for (var i = 0; i < data.length; i++) {
+//       total += data[i].eligible;
+//     }
+//     return total;
+//   };
+
+// const processData = (data) => {
+//   const result = [];
+
+//   // loop over the items array
+//   data.items.forEach((item) => {
+//     // create a new object for eligible users with the required properties
+//     const eligibleObj = {
+//       city: item.city,
+//       count: item.eligible,
+//       status: 'eligible',
+//     };
+
+//     // push the new object into the result array
+//     result.push(eligibleObj);
+
+//     // create a new object for active users with the required properties
+//     const activeObj = {
+//       city: item.city,
+//       count: item.active,
+//       status: 'active',
+//     };
+
+    
+
+//     // push the new object into the result array
+//     result.push(activeObj);
+//   });
+
+//   console.log(result);
+//   return result;
+// };
+
+//   if (data.total_items === 0) {
+//     return (
+//       <Card
+//       title={
+//           <Space direction="vertical" size="large">
+//             <Title level={3}>Number of Leads By Application</Title>
+//           </Space>
+//             }
+//       >
+//         <Result
+//           status="warning"
+//           title="No data found for the selected date range"
+
+//           extra={
+//           <Text type="warning">
+//              Select another date range.
+//             </Text >
+//            }
+//         />
+//       </Card>
+//     )
+//   }
+//   return (
+//     <>
+        
+//       <Card
+//         title={
+//           <Space direction="vertical" size="large">
+//             <Title level={3}>Conversion Rates By Application</Title>
+//           </Space>
+//             }>
+//          <Row  align="middle">
+//           <Col span={24}>
+//             <Space direction='horizontal' size="large" >
+//         </Space>
+       
+//            <Space direction="vertical" size="large" style={{ width: '100%' }}>
+//               <Space direction="horizontal"  style={{ width: '100%' }} >
+//                     <CardStatistic title="Total Applicants" width={165} value={countAll(data.items)} color="#3f8600" popInfo="Total Number of leads shown"/>
+//                     <CardStatistic title="Active" value={countActive(data.items)} color="#3f8600" popInfo={` Number of Activated drivers in the selected period`} />
+//                     <CardStatistic title="Eligible" value={countEligible(data.items)} color="#f50707" popInfo="Number of drivers that are not eligible to be activated & DNC" />
+//                     <CardStatistic title="Conversion Rate Total" fontSize={1.20} value={88} color="#3f8600" popInfo="Total Conversion Rate across all cities" />
+//                     <CardStatistic title="Conversion Rate Eligible"  fontSize={1.20} value={77} color="#3f8600" popInfo="Eligible Conversion Rate across all cities" />
+//               </Space>
+//                 <Divider orientation="left" plain>
+//                 <Text strong>Eligible and Active Users for Selected Time </Text>
+//                 </Divider>
+//               <ChartColumn props={processData(data)} xField="city" yField="count" seriesField="status" isGroup={true} isStack={false} />
+//               <Divider orientation="left" plain>
+//                 <Text strong>Ieligible and Active Users for Selected Time </Text>
+              
+//               </Divider>
+//             </Space>
+//           </Col>
+//         </Row>
+//       </Card>
+      
+//     </>
+//   );
+// };
 
         
  
@@ -360,7 +359,9 @@ const ConversionRatesByApplication = () => {
       </Space>
        
       {/* Pass date as a prop and show report if showReport is true */}
-      {showReport && <NumberOfLeads date_from={date.filter.date_from} date_to={date.filter.date_to} />}
+      {showReport && <NumberOfEligiblLeads date_from={date.filter.date_from} date_to={date.filter.date_to} />}
+
+      {/* <NumberOfIneligibleLeads date_from={date.filter.date_from} date_to={date.filter.date_to} /> */}
     </>
   );
 };
