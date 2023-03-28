@@ -1,7 +1,15 @@
 import { Column } from '@ant-design/plots';
 
 
-const ChartColumn = ({props, xField, yField, seriesField}) => {
+const ChartColumn = ({props, xField, yField, seriesField,  isGroup =false, isStack=true ,meta={count: {alias: 'Number of Leads',
+              },
+              city: {
+                alias: 'City',
+              },
+              status: {
+                alias: 'Status',
+              },
+            } }) => {
 
   const sortedData = props.sort((a, b) => b[yField] - a[yField]);
 
@@ -11,7 +19,8 @@ const ChartColumn = ({props, xField, yField, seriesField}) => {
             xField={xField}
             yField={yField}
             seriesField={seriesField}
-            isStack={true}
+            isStack={isStack}
+            isGroup={isGroup}
             label={{
               position: 'middle',
               content: (item) => {
@@ -31,17 +40,7 @@ const ChartColumn = ({props, xField, yField, seriesField}) => {
             tooltip={{
               showMarkers: false,
             }}
-            meta={{
-              count: {
-                alias: 'Number of Leads',
-              },
-              city: {
-                alias: 'City',
-              },
-              status: {
-                alias: 'Status',
-              },
-            }}
+            meta={meta}
             xAxis={{
               label: {
                 autoHide: false,
@@ -56,15 +55,11 @@ const ChartColumn = ({props, xField, yField, seriesField}) => {
             }}
             responsive={true}
             padding="fixed"
-        
             forceFit={true}
             theme={{
-              colors10: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
               minBarWidth: 250,
               maxBarWidth: 250,
-              
-              // color: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-            }}
+                }}
 
             conversionTag={{
               offsetX: 10,

@@ -1,12 +1,12 @@
 import { RadialBar } from '@ant-design/plots';
 
 
-const ChartRadialBar = ({ props }) => {
+const ChartRadialBar = ({ props, xField, yField }) => {
     return (
         <RadialBar
             data={props}
-            xField={props[0].status}
-            yField="count"
+            xField={xField}
+            yField={yField}
             seriesField="city"
             isStack={true}
             label={{
