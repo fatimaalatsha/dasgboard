@@ -1,7 +1,10 @@
 import { Column } from '@ant-design/plots';
 
 
-const ChartColumn = ({props, xField, yField, seriesField,  isGroup =false, isStack=true ,meta={count: {alias: 'Number of Leads',
+const ChartColumn = ({ props, xField, yField, seriesField, isGroup = false, isStack = true,
+  meta = {
+    count: {
+      alias: 'Number of Leads',
               },
               city: {
                 alias: 'City',
@@ -9,19 +12,8 @@ const ChartColumn = ({props, xField, yField, seriesField,  isGroup =false, isSta
               status: {
                 alias: 'Status',
               },
-            } }) => {
-
-  const sortedData = props.sort((a, b) => b[yField] - a[yField]);
-
-    return (
-        <Column
-            data={sortedData}
-            xField={xField}
-            yField={yField}
-            seriesField={seriesField}
-            isStack={isStack}
-            isGroup={isGroup}
-            label={{
+  },
+  label={
               position: 'middle',
               content: (item) => {
                 return item.count;
@@ -32,7 +24,20 @@ const ChartColumn = ({props, xField, yField, seriesField,  isGroup =false, isSta
               formatter: ({ value }) => {
                 return value.toFixed(2);
               },
-            }}
+            },
+}) => {
+
+  const sortedData = props.sort((a, b) => b[yField] - a[yField]);
+
+  return (
+    <Column
+            data={sortedData}
+            xField={xField}
+            yField={yField}
+            seriesField={seriesField}
+            isStack={isStack}
+            isGroup={isGroup}
+            label={label}            
             legend={{
               position: 'top',
               flipPage: false,
