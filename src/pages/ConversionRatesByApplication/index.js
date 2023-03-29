@@ -24,33 +24,10 @@ const NumberOfEligiblLeads = (dateFrom) => {
   };
 
   const { data, error, isLoading } = useNewFetch(`/v1/reports/conversion-rates?${getUserParams()}`);
- 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
 
-const countActive = (data) => {
- var total = 0;
-    for (var i = 0; i < data.length; i++) {
-      total += data[i].active;
-    }
-    return total;
-  };
-  
-  const countAll = (data) => {
-    var total = 0;
-    for (var i = 0; i < data.length; i++) {
-      total += data[i].total;
-    }
-    return total;
-  };
 
-  const countEligible = (data) => {
-    var total = 0;
-    for (var i = 0; i < data.length; i++) {
-      total += data[i].eligible;
-    }
-    return total;
-  };
 
 const processData = (data) => {
   const result = [];
@@ -60,24 +37,24 @@ const processData = (data) => {
     // create a new object for eligible users with the required properties
     const eligibleObj = {
       city: item.city,
-      count: item.eligible,
-      status: 'eligible',
+      count: item.eligible_rate,
+      status: 'Eligible Rate',
     };
 
     // push the new object into the result array
     result.push(eligibleObj);
 
     // create a new object for active users with the required properties
-    const activeObj = {
-      city: item.city,
-      count: item.active,
-      status: 'active',
-    };
+    // const activeObj = {
+    //   city: item.city,
+    //   count: item.total_rate,
+    //   status: 'Total Rate',
+    // };
 
     
 
-    // push the new object into the result array
-    result.push(activeObj);
+    // // push the new object into the result array
+    // result.push(activeObj);
   });
   return result;
 };
@@ -117,16 +94,30 @@ const processData = (data) => {
           <Col span={24}>
             <Space direction="vertical" size="large" style={{ width: '100%' }} >
                   <Space direction="horizontal" size="large"  style={{width: '100%', display: 'flex', alignItems: 'center', justifyContent: 'center' }} >
-                        <CardStatistic title="Total Applicants" width={165} value={countAll(data.items)} color="#3f8600" popInfo="Total Number of leads shown"/>
-                        <CardStatistic title="Active" value={countActive(data.items)} color="#3f8600" popInfo={` Number of Activated drivers in the selected period`} />
-                        <CardStatistic title="Eligible" value={countEligible(data.items)} color="#f50707" popInfo="Number of Eligible Drivers " />
-                        <CardStatistic title=" Active Rate Total" fontSize={1.20} value={88} color="#3f8600" popInfo="Total Conversion Rate across all cities (hard coded)" />
-                        <CardStatistic title=" Eligible Rate Total "  fontSize={1.20} value={77} color="#3f8600" popInfo="Eligible Rate across all cities (hard coded)" />
-                    </Space>
-                    <Divider orientation="left" plain>
-                      <Text>Eligible and Active Users form <Text strong>{dateFrom.date_from} </Text> to <Text strong>{dateFrom.date_to}</Text> </Text>
-                    </Divider>
-                  <ChartColumn props={processData(data)} xField="city" yField="count" seriesField="status" isGroup={true} isStack={false} />
+                        <CardStatistic title="Total Applicants" width={165} value={data.meta.total_applicants} color="#3f8600" popInfo="Total Number of leads shown"/>
+                        <CardStatistic title="Active" value={data.meta.total_active} color="#3f8600" popInfo={` Number of Activated drivers in the selected period`} />
+                        <CardStatistic title="Eligible" value={data.meta.total_eligible} color="#f50707" popInfo="Number of Eligible Drivers " />
+                        <CardStatistic title=" Active Rate Total" fontSize={1.20} value={data.meta.total_rate} color="#3f8600" popInfo="Total Conversion Rate across all cities" />
+                        <CardStatistic title=" Eligible Rate Total "  fontSize={1.20} value={data.meta.total_eligible} color="#3f8600" popInfo="Eligible Rate across all cities" />
+                  </Space>
+              <Divider orientation="left" plain>
+                    <Text>Eligible Rate <Text strong >{dateFrom.date_from}</Text>  to <Text strong>{dateFrom.date_to} </Text></Text>
+              </Divider>
+              <ChartColumn props={processData(data)} xField="city" yField="count" seriesField="status" isGroup={true} isStack={false}
+                label={
+                  {
+                    position: 'top',
+                    style: {
+                      fill: '#000',
+                      opacity: 0.6,
+                    },
+                    content: (item) => {
+                        return item.count ? `${item.count}%` : '';
+                    }
+
+                  }
+                  
+                } />
             </Space>
                 <Space direction="vertical" size="large" style={{ width: '100%' }}>
                   <Divider orientation="left" plain>
