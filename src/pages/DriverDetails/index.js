@@ -491,8 +491,10 @@ const showConfirm = (status) => {
                 name="notes"
                 rules={[{required: true,message: 'Please type a note before submitting!'}]}
               >
+                <Text mark style={{ paddingBottom: 8, display: 'block' }}>&nbsp;Legacy feature, will get removed on Wednesday April 26th 2023&nbsp;</Text>
                 <TextArea
                   placeholder="Leave notes here..."
+                  disabled
                   autoSize={{
                     minRows: 2,
                     maxRows: 6,
@@ -500,7 +502,7 @@ const showConfirm = (status) => {
                 />
               </Form.Item>
               <Form.Item>
-                <Button type="primary" htmlType="submit">
+                <Button type="primary" htmlType="submit" disabled>
                   Submit 
                 </Button>
               </Form.Item>
