@@ -1,7 +1,7 @@
 import { useState } from "react"
 import { Timeline, Card, Space, Input, message, Typography } from "antd"
 
-import { Formik, Form , Field } from 'formik' // Import Formik form components
+import { Formik, Form , Field, ErrorMessage } from 'formik' // Import Formik form components
 import { object, string } from 'yup' // Import Formik validation schema
 
 import dayjs from 'dayjs' // Import date handlers
@@ -112,7 +112,15 @@ const AddNewNote = ({newNote}) => {
             <Form style={{ position: 'sticky', top: 1, zIndex: 1 }}>
                 <Space direction="vertical" size={8} style={{ width: '100%', background: '#FFF', padding: 8, boxShadow: '0 5px 4px 0 rgba(0,0,0,0.16)' }}>
                         <Select name="note_type" datasource={notes_types} placeholder="Select a note type" />
-                        <Field name="note_description" as={Input.TextArea} placeholder="Include short description of interaction" />
+                        <Field name="note_description">
+                            {({ field, form, meta }) => (
+                            <div>
+                                <Input.TextArea rows={4} placeholder="Include short description of interaction" {...field} />
+                                {meta.touched &&
+                                meta.error && <Text type="danger">{meta.error}</Text>}
+                            </div>
+                            )}
+                        </Field>
                         <Submit key="submit" type="primary" block>
                             Add Note
                         </Submit>
@@ -134,7 +142,7 @@ const DriverDetailsNotes = () => {
         <AddNewNote newNote={(value) => setNotes(prevNotes => ([ ...prevNotes, value ]))}/>
             <Space
                 direction="vertical" 
-                style={{ width: '100%', flex: 1, minWidth: 0, minHeight: 0, position: 'absolute', top: 150, padding: 24 }} 
+                style={{ width: '100%', flex: 1, minWidth: 0, minHeight: 0, position: 'absolute', top: 200, padding: 24 }} 
             >
                 <Timeline reverse>
                     {
