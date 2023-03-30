@@ -487,11 +487,11 @@ const showConfirm = (status) => {
               />
             <Divider orientation="left"><Title level={4}>Note</Title></Divider>
             <Form initialValues={{ notes: data.notes }} onFinish={(values) => updateText(values)}>
+              <Text mark style={{ paddingBottom: 8, display: 'block' }}>&nbsp;Legacy feature, will get removed on Wednesday April 26th 2023&nbsp;</Text>
               <Form.Item 
                 name="notes"
                 rules={[{required: true,message: 'Please type a note before submitting!'}]}
               >
-                <Text mark style={{ paddingBottom: 8, display: 'block' }}>&nbsp;Legacy feature, will get removed on Wednesday April 26th 2023&nbsp;</Text>
                 <TextArea
                   placeholder="Leave notes here..."
                   disabled
