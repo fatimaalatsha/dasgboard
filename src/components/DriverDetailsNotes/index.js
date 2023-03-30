@@ -14,78 +14,8 @@ import notes_types from "../../assets/data/notes_types" // Import notes types fo
 import useFetch from "../../hooks/use-new-fetch" // Import useNewFetch hook
 import { createDriverNotes } from "../../utils/driver-status"
 
-
 const { Text } = Typography
 const { TextArea } = Input
-
-const items = [
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2023-03-10 08:32:45",
-
-    },
-    {
-        note_type: "Incident",
-        note_description: "Driver details updated",
-        note_date: "2023-03-09 21:17:12",
-    },
-    {
-        note_type: "Initial Contact",
-        note_description: "Driver details updated",
-        note_date: "2023-03-08 14:55:34",
-
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2023-03-07 11:45:09",
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2023-03-06 18:26:58",
-
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2023-03-05 06:38:22",
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2023-03-04 15:22:37",
-
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2021-01-01 12:00:00",
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2021-01-01 12:00:00",
-
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2021-01-01 12:00:00",
-    },
-    {
-        note_type: "Initial Information",
-        note_description: "Driver details updated",
-        note_date: "2021-01-01 12:00:00",
-
-    },
-    {
-        note_type: "Initial Information",
-        note_description: "Driver details updated",
-        note_date: "2021-01-01 12:00:00",
-    },
-]
 
 dayjs.extend(utc)
 
@@ -94,6 +24,7 @@ const AddNewNote = ({ driverId, refetch }) => {
         note_type: '',
         note: '',
     }
+    
     const noteSchema = object().shape({
         note_type: string().required('Note type is required'),
         note: string().required('Note description is required'),
@@ -142,10 +73,9 @@ const AddNewNote = ({ driverId, refetch }) => {
 
 const DriverDetailsNotes = ({ id }) => {
     const { data, error, loading, refetch } = useFetch(`/v1/drivers/${id}/notes`)
-    const [ notes, setNotes ] = useState(items)
-    console.log(data)
     
     if (loading) return <Spin />
+
     if (error) return <div>failed to load</div>
 
     return (
