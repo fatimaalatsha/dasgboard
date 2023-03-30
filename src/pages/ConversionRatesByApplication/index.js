@@ -94,11 +94,11 @@ const ConversionRatesByApplication = () => {
     <>  
       <Card
         title={
-          <Space direction="vertical" size="large">
+          <Space direction="horizontal" size="large" style={
+            {display: 'flex', justifyContent: 'space-between'}
+          }>
             <Title level={3}>Conversion Rates By Application Date</Title>
-          </Space>
-            }>
-          <Space align="start" direction="horizontal">
+             <Space align="start" direction="horizontal" >
       <DatePicker.RangePicker
         open={isEnable}
         allowClear={true}
@@ -137,11 +137,16 @@ const ConversionRatesByApplication = () => {
           );
           }}
           
-      />
+          />
+          
        <Tooltip title='Select Range'>
             <Button style={{padding: 0, height: 'auto' }} onClick={() => setIsEnable(true)} type='link' icon={<EditOutlined />} />
-        </Tooltip>
-      </Space>
+          </Tooltip>
+       
+        </Space>
+          </Space>
+            }>
+        
          <Row  align="middle">
           <Col span={24}>
             <Space direction="vertical" size="large" style={{ width: '100%' }} >
@@ -160,30 +165,23 @@ const ConversionRatesByApplication = () => {
               <ChartColumn props={processData(data)} xField="city" yField="count" seriesField="status" isGroup={true} isStack={false}
                 label={
                   {
-                    position: 'middle',
+                    position: 'top',
                     style: {
                       fill: '#000',
-                      opacity: 1.6,
+                      opacity: 1,                      
                     },
                     content: (item) => {
                         return item.count ? `${item.count}%` : '';
                     }, 
+                   rotate: false,
                     layout: [
-                  {
-                    type: 'interval-adjust-position',
-                  }, 
-                  {
-                    type: 'interval-hide-overlap',
-                  }, 
-                  {
-                    type: 'adjust-color',
-                      },
+                      { type: 'interval-hide-overlap', },
+                      { type: 'adjust-color' },
+                      { type: 'interval-adjust-position' },
+                      { type: 'interval-rect-mask' },
+                     
                     ],
-
-
-                  }
-                  
-                  } />
+                  }} />
                 </div>
             </Space>
                 <Space direction="vertical" size="large" style={{ width: '100%' }}>
@@ -239,228 +237,5 @@ const ConversionRatesByApplication = () => {
     </>
  );
 };                    
-  
-
-
-
-
-
-//   const getUserParams = () => {
-//     const { date_from, date_to } = dateFrom;
-//     return qs.stringify(
-//       {
-//         date_from,
-//         date_to,
-//         type: 'ineligible',
-//       },
-//       { skipNulls: true, arrayFormat: 'comma' }
-//     );
-//   };
-
-//   const { data, error, isLoading } = useNewFetch(`/v1/reports/conversion-rates?${getUserParams()}`);
-//   console.log(data);
- 
-//   if (isLoading) return <p>Loading...</p>;
-//   if (error) return <p>Something went wrong...</p>;
-
-// const countActive = (data) => {
-//  var total = 0;
-//     for (var i = 0; i < data.length; i++) {
-//       total += data[i].active;
-//     }
-//     return total;
-//   };
-  
-//   const countAll = (data) => {
-//     var total = 0;
-//     for (var i = 0; i < data.length; i++) {
-//       total += data[i].total;
-//     }
-//     return total;
-//   };
-
-//   const countEligible = (data) => {
-//     var total = 0;
-//     for (var i = 0; i < data.length; i++) {
-//       total += data[i].eligible;
-//     }
-//     return total;
-//   };
-
-// const processData = (data) => {
-//   const result = [];
-
-//   // loop over the items array
-//   data.items.forEach((item) => {
-//     // create a new object for eligible users with the required properties
-//     const eligibleObj = {
-//       city: item.city,
-//       count: item.eligible,
-//       status: 'eligible',
-//     };
-
-//     // push the new object into the result array
-//     result.push(eligibleObj);
-
-//     // create a new object for active users with the required properties
-//     const activeObj = {
-//       city: item.city,
-//       count: item.active,
-//       status: 'active',
-//     };
-
-    
-
-//     // push the new object into the result array
-//     result.push(activeObj);
-//   });
-
-//   console.log(result);
-//   return result;
-// };
-
-//   if (data.total_items === 0) {
-//     return (
-//       <Card
-//       title={
-//           <Space direction="vertical" size="large">
-//             <Title level={3}>Number of Leads By Application</Title>
-//           </Space>
-//             }
-//       >
-//         <Result
-//           status="warning"
-//           title="No data found for the selected date range"
-
-//           extra={
-//           <Text type="warning">
-//              Select another date range.
-//             </Text >
-//            }
-//         />
-//       </Card>
-//     )
-//   }
-//   return (
-//     <>
-        
-//       <Card
-//         title={
-//           <Space direction="vertical" size="large">
-//             <Title level={3}>Conversion Rates By Application</Title>
-//           </Space>
-//             }>
-//          <Row  align="middle">
-//           <Col span={24}>
-//             <Space direction='horizontal' size="large" >
-//         </Space>
-       
-//            <Space direction="vertical" size="large" style={{ width: '100%' }}>
-//               <Space direction="horizontal"  style={{ width: '100%' }} >
-//                     <CardStatistic title="Total Applicants" width={165} value={countAll(data.items)} color="#3f8600" popInfo="Total Number of leads shown"/>
-//                     <CardStatistic title="Active" value={countActive(data.items)} color="#3f8600" popInfo={` Number of Activated drivers in the selected period`} />
-//                     <CardStatistic title="Eligible" value={countEligible(data.items)} color="#f50707" popInfo="Number of drivers that are not eligible to be activated & DNC" />
-//                     <CardStatistic title="Conversion Rate Total" fontSize={1.20} value={88} color="#3f8600" popInfo="Total Conversion Rate across all cities" />
-//                     <CardStatistic title="Conversion Rate Eligible"  fontSize={1.20} value={77} color="#3f8600" popInfo="Eligible Conversion Rate across all cities" />
-//               </Space>
-//                 <Divider orientation="left" plain>
-//                 <Text strong>Eligible and Active Users for Selected Time </Text>
-//                 </Divider>
-//               <ChartColumn props={processData(data)} xField="city" yField="count" seriesField="status" isGroup={true} isStack={false} />
-//               <Divider orientation="left" plain>
-//                 <Text strong>Ieligible and Active Users for Selected Time </Text>
-              
-//               </Divider>
-//             </Space>
-//           </Col>
-//         </Row>
-//       </Card>
-      
-//     </>
-//   );
-// };
-
-        
- 
-
-
-// const ConversionRatesByApplication = () => {
-//   const [date, setDate] = useState({
-//     filter: {
-//       date_from: dayjs().subtract(90, 'days').format('YYYY-MM-DD'),
-//       date_to: dayjs().format('YYYY-MM-DD'),
-//     },
-//   });
-//   const [isEnable, setIsEnable] = useState(false); // Set isEnable state
-//   const [showReport, setShowReport] = useState(true);
-//   const [dateset, setDateset] = useState('');
-//  console.log(date);
-//   const getUserParams = ({ date_from, date_to }) => {
-//     // Use the selected date range from the prop
-//     return qs.stringify(
-//       {
-//         date_from,
-//         date_to,
-//       },
-//       { skipNulls: true, arrayFormat: 'comma' }
-//     );
-//   };
-
-
-//   return (
-//     <>
-//     <Space align="start" direction="horizontal">
-//       <DatePicker.RangePicker
-//         open={isEnable}
-//         allowClear={true}
-//         inputReadOnly={true}
-//         size="small"
-//         showToday={false}
-//         bordered={true}
-//         onChange={(dates) => {
-//           setDate({
-//             filter: {
-//                 date_from: dayjs().subtract(90, 'days').format('YYYY-MM-DD'),
-//                 date_to: dayjs().format('YYYY-MM-DD'),
-//             },
-//           });
-//         }}
-//         renderExtraFooter={() => {
-//           return (
-//             <Space direction='horizontal' style={{ display: 'flex', justifyContent: 'space-between' }}>
-//                <Button
-//                 type="primary"
-//                 onClick={() => {
-//                   setIsEnable(false);
-//                   setShowReport(true);
-//                 }}
-//             >
-//               Cancel
-//             </Button>
-//             <Button
-//               type="primary"
-//               onClick={() => {
-//                 setIsEnable(false);
-                
-//               }}
-//             >
-//               OK
-//               </Button>
-//            </Space>
-//           );
-//         }}
-//       />
-//        <Tooltip title='Select Range'>
-//             <Button style={{padding: 0, height: 'auto' }} onClick={() => setIsEnable(true)} type='link' icon={<EditOutlined />} />
-//         </Tooltip>
-//       </Space>
-       
-//       {/* Pass date as a prop and show report if showReport is true */}
-//       {showReport && <NumberOfEligiblLeads date_from={date.filter.date_from} date_to={date.filter.date_to} />}
-
-//     </>
-//   );
-// };
-
 
 export default ConversionRatesByApplication;
