@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState , useEffect} from 'react';
 import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Divider, Table} from 'antd';
 import useNewFetch from '../../hooks/use-new-fetch';
 import qs from 'qs';
@@ -10,10 +10,20 @@ import CardStatistic from '../../components/CardStatistic';
 
 const { Title, Text} = Typography;
 
-const NumberOfEligiblLeads = (dateFrom) => {
+const ConversionRatesByApplication = () => {
+
+ const [date, setDate] = useState({
+    filter: {
+      date_from: dayjs().subtract(90, 'days').format('YYYY-MM-DD'),
+      date_to: dayjs().format('YYYY-MM-DD'),
+    },
+ });
+  
+  const [isEnable, setIsEnable] = useState(false); // Set isEnable state
+  const [dateset, setDateset] = useState('');
 
   const getUserParams = () => {
-    const { date_from, date_to } = dateFrom;
+    const { date_from, date_to } = date.filter;
     return qs.stringify(
       {
         date_from,
@@ -23,38 +33,36 @@ const NumberOfEligiblLeads = (dateFrom) => {
     );
   };
 
-  const { data, error, isLoading } = useNewFetch(`/v1/reports/conversion-rates?${getUserParams()}`);
+  const { data, error, isLoading , refetch} = useNewFetch(`/v1/reports/conversion-rates?${getUserParams()}`);
   if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>Something went wrong...</p>;
+  if (error) return <p>Something went wrong...</p>; 
 
+    const processData = (data) => {
+      const result = [];
 
+      // loop over the items array
+      data.items.forEach((item) => {
+        // create a new object for eligible users with the required properties
+        const eligibleObj = {
+          city: item.city,
+          count: item.eligible_rate,
+          status: 'Eligible Rate',
+        };
 
-const processData = (data) => {
-  const result = [];
+        // push the new object into the result array
+        result.push(eligibleObj);
 
-  // loop over the items array
-  data.items.forEach((item) => {
-    // create a new object for eligible users with the required properties
-    const eligibleObj = {
-      city: item.city,
-      count: item.eligible_rate,
-      status: 'Eligible Rate',
-    };
-
-    // push the new object into the result array
-    result.push(eligibleObj);
-
-    // create a new object for active users with the required properties
-    // const activeObj = {
-    //   city: item.city,
-    //   count: item.total_rate,
-    //   status: 'Total Rate',
-    // };
+        // create a new object for active users with the required properties
+        const activeObj = {
+          city: item.city,
+          count: item.total_rate,
+          status: 'Total Rate',
+        };
 
     
 
-    // // push the new object into the result array
-    // result.push(activeObj);
+    // push the new object into the result array
+    result.push(activeObj);
   });
   return result;
 };
@@ -80,16 +88,60 @@ const processData = (data) => {
         />
       </Card>
     )
-  }
+}
+  
   return (
-    <>
-        
+    <>  
       <Card
         title={
           <Space direction="vertical" size="large">
-            <Title level={3}>Conversion Rates By Application</Title>
+            <Title level={3}>Conversion Rates By Application Date</Title>
           </Space>
             }>
+          <Space align="start" direction="horizontal">
+      <DatePicker.RangePicker
+        open={isEnable}
+        allowClear={true}
+        inputReadOnly={true}
+        size="small"
+        showToday={false}
+        bordered={true}
+        onChange={(dates) => {
+          setDate({
+            filter: {
+              date_from: dates[0].format('YYYY-MM-DD'),
+              date_to: dates[1].format('YYYY-MM-DD'),
+            },
+          });
+        }}
+        renderExtraFooter={() => {
+          return (
+            <Space direction='horizontal' style={{ display: 'flex', justifyContent: 'space-between' }}>
+               <Button
+                type="primary"
+                onClick={() => {
+                  setIsEnable(false);
+                }}
+            >
+              Cancel
+            </Button>
+            <Button
+              type="primary"
+              onClick={() => {
+                setIsEnable(false);
+              }}
+            >
+              OK
+              </Button>
+           </Space>
+          );
+          }}
+          
+      />
+       <Tooltip title='Select Range'>
+            <Button style={{padding: 0, height: 'auto' }} onClick={() => setIsEnable(true)} type='link' icon={<EditOutlined />} />
+        </Tooltip>
+      </Space>
          <Row  align="middle">
           <Col span={24}>
             <Space direction="vertical" size="large" style={{ width: '100%' }} >
@@ -101,27 +153,42 @@ const processData = (data) => {
                         <CardStatistic title=" Eligible Rate Total "  fontSize={1.20} value={data.meta.total_eligible} color="#3f8600" popInfo="Eligible Rate across all cities" />
                   </Space>
               <Divider orientation="left" plain>
-                    <Text>Eligible Rate <Text strong >{dateFrom.date_from}</Text>  to <Text strong>{dateFrom.date_to} </Text></Text>
+                    <Text> Eligible Rate and Total Rate from <Text strong >{date.filter.date_from}</Text>  to <Text strong>{date.filter.date_to} </Text></Text>
               </Divider>
+              <div style={{ height: "700px" }}>
+
               <ChartColumn props={processData(data)} xField="city" yField="count" seriesField="status" isGroup={true} isStack={false}
                 label={
                   {
-                    position: 'top',
+                    position: 'middle',
                     style: {
                       fill: '#000',
-                      opacity: 0.6,
+                      opacity: 1.6,
                     },
                     content: (item) => {
                         return item.count ? `${item.count}%` : '';
-                    }
+                    }, 
+                    layout: [
+                  {
+                    type: 'interval-adjust-position',
+                  }, 
+                  {
+                    type: 'interval-hide-overlap',
+                  }, 
+                  {
+                    type: 'adjust-color',
+                      },
+                    ],
+
 
                   }
                   
-                } />
+                  } />
+                </div>
             </Space>
                 <Space direction="vertical" size="large" style={{ width: '100%' }}>
                   <Divider orientation="left" plain>
-                    <Text>Eligible Rate and Active Rate Users from <Text strong >{dateFrom.date_from}</Text>  to <Text strong>{dateFrom.date_to} </Text>per City </Text>
+                    <Text>Eligible Rate and Active Rate Users from <Text strong >{date.filter.date_from}</Text>  to <Text strong>{date.filter.date_to} </Text>per City </Text>
                   </Divider>
                       <Table
                         dataSource={data.items}
@@ -169,10 +236,13 @@ const processData = (data) => {
           </Col>
         </Row>
       </Card>
-      
     </>
-  );
-};
+ );
+};                    
+  
+
+
+
 
 
 //   const getUserParams = () => {
@@ -314,83 +384,83 @@ const processData = (data) => {
  
 
 
-const ConversionRatesByApplication = () => {
-  const [date, setDate] = useState({
-    filter: {
-      date_from: dayjs().subtract(1, 'month').format('YYYY-MM-DD'),
-      date_to: dayjs().format('YYYY-MM-DD'),
-    },
-  });
-  const [isEnable, setIsEnable] = useState(true); // Set isEnable state
-  const [showReport, setShowReport] = useState(false);
-  const [dateset, setDateset] = useState('');
+// const ConversionRatesByApplication = () => {
+//   const [date, setDate] = useState({
+//     filter: {
+//       date_from: dayjs().subtract(90, 'days').format('YYYY-MM-DD'),
+//       date_to: dayjs().format('YYYY-MM-DD'),
+//     },
+//   });
+//   const [isEnable, setIsEnable] = useState(false); // Set isEnable state
+//   const [showReport, setShowReport] = useState(true);
+//   const [dateset, setDateset] = useState('');
+//  console.log(date);
+//   const getUserParams = ({ date_from, date_to }) => {
+//     // Use the selected date range from the prop
+//     return qs.stringify(
+//       {
+//         date_from,
+//         date_to,
+//       },
+//       { skipNulls: true, arrayFormat: 'comma' }
+//     );
+//   };
 
-  const getUserParams = ({ date_from, date_to }) => {
-    // Use the selected date range from the prop
-    return qs.stringify(
-      {
-        date_from,
-        date_to,
-      },
-      { skipNulls: true, arrayFormat: 'comma' }
-    );
-  };
 
-
-  return (
-    <>
-    <Space align="start" direction="horizontal">
-      <DatePicker.RangePicker
-        open={isEnable}
-        allowClear={true}
-        inputReadOnly={true}
-        size="small"
-        showToday={false}
-        bordered={true}
-        onChange={(dates) => {
-          setDate({
-            filter: {
-              date_from: dates[0].format('YYYY-MM-DD'),
-              date_to: dates[1].format('YYYY-MM-DD'),
-            },
-          });
-        }}
-        renderExtraFooter={() => {
-          return (
-            <Space direction='horizontal' style={{ display: 'flex', justifyContent: 'space-between' }}>
-               <Button
-                type="primary"
-                onClick={() => {
-                  setIsEnable(false);
-                  setDateset(getUserParams(date.filter.date_from));
-                }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              onClick={() => {
-                setIsEnable(false);
-                setShowReport(true);
-              }}
-            >
-              OK
-              </Button>
-           </Space>
-          );
-        }}
-      />
-       <Tooltip title='Select Range'>
-            <Button style={{padding: 0, height: 'auto' }} onClick={() => setIsEnable(true)} type='link' icon={<EditOutlined />} />
-        </Tooltip>
-      </Space>
+//   return (
+//     <>
+//     <Space align="start" direction="horizontal">
+//       <DatePicker.RangePicker
+//         open={isEnable}
+//         allowClear={true}
+//         inputReadOnly={true}
+//         size="small"
+//         showToday={false}
+//         bordered={true}
+//         onChange={(dates) => {
+//           setDate({
+//             filter: {
+//                 date_from: dayjs().subtract(90, 'days').format('YYYY-MM-DD'),
+//                 date_to: dayjs().format('YYYY-MM-DD'),
+//             },
+//           });
+//         }}
+//         renderExtraFooter={() => {
+//           return (
+//             <Space direction='horizontal' style={{ display: 'flex', justifyContent: 'space-between' }}>
+//                <Button
+//                 type="primary"
+//                 onClick={() => {
+//                   setIsEnable(false);
+//                   setShowReport(true);
+//                 }}
+//             >
+//               Cancel
+//             </Button>
+//             <Button
+//               type="primary"
+//               onClick={() => {
+//                 setIsEnable(false);
+                
+//               }}
+//             >
+//               OK
+//               </Button>
+//            </Space>
+//           );
+//         }}
+//       />
+//        <Tooltip title='Select Range'>
+//             <Button style={{padding: 0, height: 'auto' }} onClick={() => setIsEnable(true)} type='link' icon={<EditOutlined />} />
+//         </Tooltip>
+//       </Space>
        
-      {/* Pass date as a prop and show report if showReport is true */}
-      {showReport && <NumberOfEligiblLeads date_from={date.filter.date_from} date_to={date.filter.date_to} />}
+//       {/* Pass date as a prop and show report if showReport is true */}
+//       {showReport && <NumberOfEligiblLeads date_from={date.filter.date_from} date_to={date.filter.date_to} />}
 
-    </>
-  );
-};
+//     </>
+//   );
+// };
 
 
 export default ConversionRatesByApplication;

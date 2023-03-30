@@ -1,31 +1,37 @@
 import { Column } from '@ant-design/plots';
 
 
-const ChartColumn = ({ props, xField, yField, seriesField, isGroup = false, isStack = true,
-  meta = {
-    count: {
-      alias: 'Number of Leads',
+const ChartColumn = (
+  { props,
+    xField,
+    yField,
+    seriesField,
+    isGroup = false,
+    isStack = true,
+    meta = {
+      count: {
+        alias: 'Number of Leads',
+                },
+                city: {
+                  alias: 'City',
+                },
+                status: {
+                  alias: 'Status',
+                },
+    },
+    label={
+                position: 'middle',
+                content: (item) => {
+                  return item.count;
+                },
+                style: {
+                  fill: '#fff',
+                },
+                formatter: ({ value }) => {
+                  return value.toFixed(2);
+                },
               },
-              city: {
-                alias: 'City',
-              },
-              status: {
-                alias: 'Status',
-              },
-  },
-  label={
-              position: 'middle',
-              content: (item) => {
-                return item.count;
-              },
-              style: {
-                fill: '#fff',
-              },
-              formatter: ({ value }) => {
-                return value.toFixed(2);
-              },
-            },
-}) => {
+  }) => {
 
   const sortedData = props.sort((a, b) => b[yField] - a[yField]);
 
@@ -76,9 +82,7 @@ const ChartColumn = ({ props, xField, yField, seriesField, isGroup = false, isSt
                 textBaseline: 'middle',
               },
         }}
-        
-
-        
+              
         />
     );
 };
