@@ -1,7 +1,7 @@
-import { useState } from "react"
-import { Timeline, Card, Space, Input, message, Typography, Spin, Empty } from "antd"
+import { Timeline, Card, Space, Input, message, Typography, Spin, Empty, Button, Tooltip } from "antd"
+import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 
-import { Formik, Form , Field, ErrorMessage } from 'formik' // Import Formik form components
+import { Formik, Form , Field } from 'formik' // Import Formik form components
 import { object, string } from 'yup' // Import Formik validation schema
 
 import dayjs from 'dayjs' // Import date handlers
@@ -14,78 +14,8 @@ import notes_types from "../../assets/data/notes_types" // Import notes types fo
 import useFetch from "../../hooks/use-new-fetch" // Import useNewFetch hook
 import { createDriverNotes } from "../../utils/driver-status"
 
-
-const { Text } = Typography
+const { Text, Title } = Typography
 const { TextArea } = Input
-
-const items = [
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2023-03-10 08:32:45",
-
-    },
-    {
-        note_type: "Incident",
-        note_description: "Driver details updated",
-        note_date: "2023-03-09 21:17:12",
-    },
-    {
-        note_type: "Initial Contact",
-        note_description: "Driver details updated",
-        note_date: "2023-03-08 14:55:34",
-
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2023-03-07 11:45:09",
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2023-03-06 18:26:58",
-
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2023-03-05 06:38:22",
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2023-03-04 15:22:37",
-
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2021-01-01 12:00:00",
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2021-01-01 12:00:00",
-
-    },
-    {
-        note_type: "Follow Up",
-        note_description: "Driver details updated",
-        note_date: "2021-01-01 12:00:00",
-    },
-    {
-        note_type: "Initial Information",
-        note_description: "Driver details updated",
-        note_date: "2021-01-01 12:00:00",
-
-    },
-    {
-        note_type: "Initial Information",
-        note_description: "Driver details updated",
-        note_date: "2021-01-01 12:00:00",
-    },
-]
 
 dayjs.extend(utc)
 
@@ -94,6 +24,7 @@ const AddNewNote = ({ driverId, refetch }) => {
         note_type: '',
         note: '',
     }
+
     const noteSchema = object().shape({
         note_type: string().required('Note type is required'),
         note: string().required('Note description is required'),
@@ -141,18 +72,30 @@ const AddNewNote = ({ driverId, refetch }) => {
 }
 
 const DriverDetailsNotes = ({ id }) => {
-    const { data, error, loading, refetch } = useFetch(`/v1/drivers/${id}/notes`)
-    const [ notes, setNotes ] = useState(items)
-    console.log(data)
-    
-    if (loading) return <Spin />
+    const { data, error, isLoading, refetch } = useFetch(`/v1/drivers/${id}/notes`)
+
+    const refetchConfig = {
+        icon: <ReloadOutlined />,
+        onClick: () => refetch(),
+        type: 'primary',
+        ghost: true,
+    }
+
     if (error) return <div>failed to load</div>
 
     return (
         <Card 
-            title="Notes" 
+            title={
+                <Space style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                    <Title level={2} style={{ margin: 0 }}>Notes</Title>
+                    <Tooltip title="Refresh">
+                        <Button {...refetchConfig} />
+                    </Tooltip>
+                </Space>
+            } 
             style={{ height: '100%', width: '100%', overflowY: 'hidden' }}
             bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%', position: 'relative', overflowY: 'scroll', padding: 0 }}
+            loading={isLoading}
         >
         <AddNewNote driverId={id} refetch={refetch} />
             <Space
