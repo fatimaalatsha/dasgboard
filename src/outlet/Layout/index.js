@@ -50,7 +50,7 @@ const Layout = () => {
                     <Route path="/applicants" element={<Applicants />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/reports/conversion_rates" element={<NumberOfleads />} />
-                    <Route path="/reports/conversion_rates_per_stage" element={<ReportDetails />} />
+                    <Route path="/reports/city_overview" element={<ReportDetails />} />
                     <Route path='/reports/number_of_drivers' element={<NumberOfDrivers />} />
                     <Route path='/reports/conversion_rates_by_application' element={<ConversionRatesByApplication />} />
                     {['/documents/:id', '/drivers/:id', '/applicants/:id'].map(path => <Route key="Details" path={path} element={<DriverDetails />} />)}

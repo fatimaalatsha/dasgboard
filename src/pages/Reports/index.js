@@ -157,11 +157,11 @@ const Reports = () => {
       scroll={{ y: 400 }}
       pagination={false}
       order={{columnKey: 'total', order: 'descend', }}
-      // onRow={() => ({
-      //   onClick: () => {
-      //     navigate(`/reports/conversion_rates_per_stage`);
-      //   },
-      // })}
+      onRow={() => ({
+        onClick: () => {
+          navigate(`/reports/city_overview`);
+        },
+      })}
     />
   </Card>
   <Card title={<Title level={4}>Inter-city Reports</Title>} style={{ width: 500,}}>
