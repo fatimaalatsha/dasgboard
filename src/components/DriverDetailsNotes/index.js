@@ -1,5 +1,5 @@
-import { Timeline, Card, Space, Input, message, Typography, Spin, Empty, Button, Tooltip } from "antd"
-import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
+import { Timeline, Card, Space, Input, message, Typography, Empty, Button, Tooltip, Popconfirm } from "antd"
+import { ReloadOutlined, FolderOutlined } from '@ant-design/icons' // Import Ant Icons
 
 import { Formik, Form , Field } from 'formik' // Import Formik form components
 import { object, string } from 'yup' // Import Formik validation schema
@@ -47,10 +47,8 @@ const AddNewNote = ({ driverId, refetch }) => {
             validationSchema={noteSchema}
             onSubmit={ async (values, { setSubmitting, resetForm }) => {
                 setSubmitting(true)
-                console.log(values)
                 await createDriverNotes(driverId,values)
                 .then(res => {
-                    console.log(res)
                     resetForm()
                     setSubmitting(false)
                     res && message.success('Note added successfully')
@@ -77,6 +75,13 @@ const DriverDetailsNotes = ({ id }) => {
     const refetchConfig = {
         icon: <ReloadOutlined />,
         onClick: () => refetch(),
+        type: 'primary',
+        ghost: true,
+    }
+
+    const archiveConfig = {
+        icon: <FolderOutlined />,
+        onClick: () => console.log('archive'),
         type: 'primary',
         ghost: true,
     }
@@ -108,7 +113,20 @@ const DriverDetailsNotes = ({ id }) => {
                         data.items?.map((item, index) => (
                             <Timeline.Item key={index}>
                                 <Space size={2} direction="vertical">
-                                    <Text strong>{dayjs(item.created_at).format('dddd DD, MMM YYYY - HH:mm')}</Text>
+                                    <Space>
+                                        <Text strong>{dayjs(item.created_at).format('dddd DD, MMM YYYY - HH:mm')}</Text>
+                                        <Tooltip title="Archive" placement="bottom">
+                                            <Popconfirm
+                                                title="Archive Note"
+                                                description="Are you sure you want to archive this note?"
+                                                onConfirm={() => console.log('archive')}
+                                                okText="Yes"
+                                                cancelText="No"
+                                            >
+                                                    <Button {...archiveConfig} />
+                                            </Popconfirm>
+                                        </Tooltip>
+                                    </Space>
                                     <Text type="secondary">{item.note_type}</Text>
                                     <Text>{item.note}</Text>
                                     <Text italic>{item.admin_name}</Text>
