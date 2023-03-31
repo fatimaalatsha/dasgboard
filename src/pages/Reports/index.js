@@ -2,7 +2,7 @@ import { Card, Table, Typography,Space, Divider} from 'antd';
 import { AreaChartOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import useFetch from '../../hooks/use-fetch';
-import {useNewFetch} from '../../hooks/use-new-fetch';
+import useNewFetch from '../../hooks/use-new-fetch';
 import CardStatistic from '../../components/CardStatistic';
 import ChartColumn from '../../components/ChartColumn';
 import qs from 'qs';
@@ -55,71 +55,25 @@ const Reports = () => {
     navigate(`/reports/${record.key}`);
   };
 
-  const dateFrom = {  
-    date_from: '2020-01-01',
-    date_to: '2023-04-16',
-  };
- const getUserParams = () => {
-    const { date_from, date_to } = dateFrom;
-    return qs.stringify(
-      {
-        date_from,
-        date_to,
-      },
-      { skipNulls: true, arrayFormat: 'comma' }
-    );
-  };
 
-
-  const { data, error, isLoading } = useFetch(
-    `/v1/reports/conversion-rates?${getUserParams()}`
-  );
-
-  const countActive = (data) => {
-    var active = 0;
-    for (var i = 0; i < data.length; i++) {
-        active += data[i].active;
-      
-    }
-    return active; 
-  };
-
-  const countAll = (data) => {
-    var total = 0;
-    for (var i = 0; i < data.length; i++) {
-      total += data[i].total;
-    }
-    return total;
-  };
-
-  // const conversionRate = (data) => {
-  //   var total = 0;
-  //   for (var i = 0; i < data.length; i++) {
-  //     if (data[i].status === "Active") {
-  //       total += data[i].active;
-  //     }
-  //   }
-  //   return (total / countAll(data)) * 100;
-  // };
+  const { data, error, isLoading } = useNewFetch(`/v1/reports/applicants-overview`);
+  console.log(data)
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
   return (
     <Card title={<Title level={2}>Reports</Title>}>
-      <Space direction="horizontal" size="large">
-          <CardStatistic title="Total Leads" value={countAll(data.items)} color="#3f8600" popInfo="Total number of leads " />
-          <CardStatistic title="Active" value={countActive(data.items)} popInfo="Total active drivers" color="#3f8600" />
-          <CardStatistic title="Awaiting " value={countAll(data.items)-countActive(data.items)} color="#1307f5" popInfo="Number of applicants who are in the process" />
-          <CardStatistic title="New Leads" value={7} color="#f507c9" popInfo="Number of new leads in the last month(hard coded)" />
-          <CardStatistic title="Cities " value={data.total_items} color="#f57207" popInfo="Number of active cities"/>
-          <CardStatistic title="Ineligible " value={17} color="#3f8600" popInfo="(Hard coded)" />               
-      </Space> 
-      <br />
-      <br />
-     
+      <Space direction="vertical" size="large" style={{ width: '100%' }} align='center'>
+          <Space direction="horizontal" size="large">
+              <CardStatistic title="Total Leads" height ={ 100} width = {140} value={data.meta.total} color="#3f8600" popInfo="Total number of leads " />
+              <CardStatistic title="Active" value={data.meta.total_active} popInfo="Total active drivers" color="#3f8600" />
+              <CardStatistic title="Total Applicants " value={data.meta.total_applicants} color="#1307f5" popInfo="Number of applicants who are in the process" />
+              <CardStatistic title="New Leads" value={data.meta.total_applicants_seven_days} color="#f507c9" popInfo="Number of new leads in the last 7 days" />
+              <CardStatistic title="Ineligible " value={data.meta.total_ineligible} color="#3f8600" popInfo="(Hard coded)" />               
+            </Space> 
+        </Space>
       <Divider orientation="left">Number of Leads</Divider>
-<ChartColumn props={data.items} xField="city" yField="total" seriesField="city" />
-<br />
+  <ChartColumn props={data.items} xField="city" yField="total" seriesField="city" />
 <Divider orientation="left" />
 
 <Space direction="horizontal" size={200} style={{ marginTop: '10px' }}>
