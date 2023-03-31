@@ -88,14 +88,4 @@ const ReportDetails = () => {
     </>
   );
 };
-
-
-
-        
- 
-
-
-
-
-
 export default ReportDetails;
