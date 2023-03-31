@@ -1,17 +1,9 @@
 import { useState } from 'react';
 import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Table} from 'antd';
 import useNewFetch from '../../hooks/use-new-fetch';
-import useFetch from '../../hooks/use-fetch';
-import qs from 'qs';
 import dayjs from 'dayjs';
 
-import { EditOutlined, BarChartOutlined } from '@ant-design/icons';
-import ChartBar from '../../components/ChartBar';
-import ChartColumn from '../../components/ChartColumn';
-import ChartPie from '../../components/ChartPie';
 import CardStatistic from '../../components/CardStatistic';
-import ChartLine from '../../components/ChartLine';
-import ChartRadialBar from '../../components/ChartRadialBar';
 const { Title, Text } = Typography;
 
 
