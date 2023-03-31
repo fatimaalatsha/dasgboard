@@ -6,7 +6,6 @@ import { useLocation } from 'react-router-dom'; // Import Nav component
 
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import API from '../../api/BaseUrl'
-import useNewFetch from '../../hooks/use-new-fetch'// Import useFetch custom hook
 
 import qs from 'qs' // Import qs library
 import dayjs from "dayjs"// Import date handlers
