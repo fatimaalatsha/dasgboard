@@ -187,7 +187,6 @@ const DriverDetails = () => {
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   const [changeStatusModal, setChangeStatusModal] = useState(false)// Set change status modal state
-
   const appStatusArray = app_status.filter(item => item.text !== 'Blank') // Removes Blank from app_status array
 
   const successAlert = (msg) => { // Success alert method
