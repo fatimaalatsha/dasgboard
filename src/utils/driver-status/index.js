@@ -123,4 +123,23 @@ const createDriverNotes = async (driverId, body) => { // Create driver notes
     }
 }
 
-export { deleteDriver, updateStatus, notifyDriver, updateApplicationStatus, updateDriver, createDriverNotes}
+const archiveDriverNotes = async (noteId) => { // Archive driver notes
+    try {
+        const auth = await Auth.currentSession()// Get current session
+        const token = auth.getAccessToken().getJwtToken()// Get token from session
+        const options = { // Set options for endpoint
+            headers: {
+                'Authorization': token,
+                ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
+            }
+        }
+        const response = await NEW_API.post(`/v1/drivers/notes/${noteId}/archive`, {}, options)
+        const data = await response.data
+        return data
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+export { deleteDriver, updateStatus, notifyDriver, updateApplicationStatus, updateDriver, createDriverNotes, archiveDriverNotes }

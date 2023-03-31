@@ -5,6 +5,7 @@ import { ReloadOutlined, FolderOutlined } from '@ant-design/icons' // Import Ant
 import { Formik, Form , Field } from 'formik' // Import Formik form components
 import { object, string } from 'yup' // Import Formik validation schema
 
+import qs from 'qs' // Import qs library
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 
@@ -13,12 +14,17 @@ import Submit from "../forms/SubmitWrapper" // Import custom formik submit compo
 import notes_types from "../../assets/data/notes_types" // Import notes types for select options
 
 import useFetch from "../../hooks/use-new-fetch" // Import useNewFetch hook
-import { createDriverNotes } from "../../utils/driver-status"
+import { createDriverNotes, archiveDriverNotes } from "../../utils/driver-status"
 
 const { Text, Title } = Typography
 const { TextArea } = Input
 
 dayjs.extend(utc)
+
+//get the papams that will be passed to filters through qs
+const getUserParams = (params) => ({ // Get table params
+    archived: params,
+})
 
 const AddNewNote = ({ driverId, refetch }) => {
     const initialValues = {
@@ -71,8 +77,8 @@ const AddNewNote = ({ driverId, refetch }) => {
 }
 
 const DriverDetailsNotes = ({ id }) => {
-    const { data, error, isLoading, refetch } = useFetch(`/v1/drivers/${id}/notes`)
     const [showArchived, setShowArchived] = useState(false)
+    const { data, error, isLoading, refetch } = useFetch(`/v1/drivers/${id}/notes?${qs.stringify(getUserParams(showArchived), { skipNulls: true, arrayFormat: 'comma' })}`)
 
     const refetchConfig = {
         icon: <ReloadOutlined />,
@@ -88,22 +94,15 @@ const DriverDetailsNotes = ({ id }) => {
         ghost: true,
     }
 
+    const handleArchive = async (id) => {
+        await archiveDriverNotes(id)
+        .then(res => {
+            res && message.success('Note archived successfully')
+            refetch()
+        })
+    }
+
     if (error) return <div>failed to load</div>
-
-    const newItems = data.items?.map(item => ({...item, status: 'active'}))
-
-    newItems?.unshift({
-        "id": 1029,
-        "admin_id": 23,
-        "note_type": "Follow Up",
-        "note": "Example of an archived note",
-        "status": "archived",
-        "created_at": "2023-03-31T21:17:47.916Z",
-        "updated_at": "2023-03-31T21:17:47.916Z",
-        "admin_name": "Alejandro Delgadillo"
-    })
-
-    const archivedItems = showArchived ? newItems : newItems?.filter((item) => item.status === 'active')
 
     return (
         <Card 
@@ -129,18 +128,18 @@ const DriverDetailsNotes = ({ id }) => {
             >
                 <Timeline>
                     {
-                        archivedItems?.length === 0 ? <Empty /> :
-                        archivedItems?.map((item, index) => (
-                            <Timeline.Item key={index} color={item.status === 'archived' ? 'gray' : 'blue'} dot={item.status === 'archived' && <FolderOutlined />} >
+                        data.items?.length === 0 ? <Empty /> :
+                        data.items?.map((item, index) => (
+                            <Timeline.Item key={index} color={item.archived  ? 'gray' : 'blue'} dot={item.archived && <FolderOutlined />} >
                                 <Space size={2} direction="vertical">
                                     <Space>
                                         <Text strong>{dayjs(item.created_at).format('dddd DD, MMM YYYY - HH:mm')}</Text>
-                                        { item.status !== 'archived' && (
+                                        { !item.archived && (
                                             <Tooltip title="Archive" placement="bottom">
                                                 <Popconfirm
                                                     title="Archive Note"
                                                     description="Are you sure you want to archive this note?"
-                                                    onConfirm={() => console.log('archive')}
+                                                    onConfirm={() => handleArchive(item.id)}
                                                     okText="Yes"
                                                     cancelText="No"
                                                 >
