@@ -56,36 +56,50 @@ const Reports = () => {
   };
 
   const { data, error, isLoading } = useNewFetch(`/v1/reports/applicants-overview`);
-  console.log(data)
 
   const processData = (data) => {
       const result = [];
 
       // loop over the items array
       data.items.forEach((item) => {
-        // create a new object for eligible users with the required properties
-        const eligibleObj = {
+        // create a new object for active users with the required properties
+        const activeObj = {
           city: item.city,
           count: item.active,
           status: 'active',
         };
 
         // push the new object into the result array
-        result.push(eligibleObj);
+        result.push(activeObj);
 
-        // create a new object for active users with the required properties
-        const activeObj = {
+        // create a new object for applicants users with the required properties
+        const applicantsObj = {
           city: item.city,
           count: item.applicants,
           status: 'applicants',
-        };
-
-    
-
+        }; 
     // push the new object into the result array
-    result.push(activeObj);
+        result.push(applicantsObj);
+        
+        // create a new object for  Ineligible users with the required properties
+        const IneligibleObj = {
+          city: item.city,
+          count: item.ineligible,
+          status: 'Ineligible',
+        };
+        // push the new object into the result array
+        result.push(IneligibleObj);
+        
+        // create a new object for  New Leads users with the required properties
+        const NewLeadsObj = {
+          city: item.city,
+          count: item.applicants_seven_days,
+          status: 'New Leads',
+        };
+        // push the new object into the result array
+        result.push(NewLeadsObj);
+
       });
-    console.log(result)
   return result;
 };
 
@@ -95,15 +109,36 @@ const Reports = () => {
     <Card title={<Title level={2}>Reports</Title>}>
       <Space direction="vertical" size="large" style={{ width: '100%' }} align='center'>
           <Space direction="horizontal" size="large">
-              <CardStatistic title="Total Leads" height ={ 100} width = {140} value={data.meta.total} color="#3f8600" popInfo="Total number of leads " />
-              <CardStatistic title="Active" value={data.meta.total_active} popInfo="Total active drivers" color="#3f8600" />
-              <CardStatistic title="Total Applicants " value={data.meta.total_applicants} color="#1307f5" popInfo="Number of applicants who are in the process" />
-              <CardStatistic title="New Leads" value={data.meta.total_applicants_seven_days} color="#f507c9" popInfo="Number of new leads in the last 7 days" />
-              <CardStatistic title="Ineligible " value={data.meta.total_ineligible} color="#3f8600" popInfo="(Hard coded)" />               
+              <CardStatistic title="Total Leads" height ={120} width = {165} value={data.meta.total} color="#3f8600" popInfo="Total number of leads " />
+              <CardStatistic title="Active" height ={120} width = {165} value={data.meta.total_active} popInfo="Total active drivers" color="#3f8600" />
+              <CardStatistic title="Total Applicants" height ={120} width = {165} value={data.meta.total_applicants} color="#1307f5" popInfo="Number of applicants who are in the process" />
+              <CardStatistic title="New Leads" height ={120} width = {165} value={data.meta.total_applicants_seven_days} color="#f507c9" popInfo="Number of new leads in the last 7 days" />
+              <CardStatistic title="Ineligible" height ={120} width = {165} value={data.meta.total_ineligible} color="#3f8600" popInfo="Total number of ineligible applicants " />               
             </Space> 
         </Space>
-      <Divider orientation="left">Number of Leads</Divider>
-  <ChartColumn props={processData(data)} xField="city" yField="total" seriesField="city" />
+      <Divider orientation="left">Number of Leads Per City </Divider>
+      <dev style={{ height: "700px" }}>
+      <ChartColumn props={processData(data)} xField="city" yField="count" seriesField="status" isGroup={false} isStack={true}
+      label={
+                  {
+                    position: 'middle',
+                    style: {
+                      fill: '#000',
+                      opacity: 1,                      
+                    },
+                    content: (item) => {
+                        return item.count ? `${item.count}` : '';
+                    }, 
+                   rotate: false,
+                    layout: [
+                      { type: 'interval-hide-overlap', },
+                      { type: 'adjust-color' },
+                      { type: 'interval-adjust-position' },
+                      { type: 'interval-rect-mask' },
+                     
+                    ],
+            }} />
+      </dev>
 <Divider orientation="left" />
 
 <Space direction="horizontal" size={200} style={{ marginTop: '10px' }}>
@@ -143,11 +178,11 @@ const Reports = () => {
       pagination={false}
       order={{ columnKey: 'total', order: 'descend', }}
       rowKey="city"
-      onRow={(record) => ({
-        onClick: () => {
-          navigate(`/reports/city_overview/${record.city}`);
-        },
-            })}
+      // onRow={(record) => ({
+      //   onClick: () => {
+      //     navigate(`/reports/city_overview/${record.city}`);
+      //   },
+      //       })}
       
     />
   </Card>
