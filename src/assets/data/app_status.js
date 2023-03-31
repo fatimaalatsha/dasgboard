@@ -36,6 +36,10 @@ const app_status = [
         ]
     },
     {
+        text: 'Existing Driver',
+        value: 'Existing Driver',
+    },
+    {
         text: 'Ineligible',
         value: 'Ineligible',
         sub: [
