@@ -55,9 +55,39 @@ const Reports = () => {
     navigate(`/reports/${record.key}`);
   };
 
-
   const { data, error, isLoading } = useNewFetch(`/v1/reports/applicants-overview`);
   console.log(data)
+
+  const processData = (data) => {
+      const result = [];
+
+      // loop over the items array
+      data.items.forEach((item) => {
+        // create a new object for eligible users with the required properties
+        const eligibleObj = {
+          city: item.city,
+          count: item.active,
+          status: 'active',
+        };
+
+        // push the new object into the result array
+        result.push(eligibleObj);
+
+        // create a new object for active users with the required properties
+        const activeObj = {
+          city: item.city,
+          count: item.applicants,
+          status: 'applicants',
+        };
+
+    
+
+    // push the new object into the result array
+    result.push(activeObj);
+      });
+    console.log(result)
+  return result;
+};
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
@@ -73,7 +103,7 @@ const Reports = () => {
             </Space> 
         </Space>
       <Divider orientation="left">Number of Leads</Divider>
-  <ChartColumn props={data.items} xField="city" yField="total" seriesField="city" />
+  <ChartColumn props={processData(data)} xField="city" yField="total" seriesField="city" />
 <Divider orientation="left" />
 
 <Space direction="horizontal" size={200} style={{ marginTop: '10px' }}>
