@@ -154,8 +154,8 @@ const ConversionRatesByApplication = () => {
                         <CardStatistic title="Total Applicants" width={165} value={data.meta.total_applicants} color="#3f8600" popInfo="Total Number of leads shown"/>
                         <CardStatistic title="Active" value={data.meta.total_active} color="#3f8600" popInfo={` Number of Activated drivers in the selected period`} />
                         <CardStatistic title="Eligible" value={data.meta.total_eligible} color="#f50707" popInfo="Number of Eligible Drivers " />
-                        <CardStatistic title=" Active Rate Total" fontSize={1.20} value={data.meta.total_rate} color="#3f8600" popInfo="Total Conversion Rate across all cities" />
-                        <CardStatistic title=" Eligible Rate Total "  fontSize={1.20} value={data.meta.total_eligible} color="#3f8600" popInfo="Eligible Rate across all cities" />
+                        <CardStatistic title=" Active Rate Total" fontSize={1.20} value={data.meta.total_rate + '%'} color="#3f8600" popInfo="Total Conversion Rate across all cities" />
+                        <CardStatistic title=" Eligible Rate Total "  fontSize={1.20} value={data.meta.eligible_rate + '%'} color="#3f8600" popInfo="Eligible Rate across all cities" />
                   </Space>
               <Divider orientation="left" plain>
                     <Text> Eligible Rate and Total Rate from <Text strong >{date.filter.date_from}</Text>  to <Text strong>{date.filter.date_to} </Text></Text>
