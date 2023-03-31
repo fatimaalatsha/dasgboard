@@ -6,14 +6,13 @@ import { useLocation } from 'react-router-dom'; // Import Nav component
 
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import API from '../../api/BaseUrl'
-import useNewFetch from '../../hooks/use-new-fetch'// Import useFetch custom hook
 
 import qs from 'qs' // Import qs library
 import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
 import { useFilterStore } from '../../store' // Import filter store
-import app_status from '../../assets/data/app_status' // Import Application Status definition
+import {app_status} from '../../assets/data/app_status' // Import Application Status definition
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params

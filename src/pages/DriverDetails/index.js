@@ -47,7 +47,7 @@ import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs, readyToDrive } from '../../utils/doc-status' // Import isAllApproved function
 import { updateStatus, notifyDriver,updateApplicationStatus, updateDriver } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
-import app_status from '../../assets/data/app_status' // Import application status object data
+import {app_status, exludeStatuses} from '../../assets/data/app_status' // Import application status object data
 
 const { confirm } = Modal // Destructure config from Modal
 const { Title, Text } = Typography // Destructure Title from Typography
@@ -187,7 +187,7 @@ const DriverDetails = () => {
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   const [changeStatusModal, setChangeStatusModal] = useState(false)// Set change status modal state
-  const appStatusArray = app_status.filter(item => item.text !== 'Blank') // Removes Blank from app_status array
+  const appStatusArray = app_status.filter(item => !exludeStatuses.includes(item.text)) // Removes Blank from app_status array
 
   const successAlert = (msg) => { // Success alert method
     message.success(msg)
