@@ -1,29 +1,49 @@
 import { Column } from '@ant-design/plots';
 
 
-const ChartColumn = ({props, xField, yField, seriesField}) => {
+const ChartColumn = (
+  { props,
+    xField,
+    yField,
+    seriesField,
+    isGroup = false,
+    isStack = true,
+    meta = {
+      count: {
+        alias: 'Number of Leads',
+                },
+                city: {
+                  alias: 'City',
+                },
+                status: {
+                  alias: 'Status',
+                },
+    },
+    label={
+                position: 'middle',
+                content: (item) => {
+                  return item.count;
+                },
+                style: {
+                  fill: '#fff',
+                },
+                formatter: ({ value }) => {
+                  return value.toFixed(2);
+                },
+              },
+  }) => {
 
   const sortedData = props.sort((a, b) => b[yField] - a[yField]);
 
-    return (
-        <Column
+  return (
+    <Column
             data={sortedData}
             xField={xField}
             yField={yField}
             seriesField={seriesField}
-            isStack={true}
-            label={{
-              position: 'middle',
-              content: (item) => {
-                return item.count;
-              },
-              style: {
-                fill: '#fff',
-              },
-              formatter: ({ value }) => {
-                return value.toFixed(2);
-              },
-            }}
+            isStack={isStack}
+            isGroup={isGroup}
+            label={label}            
             legend={{
               position: 'top',
               flipPage: false,
@@ -31,17 +51,7 @@ const ChartColumn = ({props, xField, yField, seriesField}) => {
             tooltip={{
               showMarkers: false,
             }}
-            meta={{
-              count: {
-                alias: 'Number of Leads',
-              },
-              city: {
-                alias: 'City',
-              },
-              status: {
-                alias: 'Status',
-              },
-            }}
+            meta={meta}
             xAxis={{
               label: {
                 autoHide: false,
@@ -56,15 +66,11 @@ const ChartColumn = ({props, xField, yField, seriesField}) => {
             }}
             responsive={true}
             padding="fixed"
-        
             forceFit={true}
             theme={{
-              colors10: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
               minBarWidth: 250,
               maxBarWidth: 250,
-              
-              // color: ['#2582a1', '#f88c24', '#c52125', '#87f4d0'],
-            }}
+                }}
 
             conversionTag={{
               offsetX: 10,
@@ -76,9 +82,7 @@ const ChartColumn = ({props, xField, yField, seriesField}) => {
                 textBaseline: 'middle',
               },
         }}
-        
-
-        
+              
         />
     );
 };
