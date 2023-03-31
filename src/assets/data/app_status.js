@@ -36,6 +36,10 @@ const app_status = [
         ]
     },
     {
+        text: 'Existing Driver',
+        value: 'Existing Driver',
+    },
+    {
         text: 'Ineligible',
         value: 'Ineligible',
         sub: [
@@ -68,7 +72,16 @@ const app_status = [
     { 
         text: 'On Hold/Contact Later', 
         value: 'On Hold/Contact Later', 
-        sub: [] 
+        sub: [
+            { 
+                text: 'Upgrading License', 
+                value: 'Upgrading License' 
+            },
+            { 
+                text: 'License Upgrade Requested', 
+                value: 'License Upgrade Requested' 
+            },
+        ] 
     },
     {
         text: 'Step 1 - Contact Info',
