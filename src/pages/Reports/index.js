@@ -2,6 +2,7 @@ import { Card, Table, Typography,Space, Divider} from 'antd';
 import { AreaChartOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import useFetch from '../../hooks/use-fetch';
+import {useNewFetch} from '../../hooks/use-new-fetch';
 import CardStatistic from '../../components/CardStatistic';
 import ChartColumn from '../../components/ChartColumn';
 import qs from 'qs';
@@ -156,15 +157,17 @@ const Reports = () => {
       //       }}
       scroll={{ y: 400 }}
       pagination={false}
-      order={{columnKey: 'total', order: 'descend', }}
-      onRow={() => ({
+      order={{ columnKey: 'total', order: 'descend', }}
+      rowKey="city"
+      onRow={(record) => ({
         onClick: () => {
-          navigate(`/reports/city_overview`);
+          navigate(`/reports/city_overview/${record.city}`);
         },
-      })}
+            })}
+      
     />
   </Card>
-  <Card title={<Title level={4}>Inter-city Reports</Title>} style={{ width: 500,}}>
+  <Card title={<Title level={4}>Cross-cities Reports</Title>} style={{ width: 500,}}>
     <Table
       columns={columns}
       dataSource={dataSet}
