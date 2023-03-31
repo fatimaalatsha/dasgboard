@@ -9,7 +9,7 @@ const CardStatistic = ({ title, value, color, popInfo, height = 100, width = 140
             content={<Text style={{ color: color }}>{popInfo}</Text>}
         >
             <Card
-                style={{ width, height, textAlign: 'center', backgroundColor: '#f0f2f5' }}
+                style={{ width, height, textAlign: 'center', backgroundColor: '#f0f2f5' , alignContent: 'center'}}
              
             >
                 <Statistic
