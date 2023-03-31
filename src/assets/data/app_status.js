@@ -36,6 +36,10 @@ const app_status = [
         ]
     },
     {
+        text: 'Existing Driver',
+        value: 'Existing Driver',
+    },
+    {
         text: 'Ineligible',
         value: 'Ineligible',
         sub: [
@@ -68,7 +72,16 @@ const app_status = [
     { 
         text: 'On Hold/Contact Later', 
         value: 'On Hold/Contact Later', 
-        sub: [] 
+        sub: [
+            { 
+                text: 'Upgrading License', 
+                value: 'Upgrading License' 
+            },
+            { 
+                text: 'License Upgrade Requested', 
+                value: 'License Upgrade Requested' 
+            },
+        ] 
     },
     {
         text: 'Step 1 - Contact Info',
@@ -110,4 +123,6 @@ const app_status = [
     
 ]
 
-export default app_status
+const exludeStatuses = ['Blank', 'Step 1 - Contact Info', 'Step 2 - Licence', 'Step 3 - Work Eligibility', 'Step 4 - Vehicle Ownership', 'Step 5 - Insurance', 'Step 6 - Safety', 'Step 7 - Driver History', 'Step 8 - Profile Picture', 'Document review']
+
+export {app_status, exludeStatuses}

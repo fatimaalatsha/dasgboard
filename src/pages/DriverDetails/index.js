@@ -28,8 +28,8 @@ import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined } from '
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
+import { object, string } from 'yup';
 import API from '../../api/BaseUrl' // Import API base URL
-
 
 import EditableText from '../../components/EditableText' // Import editbale string component
 import EditableDate from '../../components/EditableDate' // Import editable date component
@@ -47,11 +47,20 @@ import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
 import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs, readyToDrive } from '../../utils/doc-status' // Import isAllApproved function
 import { updateStatus, notifyDriver,updateApplicationStatus, updateDriver } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
-
+import {app_status, exludeStatuses} from '../../assets/data/app_status' // Import application status object data
 
 const { confirm } = Modal // Destructure config from Modal
 const { Title, Text } = Typography // Destructure Title from Typography
 const { TextArea } = Input // Destructure TextArea from Input
+
+const appStatusSchema = object().shape({
+  application_status: string().required('Application status is required'),
+  status_reason: string().when('application_status', {
+      is: (val) => val === 'Do not contact (DNC)',
+      then: string().required('Reason is required'),
+      otherwise: string().notRequired()
+    })
+})
 
 const SelectFeeder = (props) => {
   const { data, isLoading, error } = useFetch(`/v1/cities`)// Call useFetch custom hook
@@ -178,8 +187,7 @@ const DriverDetails = () => {
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
   const [changeStatusModal, setChangeStatusModal] = useState(false)// Set change status modal state
-  const [showSubIneligible, setShowSubIneligible] = useState(false)// Set show sub state
-  const [showSubDNC, setShowSubDNC] = useState(false)// Set show sub state
+  const appStatusArray = app_status.filter(item => !exludeStatuses.includes(item.text)) // Removes Blank from app_status array
 
   const successAlert = (msg) => { // Success alert method
     message.success(msg)
@@ -257,32 +265,33 @@ const DriverDetails = () => {
       },
       });    
   }
-const showConfirm = (status) => {
-    setLoading(true)
-    confirm({
-      title: 
-          <Title level={4}>
-            {`Are you sure you want to change the status to `}
-            <Text style={{ textTransform: 'capitalize'}} mark strong>{status}?</Text>
-          </Title>,
-      content: 'This action cannot be undone, and the driver will be notified.',
-      onOk: async () => {
-        await isAllApproved(id)
-        .then((res) => {
-          if (res) {
-            setLoading(false)
-            refetch()
-          } else {
-            setLoading(false)
-            showError('active')
-          }
-        })
-      },
-      onCancel() {
-        setLoading(false)
-        console.log('Cancel');
-      },
-    });
+
+  const showConfirm = (status) => {
+      setLoading(true)
+      confirm({
+        title: 
+            <Title level={4}>
+              {`Are you sure you want to change the status to `}
+              <Text style={{ textTransform: 'capitalize'}} mark strong>{status}?</Text>
+            </Title>,
+        content: 'This action cannot be undone, and the driver will be notified.',
+        onOk: async () => {
+          await isAllApproved(id)
+          .then((res) => {
+            if (res) {
+              setLoading(false)
+              refetch()
+            } else {
+              setLoading(false)
+              showError('active')
+            }
+          })
+        },
+        onCancel() {
+          setLoading(false)
+          console.log('Cancel');
+        },
+      });
   }
 
   const showError = (status) => {
@@ -310,35 +319,6 @@ const showConfirm = (status) => {
       }
     });
   }
-  const option = [
-    { text:'Do not contact (DNC)',  value: 'Do not contact (DNC)' , key: 'Do not contact (DNC)' },
-    { text:'Awaiting Documents',  value: 'Awaiting Documents' , key: 'Awaiting Documents' },
-    { text: 'Ineligible' ,value: 'Ineligible' , key: 'Ineligible' },
-    { text: 'Unresponsive', value: 'Unresponsive', key: 'Unresponsive' },
-    { text: 'On Hold/Contact Later', value: 'On Hold/Contact Later', key: 'On Hold/Contact Later' },
-  ]
-
-  const subOptionIneligible = [ 
-    { text: 'Underage', value: 'Underage', key: 'Underage' },
-    { text: 'Unqualified licence class', value: 'Unqualified licence class', key: 'Unqualified licence class' },
-    { text: 'Background check - Failed', value: 'Background check - Failed', key: 'Background check - Failed' },
-    { text: 'Driver Abstract - Failed', value: 'Driver Abstract - Failed', key: 'Driver Abstract - Failed' },
-    { text: 'Unqualified vehicle', value: 'Unqualified vehicle', key: 'Unqualified vehicle' },
-    { text: 'Rejected City Licence', value: 'Rejected City Licence', key: 'Rejected City Licence' },
-  ]
-  
-  const subOptionDNC = [
-    { text: 'Opted Out', value: 'Opted Out', key: 'Opted Out' },
-    { text: 'Banned', value: 'Banned', key: 'Banned' },
-    { text: 'International', value: 'International', key: 'International' },
-    { text: 'Rejected', value: 'Rejected', key: 'Rejected' },
-  ]
-
-  // Handle sub option to show or hide
-  const handleSubOption = (value) => {
-    value === 'Ineligible' ? setShowSubIneligible(true) : setShowSubIneligible(false)
-    value === 'Do not contact (DNC)' ? setShowSubDNC(true) : setShowSubDNC(false)
-  }
 
   if (error) {
     return <div>Something went wrong</div>
@@ -351,7 +331,7 @@ const showConfirm = (status) => {
   return (
     <Card title={'Driver Details'} loading={isLoading} style={{ margin: 15 }}
       extra={ !['active'].includes(data.status) && (
-        <Button type="primary" key='status' loading={loading} onClick={() => { setChangeStatusModal(true); handleSubOption(data.application_status)}}>
+        <Button type="primary" key='status' loading={loading} onClick={() => setChangeStatusModal(true)}>
             Change Application Status 
         </Button>
       )}
@@ -568,7 +548,11 @@ const showConfirm = (status) => {
       { /* End Additional Documents Drawwer */}
       { /*change Application Status modal*/}
       <Formik
-        initialValues={{ application_status: data.application_status, status_reason: data.status_reason }}
+        initialValues={{ 
+          application_status: data.application_status, 
+          status_reason: '' 
+        }}
+        validationSchema={appStatusSchema}
         onSubmit={async (values, { setSubmitting }) => {
           await updateApplicationStatus( id, values.application_status, values.status_reason)
             .then((response) => {
@@ -581,46 +565,43 @@ const showConfirm = (status) => {
             })
         }}
       >
-        {props => (
-          <FormikForm>
-            <Modal
-              title="Update Application Status"
-              open={changeStatusModal}
-              onCancel={() => setChangeStatusModal(false)}
-              destroyOnClose
-              footer={[
-                <Button key="Back"
-                onClick={() => setChangeStatusModal(false)}
-                >
-                  Cancel
-                </Button>,
-                <SubmitWrapper key="Submit" type="primary">
-                  Yes, Change
-                </SubmitWrapper>,
-              ]}
-            >
-              <Space direction="vertical">
-                <Text>
-                  {`Are you sure you want to continue with this action? `} <Text mark strong>{`${data.first_name} ${data.last_name}`}</Text>{` will have their application status changed to `} <Text mark strong>{`${props.values.application_status}`}</Text>
-                </Text>
-                <Form.Item
-                  rules={[{ required: true, message: 'Please select a status!' }]}
-                >
-                  <SelectWrapper   
-                    type="text" name="application_status" datasource={option} placeholder="Select a status" onSelect={handleSubOption} key={option.key} />
-                </Form.Item>
-                <Form.Item 
-                 rules={[{ required: true, message: 'Please select a status!'}]}>
-                  {showSubIneligible && <SelectWrapper type="text" name="status_reason" datasource={subOptionIneligible} placeholder="Select one of the following reasons" key={subOptionIneligible.key} />} 
-                  {showSubDNC && <SelectWrapper type="text" name="status_reason" datasource={subOptionDNC} placeholder="Select one of the following reasons" key={subOptionDNC.key} />}
-                </Form.Item>
-              </Space>
-            </Modal>
-          </FormikForm>
-        )}
+        { props => {
+          const appStatusSubArray = appStatusArray.filter((item) => item.value === props.values.application_status)
+          return (
+            <FormikForm>
+              <Modal
+                title="Update Application Status"
+                open={changeStatusModal}
+                onCancel={() => setChangeStatusModal(false)}
+                destroyOnClose
+                footer={[
+                  <Button key="Back"
+                  onClick={() => setChangeStatusModal(false)}
+                  >
+                    Cancel
+                  </Button>,
+                  <SubmitWrapper key="Submit" type="primary">
+                    Yes, Change
+                  </SubmitWrapper>,
+                ]}
+              >
+                <Space size={18} direction="vertical">
+                  <Text>
+                    {`Are you sure you want to continue with this action? `} <Text mark strong>{`${data.first_name} ${data.last_name}`}</Text>{` will have their application status changed to `} <Text mark strong>{`${props.values.application_status}`}</Text>
+                  </Text>
+                    <SelectWrapper name="application_status" datasource={appStatusArray} placeholder="Select a status" />
+                    {
+                      appStatusSubArray[0]?.hasOwnProperty('sub') && (
+                        <SelectWrapper name="status_reason" datasource={appStatusSubArray[0].sub} placeholder="Select a reason" />
+                      )
+                    }
+                </Space>
+              </Modal>
+            </FormikForm>
+          )} 
+        }
       </Formik>
       { /*end change Application application_status modal*/}
-     
     </Card>
   )
 }
