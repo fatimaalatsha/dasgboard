@@ -1,4 +1,5 @@
-import { Timeline, Card, Space, Input, message, Typography, Empty, Button, Tooltip, Popconfirm } from "antd"
+import { useState } from "react"
+import { Timeline, Card, Space, Input, message, Typography, Empty, Button, Tooltip, Popconfirm, Checkbox } from "antd"
 import { ReloadOutlined, FolderOutlined } from '@ant-design/icons' // Import Ant Icons
 
 import { Formik, Form , Field } from 'formik' // Import Formik form components
@@ -71,6 +72,7 @@ const AddNewNote = ({ driverId, refetch }) => {
 
 const DriverDetailsNotes = ({ id }) => {
     const { data, error, isLoading, refetch } = useFetch(`/v1/drivers/${id}/notes`)
+    const [showArchived, setShowArchived] = useState(false)
 
     const refetchConfig = {
         icon: <ReloadOutlined />,
@@ -88,14 +90,32 @@ const DriverDetailsNotes = ({ id }) => {
 
     if (error) return <div>failed to load</div>
 
+    const newItems = data.items?.map(item => ({...item, status: 'active'}))
+
+    newItems?.unshift({
+        "id": 1029,
+        "admin_id": 23,
+        "note_type": "Follow Up",
+        "note": "Example of an archived note",
+        "status": "archived",
+        "created_at": "2023-03-31T21:17:47.916Z",
+        "updated_at": "2023-03-31T21:17:47.916Z",
+        "admin_name": "Alejandro Delgadillo"
+    })
+
+    const archivedItems = showArchived ? newItems : newItems?.filter((item) => item.status === 'active')
+
     return (
         <Card 
             title={
-                <Space style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-                    <Title level={2} style={{ margin: 0 }}>Notes</Title>
-                    <Tooltip title="Refresh">
-                        <Button {...refetchConfig} />
-                    </Tooltip>
+                <Space size={16} direction="vertical" style={{ width: '100%',  margin: '8px 0'}}>
+                    <Space style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+                        <Title level={2} style={{ margin: 0 }}>Notes</Title>
+                        <Tooltip title="Refresh">
+                            <Button {...refetchConfig} />
+                        </Tooltip>
+                    </Space>
+                    <Checkbox onChange={(e) => setShowArchived(e.target.checked)}><Text type="secondary" style={{ fontWeight: 'normal' }}>Show archived notes</Text></Checkbox>
                 </Space>
             } 
             style={{ height: '100%', width: '100%', overflowY: 'hidden' }}
@@ -109,23 +129,25 @@ const DriverDetailsNotes = ({ id }) => {
             >
                 <Timeline>
                     {
-                        data.items?.length === 0 ? <Empty /> :
-                        data.items?.map((item, index) => (
-                            <Timeline.Item key={index}>
+                        archivedItems?.length === 0 ? <Empty /> :
+                        archivedItems?.map((item, index) => (
+                            <Timeline.Item key={index} color={item.status === 'archived' ? 'gray' : 'blue'} dot={item.status === 'archived' && <FolderOutlined />} >
                                 <Space size={2} direction="vertical">
                                     <Space>
                                         <Text strong>{dayjs(item.created_at).format('dddd DD, MMM YYYY - HH:mm')}</Text>
-                                        <Tooltip title="Archive" placement="bottom">
-                                            <Popconfirm
-                                                title="Archive Note"
-                                                description="Are you sure you want to archive this note?"
-                                                onConfirm={() => console.log('archive')}
-                                                okText="Yes"
-                                                cancelText="No"
-                                            >
-                                                    <Button {...archiveConfig} />
-                                            </Popconfirm>
-                                        </Tooltip>
+                                        { item.status !== 'archived' && (
+                                            <Tooltip title="Archive" placement="bottom">
+                                                <Popconfirm
+                                                    title="Archive Note"
+                                                    description="Are you sure you want to archive this note?"
+                                                    onConfirm={() => console.log('archive')}
+                                                    okText="Yes"
+                                                    cancelText="No"
+                                                >
+                                                        <Button {...archiveConfig} />
+                                                </Popconfirm>
+                                            </Tooltip>
+                                        )}
                                     </Space>
                                     <Text type="secondary">{item.note_type}</Text>
                                     <Text>{item.note}</Text>
