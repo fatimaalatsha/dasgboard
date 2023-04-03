@@ -696,7 +696,7 @@ const EnableAdditionalDocs = ({status, id, refetch}) => { // TODO: Implement ena
 }
 
 
-const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub, pinkSlip  }) => {
+const AdditionalDocsDrawer = ({ province, status, open, setOpen, driverid, sub, pinkSlip  }) => {
   const [slip, setSlip] = useState(false)// Set slep modal state
   const [pinkSlipState, setPinkSlipState] = useState(pinkSlip) // Set pink slip state
  
@@ -710,8 +710,8 @@ const AdditionalDocsDrawer = ({ province, status , open, setOpen, driverid, sub,
       open={open}
     >
       <Space direction="vertical" style={{ width: '100%' }}>
-        { (status === 'active' && province === 1 )&&<Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button>}
-       {( status ==='active'&& pinkSlipState) && <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />}
+        {( status === 'active' && province === 1 ) && <Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button> }
+       {( status ==='active' && pinkSlipState && province === 1 ) && <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />}
         <AdditionalDocsFeeder driverid={driverid} sub={sub} />
       </Space>
     {/* pink slip modal */}
@@ -802,7 +802,6 @@ const AdditionalDocsFeeder = ({ driverid, sub }) => {
               <PopDeleteButton id={doc.id} refetch={refetch} />
             </Space>
             <DocViewer key={idx} objectKey={`${sub}/${doc.key1}`} />
-            <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />
           </Space>
         ))
       }
