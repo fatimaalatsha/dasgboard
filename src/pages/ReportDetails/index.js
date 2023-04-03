@@ -1,22 +1,17 @@
 import { useState } from 'react';
-import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Table} from 'antd';
+import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Table } from 'antd';
 import useNewFetch from '../../hooks/use-new-fetch';
+import qs from 'qs';
 import dayjs from 'dayjs';
+import { useParams } from 'react-router-dom'
 
+import { EditOutlined, BarChartOutlined } from '@ant-design/icons';
 import CardStatistic from '../../components/CardStatistic';
 const { Title, Text } = Typography;
 
 
-
 const ReportDetails = () => {
-
-  console.log(window.location.pathname.split('/')[3])
-
-  const cityId = window.location.pathname.split('/')[3]
-
-
-  
- const [id, setId] = useState(1);
+  const { id } = useParams();
   const { data, error, isLoading } = useNewFetch(
     `/v1/reports/city-overview/${id}`
   );
@@ -35,7 +30,6 @@ const ReportDetails = () => {
           <Col span={24}>
             <Space direction='horizontal' size="large" >
         </Space>
-       
            <Space direction="vertical" size="large" style={{ width: '100%' }} align='center' >
               <Space direction="horizontal" size="large" align='center' style={{ width: '100%' }} >
                 <CardStatistic title="Total" value={data.total} color="#3f8600"  />
@@ -78,13 +72,10 @@ const ReportDetails = () => {
                 dataSource={data.applicants_list}
                 pagination={false}
               />
-
-
             </Space>
           </Col>
         </Row>
-      </Card>
-      
+      </Card>  
     </>
   );
 };
