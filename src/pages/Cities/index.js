@@ -80,7 +80,7 @@ const Cities = () => {
   })
   //fetch data from api
   const { data, isLoading, error, refetch } = useFetch(`v1/cities/cc?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
-
+  console.log(data)
   //handle table change
   const handleTableChange = (pagination, filter, sorter) => { 
         Object.keys(filter).forEach(key => {

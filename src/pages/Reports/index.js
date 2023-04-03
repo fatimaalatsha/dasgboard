@@ -2,6 +2,7 @@ import { Card, Table, Typography,Space, Divider} from 'antd';
 import { AreaChartOutlined } from '@ant-design/icons';
 import { useNavigate } from 'react-router-dom';
 import useFetch from '../../hooks/use-fetch';
+import useNewFetch from '../../hooks/use-new-fetch';
 import CardStatistic from '../../components/CardStatistic';
 import ChartColumn from '../../components/ChartColumn';
 import qs from 'qs';
@@ -54,71 +55,90 @@ const Reports = () => {
     navigate(`/reports/${record.key}`);
   };
 
-  const dateFrom = {  
-    date_from: '2020-01-01',
-    date_to: '2023-04-16',
-  };
- const getUserParams = () => {
-    const { date_from, date_to } = dateFrom;
-    return qs.stringify(
-      {
-        date_from,
-        date_to,
-      },
-      { skipNulls: true, arrayFormat: 'comma' }
-    );
-  };
+  const { data, error, isLoading } = useNewFetch(`/v1/reports/applicants-overview`);
 
+  const processData = (data) => {
+      const result = [];
 
-  const { data, error, isLoading } = useFetch(
-    `/v1/reports/conversion-rates?${getUserParams()}`
-  );
+      // loop over the items array
+      data.items.forEach((item) => {
+        // create a new object for active users with the required properties
+        const activeObj = {
+          city: item.city,
+          count: item.active,
+          status: 'active',
+        };
 
-  const countActive = (data) => {
-    var active = 0;
-    for (var i = 0; i < data.length; i++) {
-        active += data[i].active;
-      
-    }
-    return active; 
-  };
+        // push the new object into the result array
+        result.push(activeObj);
 
-  const countAll = (data) => {
-    var total = 0;
-    for (var i = 0; i < data.length; i++) {
-      total += data[i].total;
-    }
-    return total;
-  };
+        // create a new object for applicants users with the required properties
+        const applicantsObj = {
+          city: item.city,
+          count: item.applicants,
+          status: 'applicants',
+        }; 
+    // push the new object into the result array
+        result.push(applicantsObj);
+        
+        // create a new object for  Ineligible users with the required properties
+        const IneligibleObj = {
+          city: item.city,
+          count: item.ineligible,
+          status: 'Ineligible',
+        };
+        // push the new object into the result array
+        result.push(IneligibleObj);
+        
+        // create a new object for  New Leads users with the required properties
+        const NewLeadsObj = {
+          city: item.city,
+          count: item.applicants_seven_days,
+          status: 'New Leads',
+        };
+        // push the new object into the result array
+        result.push(NewLeadsObj);
 
-  // const conversionRate = (data) => {
-  //   var total = 0;
-  //   for (var i = 0; i < data.length; i++) {
-  //     if (data[i].status === "Active") {
-  //       total += data[i].active;
-  //     }
-  //   }
-  //   return (total / countAll(data)) * 100;
-  // };
+      });
+  return result;
+};
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
   return (
     <Card title={<Title level={2}>Reports</Title>}>
-      <Space direction="horizontal" size="large">
-          <CardStatistic title="Total Leads" value={countAll(data.items)} color="#3f8600" popInfo="Total number of leads " />
-          <CardStatistic title="Active" value={countActive(data.items)} popInfo="Total active drivers" color="#3f8600" />
-          <CardStatistic title="Awaiting " value={countAll(data.items)-countActive(data.items)} color="#1307f5" popInfo="Number of applicants who are in the process" />
-          <CardStatistic title="New Leads" value={7} color="#f507c9" popInfo="Number of new leads in the last month(hard coded)" />
-          <CardStatistic title="Cities " value={data.total_items} color="#f57207" popInfo="Number of active cities"/>
-          <CardStatistic title="Ineligible " value={17} color="#3f8600" popInfo="(Hard coded)" />               
-      </Space> 
-      <br />
-      <br />
-     
-      <Divider orientation="left">Number of Leads</Divider>
-<ChartColumn props={data.items} xField="city" yField="total" seriesField="city" />
-<br />
+      <Space direction="vertical" size="large" style={{ width: '100%' }} align='center'>
+          <Space direction="horizontal" size="large">
+              <CardStatistic title="Total Leads" height ={120} width = {165} value={data.meta.total} color="#3f8600" popInfo="Total number of leads " />
+              <CardStatistic title="Active" height ={120} width = {165} value={data.meta.total_active} popInfo="Total active drivers" color="#3f8600" />
+              <CardStatistic title="Total Applicants" height ={120} width = {165} value={data.meta.total_applicants} color="#1307f5" popInfo="Number of applicants who are in the process" />
+              <CardStatistic title="New Leads" height ={120} width = {165} value={data.meta.total_applicants_seven_days} color="#f507c9" popInfo="Number of new leads in the last 7 days" />
+              <CardStatistic title="Ineligible" height ={120} width = {165} value={data.meta.total_ineligible} color="#3f8600" popInfo="Total number of ineligible applicants " />               
+            </Space> 
+        </Space>
+      <Divider orientation="left">Number of Leads Per City </Divider>
+      <dev style={{ height: "700px" }}>
+      <ChartColumn props={processData(data)} xField="city" yField="count" seriesField="status" isGroup={false} isStack={true}
+      label={
+                  {
+                    position: 'middle',
+                    style: {
+                      fill: '#000',
+                      opacity: 1,                      
+                    },
+                    content: (item) => {
+                        return item.count ? `${item.count}` : '';
+                    }, 
+                   rotate: false,
+                    layout: [
+                      { type: 'interval-hide-overlap', },
+                      { type: 'adjust-color' },
+                      { type: 'interval-adjust-position' },
+                      { type: 'interval-rect-mask' },
+                     
+                    ],
+            }} />
+      </dev>
 <Divider orientation="left" />
 
 <Space direction="horizontal" size={200} style={{ marginTop: '10px' }}>
@@ -156,15 +176,17 @@ const Reports = () => {
       //       }}
       scroll={{ y: 400 }}
       pagination={false}
-      order={{columnKey: 'total', order: 'descend', }}
-      onRow={() => ({
-        onClick: () => {
-          navigate(`/reports/city_overview`);
-        },
-      })}
+      order={{ columnKey: 'total', order: 'descend', }}
+      rowKey="city"
+      // onRow={(record) => ({
+      //   onClick: () => {
+      //     navigate(`/reports/city_overview/${record.city}`);
+      //   },
+      //       })}
+      
     />
   </Card>
-  <Card title={<Title level={4}>Inter-city Reports</Title>} style={{ width: 500,}}>
+  <Card title={<Title level={4}>Cross-cities Reports</Title>} style={{ width: 500,}}>
     <Table
       columns={columns}
       dataSource={dataSet}
