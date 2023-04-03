@@ -117,7 +117,7 @@ const Reports = () => {
             </Space> 
         </Space>
       <Divider orientation="left">Number of Leads Per City </Divider>
-      <dev style={{ height: "700px" }}>
+      <div style={{ height: "700px" }}>
       <ChartColumn props={processData(data)} xField="city" yField="count" seriesField="status" isGroup={false} isStack={true}
       label={
                   {
@@ -138,7 +138,7 @@ const Reports = () => {
                      
                     ],
             }} />
-      </dev>
+      </div>
 <Divider orientation="left" />
 
 <Space direction="horizontal" size={200} style={{ marginTop: '10px' }}>
@@ -148,7 +148,7 @@ const Reports = () => {
         {
           title: 'City',
           dataIndex: 'city',
-          key: 'city',
+          key: 'city_id',
         },
         {
           title: 'Total',
@@ -178,12 +178,11 @@ const Reports = () => {
       pagination={false}
       order={{ columnKey: 'total', order: 'descend', }}
       rowKey="city"
-      // onRow={(record) => ({
-      //   onClick: () => {
-      //     navigate(`/reports/city_overview/${record.city}`);
-      //   },
-      //       })}
-      
+      onRow={(record) => ({
+        onClick: () => {
+          navigate(`/reports/city_overview/${record.city_id}`);
+        },
+            })}  
     />
   </Card>
   <Card title={<Title level={4}>Cross-cities Reports</Title>} style={{ width: 500,}}>

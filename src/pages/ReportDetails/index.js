@@ -1,23 +1,17 @@
 import { useState } from 'react';
-import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Table} from 'antd';
+import { Typography, Card, Space, DatePicker, Button, Tooltip, Result, Row, Col, Table } from 'antd';
 import useNewFetch from '../../hooks/use-new-fetch';
+import qs from 'qs';
 import dayjs from 'dayjs';
+import { useParams } from 'react-router-dom'
 
+import { EditOutlined, BarChartOutlined } from '@ant-design/icons';
 import CardStatistic from '../../components/CardStatistic';
 const { Title, Text } = Typography;
 
 
-
-const NumberOfLead = (dateFrom) => {
-  const [chartType, setChartType] = useState('bar');
-
-  console.log(window.location.pathname.split('/')[3])
-
-  const cityId = window.location.pathname.split('/')[3]
-
-
-  
- const [id, setId] = useState(1);
+const ReportDetails = () => {
+  const { id } = useParams();
   const { data, error, isLoading } = useNewFetch(
     `/v1/reports/city-overview/${id}`
   );
@@ -103,7 +97,6 @@ const NumberOfLead = (dateFrom) => {
           <Col span={24}>
             <Space direction='horizontal' size="large" >
         </Space>
-       
            <Space direction="vertical" size="large" style={{ width: '100%' }} align='center' >
               <Space direction="horizontal" size="large" align='center' style={{ width: '100%' }} >
                 <CardStatistic title="Total" value={data.total} color="#3f8600"  />
@@ -150,99 +143,11 @@ const NumberOfLead = (dateFrom) => {
                 dataSource={data.applicants_list}
                 pagination={false}
               />
-
-
             </Space>
           </Col>
         </Row>
-      </Card>
-      
+      </Card>  
     </>
   );
 };
-
-
-
-        
- 
-
-
-const ReportDetails = () => {
-  const [date, setDate] = useState({
-    filter: {
-      date_from: dayjs().subtract(1, 'month').format('YYYY-MM-DD'),
-      date_to: dayjs().format('YYYY-MM-DD'),
-    },
-  });
-  const [isEnable, setIsEnable] = useState(true); // Set isEnable state
-  const [showReport, setShowReport] = useState(false);
-  const [dateset, setDateset] = useState('');
-
-  const getUserParams = ({ date_from, date_to }) => {
-    // Use the selected date range from the prop
-    return qs.stringify(
-      {
-        date_from,
-        date_to,
-      },
-      { skipNulls: true, arrayFormat: 'comma' }
-    );
-  };
-
-
-  return (
-    <>
-    <Space align="start" direction="horizontal">
-      <DatePicker.RangePicker
-        open={isEnable}
-        allowClear={true}
-        inputReadOnly={true}
-        size="small"
-        showToday={false}
-        bordered={true}
-        onChange={(dates) => {
-          setDate({
-            filter: {
-              date_from: dates[0].format('YYYY-MM-DD'),
-              date_to: dates[1].format('YYYY-MM-DD'),
-            },
-          });
-        }}
-        renderExtraFooter={() => {
-          return (
-            <Space direction='horizontal' style={{ display: 'flex', justifyContent: 'space-between' }}>
-               <Button
-                type="primary"
-                onClick={() => {
-                  setIsEnable(false);
-                  setDateset(getUserParams(date.filter.date_from));
-                }}
-            >
-              Cancel
-            </Button>
-            <Button
-              type="primary"
-              onClick={() => {
-                setIsEnable(false);
-                setShowReport(true);
-              }}
-            >
-              OK
-              </Button>
-           </Space>
-          );
-        }}
-      />
-       <Tooltip title='Select Range'>
-            <Button style={{padding: 0, height: 'auto' }} onClick={() => setIsEnable(true)} type='link' icon={<EditOutlined />} />
-        </Tooltip>
-      </Space>
-       
-      {/* Pass date as a prop and show report if showReport is true */}
-      {showReport && <NumberOfLead date_from={date.filter.date_from} date_to={date.filter.date_to} />}
-    </>
-  );
-};
-
-
 export default ReportDetails;
