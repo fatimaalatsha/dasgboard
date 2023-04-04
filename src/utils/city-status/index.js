@@ -1,9 +1,7 @@
 import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
-import API from '../../api/BaseUrl' // Import API base URL
 import NewAPI from '../../api/NewUrl' // Import new API base URL
 
-//
-const createCity = async (values) => {
+const createCity = async (values) => { // Create New City
     try {
       const auth = await Auth.currentSession()// Get current session
       const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -14,17 +12,15 @@ const createCity = async (values) => {
         }
       
       }
-      const response = await NewAPI.post(`/v1/cities/cc`, values, options)
+      const response = await NewAPI.post(`/v1/cities`, values, options)
       const data = await response.data
       return data
     } catch (error) {
       console.log(error)
     }  
-  }
+}
   
- // Fetch getProvince list from API
-
-  const getProvince = async () => {
+const getProvince = async () => {// Get Province List
     try {
       const auth = await Auth.currentSession()// Get current session
       const token = auth.getAccessToken().getJwtToken()// Get token from session
