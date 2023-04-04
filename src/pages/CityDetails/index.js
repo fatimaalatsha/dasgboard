@@ -18,6 +18,7 @@ import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 
 import useFetch from '../../hooks/use-fetch'
+import useNewFetch from '../../hooks/use-new-fetch' // Import new endpoint hook
 import { updateCityProfile } from '../../utils/city-status' // Import updateCityProfile function
 
 import EditableText from '../../components/EditableText' // Import EditableText component
@@ -43,7 +44,7 @@ const descriptionConfig = {
 }
 
 const CityEmailTemplates = ({cityid}) => { // Email templates component
-    const { data, isLoading, error, refetch } = useFetch(`/v1/cities/cc/${cityid}/settings`) // Fetch city settings
+    const { data, isLoading, error, refetch } = useNewFetch(`/v1/cities/${cityid}/settings`) // Fetch city settings
     if (isLoading) {
         return <>Loading...</>
     }
@@ -231,7 +232,7 @@ const CityProfile = ({ data, cityid }) => { // Editable info profile component
 
 const CityDetails = () => {
     const { id } = useParams()
-    const { data, isLoading, error, refetch } = useFetch(`/v1/cities/cc/${id}`)
+    const { data, isLoading, error, refetch } = useNewFetch(`/v1/cities/${id}`)
     const [loading, setLoading] = useState(false)
 
     if (error) {
