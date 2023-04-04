@@ -17,11 +17,11 @@ import {
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 
-import useFetch from '../../hooks/use-fetch'
 import useNewFetch from '../../hooks/use-new-fetch' // Import new endpoint hook
 import { updateCityProfile } from '../../utils/city-status' // Import updateCityProfile function
 
 import EditableText from '../../components/EditableText' // Import EditableText component
+import EditableDate from '../../components/EditableDate' // Import EditableDate component
 
 import WelcomeEmail from '../../components/email/WelcomeEmail' // Import WelcomeEmail component
 import InitialDocuments from '../../components/email/InitialDocuments' // Import InitialDocuments component
@@ -212,10 +212,10 @@ const CityProfile = ({ data, cityid }) => { // Editable info profile component
     return (
         <Descriptions {...descriptionConfig}>
             <Item label="driver minimum age">
-                <EditableText name="min_age" value={data?.min_age.toString()} updateCallback={value => updateCityProfile(cityid, value)}/>
+                <EditableText name="min_age" value={data?.min_age} updateCallback={value => updateCityProfile(cityid, value)}/>
             </Item>
             <Item label="maximum vehicle age (years)">
-                <EditableText name="vehicle_age" value={data?.vehicle_age.toString()} updateCallback={value => updateCityProfile(cityid, value)}/>
+                <EditableText name="vehicle_age" value={data?.vehicle_age} updateCallback={value => updateCityProfile(cityid, value)}/>
             </Item>
             <Item label="total tax rate">
                 <Space align="baseline">
@@ -224,7 +224,10 @@ const CityProfile = ({ data, cityid }) => { // Editable info profile component
                 </Space>
             </Item>
             <Item label="recruitment email address">
-                <EditableText name="email" value={data?.email} updateCallback={value => updateCityProfile(cityid, value)}/>
+                <EditableText name="email" value={data?.email_to} updateCallback={value => updateCityProfile(cityid, value)}/>
+            </Item>
+            <Item label="launch date">
+                <EditableDate name="launch_date" value={data?.launch_date} updateCallback={value => updateCityProfile(cityid, value)}/>
             </Item>
         </Descriptions>
     )

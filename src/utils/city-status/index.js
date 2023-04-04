@@ -55,7 +55,6 @@ const createCity = async (values) => {
 }
 
 const updateCityProfile = async (id, property) => {
-  console.log(property)
     try {
       const auth = await Auth.currentSession()// Get current session
       const token = auth.getAccessToken().getJwtToken()// Get token from session
