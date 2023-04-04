@@ -219,7 +219,7 @@ const CityProfile = ({ data, cityid }) => { // Editable info profile component
             </Item>
             <Item label="total tax rate">
                 <Space align="baseline">
-                    <EditableText value={data?.tax_rate} />
+                    <EditableText name="tax_rate" value={data?.tax_rate} updateCallback={value => updateCityProfile(cityid, value)}/>
                     <Text>{ data?.province_id === 1 ? 'HST' : 'GST + PST' }</Text>
                 </Space>
             </Item>
