@@ -7,7 +7,6 @@ import { useParams } from 'react-router-dom'
 
 import { EditOutlined, BarChartOutlined } from '@ant-design/icons';
 import CardStatistic from '../../components/CardStatistic';
-import ChartColumn from '../../components/ChartColumn';
 const { Title, Text } = Typography;
 
 
