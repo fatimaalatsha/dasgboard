@@ -74,12 +74,12 @@ const app_status = [
         value: 'On Hold/Contact Later', 
         sub: [
             { 
-                text: 'Upgrading License', 
-                value: 'Upgrading License' 
+                text: 'Requested to Upgrade Licence', 
+                value: 'Requested to Upgrade Licence' 
             },
             { 
-                text: 'License Upgrade Requested', 
-                value: 'License Upgrade Requested' 
+                text: 'Upgrading Licence', 
+                value: 'Upgrading Licence' 
             },
         ] 
     },
