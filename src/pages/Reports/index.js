@@ -56,10 +56,9 @@ const Reports = () => {
   };
 
   const { data, error, isLoading } = useNewFetch(`/v1/reports/applicants-overview`);
-
+  
   const processData = (data) => {
       const result = [];
-
       // loop over the items array
       data.items.forEach((item) => {
         // create a new object for active users with the required properties
@@ -141,8 +140,8 @@ const Reports = () => {
       </div>
 <Divider orientation="left" />
 
-<Space direction="horizontal" size={200} style={{ marginTop: '10px' }}>
-  <Card title={<Title level={4}>Inter-city Reports</Title>} style={{ width: 500 }}>
+<Space direction="horizontal" size={100} style={{ marginTop: '10px' }}>
+  <Card title={<Title level={4}>Inter-city Reports</Title>} style={{ width: 600 }}>
     <Table
       columns={[
         {
@@ -161,14 +160,18 @@ const Reports = () => {
           key: 'active',
         },
         {
-          title: 'Conversion Rate',
-          dataIndex: 'percentage',
-          key: 'percentage',
-          render: (text) => <span>{text}%</span>,
+          title: 'Ineligible',
+          dataIndex: 'ineligible',
+          key: 'ineligible',
+        },
+        {
+          title: 'Recent Applicants',
+          dataIndex: 'applicants_seven_days',
+          key: 'applicants_seven_days',
         },
       ]}
       dataSource={data.items}
-      style={{ width: 500, height: 500, overflow: 'auto',  color: '#b7eb8f' }}     
+      style={{ width: 600, height: 500, overflow: 'auto',  color: '#b7eb8f' }}     
       // pagination={{
       //   pageSize: 4,
       //   showSizeChanger: false,
@@ -185,7 +188,7 @@ const Reports = () => {
             })}  
     />
   </Card>
-  <Card title={<Title level={4}>Cross-cities Reports</Title>} style={{ width: 500,}}>
+  <Card title={<Title level={4}>Cross-cities Reports</Title>} style={{ width:400,}}>
     <Table
       columns={columns}
       dataSource={dataSet}
@@ -197,11 +200,9 @@ const Reports = () => {
         },
             })}
       pagination={false}
-      style={{ width: 500, height: 500, overflow: 'auto',  color: '#b7eb8f' }}     
-
+      style={{ width: 550, height: 500, overflow: 'auto',  color: '#b7eb8f' }}     
     />
   </Card>
-  
 </Space>
 
     </Card>
