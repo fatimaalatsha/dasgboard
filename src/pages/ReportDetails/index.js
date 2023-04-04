@@ -11,7 +11,6 @@ import ChartBar from '../../components/ChartBar';
 import ChartColumn from '../../components/ChartColumn';
 import ChartPie from '../../components/ChartPie';
 import CardStatistic from '../../components/CardStatistic';
-import ChartColumn from '../../components/ChartColumn';
 const { Title, Text } = Typography;
 
 
