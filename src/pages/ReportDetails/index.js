@@ -49,7 +49,7 @@ const ReportDetails = () => {
               <Space direction="horizontal"  width={165} size="large" align='center' style={{ width: '100%' }}>
                 <CardStatistic title="Total Applicant Pool" width={180}  value={data.total} color="#3f8600" popInfo='Total Number of applicants, active and ineligible' />
                 <CardStatistic title="Active"  width={165} value={data.active} color="#3f8600" popInfo='Total Number Of Actived Drivers' />
-                <CardStatistic title="Applicants"  width={165} value={data.applicants} color="#3f8600" popInfo='Total Number Of Applicants' />
+                <CardStatistic title="Eligible Applicants"  width={165} value={data.applicants} color="#3f8600" popInfo='TTotal Number of Eligible Applicants' />
                 <CardStatistic title="New Applicants" width={165} value={data.applicants_seven_days} color="#1307f5" popInfo='Number Of Applicants In The Last 7 Days' />        
               </Space>
             </Space>
