@@ -1,5 +1,6 @@
 import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
 import NewAPI from '../../api/NewUrl' // Import new API base URL
+import city_timezones from '../../assets/data/city_timezones'
 
 const createCity = async (values) => { // Create New City
     try {
