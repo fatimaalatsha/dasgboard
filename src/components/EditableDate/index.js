@@ -39,7 +39,7 @@ const EditableDate = ({...props}) => {
         {
             isEnable ? (
                 <DatePicker 
-                    defaultValue={dayjs(dayjs(dateValue).format(dateFormat))} 
+                    defaultValue={dayjs(dayjs(dateValue || dayjs()).format(dateFormat))} 
                     autoFocus={isEnable}
                     open={isEnable}
                     allowClear={false}
