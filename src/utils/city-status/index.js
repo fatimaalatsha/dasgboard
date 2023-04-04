@@ -1,7 +1,6 @@
 import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
 import API from '../../api/BaseUrl' // Import API base URL
-import NewAPI from '../../api/NewUrl'
-import  { message }  from 'antd'
+import NewAPI from '../../api/NewUrl' // Import new API base URL
 
 //
 const createCity = async (values) => {
@@ -11,17 +10,14 @@ const createCity = async (values) => {
       const options = { // Set options for fetch
         headers: {
           Authorization: token,
-          ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
+          ...(process.env.REACT_APP_NEW_ENV && { 'env': process.env.REACT_APP_NEW_ENV }),
         }
       
       }
-      const response = await API.post(`/v1/cities/cc`, values, options)
+      const response = await NewAPI.post(`/v1/cities/cc`, values, options)
       const data = await response.data
-      if (data) {
-        message.success('City created successfully');
-      }
-    }
-    catch (error) {
+      return data
+    } catch (error) {
       console.log(error)
     }  
   }
@@ -35,19 +31,18 @@ const createCity = async (values) => {
       const options = { // Set options for fetch
         headers: {
           Authorization: token,
-          ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
+          ...(process.env.REACT_APP_NEW_ENV && { 'env': process.env.REACT_APP_NEW_ENV }),
         }
       
       }
-      const response = await API.get(`/v1/provinces`, options)
+      const response = await NewAPI.get(`/v1/provinces`, options)
       const data = await response.data
-      console.log('data', data)
-      if (data) {
-        const provinces = data.items.map((province) => {
-          province.value = province.province_id
-          return province;
-        })
-      }
+      const provinces = data.data.map((province) => {
+        province.text = province.name
+        province.value = province.id
+        return province
+      })
+      return provinces
     }
     catch (error) {
       console.log(error)
