@@ -6,7 +6,6 @@ import dayjs from 'dayjs';
 import { useParams } from 'react-router-dom'
 
 import { EditOutlined, BarChartOutlined } from '@ant-design/icons';
-import ChartColumn from '../../components/ChartColumn';
 import CardStatistic from '../../components/CardStatistic';
 const { Title, Text } = Typography;
 
