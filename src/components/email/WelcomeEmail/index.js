@@ -14,11 +14,11 @@ const { TextArea } = Input // destructuring Input component
 
 const WelcomeEmail = ({data, id, refetch}) => {
 
-    const driverLicense = Object.assign({}, data?.items?.filter(item => item.key.includes('driver_licence_'))) // Find driver licence info
-    const driverAbstract = Object.assign({}, data?.items?.filter(item => item.key.includes('driver_abstract_'))) // Find driver abstract info
-    const vehicleOwnership = Object.assign({}, data?.items?.filter(item => item.key.includes('vehicle_ownership_'))) // Find vehicle ownership info
-    const vehicleInsurance = Object.assign({}, data?.items?.filter(item => item.key.includes('vehicle_insurance_'))) // Find vehicle insurance info
-    const workEligibility = Object.assign({}, data?.items?.filter(item => item.key.includes('work_eligibility_'))) // Find work eligibility info
+    const driverLicense = Object.assign({}, data?.filter(item => item.key.includes('driver_licence_'))) // Find driver licence info
+    const driverAbstract = Object.assign({}, data?.filter(item => item.key.includes('driver_abstract_'))) // Find driver abstract info
+    const vehicleOwnership = Object.assign({}, data?.filter(item => item.key.includes('vehicle_ownership_'))) // Find vehicle ownership info
+    const vehicleInsurance = Object.assign({}, data?.filter(item => item.key.includes('vehicle_insurance_'))) // Find vehicle insurance info
+    const workEligibility = Object.assign({}, data?.filter(item => item.key.includes('work_eligibility_'))) // Find work eligibility info
 
     const welcomeEmail = [
         driverLicense,

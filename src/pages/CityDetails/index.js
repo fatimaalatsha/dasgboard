@@ -17,10 +17,11 @@ import {
 import { ArrowLeftOutlined } from '@ant-design/icons'
 import { useParams } from 'react-router-dom'
 
-import useFetch from '../../hooks/use-fetch'
+import useNewFetch from '../../hooks/use-new-fetch' // Import new endpoint hook
 import { updateCityProfile } from '../../utils/city-status' // Import updateCityProfile function
 
 import EditableText from '../../components/EditableText' // Import EditableText component
+import EditableDate from '../../components/EditableDate' // Import EditableDate component
 
 import WelcomeEmail from '../../components/email/WelcomeEmail' // Import WelcomeEmail component
 import InitialDocuments from '../../components/email/InitialDocuments' // Import InitialDocuments component
@@ -43,7 +44,7 @@ const descriptionConfig = {
 }
 
 const CityEmailTemplates = ({cityid}) => { // Email templates component
-    const { data, isLoading, error, refetch } = useFetch(`/v1/cities/cc/${cityid}/settings`) // Fetch city settings
+    const { data, isLoading, error, refetch } = useNewFetch(`/v1/cities/${cityid}/settings`) // Fetch city settings
     if (isLoading) {
         return <>Loading...</>
     }
@@ -211,19 +212,22 @@ const CityProfile = ({ data, cityid }) => { // Editable info profile component
     return (
         <Descriptions {...descriptionConfig}>
             <Item label="driver minimum age">
-                <EditableText name="min_age" value={data?.min_age.toString()} updateCallback={value => updateCityProfile(cityid, value)}/>
+                <EditableText name="min_age" value={data?.min_age} updateCallback={value => updateCityProfile(cityid, value)}/>
             </Item>
             <Item label="maximum vehicle age (years)">
-                <EditableText name="vehicle_age" value={data?.vehicle_age.toString()} updateCallback={value => updateCityProfile(cityid, value)}/>
+                <EditableText name="vehicle_age" value={data?.vehicle_age} updateCallback={value => updateCityProfile(cityid, value)}/>
             </Item>
             <Item label="total tax rate">
                 <Space align="baseline">
-                    <EditableText value={data?.tax_rate} />
+                    <EditableText name="tax_rate" value={data?.tax_rate} updateCallback={value => updateCityProfile(cityid, value)}/>
                     <Text>{ data?.province_id === 1 ? 'HST' : 'GST + PST' }</Text>
                 </Space>
             </Item>
             <Item label="recruitment email address">
-                <EditableText name="email" value={data?.email} updateCallback={value => updateCityProfile(cityid, value)}/>
+                <EditableText name="email" value={data?.email_to} updateCallback={value => updateCityProfile(cityid, value)}/>
+            </Item>
+            <Item label="launch date">
+                <EditableDate name="launch_date" value={data?.launch_date} updateCallback={value => updateCityProfile(cityid, value)}/>
             </Item>
         </Descriptions>
     )
@@ -231,7 +235,7 @@ const CityProfile = ({ data, cityid }) => { // Editable info profile component
 
 const CityDetails = () => {
     const { id } = useParams()
-    const { data, isLoading, error, refetch } = useFetch(`/v1/cities/cc/${id}`)
+    const { data, isLoading, error, refetch } = useNewFetch(`/v1/cities/${id}`)
     const [loading, setLoading] = useState(false)
 
     if (error) {
@@ -266,7 +270,7 @@ const CityDetails = () => {
     return (
         <Card
             title={
-                <Space align="start">
+                <Space align="center">
                     <Button onClick={() => window.history.back()} type="text" icon={<ArrowLeftOutlined />} />
                     <Title>{data.name}</Title>
                     <Tag color={data.status === 'active' ? "green" : 'red' } style={{ textTransform: 'capitalize'}}>{data.status}</Tag>

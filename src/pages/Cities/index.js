@@ -1,20 +1,18 @@
-import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
-import API from '../../api/BaseUrl'
-import { Auth } from 'aws-amplify'// Import Amplify auth method
+import useNewFetch from '../../hooks/use-new-fetch' // Import new endpoint hook
 
-import React ,{ useState, useEffect } from 'react'; // Import React
+import { useState, useEffect } from 'react'; // Import React
 import { useNavigate } from 'react-router-dom' // Import hook from react-router
 
-import { Card, Table, Button, Modal, Space, Tag } from 'antd'; // Import Ant components
+import { Card, Table, Button, Modal, Space, Tag, message} from 'antd'; // Import Ant components
 import { Formik, Form } from 'formik'   // Import Formik form components
 
-import * as yup from 'yup'; // Import Yup validation library
+import {string, number, object} from 'yup'; // Import Yup validation library
 import qs from 'qs' // Import qs library
 
 import InputWrapper from '../../components/forms/InputWrapper' // Import InputWrapper component
 import SelectWrapper from '../../components/forms/SelectWrapper' // Import SelectWrapper component
 import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
-import { createCity } from '../../utils/city-status'  // Import createCity function
+import { createCity, getProvince } from '../../utils/city-status'  // Import createCity function
 
 
 
@@ -37,31 +35,10 @@ const Cities = () => {
   const navigate = useNavigate()
   
    // Fetch getProvince list from API
-  const getProvince = async () => {
-    try {
-      const auth = await Auth.currentSession()// Get current session
-      const token = auth.getAccessToken().getJwtToken()// Get token from session
-      const options = { // Set options for fetch
-        headers: {
-          Authorization: token,
-          ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
-        }
-      
-      }
-      const response = await API.get(`/v1/provinces`, options)
-      const data = await response.data
-      if (data) {
-        const provinces = data.items.map((province) => {
-          province.text = province.name
-          province.value = province.id
-          return province;
-        })
-        setProvinces(provinces) 
-      }
-    }
-    catch (error) {
-      console.log(error)
-    }  
+  const getPronvices = async () => {
+    await getProvince().then((response) => {
+      setProvinces(response)
+    })
   }
   
     //get the papams that will be passed to filters through qs
@@ -79,8 +56,8 @@ const Cities = () => {
       },
   })
   //fetch data from api
-  const { data, isLoading, error, refetch } = useFetch(`v1/cities/cc?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
-  console.log(data)
+  const { data, isLoading, error, refetch } = useNewFetch(`v1/cities?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
+  
   //handle table change
   const handleTableChange = (pagination, filter, sorter) => { 
         Object.keys(filter).forEach(key => {
@@ -104,44 +81,39 @@ const Cities = () => {
         ...tableParams,
         pagination: {
             ...tableParams.pagination,
-            total: data?.total_items,
+            total: data.meta?.total_items,
         }
     }) 
     if (isMounted) {
-      getProvince()
+      getPronvices()
     }
     return () => { isMounted = false }
   }, [data])
 
   
 // validate schema for form
-  const validationSchema = yup.object({
-    province_id: yup.string()
-      .required('Required'),
-    name: yup.string()
-      .required('Required'),
-    email: yup.string()
-      .email('Please Enter A Aalid Email Address!').required('Please type your valid email address!'),
-    status: yup.string()
-      .required('please select status'),
-    min_age: yup.number()
-      .typeError('Minimum Age Should be A Number!')
-      .required('Required').positive('Minimum Age Should be A Positive Number!')
-      .integer()
-      .max(99, 'Minimum Age Should be Two-Digit Number!'),
-    vehicle_age: yup.number()
-      .typeError('Minimum Age Should be A Number!')
-      .required('Required')
-      .positive('Minimum Age Should be A Positive Number!')
-      .integer()
-      .max(99, 'Minimum Age Should be A Two-Digit Number!'),
+  const validationSchema = object().shape({
+    province_id: number().required('Required'),
+    name: string().required('Required'),
+    email: string()
+          .email('Please type a valid Email Address!')
+          .required('Required!'),
+    status: string().required('please select status'),
+    min_age: number()
+            .positive('Positive Number Only!')
+            .max(99, 'Minimum Age Should be Two-Digit Number!')
+            .required('Required'),
+    vehicle_age: number()
+                .positive('Positive Number Only!')
+                .max(99, 'Minimum Age Should be A Two-Digit Number!')
+                .required('Required'),
   })
    
   const initialValues = {
     name: '',
-    province_id:'',
-    min_age: '',
-    vehicle_age: '',
+    province_id: null,
+    min_age: null,
+    vehicle_age: null,
     email: '',
     status: '', 
   }
@@ -208,66 +180,59 @@ const Cities = () => {
           </Button>
         
       <Formik
-      initialValues={initialValues}
+        initialValues={initialValues}
         validationSchema={validationSchema}
         onSubmit={async (values, actions) => {
-          await createCity(values).then((response) => {
+          console.log(values)
+          await createCity({...values, min_age: Number(values.min_age), vehicle_age: Number(values.vehicle_age)}).then((response) => {
             if (response) {
-              actions.resetForm({
-                values: {
-                  name: '',
-                  province_id: '',
-                  min_age: '',
-                  vehicle_age: '',
-                  email: '',
-                  status: '',
-                }
-              })
+              actions.resetForm()
+              message.success('City created successfully');
               refetch()
               }
             setOpen(false)
           })
         }}           
       >
-              <Form > 
+        <Form > 
           <Modal
-              title="Add New City"
-              destroyOnClose = {true}
-              open={open}
-              confirmLoading={confirmLoading}
-              onCancel={handleCancel}
-              footer={[
-                <Button key="cancel" onClick={() =>  setOpen(false)}>
-                    Cancel
-                </Button>,
-                <SubmitWrapper key="submit" type="primary" >
-                    Add City
-                </SubmitWrapper>,
-              ]}
-                >
-                  <Space direction='vertical' style={{ width: '100%'}}>
-                    <SelectWrapper type="text" name="province_id" datasource={provinces} placeholder="Province" />
-                    <InputWrapper type="text" name="name" placeholder="City Name" />
-                    <InputWrapper type="text" name="email" placeholder="City Email" />
-                    <SelectWrapper type="text" datasource={status} name="status" placeholder="Status" />
-                    <InputWrapper type="text" name="min_age" placeholder="Driver Minimum Age" />
-                    <InputWrapper type="text" name="vehicle_age" placeholder="Maximum Vehicle Age" />
-                  </Space>
-                </Modal>
-              </Form>
-            </Formik>
+            title="Add New City"
+            destroyOnClose = {true}
+            open={open}
+            confirmLoading={confirmLoading}
+            onCancel={handleCancel}
+            footer={[
+              <Button key="cancel" onClick={() =>  setOpen(false)}>
+                  Cancel
+              </Button>,
+              <SubmitWrapper key="submit" type="primary" >
+                  Add City
+              </SubmitWrapper>,
+            ]}
+              >
+                <Space direction='vertical' style={{ width: '100%'}}>
+                  <SelectWrapper name="province_id" datasource={provinces} placeholder="Province" />
+                  <InputWrapper name="name" type="text" placeholder="City Name" />
+                  <InputWrapper name="email" type="text" placeholder="City Email" />
+                  <SelectWrapper name="status" datasource={status} placeholder="Status" />
+                  <InputWrapper name="min_age" type="number" placeholder="Driver Minimum Age" />
+                  <InputWrapper name="vehicle_age" type="number" placeholder="Maximum Vehicle Age" />
+                </Space>
+          </Modal>
+        </Form>
+      </Formik>
           
           <Table
-          dataSource={data.items}
+          dataSource={data.data}
           columns={columns}
           loading={isLoading}
           pagination={tableParams.pagination}
           sortDirections={['ascend', 'descend', 'ascend']}
           onChange={handleTableChange}
           rowClassName={() => 'clickable-row'}
-          rowKey={(record) => record.city_id}
+          rowKey={(record) => record.id}
           onRow={(record) => ({
-                  onClick: () => navigate(`/city/${record.city_id}`)
+                  onClick: () => navigate(`/city/${record.id}`)
         })}
           />      
     </Card>

@@ -14,7 +14,7 @@ const { TextArea } = Input // destructuring Input component
 
 const AppActivation = ({data, id, refetch}) => {
 
-    const appActivationNumber = Object.assign({}, data?.items?.filter(item => item.key.includes('app_activation_'))) // Find app activation info
+    const appActivationNumber = Object.assign({}, data?.filter(item => item.key.includes('app_activation_'))) // Find app activation info
 
     const appActivation = [
         appActivationNumber

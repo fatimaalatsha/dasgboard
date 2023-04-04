@@ -14,10 +14,10 @@ const { TextArea } = Input // destructuring Input component
 
 const InitialDocuments = ({data, id, refetch}) => {
 
-    const vehicleSafety = Object.assign({}, data?.items?.filter(item => item.key.includes('vehicle_safety_'))) // Find vehicle safety info
-    const backgroundCheck = Object.assign({}, data?.items?.filter(item => item.key.includes('background_check_'))) // Find background check info
-    const insuranceVerification = Object.assign({}, data?.items?.filter(item => item.key.includes('insurance_verification_'))) // Find insurance verification info
-    const cityLicensing = Object.assign({}, data?.items?.filter(item => item.key.includes('city_licensing_'))) // Find city licensing info
+    const vehicleSafety = Object.assign({}, data?.filter(item => item.key.includes('vehicle_safety_'))) // Find vehicle safety info
+    const backgroundCheck = Object.assign({}, data?.filter(item => item.key.includes('background_check_'))) // Find background check info
+    const insuranceVerification = Object.assign({}, data?.filter(item => item.key.includes('insurance_verification_'))) // Find insurance verification info
+    const cityLicensing = Object.assign({}, data?.filter(item => item.key.includes('city_licensing_'))) // Find city licensing info
 
     const initialDocuments = [
         vehicleSafety,
