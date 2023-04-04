@@ -1,4 +1,4 @@
-import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
+import useNewFetch from '../../hooks/use-new-fetch' // Import new endpoint hook
 import API from '../../api/BaseUrl'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 
@@ -79,8 +79,8 @@ const Cities = () => {
       },
   })
   //fetch data from api
-  const { data, isLoading, error, refetch } = useFetch(`v1/cities/cc?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
-  console.log(data)
+  const { data, isLoading, error, refetch } = useNewFetch(`v1/cities?${qs.stringify(getUserParams(tableParams), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
+  
   //handle table change
   const handleTableChange = (pagination, filter, sorter) => { 
         Object.keys(filter).forEach(key => {
@@ -104,7 +104,7 @@ const Cities = () => {
         ...tableParams,
         pagination: {
             ...tableParams.pagination,
-            total: data?.total_items,
+            total: data.meta?.total_items,
         }
     }) 
     if (isMounted) {
@@ -258,16 +258,16 @@ const Cities = () => {
             </Formik>
           
           <Table
-          dataSource={data.items}
+          dataSource={data.data}
           columns={columns}
           loading={isLoading}
           pagination={tableParams.pagination}
           sortDirections={['ascend', 'descend', 'ascend']}
           onChange={handleTableChange}
           rowClassName={() => 'clickable-row'}
-          rowKey={(record) => record.city_id}
+          rowKey={(record) => record.id}
           onRow={(record) => ({
-                  onClick: () => navigate(`/city/${record.city_id}`)
+                  onClick: () => navigate(`/city/${record.id}`)
         })}
           />      
     </Card>
