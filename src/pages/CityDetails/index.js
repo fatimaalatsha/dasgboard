@@ -270,7 +270,7 @@ const CityDetails = () => {
     return (
         <Card
             title={
-                <Space align="start">
+                <Space align="center">
                     <Button onClick={() => window.history.back()} type="text" icon={<ArrowLeftOutlined />} />
                     <Title>{data.name}</Title>
                     <Tag color={data.status === 'active' ? "green" : 'red' } style={{ textTransform: 'capitalize'}}>{data.status}</Tag>
