@@ -82,14 +82,14 @@ const updateEmailTemplate = async (id, payload) => {
       const options = { // Set options for fetch
         headers: {
           Authorization: token,
-          ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
+          ...(process.env.REACT_APP_NEW_ENV && { 'env': process.env.REACT_APP_NEW_ENV }),
         }
       }
       const body = {
         city_id: Number(id),
         ...payload
       }
-      const response = await API.post(`/v1/cities/cc/${id}/settings`, body, options)
+      const response = await NewAPI.post(`/v1/cities/${id}/settings`, body, options)
       const data = await response.data
       if (data) {
         return data.message
