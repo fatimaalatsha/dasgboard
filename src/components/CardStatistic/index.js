@@ -23,13 +23,4 @@ const CardStatistic = ({ title, value, color, popInfo, height = 100, width = 140
     );
 };
 
-CardStatistic.propTypes = {
-    title: PropTypes.string.isRequired,
-    value: PropTypes.number.isRequired,
-    color: PropTypes.string.isRequired,
-    popInfo: PropTypes.string.isRequired,
-    height: PropTypes.number,
-    width: PropTypes.number,
-};
-
 export default CardStatistic;
