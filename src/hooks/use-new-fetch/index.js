@@ -23,7 +23,7 @@ const useNewFetch = (url, applicants = false) => {
             const response = await API.get(url, options)// Fetch data from API
             const data = await response.data// Get data from response
             if (applicants) {
-                data.items.map((applicant) => {
+                data.data.map((applicant) => {
                     applicant.app_status = [applicant.status, applicant.application_status]
                     return applicant
                 })
