@@ -13,7 +13,7 @@ import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
 import { useFilterStore } from '../../store' // Import filter store
 import { app_status } from '../../assets/data/app_status' // Import Application Status definition
-import { getCities } from '../../utils/city-status';
+import { getCities } from '../../utils/city-status'
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
@@ -104,7 +104,7 @@ const Applicants = () => {
     setApplicantFilter({ // Set filter to store
       pagination: {
         ...applicantFilter.pagination,
-        total: data?.total_items,
+        total: data.meta?.total_items,
         showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Applicants`,
       }
     })
@@ -293,7 +293,7 @@ const Applicants = () => {
         </Input.Group>
       </Space>
       <Table
-        dataSource={data.items}
+        dataSource={data.data}
         columns={columns}
         loading={isLoading}
         rowKey="user_id"
