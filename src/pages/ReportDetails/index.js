@@ -1,9 +1,10 @@
 import { useState } from 'react';
-import { Typography, Card, Space, Divider, Row, Col, Table } from 'antd';
+import { Typography, Card, Space, Divider, Row, Col, Table, Tag } from 'antd';
 import useNewFetch from '../../hooks/use-new-fetch';
 import qs from 'qs';
 import dayjs from 'dayjs';
 import { useParams } from 'react-router-dom'
+import { useNavigate } from 'react-router-dom';
 
 import { EditOutlined, BarChartOutlined } from '@ant-design/icons';
 import CardStatistic from '../../components/CardStatistic';
@@ -13,13 +14,13 @@ const { Title, Text } = Typography;
 
 const ReportDetails = () => {
   const { id } = useParams();
+  const navigate = useNavigate();
   const { data, error, isLoading } = useNewFetch(`/v1/reports/city-overview/${id}`);
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
 
   const getStatusCount = (data) => {
   const result = [];
-  
   result.push({ status: 'Active', count: data.active });
   result.push({ status: 'Ineligible', count: data.ineligible });
   result.push({ status: 'Applicants', count: data.applicants });
@@ -73,11 +74,16 @@ const ReportDetails = () => {
                       dataIndex: 'last_name',
                       key: 'last_name',
                     },
-                    // {
-                    //   title: 'Status',
-                    //   dataIndex: 'status',
-                    //   key: 'status',
-                    // },
+                    {
+                      title: 'Application Status',
+                      dataIndex: 'application_status',
+                      key: 'application_status',
+                      render: (application_status) =>
+                        <Tag color={application_status === 'active' ? 'green' : application_status === 'inactive' ? 'volcano' : 'orange'}>
+                          {application_status}
+                        </Tag>,
+                      
+                    },
                     {
                       title: 'Application Date',
                       dataIndex: 'created_at',
@@ -88,6 +94,16 @@ const ReportDetails = () => {
                 }
                 dataSource={data.applicants_list}
                 pagination={false}
+                rowKey={(record) =>
+                  record.user_id
+                }
+                onRow={(record) => {
+                  return {
+                    onClick: (event) => {
+                      navigate(`/applicants/${record.user_id}`); // click row
+                    },
+                  };
+                }}
               />
             </Space>
           </Col>
