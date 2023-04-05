@@ -51,7 +51,7 @@ let filterStore = (set) => ({
       city: null,
       status: null,
       date: null,
-      tz: null,
+      tz: 'America/Thunder_Bay',
     },
     setScheduleFilter: (filter) => set((state) => ({ scheduleFilter: { ...state.scheduleFilter, ...filter } })),
 })
