@@ -183,10 +183,10 @@ const Drivers = () => {
           color={'#FFF'} 
           title={(
             <Space size={2} direction="vertical">
-              <Text strong>{dayjs().format('dddd DD, MMM YYYY - HH:mm')}</Text>
-              <Text type="secondary">Follow Up</Text>
+              <Text strong>{dayjs(record.created_at).format('dddd DD, MMM YYYY - HH:mm')}</Text>
+              <Text type="secondary">{record.type}</Text>
               <Text>{record.last_note}</Text>
-              <Text italic>Chuck Norris</Text>
+              <Text italic>{record.admin_name}</Text>
             </Space>
             )}
         >
