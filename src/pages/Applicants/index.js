@@ -180,18 +180,18 @@ const Applicants = () => {
       render: (text, record) => (
         <Tooltip 
           color={'#FFF'} 
-          title={(
+          title={ record.last_note.note && (
             <Space size={2} direction="vertical">
-              <Text strong>{dayjs().format('dddd DD, MMM YYYY - HH:mm')}</Text>
-              <Text type="secondary">Follow Up</Text>
-              <Text>{record.last_note}</Text>
-              <Text italic>Chuck Norris</Text>
+              <Text strong>{dayjs(record.last_note.created_at).format('dddd DD, MMM YYYY - HH:mm')}</Text>
+              <Text type="secondary">{record.last_note.type}</Text>
+              <Text>{record.last_note.note}</Text>
+              <Text italic>{record.last_note.admin_name}</Text>
             </Space>
             )}
         >
           <Text>
             {text}
-            {record.last_note && <CommentOutlined style={{ marginLeft: 2 }} />}
+            {record.last_note.note && <CommentOutlined style={{ marginLeft: 2 }} />}
           </Text>
         </Tooltip>
       ),
