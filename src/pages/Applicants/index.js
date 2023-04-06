@@ -178,7 +178,17 @@ const Applicants = () => {
       ...( applicantFilter.sort?.first_name && { defaultSortOrder: applicantFilter.sort?.first_name === 'asc' ? 'ascend' : 'descend' }),
       filteredValue: null,
       render: (text, record) => (
-        <Tooltip title={record.last_note}>
+        <Tooltip 
+          color={'#FFF'} 
+          title={(
+            <Space size={2} direction="vertical">
+              <Text strong>{dayjs().format('dddd DD, MMM YYYY - HH:mm')}</Text>
+              <Text type="secondary">Follow Up</Text>
+              <Text>{record.last_note}</Text>
+              <Text italic>Chuck Norris</Text>
+            </Space>
+            )}
+        >
           <Text>
             {text}
             {record.last_note && <CommentOutlined style={{ marginLeft: 2 }} />}
