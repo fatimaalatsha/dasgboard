@@ -1,18 +1,18 @@
 import { useState, useEffect } from 'react';
 
 import { Card, Table, Tag, Button, Space, Input, Tooltip, Typography } from 'antd'; // Import Ant components
-import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
+import { ReloadOutlined, CommentOutlined } from '@ant-design/icons' // Import Ant Icons
 import { useLocation } from 'react-router-dom'; // Import Nav component
 
-import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
-import API from '../../api/BaseUrl'
+import useNewFetch from '../../hooks/use-new-fetch'
 
 import qs from 'qs' // Import qs library
 import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 
 import { useFilterStore } from '../../store' // Import filter store
-import {app_status} from '../../assets/data/app_status' // Import Application Status definition
+import { app_status } from '../../assets/data/app_status' // Import Application Status definition
+import { getCities } from '../../utils/city-status'
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
@@ -23,7 +23,7 @@ import {app_status} from '../../assets/data/app_status' // Import Application St
 
 dayjs.extend(utc)
 
-
+const { Text } = Typography
 
 const DocumentOverview = (props) => { // Document Overview component
   return (
@@ -54,25 +54,13 @@ const Applicants = () => {
   const [searchText, setSearchText] = useState( applicantFilter.full_name || '');
   
   // Fetch Cities list from API
-  const getCities = async () => {
-    try { 
-      const response = await API.get('/v1/cities')
-      const data = await response.data
-      if (data) {
-        const cities = data.items.map((city) => {
-          city.value = city.city_id
-          city.text = city.name
-          delete city.name
-          return city;
-        })
-        setCities(cities)
-      }
-    }
-    catch (error) {
-      console.log(error)
-    }  
+  const loadCities = async () => {
+    await getCities().then((response) => {
+      setCities(response)
+    })
   }
-  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc?${qs.stringify(getUserParams(applicantFilter), { skipNulls: true, arrayFormat: 'comma' })}`, true) // Fetch data from API//data
+  
+  const { data, isLoading, error, refetch } = useNewFetch(`/v1/drivers?${qs.stringify(getUserParams(applicantFilter), { skipNulls: true, arrayFormat: 'comma' })}`, true) // Fetch data from API//data
 
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
     Object.keys(filter).forEach(key => {
@@ -118,12 +106,12 @@ const Applicants = () => {
     setApplicantFilter({ // Set filter to store
       pagination: {
         ...applicantFilter.pagination,
-        total: data?.total_items,
+        total: data.meta?.total_items,
         showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Applicants`,
       }
     })
     if (isMounted) {
-      getCities()
+      loadCities()
     }
     
     return () => { isMounted = false }
@@ -189,6 +177,24 @@ const Applicants = () => {
       sorter: true,
       ...( applicantFilter.sort?.first_name && { defaultSortOrder: applicantFilter.sort?.first_name === 'asc' ? 'ascend' : 'descend' }),
       filteredValue: null,
+      render: (text, record) => (
+        <Tooltip 
+          color={'#FFF'} 
+          title={ record.last_note.note && (
+            <Space size={2} direction="vertical">
+              <Text strong>{dayjs(record.last_note.created_at).format('dddd DD, MMM YYYY - HH:mm')}</Text>
+              <Text type="secondary">{record.last_note.type}</Text>
+              <Text>{record.last_note.note}</Text>
+              <Text italic>{record.last_note.admin_name}</Text>
+            </Space>
+            )}
+        >
+          <Text>
+            {text}
+            {record.last_note.note && <CommentOutlined style={{ marginLeft: 2 }} />}
+          </Text>
+        </Tooltip>
+      ),
     },
     {
       title: 'Last Name',
@@ -307,7 +313,7 @@ const Applicants = () => {
         </Input.Group>
       </Space>
       <Table
-        dataSource={data.items}
+        dataSource={data.data}
         columns={columns}
         loading={isLoading}
         rowKey="user_id"
