@@ -32,11 +32,11 @@ export const pinkSlipContent = {
     },
     effective_date: {
       label: "Effective Date/Date d'Entrée en Vigueur:",
-      value: "October 7, 2022 / 7 octobre 2022"
+      value: "April 7, 2023 / 7 avril 2023"
     },
     expiry_date: {
       label: "Date of Expiry/Date d'Expiration:",
-      value: "April 6, 2023 / 6 avril 2023"
+      value: "October 6, 2023 / 6 octobre 2023"
     },
     plate_number: {
       label: "Licence Plate Number/Numéro de Plaque:",
