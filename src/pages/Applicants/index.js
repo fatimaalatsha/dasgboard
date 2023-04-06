@@ -1,10 +1,9 @@
 import { useState, useEffect } from 'react';
 
 import { Card, Table, Tag, Button, Space, Input, Tooltip, Typography } from 'antd'; // Import Ant components
-import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
+import { ReloadOutlined, CommentOutlined } from '@ant-design/icons' // Import Ant Icons
 import { useLocation } from 'react-router-dom'; // Import Nav component
 
-import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import useNewFetch from '../../hooks/use-new-fetch'
 
 import qs from 'qs' // Import qs library
@@ -23,6 +22,8 @@ import { getCities } from '../../utils/city-status'
 })
 
 dayjs.extend(utc)
+
+const { Text } = Typography
 
 const DocumentOverview = (props) => { // Document Overview component
   return (
@@ -175,6 +176,14 @@ const Applicants = () => {
       sorter: true,
       ...( applicantFilter.sort?.first_name && { defaultSortOrder: applicantFilter.sort?.first_name === 'asc' ? 'ascend' : 'descend' }),
       filteredValue: null,
+      render: (text, record) => (
+        <Tooltip title={record.last_note}>
+          <Text>
+            {text}
+            {record.last_note && <CommentOutlined style={{ marginLeft: 2 }} />}
+          </Text>
+        </Tooltip>
+      ),
     },
     {
       title: 'Last Name',
