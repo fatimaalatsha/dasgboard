@@ -118,32 +118,6 @@ const getCities = async () => { // Get Cities List for dropdown
   }  
 }
 
-const getCities = async () => { // Get Cities List for dropdown
-  try { 
-    const auth = await Auth.currentSession()// Get current session
-    const token = auth.getAccessToken().getJwtToken()// Get token from session
-    const options = { // Set options for fetch
-      headers: {
-        Authorization: token,
-        ...(process.env.REACT_APP_NEW_ENV && { 'env': process.env.REACT_APP_NEW_ENV }),
-      }
-    
-    }
-    const response = await NewAPI.get('/v1/cities', options)
-    const data = await response.data
-    const cities = data.data.map((city) => {
-      city.text = city.name
-      city.value = city.id
-      delete city.name
-      return city
-    })
-    return cities
-  }
-  catch (error) {
-    console.log(error)
-  }  
-}
-
 const getCityTimezone =  (id) => {
     const city = city_timezones.find((city) => city.city_id === id)
     return city.tz
