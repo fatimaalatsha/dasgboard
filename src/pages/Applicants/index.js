@@ -59,6 +59,7 @@ const Applicants = () => {
       setCities(response)
     })
   }
+  
   const { data, isLoading, error, refetch } = useNewFetch(`/v1/drivers?${qs.stringify(getUserParams(applicantFilter), { skipNulls: true, arrayFormat: 'comma' })}`, true) // Fetch data from API//data
 
   const handleTableChange = (pagination, filter, sorter) => { // Handle table change
