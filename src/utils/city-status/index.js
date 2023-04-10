@@ -31,7 +31,7 @@ const getProvince = async () => {// Get Province List for dropdown
         }
       
       }
-      const response = await NewAPI.get(`/v1/provinces`, options)
+      const response = await NewAPI.get(`/v1/provinces?paginated=false`, options) // set paginated to false to get all provinces without pagination
       const data = await response.data
       const provinces = data.data.map((province) => {
         province.text = province.name
@@ -102,7 +102,7 @@ const getCities = async () => { // Get Cities List for dropdown
       }
     
     }
-    const response = await NewAPI.get('/v1/cities', options)
+    const response = await NewAPI.get('/v1/cities?paginated=false&filter[status]=in|active', options) // set paginated to false to get all cities without pagination and active cities only
     const data = await response.data
     const cities = data.data.map((city) => {
       city.text = city.name
