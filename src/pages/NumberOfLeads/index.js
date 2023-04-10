@@ -368,10 +368,12 @@ const NumberOfLeads = () => {
                 />
               </div>
               {showIneligible && (
-                <NumberOfLead
-                  date_from={date.filter.date_from}
-                  date_to={date.filter.date_to}
-                />
+                <div style={{ height: "700px" }}>
+                  <NumberOfLead
+                    date_from={date.filter.date_from}
+                    date_to={date.filter.date_to}
+                  />
+                </div>
               )}
             </Space>
           </Col>
