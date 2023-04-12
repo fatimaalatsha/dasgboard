@@ -13,6 +13,8 @@ import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
 import { getCityTimezone } from '../../utils/city-status'
 
+import useSchedule from '../../hooks/use-schedule'
+
 dayjs.extend(utc)
 dayjs.extend(timezone)
 

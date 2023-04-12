@@ -22,6 +22,7 @@ import NumberOfleads from '../../pages/NumberOfLeads'
 import NumberOfDrivers from '../../pages/NumberOfDrivers'
 import ConversionRatesByApplication from '../../pages/ConversionRatesByApplication'
 import Schedule from '../../pages/Schedule'
+import Schedule from '../../pages/Schedule'
 
 const { Sider, Content, Header} = Container // Destructuring Layout component
 
