@@ -98,6 +98,8 @@ const WeekView = ({selectedWeek, dummy, days, tz }) => {
                             isCellFilled={dayjs(record[day][item]?.start_time).tz(scheduleFilter.tz).format('dddd').toLowerCase() === day && dayjs(record[day][item]?.start_time).tz(scheduleFilter.tz).format('HH:mm') === record.time} 
                             record={record[day][item]} 
                             setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
+                            selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
+                            refetch={() => refetch()}
                         />
                     )
                 } 
@@ -110,6 +112,8 @@ const WeekView = ({selectedWeek, dummy, days, tz }) => {
                     dayWeek={day}
                     day={selectedWeek.day(idx).date()}
                     setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
+                    selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
+                    refetch={() => refetch()}
                 />
             )
         },
