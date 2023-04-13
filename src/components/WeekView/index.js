@@ -11,7 +11,6 @@ import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import CellShift from '../CellShift' // Import CellShift component
 import { CitySelect } from '../CitySelect'
 import { useFilterStore } from '../../store'
-import { getCityTimezone } from '../../utils/city-status'
 import useSchedule from '../../hooks/use-schedule'
 
 dayjs.extend(utc)

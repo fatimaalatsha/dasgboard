@@ -17,6 +17,8 @@ import {
 } from 'antd'
 import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
+import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import Yup for form validation
 
@@ -25,6 +27,9 @@ import { useFilterStore } from '../../store'
 import Submit from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import { CitySelect } from '../CitySelect' // Import CitySelect component
 import generateName from '../../utils/name-creation' // Dummy name array generator
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const { useToken } = theme
 const { Text, Title, Link } = Typography
@@ -121,6 +126,7 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit}) => {
 }
 
 const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
+    isCellFilled && console.log(record)
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [selectedItems, setSelectedItems] = useState([]) // State to hold selected options
     const [edit, setEdit] = useState(false) // State to hold edit mode
@@ -129,14 +135,16 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     const [hours, setHours] = useState({
         start: record.start,
         end: record.end,
-        diff: record.start ? getFilledHours(record.end, record.start) : 4
+        diff: record.duration ? record.duration : 4
     });
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
+    //dayjs(record.start_time).tz(scheduleFilter.tz).format('HH:mm')
+    //dayjs(record.end_time).tz(scheduleFilter.tz).format('HH:mm')
     const [shift, setShift] = useState({
         drivers: 10,
-        start: record.start || record.time,
-        end: record.end || null,
+        start: record.time || dayjs(record.start_time).tz(scheduleFilter.tz).format('HH:mm'),
+        end: record.end_time ? dayjs(record.end_time).tz(scheduleFilter.tz).format('HH:mm') : null,
     })
 
     const floatingComponentHeight = hours.diff * 57 + 2
@@ -254,7 +262,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                             disabledHours: () => {
                                                 const hours = []
                                                 for (let i = 0; i < 24; i++) {
-                                                    if (i < dayjs(record.time, 'HH:mm').hour() + 1) {
+                                                    if (i < (record.start_time ? dayjs(shift.start, 'HH:mm').hour() : dayjs(record.time, 'HH:mm').hour()) + 1) {
                                                         hours.push(i)
                                                     }
                                                 }
