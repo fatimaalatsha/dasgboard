@@ -23,7 +23,7 @@ const queryHandler = (params) => ({ // Get table params
   ...params,
 })
 
-const WeekView = ({selectedWeek, dummy, days, tz }) => {
+const WeekView = ({selectedWeek, dummy, days, tz, city }) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
     const { data, isLoading, error, refetch } = useSchedule(`/v1/shifts?${qs.stringify(queryHandler(scheduleFilter), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz) // Call useSchedule hook
@@ -100,6 +100,7 @@ const WeekView = ({selectedWeek, dummy, days, tz }) => {
                             setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
                             selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
                             refetch={refetch}
+                            city={city}
                         />
                     )
                 } 
@@ -114,6 +115,7 @@ const WeekView = ({selectedWeek, dummy, days, tz }) => {
                     setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
                     selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
                     refetch={refetch}
+                    city={city}
                 />
             )
         },
