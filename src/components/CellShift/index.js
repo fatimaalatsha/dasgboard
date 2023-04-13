@@ -14,6 +14,7 @@ import {
     Select,
     Dropdown,
     Tooltip,
+    message,
 } from 'antd'
 import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
@@ -27,7 +28,7 @@ import { useFilterStore } from '../../store'
 import Submit from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import { CitySelect } from '../CitySelect' // Import CitySelect component
 import generateName from '../../utils/name-creation' // Dummy name array generator
-import { convertToHourTz, converToUTC, createWeekShift } from '../../utils/schedule-status'
+import { convertToHourTz, converToUTC, createWeekShift, deleteWeekShift } from '../../utils/schedule-status'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -47,22 +48,6 @@ const shiftSchema = object().shape({
     city_id: number().required('Required'),
 })
 
-const items = [
-    {
-        key: 1,
-        label: 'Edit',
-    },
-    {
-        key: 2,
-        label: 'Send to Draft',
-    },
-    {
-        key: 3,
-        danger: true,
-        label: 'Delete',
-    },
-]
-
 const generateNames = (numNames) => {
     const names = [];
     for (let i = 0; i < numNames; i++) {
@@ -73,14 +58,34 @@ const generateNames = (numNames) => {
   
 const namesArray = generateNames(30)
 
-const ShiftCard = ({record, cardStyle, handleEdit, setEdit}) => {
+const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetch}) => {
 
-    const onClick = ({ key }) => {
-        if (key === '1') {
-            handleEdit()
-            setEdit(true)
-        }
-    }
+    const items = [
+        {
+            key: 1,
+            onClick: () => {
+                handleEdit()
+                setEdit(true)
+            },
+            label: 'Edit',
+        },
+        {
+            key: 2,
+            label: 'Send to Draft',
+        },
+        {
+            key: 3,
+            danger: true,
+            onClick: async () => {
+                await deleteWeekShift(record.shift_id)
+                .then((res) => {
+                    message.success(res.message)
+                    refetch()
+                })
+            },
+            label: 'Delete',
+        },
+    ]
 
     return (
         <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, width: 'calc(100% + 2px)' }}>
@@ -89,7 +94,7 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit}) => {
                 bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100%)', padding: 8 }}
             >
                 <Row justify="end">
-                    <Dropdown menu={{items, onClick }} >
+                    <Dropdown menu={{items}} >
                         <Link onClick={(e) => e.preventDefault()}>
                         <Space>
                             <MoreOutlined />
@@ -126,8 +131,7 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit}) => {
     )
 }
 
-const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay}) => {
-    //isCellFilled && console.log(record)
+const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch}) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [selectedItems, setSelectedItems] = useState([]) // State to hold selected options
     const [edit, setEdit] = useState(false) // State to hold edit mode
@@ -140,19 +144,16 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     });
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    //dayjs(record.start_time).tz(scheduleFilter.tz).format('HH:mm')
-    //dayjs(record.end_time).tz(scheduleFilter.tz).format('HH:mm')
-    //convertToHourTz(record.start_time, scheduleFilter.tz)
-    //convertToHourTz(record.end_time, scheduleFilter.tz)
     const [shift, setShift] = useState({
         drivers: record.capacity || 0,
         start: record.start_time ? convertToHourTz(record.start_time, scheduleFilter.tz) : record.time,
         end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : null,
         city: Number(record.city_id) || Number(scheduleFilter.filter.city_id.replace('in|', '')),
         day: record.start_time ? dayjs(record.start_time).tz(scheduleFilter.tz).format('YYYY-MM-DD') : selectedDay,
+        shift_id: record.id || null,
     })
     const floatingComponentHeight = hours.diff * 57 + 2
-//record.title && console.log(shift.start)
+
     const cardStyleConfig = {
         backgroundColor: token.colorSuccessBg,
         borderColor: token.colorSuccessBorder,
@@ -167,9 +168,16 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     } */
   
     const handleClick = () => {
-        //console.log(record)
         setIsHovering(true)
         showModal()
+    }
+
+    const handleDelete = async () => {
+        await deleteWeekShift(shift.shift_id)
+        .then((res) => {
+            message.success(res.message)
+            refetch()
+        })
     }
 
     const handleHoursChange = (timeString) => {
@@ -183,8 +191,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         setHoveredCell({ time: timeString[0], day: day })
     }
 
-    const showModal = () => {   
-    console.log('Selected Day: ', shift)
+    const showModal = () => { 
       setIsModalOpen(true)
     }
 
@@ -203,7 +210,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         <>
             <div className="container" style={{ minHeight: 24}}>
                 { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} />
+                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} refetch={refetch}/>
                 ) : (
                 <>
                     {  display && (
@@ -212,7 +219,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     </Tooltip> 
                     )}
                         { isHovering && (
-                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} />
+                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} refetch={refetch}/>
                         )}
                 </>
                 )}
@@ -230,15 +237,13 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     values.end_time = converToUTC(shift.day, values.end_time, scheduleFilter.tz)
                     values.is_recurring = false
                     values.capacity = Number(values.capacity)
-
-                    console.log("payload: " , values)
-                    /* await createWeekShift(values)
+                    await createWeekShift(values)
                     .then(() => {
                         setSubmitting(false)
                         setIsModalOpen(false)
-                    }) */
-                    setSubmitting(false)
-                    setIsModalOpen(false)
+                        message.success('Shift created successfully')
+                        refetch()
+                    })
                 }}
             >
                 {props => (

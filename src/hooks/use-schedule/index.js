@@ -68,7 +68,7 @@ const useSchedule = (url, timezone) => {
 
     const refetch = () => {// Create a new refetch function
         setFetchedData({// Set fetched data to initial state
-            data: {},
+            data: [],
             isLoading: true,
             error: false,
         })

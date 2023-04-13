@@ -99,7 +99,7 @@ const WeekView = ({selectedWeek, dummy, days, tz }) => {
                             record={record[day][item]} 
                             setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
                             selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
-                            refetch={() => refetch()}
+                            refetch={refetch}
                         />
                     )
                 } 
@@ -113,7 +113,7 @@ const WeekView = ({selectedWeek, dummy, days, tz }) => {
                     day={selectedWeek.day(idx).date()}
                     setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
                     selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
-                    refetch={() => refetch()}
+                    refetch={refetch}
                 />
             )
         },
