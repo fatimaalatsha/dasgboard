@@ -14,9 +14,12 @@ import {
     Select,
     Dropdown,
     Tooltip,
+    message,
 } from 'antd'
 import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
+import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import Yup for form validation
 
@@ -25,6 +28,10 @@ import { useFilterStore } from '../../store'
 import Submit from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import { CitySelect } from '../CitySelect' // Import CitySelect component
 import generateName from '../../utils/name-creation' // Dummy name array generator
+import { convertToHourTz, converToUTC, createWeekShift, deleteWeekShift } from '../../utils/schedule-status'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const { useToken } = theme
 const { Text, Title, Link } = Typography
@@ -35,27 +42,11 @@ const getFilledHours = (end, start) => {
 }
 
 const shiftSchema = object().shape({
-    drivers: number().required('Required'),
-    start: string().required('Required'),
-    end: string().required('Required'),
-    city: number().required('Required'),
+    capacity: number().required('Required'),
+    start_time: string().required('Required'),
+    end_time: string().required('Required'),
+    city_id: number().required('Required'),
 })
-
-const items = [
-    {
-        key: 1,
-        label: 'Edit',
-    },
-    {
-        key: 2,
-        label: 'Send to Draft',
-    },
-    {
-        key: 3,
-        danger: true,
-        label: 'Delete',
-    },
-]
 
 const generateNames = (numNames) => {
     const names = [];
@@ -67,14 +58,34 @@ const generateNames = (numNames) => {
   
 const namesArray = generateNames(30)
 
-const ShiftCard = ({record, cardStyle, handleEdit, setEdit}) => {
+const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetch}) => {
 
-    const onClick = ({ key }) => {
-        if (key === '1') {
-            handleEdit()
-            setEdit(true)
-        }
-    }
+    const items = [
+        {
+            key: 1,
+            onClick: () => {
+                handleEdit()
+                setEdit(true)
+            },
+            label: 'Edit',
+        },
+        {
+            key: 2,
+            label: 'Send to Draft',
+        },
+        {
+            key: 3,
+            danger: true,
+            onClick: async () => {
+                await deleteWeekShift(record.shift_id)
+                .then((res) => {
+                    message.success(res.message)
+                    refetch()
+                })
+            },
+            label: 'Delete',
+        },
+    ]
 
     return (
         <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, width: 'calc(100% + 2px)' }}>
@@ -83,7 +94,7 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit}) => {
                 bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100%)', padding: 8 }}
             >
                 <Row justify="end">
-                    <Dropdown menu={{items, onClick }} >
+                    <Dropdown menu={{items}} >
                         <Link onClick={(e) => e.preventDefault()}>
                         <Space>
                             <MoreOutlined />
@@ -120,7 +131,7 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit}) => {
     )
 }
 
-const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
+const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch}) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [selectedItems, setSelectedItems] = useState([]) // State to hold selected options
     const [edit, setEdit] = useState(false) // State to hold edit mode
@@ -129,16 +140,18 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     const [hours, setHours] = useState({
         start: record.start,
         end: record.end,
-        diff: record.start ? getFilledHours(record.end, record.start) : 4
+        diff: record.duration ? record.duration : 4
     });
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [shift, setShift] = useState({
-        drivers: 10,
-        start: record.start || record.time,
-        end: record.end || null,
+        drivers: record.capacity || 0,
+        start: record.start_time ? convertToHourTz(record.start_time, scheduleFilter.tz) : record.time,
+        end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : null,
+        city: Number(record.city_id) || Number(scheduleFilter.filter.city_id.replace('in|', '')),
+        day: record.start_time ? dayjs(record.start_time).tz(scheduleFilter.tz).format('YYYY-MM-DD') : selectedDay,
+        shift_id: record.id || null,
     })
-
     const floatingComponentHeight = hours.diff * 57 + 2
 
     const cardStyleConfig = {
@@ -155,9 +168,16 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
     } */
   
     const handleClick = () => {
-        //console.log(record)
         setIsHovering(true)
         showModal()
+    }
+
+    const handleDelete = async () => {
+        await deleteWeekShift(shift.shift_id)
+        .then((res) => {
+            message.success(res.message)
+            refetch()
+        })
     }
 
     const handleHoursChange = (timeString) => {
@@ -171,7 +191,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
         setHoveredCell({ time: timeString[0], day: day })
     }
 
-    const showModal = () => {
+    const showModal = () => { 
       setIsModalOpen(true)
     }
 
@@ -190,7 +210,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
         <>
             <div className="container" style={{ minHeight: 24}}>
                 { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} />
+                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} refetch={refetch}/>
                 ) : (
                 <>
                     {  display && (
@@ -199,23 +219,31 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                     </Tooltip> 
                     )}
                         { isHovering && (
-                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} />
+                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} refetch={refetch}/>
                         )}
                 </>
                 )}
             </div>
             <Formik
                 initialValues={{
-                    start: shift.start,
-                    end: shift.end,
-                    drivers: 10,
-                    city: scheduleFilter.city,
+                    start_time: shift.start,
+                    end_time: shift.end,
+                    capacity: shift.drivers,
+                    city_id: shift.city,
                 }}
                 validationSchema={shiftSchema}
-                onSubmit={(values, { setSubmitting }) => {
-                    //console.log(values)
-                    setSubmitting(false)
-                    setIsModalOpen(false)
+                onSubmit={async (values, { setSubmitting }) => {
+                    values.start_time = converToUTC( shift.day, values.start_time, scheduleFilter.tz)
+                    values.end_time = converToUTC(shift.day, values.end_time, scheduleFilter.tz)
+                    values.is_recurring = false
+                    values.capacity = Number(values.capacity)
+                    await createWeekShift(values)
+                    .then(() => {
+                        setSubmitting(false)
+                        setIsModalOpen(false)
+                        message.success('Shift created successfully')
+                        refetch()
+                    })
                 }}
             >
                 {props => (
@@ -239,13 +267,13 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                     name="end"
                                     style={{ width: '100%' }} 
                                     format="HH:mm" 
-                                    defaultValue={[dayjs(props.values.start, 'HH:mm'), props.values.end ? dayjs(props.values.end, 'HH:mm') : null]} 
+                                    defaultValue={[dayjs(props.values.start_time, 'HH:mm'), props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : null]} 
                                     allowClear={false}
                                     disabled={[true, false]} 
                                     //onChange={handleHoursChange}
                                     onChange={(time, timeString) => {
-                                        props.setFieldValue('start', timeString[0])
-                                        props.setFieldValue('end', timeString[1])
+                                        props.setFieldValue('start_time', timeString[0])
+                                        props.setFieldValue('end_time', timeString[1])
                                         handleHoursChange(timeString)
                                     }}
                                     hideDisabledOptions
@@ -254,7 +282,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                             disabledHours: () => {
                                                 const hours = []
                                                 for (let i = 0; i < 24; i++) {
-                                                    if (i < dayjs(record.time, 'HH:mm').hour() + 1) {
+                                                    if (i < (record.start_time ? dayjs(shift.start, 'HH:mm').hour() : dayjs(record.time, 'HH:mm').hour()) + 1) {
                                                         hours.push(i)
                                                     }
                                                 }
@@ -275,15 +303,15 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                 />
                                 <Checkbox 
                                     onChange={() => {
-                                        props.setFieldValue('start', '00:00')
-                                        props.setFieldValue('end', '23:59')
+                                        props.setFieldValue('start_time', '00:00')
+                                        props.setFieldValue('end_time', '23:59')
                                         handleHoursChange(['00:00', '23:59'])
                                     }}
                                 >
                                     All Day
                                 </Checkbox>
                                 <CitySelect 
-                                    defaultValue={scheduleFilter.city}    
+                                    defaultValue={props.values.city_id}    
                                     style={{ width: '100%' }}
                                     disabled
                                 />
@@ -301,15 +329,15 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled}) => {
                                   }))}
                                 />
                                 <Input 
-                                    name="drivers" 
+                                    name="capacity" 
                                     prefix={<UserOutlined />} 
                                     placeholder="Driver Limit" 
                                     type="number" 
                                     min={10} max={999} 
-                                    defaultValue={props.values.drivers} 
-                                    //onChange={(event) => {setShift({...shift, drivers: event.target.value})}} 
+                                    defaultValue={props.values.capacity} 
+                                    //onChange={(event) => {setShift({...shift, capacity: event.target.value})}} 
                                     onChange={(e) => {
-                                        props.setFieldValue('drivers', e.target.value)
+                                        props.setFieldValue('capacity', e.target.value)
                                         setShift({...shift, drivers: e.target.value})
                                     }}
                                 />
