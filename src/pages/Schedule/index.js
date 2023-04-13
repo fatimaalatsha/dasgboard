@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, Space, Button, DatePicker, Select, Radio, Modal, Input, TimePicker, Checkbox} from 'antd' // Import Ant components
+import { Card, Space, Button, DatePicker, Select, Radio, Modal, Input, TimePicker, Checkbox, Spin} from 'antd' // Import Ant components
 import { LeftOutlined, RightOutlined } from '@ant-design/icons' // Import Ant icons
 
 import dayjs from 'dayjs' // Import date handlers
@@ -11,9 +11,7 @@ import DayView from '../../components/DayView'
 import generateName from '../../utils/name-creation'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
-import { getCityTimezone } from '../../utils/city-status'
-
-import useSchedule from '../../hooks/use-schedule'
+import { getCityTimezone, getCities } from '../../utils/city-status'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -62,7 +60,7 @@ const addFourHours = (hourString) => { // Add 4 hours to a time string
 
 
 const Schedule = () => {
-    dayjs.locale('en');
+    dayjs.locale('en')
     //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
@@ -70,13 +68,14 @@ const Schedule = () => {
         week: dayjs().startOf('week'),
         day: dayjs().startOf('day'),
     })
+
     const [modal, setModal] = useState({ // Create state to store the modal
         open: false,
         drivers: null,
         selectedTime: null,
         selectedDay: null,
     })
-    const [data, setData] = useState(weekHours.map((time) => ({
+    const [dummy, setDummy] = useState(weekHours.map((time) => ({
         key: time,
         time,
         monday: [],
@@ -142,10 +141,10 @@ const Schedule = () => {
     } 
     
     const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
-        const newData = [...data]
+        const newData = [...dummy]
         const rowIndex = weekHours.indexOf(modal.selectedTime.start)
         newData[rowIndex][modal.selectedDay.dayOfWeek.toLowerCase()] = [{dayOfWeek: modal.selectedDay.dayOfWeek.toLowerCase(), day: modal.selectedDay.day, start: modal.selectedTime.start, end: modal.selectedTime.end, drivers: Number(modal.drivers)}]
-        setData(newData)
+        setDummy(newData)
         setModal({...modal, open: false})
     }
 
@@ -164,9 +163,9 @@ const Schedule = () => {
             >
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
                     <Space style={{ display: 'flex', width: '100%'}}>
-                        <CitySelect 
-                            defaultValue={scheduleFilter.city} 
-                            onChange={value => setScheduleFilter({ city: value, tz: getCityTimezone(value) })}   
+                        <CitySelect
+                            value={scheduleFilter.filter.city_id ? Number(scheduleFilter.filter.city_id.replace('in|', '')) : null}
+                            onChange={(value, label) => setScheduleFilter({ ...scheduleFilter, filter: { ...scheduleFilter.filter, city_id: `in|${value}`}, tz: label.timezone, city_label: label.label })}   
                             style={{ width: 200 }}
                         />
                         <Select
@@ -199,7 +198,7 @@ const Schedule = () => {
                         <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>
-                { view === 1 ? <WeekView selectedWeek={selectedDate.week} data={data} days={days} tz={scheduleFilter.tz} />
+                { view === 1 ? <WeekView selectedWeek={selectedDate.week} dummy={dummy} days={days} tz={scheduleFilter.tz} />
                 : view === 2 ? <div>Month View 👀</div>
                 : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} tz={scheduleFilter.tz} />
                 }

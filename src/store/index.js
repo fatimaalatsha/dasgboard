@@ -1,6 +1,10 @@
 import create from "zustand"
 import { devtools, persist } from "zustand/middleware"
 import pageSize from "../assets/data/table_page_size"// Import table page size definition
+import dayjs from "dayjs"// Import date handlers
+import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
+
+dayjs.extend(utc)
 
 let filterStore = (set) => ({
     driverFilter: {
@@ -52,10 +56,14 @@ let filterStore = (set) => ({
     },
     setApplicantFilter: (filter) => set((state) => ({ applicantFilter: { ...state.applicantFilter, ...filter } })),
     scheduleFilter: {
-      city: null,
-      status: null,
-      date: null,
+      filter: {
+        city_id: '',
+        status: null,
+        start_time: `between|${dayjs().startOf('week').format()},${dayjs().endOf('week').format()}`,
+      },
       tz: 'America/Thunder_Bay',
+      city_label: '',
+      paginated: false,
     },
     setScheduleFilter: (filter) => set((state) => ({ scheduleFilter: { ...state.scheduleFilter, ...filter } })),
 })

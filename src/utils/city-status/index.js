@@ -118,7 +118,7 @@ const getCities = async () => { // Get Cities List for dropdown
   }  
 }
 
-const getCityTimezone =  (id) => {
+const getCityTimezone = (id) => {
   const city = city_timezones.find((city) => city.city_id === id)
   return city.tz
 }
