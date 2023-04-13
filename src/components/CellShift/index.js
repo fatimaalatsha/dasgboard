@@ -131,7 +131,7 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetc
     )
 }
 
-const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch}) => {
+const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch, city}) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [selectedItems, setSelectedItems] = useState([]) // State to hold selected options
     const [edit, setEdit] = useState(false) // State to hold edit mode
@@ -148,7 +148,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         drivers: record.capacity || 0,
         start: record.start_time ? convertToHourTz(record.start_time, scheduleFilter.tz) : record.time,
         end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : null,
-        city: Number(record.city_id) || Number(scheduleFilter.filter.city_id.replace('in|', '')),
         day: record.start_time ? dayjs(record.start_time).tz(scheduleFilter.tz).format('YYYY-MM-DD') : selectedDay,
         shift_id: record.id || null,
     })
@@ -173,7 +172,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     }
 
     const handleDelete = async () => {
-        await deleteWeekShift(shift.shift_id)
+        await deleteWeekShift(Number(city))
         .then((res) => {
             message.success(res.message)
             refetch()
@@ -229,10 +228,11 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     start_time: shift.start,
                     end_time: shift.end,
                     capacity: shift.drivers,
-                    city_id: shift.city,
+                    city_id: Number(city),
                 }}
+                enableReinitialize
                 validationSchema={shiftSchema}
-                onSubmit={async (values, { setSubmitting }) => {
+                onSubmit={async (values, { setSubmitting, resetForm }) => {
                     values.start_time = converToUTC( shift.day, values.start_time, scheduleFilter.tz)
                     values.end_time = converToUTC(shift.day, values.end_time, scheduleFilter.tz)
                     values.is_recurring = false
@@ -240,6 +240,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     await createWeekShift(values)
                     .then(() => {
                         setSubmitting(false)
+                        resetForm()
                         setIsModalOpen(false)
                         message.success('Shift created successfully')
                         refetch()

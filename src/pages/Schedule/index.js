@@ -68,6 +68,7 @@ const Schedule = () => {
         week: dayjs().startOf('week'),
         day: dayjs().startOf('day'),
     })
+    const [selectedCity, setSelectedCity] = useState(Number(scheduleFilter.filter.city_id.replace('in|', ''))) // Create state to store the selected city
 
     const [modal, setModal] = useState({ // Create state to store the modal
         open: false,
@@ -161,11 +162,16 @@ const Schedule = () => {
                 tabList={tabList}
                 bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16 }}
             >
-                <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
+                <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>                    
                     <Space style={{ display: 'flex', width: '100%'}}>
+                    <>{scheduleFilter.filter?.city_id}</>
+                    <>{scheduleFilter.city_label}</>
                         <CitySelect
                             value={scheduleFilter.filter.city_id ? Number(scheduleFilter.filter.city_id.replace('in|', '')) : null}
-                            onChange={(value, label) => setScheduleFilter({ ...scheduleFilter, filter: { ...scheduleFilter.filter, city_id: `in|${value}`}, tz: label.timezone, city_label: label.label })}   
+                            onChange={(value, label) => {
+                                setSelectedCity(Number(value))
+                                setScheduleFilter({ ...scheduleFilter, filter: { ...scheduleFilter.filter, city_id: `in|${value}`}, tz: label.timezone, city_label: label.label })}
+                            }   
                             style={{ width: 200 }}
                         />
                         <Select
@@ -198,7 +204,7 @@ const Schedule = () => {
                         <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>
-                { view === 1 ? <WeekView selectedWeek={selectedDate.week} dummy={dummy} days={days} tz={scheduleFilter.tz} />
+                { view === 1 ? <WeekView selectedWeek={selectedDate.week} dummy={dummy} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
                 : view === 2 ? <div>Month View 👀</div>
                 : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} tz={scheduleFilter.tz} />
                 }
