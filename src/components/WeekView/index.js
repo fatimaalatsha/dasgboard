@@ -79,6 +79,9 @@ const WeekView = ({selectedWeek, dummy, days, tz, city }) => {
         key: idx,
         width: 200,
         align: 'center',
+        shouldCellUpdate: () => {
+            return Number(city) === Number(scheduleFilter.filter.city_id?.split('|')[1])
+        },
         onCell: (record) => {
             return {
                 onMouseEnter: () => { // Mouse enter event
