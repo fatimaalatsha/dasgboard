@@ -76,7 +76,7 @@ const Schedule = () => {
         selectedTime: null,
         selectedDay: null,
     })
-    const [dummy, setDummy] = useState(weekHours.map((time) => ({
+    /* const [dummy, setDummy] = useState(weekHours.map((time) => ({
         key: time,
         time,
         monday: [],
@@ -87,7 +87,7 @@ const Schedule = () => {
         saturday: [],
         sunday: [],
         
-    })))
+    }))) */
     const [dayData, setDayData] = useState(namesArray.reduce((acc, name) => {
         const timeObj = dayHours.reduce((obj, time) => {
           obj[time] = time === generateRandomHour() ? [{ name: name, start: time, end: addFourHours(time) }] : []
@@ -142,10 +142,10 @@ const Schedule = () => {
     } 
     
     const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
-        const newData = [...dummy]
+        /* const newData = [...dummy]
         const rowIndex = weekHours.indexOf(modal.selectedTime.start)
         newData[rowIndex][modal.selectedDay.dayOfWeek.toLowerCase()] = [{dayOfWeek: modal.selectedDay.dayOfWeek.toLowerCase(), day: modal.selectedDay.day, start: modal.selectedTime.start, end: modal.selectedTime.end, drivers: Number(modal.drivers)}]
-        setDummy(newData)
+        setDummy(newData) */
         setModal({...modal, open: false})
     }
 
@@ -204,7 +204,7 @@ const Schedule = () => {
                         <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>
-                { view === 1 ? <WeekView selectedWeek={selectedDate.week} dummy={dummy} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
+                { view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
                 : view === 2 ? <div>Month View 👀</div>
                 : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} tz={scheduleFilter.tz} />
                 }
