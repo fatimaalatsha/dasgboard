@@ -64,11 +64,11 @@ const useSchedule = (url, timezone) => {
             })
             console.log(error)
         }
-    }, [url])
+    }, [url, timezone])
 
     const refetch = () => {// Create a new refetch function
         setFetchedData({// Set fetched data to initial state
-            data: [],
+            data: null,
             isLoading: true,
             error: false,
         })
@@ -79,7 +79,7 @@ const useSchedule = (url, timezone) => {
         const controller = new AbortController()// Create a new AbortController
         fetchData()// Call fetchData function
         return () => controller.abort()// Abort fetch request
-    }, [fetchData, url])// Call fetchData function on mount and unmount
+    }, [fetchData.data, url])// Call fetchData function on mount and unmount
 
     const { data, isLoading, error } = fetchedData// Destructure fetched data
     return { data, isLoading, error, refetch }// Return fetched data
