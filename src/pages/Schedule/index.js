@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, Space, Button, DatePicker, Select, Radio, Modal, Input, TimePicker, Checkbox, Spin} from 'antd' // Import Ant components
+import { Card, Space, Button, DatePicker, Select, Radio, Modal, Input, TimePicker, Checkbox } from 'antd' // Import Ant components
 import { LeftOutlined, RightOutlined } from '@ant-design/icons' // Import Ant icons
 
 import dayjs from 'dayjs' // Import date handlers
@@ -11,7 +11,7 @@ import DayView from '../../components/DayView'
 import generateName from '../../utils/name-creation'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
-import { getCityTimezone, getCities } from '../../utils/city-status'
+//import { getCityTimezone, getCities } from '../../utils/city-status'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -58,17 +58,15 @@ const addFourHours = (hourString) => { // Add 4 hours to a time string
     return `${newHour < 10 ? '0' : ''}${newHour}:${minute}`
   }
 
-
 const Schedule = () => {
-    dayjs.locale('en')
     //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
-    const scheduleFilter = useFilterStore(state => state.scheduleFilter)
-    const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
+    const weekFilter = useFilterStore(state => state.weekScheduleFilter)
+    const setWeekFilter = useFilterStore(state => state.setWeekScheduleFilter)
     const [selectedDate, setSelectedDate] = useState({ // Create state to store the selected week's date
         week: dayjs().startOf('week'),
         day: dayjs().startOf('day'),
     })
-    const [selectedCity, setSelectedCity] = useState(Number(scheduleFilter.filter.city_id.replace('in|', ''))) // Create state to store the selected city
+    const [selectedCity, setSelectedCity] = useState(Number(weekFilter.filter.city_id.replace('in|', ''))) // Create state to store the selected city
 
     const [modal, setModal] = useState({ // Create state to store the modal
         open: false,
@@ -131,10 +129,11 @@ const Schedule = () => {
     ]
 
     const handleWeekChange = (date) => { // Handle week change
-      setSelectedDate({ 
-        ...selectedDate, 
-        ...(view === 1 ? { week: dayjs(date) } : { day: dayjs(date) }) 
-      })
+        console.log(date)
+        setSelectedDate({ 
+            ...selectedDate, 
+            ...(view === 1 ? { week: dayjs(date) } : { day: dayjs(date) }) 
+        })
     }
 
     const handleTodayClick = () => { // Handle this week click
@@ -164,13 +163,11 @@ const Schedule = () => {
             >
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>                    
                     <Space style={{ display: 'flex', width: '100%'}}>
-                    <>{scheduleFilter.filter?.city_id}</>
-                    <>{scheduleFilter.city_label}</>
                         <CitySelect
-                            value={scheduleFilter.filter.city_id ? Number(scheduleFilter.filter.city_id.replace('in|', '')) : null}
+                            value={weekFilter.filter.city_id ? Number(weekFilter.filter.city_id.replace('in|', '')) : null}
                             onChange={(value, label) => {
                                 setSelectedCity(Number(value))
-                                setScheduleFilter({ ...scheduleFilter, filter: { ...scheduleFilter.filter, city_id: `in|${value}`}, tz: label.timezone, city_label: label.label })}
+                                setWeekFilter({ ...weekFilter, filter: { ...weekFilter.filter, city_id: `in|${value}`}, tz: label.timezone, city_label: label.label })}
                             }   
                             style={{ width: 200 }}
                         />
@@ -204,9 +201,9 @@ const Schedule = () => {
                         <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>
-                { view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
+                { view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={weekFilter.tz} city={selectedCity}/>
                 : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} tz={scheduleFilter.tz} />
+                : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} tz={weekFilter.tz} />
                 }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
