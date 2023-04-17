@@ -132,7 +132,7 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetc
 }
 
 const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch, city}) => {
-    const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+    const scheduleFilter = useFilterStore(state => state.weekScheduleFilter)
     const [selectedItems, setSelectedItems] = useState([]) // State to hold selected options
     const [edit, setEdit] = useState(false) // State to hold edit mode
     const filteredOptions = namesArray.filter((o) => !selectedItems.includes(o)) // Options to show in the dropdown
