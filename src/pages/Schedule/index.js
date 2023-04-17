@@ -60,13 +60,13 @@ const addFourHours = (hourString) => { // Add 4 hours to a time string
 
 const Schedule = () => {
     //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
-    const weekFilter = useFilterStore(state => state.weekScheduleFilter)
-    const setWeekFilter = useFilterStore(state => state.setWeekScheduleFilter)
+    const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+    const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
     const [selectedDate, setSelectedDate] = useState({ // Create state to store the selected week's date
         week: dayjs().startOf('week'),
         day: dayjs().startOf('day'),
     })
-    const [selectedCity, setSelectedCity] = useState(Number(weekFilter.filter.city_id.replace('in|', ''))) // Create state to store the selected city
+    const [selectedCity, setSelectedCity] = useState(Number(scheduleFilter.filter.city_id.replace('in|', ''))) // Create state to store the selected city
 
     const [modal, setModal] = useState({ // Create state to store the modal
         open: false,
@@ -164,10 +164,10 @@ const Schedule = () => {
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>                    
                     <Space style={{ display: 'flex', width: '100%'}}>
                         <CitySelect
-                            value={weekFilter.filter.city_id ? Number(weekFilter.filter.city_id.replace('in|', '')) : null}
+                            value={scheduleFilter.filter.city_id ? Number(scheduleFilter.filter.city_id.replace('in|', '')) : null}
                             onChange={(value, label) => {
                                 setSelectedCity(Number(value))
-                                setWeekFilter({ ...weekFilter, filter: { ...weekFilter.filter, city_id: `in|${value}`}, tz: label.timezone, city_label: label.label })}
+                                setScheduleFilter({ ...scheduleFilter, filter: { ...scheduleFilter.filter, city_id: `in|${value}`}, tz: label.timezone, city_label: label.label })}
                             }   
                             style={{ width: 200 }}
                         />
@@ -201,9 +201,9 @@ const Schedule = () => {
                         <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>
-                { view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={weekFilter.tz} city={selectedCity}/>
+                { view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
                 : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} tz={weekFilter.tz} />
+                : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} tz={scheduleFilter.tz} />
                 }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>

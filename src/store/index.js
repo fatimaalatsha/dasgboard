@@ -55,7 +55,7 @@ let filterStore = (set) => ({
         }
     },
     setApplicantFilter: (filter) => set((state) => ({ applicantFilter: { ...state.applicantFilter, ...filter } })),
-    weekScheduleFilter: {
+    scheduleFilter: {
       filter: {
         city_id: '',
         status: null,
@@ -64,7 +64,7 @@ let filterStore = (set) => ({
       city_label: '',
       paginated: false,
     },
-    setWeekScheduleFilter: (filter) => set((state) => ({ weekScheduleFilter: { ...state.weekScheduleFilter, ...filter } })),
+    setScheduleFilter: (filter) => set((state) => ({ scheduleFilter: { ...state.scheduleFilter, ...filter } })),
 })
 
 filterStore = devtools(filterStore, { enabled: process.env.REACT_APP_ENV === "admin_dev" })
