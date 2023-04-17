@@ -15,6 +15,7 @@ const useSchedule = (url, timezone) => {
         isLoading: true,
         error: false,
     })
+    const controller = new AbortController()// Create a new AbortController
 
     const weekHours = [];
     for (let hour = 0; hour < 24 ; hour++) {
@@ -71,7 +72,7 @@ const useSchedule = (url, timezone) => {
 
     const refetch = () => {// Create a new refetch function
         setFetchedData({// Set fetched data to initial state
-            data: null,
+            data: [],
             isLoading: true,
             error: false,
         })
@@ -79,10 +80,9 @@ const useSchedule = (url, timezone) => {
     }
 
     useEffect(() => {
-        const controller = new AbortController()// Create a new AbortController
         fetchData()// Call fetchData function
         return () => controller.abort()// Abort fetch request
-    }, [fetchData.data, url])// Call fetchData function on mount and unmount
+    }, [url])// Call fetchData function on mount and unmount
 
     const { data, isLoading, error } = fetchedData// Destructure fetched data
     return { data, isLoading, error, refetch }// Return fetched data
