@@ -55,17 +55,16 @@ let filterStore = (set) => ({
         }
     },
     setApplicantFilter: (filter) => set((state) => ({ applicantFilter: { ...state.applicantFilter, ...filter } })),
-    scheduleFilter: {
+    weekScheduleFilter: {
       filter: {
         city_id: '',
         status: null,
-        start_time: `between|${dayjs().startOf('week').format()},${dayjs().endOf('week').format()}`,
       },
       tz: 'America/Thunder_Bay',
       city_label: '',
       paginated: false,
     },
-    setScheduleFilter: (filter) => set((state) => ({ scheduleFilter: { ...state.scheduleFilter, ...filter } })),
+    setWeekScheduleFilter: (filter) => set((state) => ({ weekScheduleFilter: { ...state.weekScheduleFilter, ...filter } })),
 })
 
 filterStore = devtools(filterStore, { enabled: process.env.REACT_APP_ENV === "admin_dev" })
