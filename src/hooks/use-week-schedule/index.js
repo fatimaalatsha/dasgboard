@@ -9,7 +9,7 @@ import API from '../../api/NewUrl'// Import API base url
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-const useSchedule = (url, timezone) => {
+const useWeekSchedule = (url, timezone) => {
     const [fetchedData, setFetchedData] = useState({// Set initia fetch state to empty
         data: [],
         isLoading: true,
@@ -88,4 +88,4 @@ const useSchedule = (url, timezone) => {
     return { data, isLoading, error, refetch }// Return fetched data
 }
 
-export default useSchedule
+export default useWeekSchedule
