@@ -45,7 +45,6 @@ const NumberOfLeads = () => {
       arrayFormat: "comma",
     })}`
   );
-  console.log(data);
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
@@ -350,7 +349,7 @@ const NumberOfLeads = () => {
                   onReady={(plot) => {
                     plot.on("plot:click", (evt) => {
                       const { data } = evt;
-                      data && data.data.status === "Ineligible"
+                      data && (data.data.status === "Ineligible" || data.data.status === "Do not contact (DNC)")
                         ? navigate(
                             `/reports/conversion_rates/${data.data.status}`,
                             {
