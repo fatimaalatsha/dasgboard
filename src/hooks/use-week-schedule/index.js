@@ -5,6 +5,7 @@ import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
 import API from '../../api/NewUrl'// Import API base url
+import { getDayHours } from '../../utils/schedule-status'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -17,10 +18,7 @@ const useWeekSchedule = (url, timezone) => {
     })
     const controller = new AbortController()// Create a new AbortController
 
-    const weekHours = [];
-    for (let hour = 0; hour < 24 ; hour++) {
-        weekHours.push( dayjs().hour(hour).minute(0).format('HH:mm') )
-    } 
+    const weekHours = getDayHours() // Array of hours in a day 24h format
 
     const weekDays = ["sunday","monday", "tuesday", "wednesday", "thursday", "friday", "saturday",]
 
