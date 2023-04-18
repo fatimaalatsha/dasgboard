@@ -45,7 +45,7 @@ const generateNames = (numNames) => {
     return names;
 }
   
-const namesArray = generateNames(150)
+const namesArray = generateNames(10)
 
 const generateRandomHour = () => { // Generate a random hour
     const randomHour = Math.floor(Math.random() * 20)
@@ -88,7 +88,7 @@ const Schedule = () => {
     }))) */
     const [dayData, setDayData] = useState(namesArray.reduce((acc, name) => {
         const timeObj = dayHours.reduce((obj, time) => {
-          obj[time] = time === generateRandomHour() ? [{ name: name, start: time, end: addFourHours(time) }] : []
+          obj[time] = time === /* generateRandomHour() */ '0' ? [{ name: name, start: time, end: addFourHours(time) }] : []
           return obj
         }, {})
       

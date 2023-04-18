@@ -91,12 +91,12 @@ const DayView = ({selectedDay, dummy, hours, tz }) => {
   ]
 
   error && <>Something went wrong...</>
-
+//console.log('dummy', dummy)
   return (
     <div style={{ position: 'relative'}}>
       <Table 
           columns={columns}
-          dataSource={dummy}
+          dataSource={data}
           loading={isLoading}
           pagination={false}
           className="schedule-day-table"

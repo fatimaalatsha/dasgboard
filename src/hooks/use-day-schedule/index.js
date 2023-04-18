@@ -17,7 +17,7 @@ const useDaySchedule = (url, timezone) => {
         error: false,
     })
     const controller = new AbortController()// Create a new AbortController
-    const dayHours = getDayHours // Array of hours in a day 24h format
+    const dayHours = getDayHours() // Array of hours in a day 24h format
 
     const fetchData = useCallback(async () => {// Create a new fetchData function
         try {
@@ -34,17 +34,23 @@ const useDaySchedule = (url, timezone) => {
             }
             const response = await API.get(url, options)// Fetch data from API
             const { items } = await response.data// Get data from response
-            console.log(items)
-            const dayData = dayHours.reduce((acc, time) => {
+            const dayData = items.reduce((acc, name) => {
+                const keyName = `${name.first_name} ${name.last_name}`
+                const timeObj = dayHours.reduce((obj, time) => {
+                    obj[time] = []
+                    return obj
+                }, {})
+
                 acc.push({
-                    key: time,
-                    time,
-                    data: items.filter(item => time === dayjs(item.start_time).tz(timezone).format('HH:mm'))
+                    key: name.user_id,
+                    name: keyName,
+                    ...timeObj
                 })
+
                 return acc
             }, [])
 
-            console.log(dayData)
+            //console.log(dayData)
 
             setFetchedData({// Set fetched data
                 data: dayData,
