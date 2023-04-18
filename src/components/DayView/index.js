@@ -1,14 +1,30 @@
 import { useState } from 'react' // Import React hooks
 import { Table, Typography } from 'antd' // Import Ant components
+import qs from 'qs' // Import qs library
+import dayjs from 'dayjs' // Import dayjs
+import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
+import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
 import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import DayCellShift from '../DayCellShift' // Import CellShift component
-import dayjs from 'dayjs' // Import dayjs
+import { useFilterStore } from '../../store' // Import useFilterStore hook
+import useDaySchedule from '../../hooks/use-day-schedule' // Import useDaySchedule hook
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const { Text, Title } = Typography
 
-const DayView = ({selectedDay, data, hours, tz }) => {
+//get the papams that will be passed to filters through qs
+const queryHandler = (params) => ({ // Get table params
+  day: params.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+})
+
+const DayView = ({selectedDay, dummy, hours, tz }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
+  const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+  const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
+  const { data, isLoading, error, refetch } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler(selectedDay), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz) // Call useSchedule hook
 
   const columns = [
     {
@@ -74,11 +90,14 @@ const DayView = ({selectedDay, data, hours, tz }) => {
     }
   ]
 
+  error && <>Something went wrong...</>
+
   return (
     <div style={{ position: 'relative'}}>
       <Table 
           columns={columns}
-          dataSource={data}
+          dataSource={dummy}
+          loading={isLoading}
           pagination={false}
           className="schedule-day-table"
           bordered
