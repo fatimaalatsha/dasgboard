@@ -22,6 +22,7 @@ import NumberOfleads from '../../pages/NumberOfLeads'
 import NumberOfDrivers from '../../pages/NumberOfDrivers'
 import ConversionRatesByApplication from '../../pages/ConversionRatesByApplication'
 import Schedule from '../../pages/Schedule'
+import IneligibleApplicants from '../../pages/IneligibleApplicants'
 
 const { Sider, Content, Header} = Container // Destructuring Layout component
 
@@ -55,6 +56,7 @@ const Layout = () => {
                     <Route path="/reports/city_overview/:id" element={<ReportDetails />} />
                     <Route path='/reports/number_of_drivers' element={<NumberOfDrivers />} />
                     <Route path='/reports/conversion_rates_by_application' element={<ConversionRatesByApplication />} />
+                    <Route path='/reports/conversion_rates/:state' element={<IneligibleApplicants />} />
                     {['/documents/:id', '/drivers/:id', '/applicants/:id'].map(path => <Route key="Details" path={path} element={<DriverDetails />} />)}
                 </Routes>
             </Content>

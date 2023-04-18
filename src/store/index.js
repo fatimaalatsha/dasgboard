@@ -64,7 +64,17 @@ let filterStore = (set) => ({
       city_label: '',
       paginated: false,
     },
-    setScheduleFilter: (filter) => set((state) => ({ scheduleFilter: { ...state.scheduleFilter, ...filter } })),
+  setScheduleFilter: (filter) => set((state) => ({ scheduleFilter: { ...state.scheduleFilter, ...filter } })),
+    reportFilter: {
+   
+      date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD"),
+      date_to: dayjs().format("YYYY-MM-DD"),
+   
+  },
+  setReportFilter: (filter) =>
+    set((state) => ({
+      reportFilter: { ...state.reportFilter, ...filter }
+    })),
 })
 
 filterStore = devtools(filterStore, { enabled: process.env.REACT_APP_ENV === "admin_dev" })

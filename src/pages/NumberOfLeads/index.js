@@ -12,100 +12,40 @@ import {
   Divider,
 } from "antd";
 import useNewFetch from "../../hooks/use-new-fetch";
+import { useNavigate } from "react-router-dom";
+import { useFilterStore } from '../../store' // Import filter store
+
 import qs from "qs";
-import dayjs from "dayjs";
+
 
 import { EditOutlined } from "@ant-design/icons";
 import ChartColumn from "../../components/ChartColumn";
 import CardStatistic from "../../components/CardStatistic";
 const { Title, Text } = Typography;
 
-const NumberOfLead = (dateFrom) => {
-  const getUserParams = () => {
-    const { date_from, date_to } = dateFrom;
-    return qs.stringify(
-      {
-        date_from,
-        date_to,
-      },
-      { skipNulls: true, arrayFormat: "comma" }
-    );
-  };
+ 
+const getUserParams = (filter) => ({
+  ...filter
+})
 
-  const { data, error, isLoading } = useNewFetch(
-    `/v1/reports/status-breakdown?${getUserParams()}`
-  );
-
-  const mapDataToObjects = (data) => {
-    const { items } = data;
-    const mappedData = [];
-
-    // Loop over the status objects and data objects
-    for (const statusObj of Object.values(items)) {
-      if (typeof statusObj === "object" && statusObj.data) {
-        for (const dataObj of statusObj.data) {
-          mappedData.push({
-            city: dataObj.city,
-            status: statusObj.status,
-            count: dataObj.count,
-          });
-        }
-      } else {
-        mappedData.push({
-          city: statusObj.city,
-          status: items.status,
-          count: statusObj.count,
-        });
-      }
-    }
-    return mappedData;
-  };
-
-  if (isLoading) return <p>Loading...</p>;
-  if (error) return <p>Something went wrong...</p>;
-
-  return (
-    <>
-      <Divider orientation="left">
-        {" "}
-        Details of Ineligible Applicants from{" "}
-        <Text strong>{dateFrom.date_from}</Text> to{" "}
-        <Text strong>{dateFrom.date_to} </Text>{" "}
-      </Divider>
-      <ChartColumn
-        props={mapDataToObjects(data)}
-        xField="status"
-        yField="count"
-        seriesField="city"
-      />
-    </>
-  );
-};
 const NumberOfLeads = () => {
-  const [date, setDate] = useState({
-    filter: {
-      date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD"),
-      date_to: dayjs().format("YYYY-MM-DD"),
-    },
-  });
+  const reportFilter = useFilterStore((state) => state.reportFilter); // Get filter from store
+  const setReportFilter = useFilterStore((state) => state.setReportFilter); // Set filter to store
+  const navigate = useNavigate();
+
 
   const [isEnable, setIsEnable] = useState(false); // Set isEnable state
   const [dateset, setDateset] = useState("");
   const [showIneligible, setShowIneligible] = useState(false);
-  const getUserParams = () => {
-    const { date_from, date_to } = date.filter;
-    return qs.stringify(
-      {
-        date_from,
-        date_to,
-      },
-      { skipNulls: true, arrayFormat: "comma" }
-    );
-  };
+
 
   const { data, error, isLoading } = useNewFetch(
-    `/v1/reports/drivers-status?${getUserParams()}`
+    `/v1/reports/drivers-status?${qs.stringify(getUserParams(reportFilter), {
+      skipNulls: true,
+      arrayFormat: "comma",
+    })}`
   );
+
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
 
@@ -187,7 +127,14 @@ const NumberOfLeads = () => {
     return mappedData;
   };
 
-  if (data.total_items === 0) {
+  const handleChangeDate = (dates) => {
+    const [dateFrom, dateTo] = dates.map((date) => date.format("YYYY-MM-DD"));
+    setReportFilter({ ...reportFilter, date_from: dateFrom, date_to: dateTo });
+  };
+
+
+
+  if (data.total === 0) {
     return (
       <Card
         title={
@@ -199,7 +146,57 @@ const NumberOfLeads = () => {
         <Result
           status="warning"
           title="No data found for the selected date range"
-          extra={<Text type="warning">Select another date range.</Text>}
+          extra={
+            <>
+              <Text type="warning">Select another date range.</Text>
+              <DatePicker.RangePicker
+                open={isEnable}
+                allowClear={true}
+                inputReadOnly={true}
+                size="small"
+                showToday={false}
+                bordered={true}
+                onChange={handleChangeDate}
+                renderExtraFooter={() => {
+                  return (
+                    <Space
+                      direction="horizontal"
+                      style={{
+                        display: "flex",
+                        justifyContent: "space-between",
+                      }}
+                    >
+                      <Button
+                        type="primary"
+                        onClick={() => {
+                          setIsEnable(false);
+                        }}
+                      >
+                        Cancel
+                      </Button>
+                      <Button
+                        type="primary"
+                        onClick={() => {
+                          setIsEnable(false);
+                          setDateset(getUserParams());
+                        }}
+                      >
+                        OK
+                      </Button>
+                    </Space>
+                  );
+                }}
+              />
+              <Tooltip title="Select Range">
+                <Button
+                  style={{ padding: 0, height: "auto" }}
+                  onClick={() => setIsEnable(true)}
+                  type="link"
+                  icon={<EditOutlined />}
+                />
+              </Tooltip>
+            </>
+          }
         />
       </Card>
     );
@@ -222,14 +219,7 @@ const NumberOfLeads = () => {
                 size="small"
                 showToday={false}
                 bordered={true}
-                onChange={(dates) => {
-                  setDate({
-                    filter: {
-                      date_from: dates[0].format("YYYY-MM-DD"),
-                      date_to: dates[1].format("YYYY-MM-DD"),
-                    },
-                  });
-                }}
+                onChange={handleChangeDate}
                 renderExtraFooter={() => {
                   return (
                     <Space
@@ -243,7 +233,6 @@ const NumberOfLeads = () => {
                         type="primary"
                         onClick={() => {
                           setIsEnable(false);
-                          setDateset(getUserParams(date.filter.date_from));
                         }}
                       >
                         Cancel
@@ -252,10 +241,10 @@ const NumberOfLeads = () => {
                         type="primary"
                         onClick={() => {
                           setIsEnable(false);
+                          setDateset(getUserParams());
                         }}
                       >
-                        {" "}
-                        OK{" "}
+                        OK
                       </Button>
                     </Space>
                   );
@@ -347,8 +336,8 @@ const NumberOfLeads = () => {
                 <Text>
                   {" "}
                   Number Of Leads Per City from{" "}
-                  <Text strong>{date.filter.date_from}</Text> to{" "}
-                  <Text strong>{date.filter.date_to} </Text>
+                  <Text strong>{reportFilter.date_from}</Text> to{" "}
+                  <Text strong>{reportFilter.date_to} </Text>
                 </Text>
               </Divider>
               <div style={{ height: "700px" }}>
@@ -360,21 +349,21 @@ const NumberOfLeads = () => {
                   onReady={(plot) => {
                     plot.on("plot:click", (evt) => {
                       const { data } = evt;
-                      data && data.data.status === "Ineligible"
-                        ? setShowIneligible(true)
+                      data && (data.data.status === "Ineligible" || data.data.status === "Do not contact (DNC)")
+                        ? navigate(
+                            `/reports/conversion_rates/${data.data.status}`,
+                            {
+                              state: {
+                                date_from: reportFilter.date_from,
+                                date_to: reportFilter.date_to,
+                              },
+                            }
+                          )
                         : setShowIneligible(false);
                     });
                   }}
                 />
               </div>
-              {showIneligible && (
-                <div style={{ height: "700px" }}>
-                  <NumberOfLead
-                    date_from={date.filter.date_from}
-                    date_to={date.filter.date_to}
-                  />
-                </div>
-              )}
             </Space>
           </Col>
         </Row>
