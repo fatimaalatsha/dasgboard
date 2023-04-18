@@ -28,7 +28,7 @@ import { useFilterStore } from '../../store'
 import Submit from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import { CitySelect } from '../CitySelect' // Import CitySelect component
 import generateName from '../../utils/name-creation' // Dummy name array generator
-import { convertToHourTz, converToUTC, createWeekShift, deleteWeekShift } from '../../utils/schedule-status'
+import { convertToHourTz, converToUTC, createWeekShift, updateWeekShift, deleteWeekShift } from '../../utils/schedule-status'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -199,10 +199,11 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     } */
 
     const handleCancel = () => {
-      setIsModalOpen(false)
-      if (!edit) {
+        setIsModalOpen(false)
+        if (!edit) {
             setIsHovering(!isHovering)
         }
+        refetch()
     }
 
     return (
@@ -237,12 +238,21 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     values.end_time = converToUTC(shift.day, values.end_time, scheduleFilter.tz)
                     values.is_recurring = false
                     values.capacity = Number(values.capacity)
+                    !edit ? // If edit mode is true, update shift
                     await createWeekShift(values)
                     .then(() => {
                         setSubmitting(false)
                         resetForm()
                         setIsModalOpen(false)
                         message.success('Shift created successfully')
+                        refetch()
+                    })
+                    : await updateWeekShift(values, shift.shift_id)
+                    .then(() => {
+                        setSubmitting(false)
+                        resetForm()
+                        setIsModalOpen(false)
+                        message.success('Shift updated successfully')
                         refetch()
                     })
                 }}
@@ -259,7 +269,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                     Cancel
                                 </Button>,
                                 <Submit key="submit" type="primary">
-                                    Create Shift
+                                    {!edit ? 'Create Shift' : 'Update Shift'}
                                 </Submit>,
                             ]}
                         >

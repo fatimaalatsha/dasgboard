@@ -44,6 +44,27 @@ const createWeekShift = async (payload) => {
     }
 }
 
+const updateWeekShift = async (payload, id) => {
+    try {
+        const auth = await Auth.currentSession()// Get current session
+        const token = auth.getAccessToken().getJwtToken()// Get token from session
+        const options = { // Set options for fetch
+            headers: {
+                'Authorization': token,
+                ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            }
+        }
+        const response = await API.put(`/v1/shifts/${id}`, payload, options)
+        const data = await response.data
+        return data
+    } catch (error) {
+        throw new Error(error)
+    }
+}
+
 const deleteWeekShift = async (id) => {
     try {
         const auth = await Auth.currentSession()// Get current session
@@ -65,4 +86,4 @@ const deleteWeekShift = async (id) => {
     }
 }
 
-export { createWeekShift, deleteWeekShift, convertToHourTz, converToUTC }
+export { createWeekShift, updateWeekShift, deleteWeekShift, convertToHourTz, converToUTC }

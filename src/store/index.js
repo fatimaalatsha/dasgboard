@@ -59,7 +59,6 @@ let filterStore = (set) => ({
       filter: {
         city_id: '',
         status: null,
-        start_time: `between|${dayjs().startOf('week').format()},${dayjs().endOf('week').format()}`,
       },
       tz: 'America/Thunder_Bay',
       city_label: '',

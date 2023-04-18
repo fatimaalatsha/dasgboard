@@ -20,13 +20,17 @@ const { Text, Title } = Typography
 
 //get the papams that will be passed to filters through qs
 const queryHandler = (params) => ({ // Get table params
-  ...params,
+  filter:{...params}
 })
 
 const WeekView = ({selectedWeek, dummy, days, tz, city }) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
-    const { data, isLoading, error, refetch } = useSchedule(`/v1/shifts?${qs.stringify(queryHandler(scheduleFilter), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz) // Call useSchedule hook
+    const filters = {
+        city_id: scheduleFilter.filter.city_id,
+        start_time: `between|${selectedWeek.startOf('week').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')},${selectedWeek.endOf('week').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')}`,
+    }
+    const { data, isLoading, error, refetch } = useSchedule(`/v1/shifts?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz) // Call useSchedule hook
     const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
 
     const columns = [
@@ -79,9 +83,6 @@ const WeekView = ({selectedWeek, dummy, days, tz, city }) => {
         key: idx,
         width: 200,
         align: 'center',
-        shouldCellUpdate: () => {
-            return Number(city) === Number(scheduleFilter.filter.city_id?.split('|')[1])
-        },
         onCell: (record) => {
             return {
                 onMouseEnter: () => { // Mouse enter event

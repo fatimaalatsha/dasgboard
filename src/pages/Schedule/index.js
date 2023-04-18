@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, Space, Button, DatePicker, Select, Radio, Modal, Input, TimePicker, Checkbox, Spin} from 'antd' // Import Ant components
+import { Card, Space, Button, DatePicker, Select, Radio, Modal, Input, TimePicker, Checkbox } from 'antd' // Import Ant components
 import { LeftOutlined, RightOutlined } from '@ant-design/icons' // Import Ant icons
 
 import dayjs from 'dayjs' // Import date handlers
@@ -11,7 +11,7 @@ import DayView from '../../components/DayView'
 import generateName from '../../utils/name-creation'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
-import { getCityTimezone, getCities } from '../../utils/city-status'
+//import { getCityTimezone, getCities } from '../../utils/city-status'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -58,9 +58,7 @@ const addFourHours = (hourString) => { // Add 4 hours to a time string
     return `${newHour < 10 ? '0' : ''}${newHour}:${minute}`
   }
 
-
 const Schedule = () => {
-    dayjs.locale('en')
     //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
@@ -131,10 +129,11 @@ const Schedule = () => {
     ]
 
     const handleWeekChange = (date) => { // Handle week change
-      setSelectedDate({ 
-        ...selectedDate, 
-        ...(view === 1 ? { week: dayjs(date) } : { day: dayjs(date) }) 
-      })
+        console.log(date)
+        setSelectedDate({ 
+            ...selectedDate, 
+            ...(view === 1 ? { week: dayjs(date) } : { day: dayjs(date) }) 
+        })
     }
 
     const handleTodayClick = () => { // Handle this week click
@@ -164,8 +163,6 @@ const Schedule = () => {
             >
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>                    
                     <Space style={{ display: 'flex', width: '100%'}}>
-                    <>{scheduleFilter.filter?.city_id}</>
-                    <>{scheduleFilter.city_label}</>
                         <CitySelect
                             value={scheduleFilter.filter.city_id ? Number(scheduleFilter.filter.city_id.replace('in|', '')) : null}
                             onChange={(value, label) => {
