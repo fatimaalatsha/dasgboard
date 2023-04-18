@@ -129,7 +129,6 @@ const Schedule = () => {
     ]
 
     const handleWeekChange = (date) => { // Handle week change
-        console.log(date)
         setSelectedDate({ 
             ...selectedDate, 
             ...(view === 1 ? { week: dayjs(date) } : { day: dayjs(date) }) 

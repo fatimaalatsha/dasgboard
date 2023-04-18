@@ -91,7 +91,7 @@ const DayView = ({selectedDay, dummy, hours, tz }) => {
   ]
 
   error && <>Something went wrong...</>
-//console.log('dummy', dummy)
+  //console.log('data', data)
   return (
     <div style={{ position: 'relative'}}>
       <Table 
