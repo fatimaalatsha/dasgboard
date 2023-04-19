@@ -86,4 +86,12 @@ const deleteWeekShift = async (id) => {
     }
 }
 
-export { createWeekShift, updateWeekShift, deleteWeekShift, convertToHourTz, converToUTC }
+const getDayHours = () => {
+    const hours = []
+    for (let hour = 0; hour < 24; hour++) {
+        hours.push(dayjs().hour(hour).minute(0).format('HH:mm'))
+    }
+    return hours
+}
+
+export { createWeekShift, updateWeekShift, deleteWeekShift, convertToHourTz, converToUTC, getDayHours }

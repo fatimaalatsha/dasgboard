@@ -11,7 +11,7 @@ import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import CellShift from '../CellShift' // Import CellShift component
 import { CitySelect } from '../CitySelect'
 import { useFilterStore } from '../../store'
-import useSchedule from '../../hooks/use-schedule'
+import useWeekSchedule from '../../hooks/use-week-schedule'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -30,7 +30,7 @@ const WeekView = ({selectedWeek, dummy, days, tz, city }) => {
         city_id: scheduleFilter.filter.city_id,
         start_time: `between|${selectedWeek.startOf('week').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')},${selectedWeek.endOf('week').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')}`,
     }
-    const { data, isLoading, error, refetch } = useSchedule(`/v1/shifts?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz) // Call useSchedule hook
+    const { data, isLoading, error, refetch } = useWeekSchedule(`/v1/shifts?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz) // Call useSchedule hook
     const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
 
     const columns = [

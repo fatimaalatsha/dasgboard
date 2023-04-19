@@ -45,7 +45,7 @@ const generateNames = (numNames) => {
     return names;
 }
   
-const namesArray = generateNames(150)
+const namesArray = generateNames(10)
 
 const generateRandomHour = () => { // Generate a random hour
     const randomHour = Math.floor(Math.random() * 20)
@@ -88,7 +88,7 @@ const Schedule = () => {
     }))) */
     const [dayData, setDayData] = useState(namesArray.reduce((acc, name) => {
         const timeObj = dayHours.reduce((obj, time) => {
-          obj[time] = time === generateRandomHour() ? [{ name: name, start: time, end: addFourHours(time) }] : []
+          obj[time] = time === /* generateRandomHour() */ '0' ? [{ name: name, start: time, end: addFourHours(time) }] : []
           return obj
         }, {})
       
@@ -129,7 +129,6 @@ const Schedule = () => {
     ]
 
     const handleWeekChange = (date) => { // Handle week change
-        console.log(date)
         setSelectedDate({ 
             ...selectedDate, 
             ...(view === 1 ? { week: dayjs(date) } : { day: dayjs(date) }) 
@@ -203,7 +202,7 @@ const Schedule = () => {
                 </Space>
                 { view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
                 : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedDay={selectedDate.day} data={dayData} hours={dayHours} tz={scheduleFilter.tz} />
+                : <DayView selectedDay={selectedDate.day} dummy={dayData} hours={dayHours} tz={scheduleFilter.tz} />
                 }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
