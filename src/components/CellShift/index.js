@@ -7,7 +7,6 @@ import {
     Typography, 
     Tag, 
     Modal, 
-    Input, 
     Button, 
     TimePicker, 
     Checkbox, 
@@ -21,10 +20,11 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../store'
 
+import Input from '../forms/InputWrapper' // Import InputWrapper component
 import Submit from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import { CitySelect } from '../CitySelect' // Import CitySelect component
 import generateName from '../../utils/name-creation' // Dummy name array generator
@@ -42,10 +42,16 @@ const getFilledHours = (end, start) => {
 }
 
 const shiftSchema = object().shape({
-    capacity: number().required('Required'),
+    capacity: number().min(10, 'Shift driver capacity must be greater than or equal to 10.').required('Required'),
     start_time: string().required('Required'),
     end_time: string().required('Required'),
     city_id: number().required('Required'),
+    hasGuarantee: boolean().optional(),
+    guarantee: number().when('hasGuarantee', {
+        is: true,
+        then: number().min(10, 'Guarantee amount must be greater than or equal to 10.').required('Required'),
+        otherwise: number().notRequired()
+    }),
 })
 
 const generateNames = (numNames) => {
@@ -108,6 +114,7 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetc
                             <Title level={1} style={{ margin: 0 }}>0</Title>
                             <Title level={4} type="secondary" style={{ margin: 0 }}>{`/ ${record?.drivers}`}</Title>
                         </Space>
+                        { record.guarantee && <Text>${record.guarantee}</Text>}
                         <Space>
                             <Text strong style={{ color: 'inherit', fontSize: 12 }}>{record?.start}</Text>
                             <SwapRightOutlined />
@@ -150,6 +157,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : null,
         day: record.start_time ? dayjs(record.start_time).tz(scheduleFilter.tz).format('YYYY-MM-DD') : selectedDay,
         shift_id: record.id || null,
+        hasGuarantee: false,
+        guarantee: record.guarantee,
     })
     const floatingComponentHeight = hours.diff * 57 + 2
 
@@ -230,6 +239,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     end_time: shift.end,
                     capacity: shift.drivers,
                     city_id: Number(city),
+                    guarantee: shift.guarantee,
+                    hasGuarantee: shift.hasGuarantee,
                 }}
                 enableReinitialize
                 validationSchema={shiftSchema}
@@ -238,6 +249,9 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     values.end_time = converToUTC(shift.day, values.end_time, scheduleFilter.tz)
                     values.is_recurring = false
                     values.capacity = Number(values.capacity)
+                    values.guarantee = Number(values.guarantee)
+                    !values.hasGuarantee && delete values.guarantee
+                    delete values.hasGuarantee
                     !edit ? // If edit mode is true, update shift
                     await createWeekShift(values)
                     .then(() => {
@@ -274,6 +288,16 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                             ]}
                         >
                             <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                {/* TODO: Example for global shift creator
+                                * <Checkbox 
+                                    onChange={() => {
+                                        props.setFieldValue('start_time', '00:00')
+                                        props.setFieldValue('end_time', '23:59')
+                                        handleHoursChange(['00:00', '23:59'])
+                                    }}
+                                >
+                                    All Day
+                                </Checkbox> */}
                                 <TimePicker.RangePicker 
                                     name="end"
                                     style={{ width: '100%' }} 
@@ -312,15 +336,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                         }
                                     }}
                                 />
-                                <Checkbox 
-                                    onChange={() => {
-                                        props.setFieldValue('start_time', '00:00')
-                                        props.setFieldValue('end_time', '23:59')
-                                        handleHoursChange(['00:00', '23:59'])
-                                    }}
-                                >
-                                    All Day
-                                </Checkbox>
                                 <CitySelect 
                                     defaultValue={props.values.city_id}    
                                     style={{ width: '100%' }}
@@ -352,6 +367,30 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                         setShift({...shift, drivers: e.target.value})
                                     }}
                                 />
+                                <Checkbox
+                                    onChange={() => {
+                                        setShift({ ...shift, hasGuarantee: !shift.hasGuarantee })
+                                    }}
+                                >
+                                    Guarantee?
+                                </Checkbox>
+                                { shift.hasGuarantee && (
+                                    <Input 
+                                        name="guarantee"
+                                        placeholder="Guarantee amount"
+                                        type="number"
+                                        min={0}
+                                        max={1000}
+                                        prefix="$" 
+                                        suffix="CAD" 
+                                        defaultValue={props.values.guarantee}
+                                        onChange={(e) => {
+                                            const value = Number(e.target.value)
+                                            props.setFieldValue('guarantee', value)
+                                            setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, amount: value } }))
+                                        }}
+                                    />
+                                )}
                             </Space>
                         </Modal>
                     </FormikForm>
