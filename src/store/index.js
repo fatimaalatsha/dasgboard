@@ -1,59 +1,73 @@
-import create from "zustand"
-import { devtools, persist } from "zustand/middleware"
-import pageSize from "../assets/data/table_page_size"// Import table page size definition
+import create from "zustand";
+import { devtools, persist } from "zustand/middleware";
+import dayjs from "dayjs";
 
 let filterStore = (set) => ({
-    driverFilter: {
-        pagination: {
-          current: 1,
-          pageSize: 50,
-          showSizeChanger: true,
-          pageSizeOptions: pageSize,
-          position: ['bottomRight', 'topRight'],
-        },
-        sort: {
-          created_at: 'desc',
-        },
-        filter: {
-          status: ['in|active', 'inactive'],
-        }
+  driverFilter: {
+    pagination: {
+      current: 1,
+      pageSize: 50,
+      showSizeChanger: true,
+      position: ["bottomRight", "topRight"],
     },
-    setDriverFilter: (filter) => set((state) => ({ driverFilter: { ...state.driverFilter, ...filter } })),
-    documentFilter: {
-        pagination: {
-          current: 1,
-          pageSize: 20,
-          showSizeChanger: true,
-          pageSizeOptions: pageSize,
-          position: ['bottomRight', 'topRight'],
-        },
-        sort: {
-          updated_at: 'desc',
-        },
-        filter: {
-          current: 'eq|true',
-        }
+    sort: {
+      created_at: "desc",
     },
-    setDocumentFilter: (filter) => set((state) => ({ documentFilter: { ...state.documentFilter, ...filter } })),
-    applicantFilter: {
-        pagination: {
-          current: 1,
-          pageSize: 50,
-          showSizeChanger: true,
-          pageSizeOptions: pageSize,
-          position: ['bottomRight', 'topRight'],
-        },
-        sort: {
-          created_at: 'desc',
-        },
-        filter: {
-          status: ['in|onboard', 'pending'],
-        }
+    filter: {
+      status: ["in|active", "inactive"],
     },
-    setApplicantFilter: (filter) => set((state) => ({ applicantFilter: { ...state.applicantFilter, ...filter } })),
-})
+  },
+  setDriverFilter: (filter) =>
+    set((state) => ({ driverFilter: { ...state.driverFilter, ...filter } })),
+  documentFilter: {
+    pagination: {
+      current: 1,
+      pageSize: 20,
+      showSizeChanger: true,
+      position: ["bottomRight", "topRight"],
+    },
+    sort: {
+      updated_at: "desc",
+    },
+    filter: {
+      current: "eq|true",
+    },
+  },
+  setDocumentFilter: (filter) =>
+    set((state) => ({
+      documentFilter: { ...state.documentFilter, ...filter },
+    })),
+  applicantFilter: {
+    pagination: {
+      current: 1,
+      pageSize: 50,
+      showSizeChanger: true,
+      position: ["bottomRight", "topRight"],
+    },
+    sort: {
+      created_at: "desc",
+    },
+    filter: {
+      status: ["in|onboard", "pending"],
+    },
+  },
+  setApplicantFilter: (filter) =>
+    set((state) => ({
+      applicantFilter: { ...state.applicantFilter, ...filter },
+    })),
+  reportFilter: {
+    date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD"),
+    date_to: dayjs().format("YYYY-MM-DD"),
+  },
+  setReportFilter: (filter) =>
+    set((state) => ({
+      reportFilter: { ...state.reportFilter, ...filter },
+    })),
+});
 
-filterStore = devtools(filterStore, { enabled: process.env.REACT_APP_ENV === "admin_dev" })
-filterStore = persist(filterStore, { name: "filter" })
+filterStore = devtools(filterStore, {
+  enabled: process.env.REACT_APP_ENV === "admin_dev",
+});
+filterStore = persist(filterStore, { name: "filter" });
 
-export const useFilterStore = create(filterStore)
+export const useFilterStore = create(filterStore);
