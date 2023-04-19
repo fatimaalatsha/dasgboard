@@ -46,7 +46,7 @@ const shiftSchema = object().shape({
     start_time: string().required('Required'),
     end_time: string().required('Required'),
     city_id: number().required('Required'),
-    hasGuarantee: boolean().optional(),
+    hasGuarantee: boolean().notRequired(),
     guarantee: number().when('hasGuarantee', {
         is: true,
         then: number().min(10, 'Guarantee amount must be greater than or equal to 10.').required('Required'),
@@ -114,7 +114,7 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetc
                             <Title level={1} style={{ margin: 0 }}>0</Title>
                             <Title level={4} type="secondary" style={{ margin: 0 }}>{`/ ${record?.drivers}`}</Title>
                         </Space>
-                        { record.guarantee && <Text>${record.guarantee}</Text>}
+                        { record.guarantee !== 0 && <Text>${record.guarantee}</Text>}
                         <Space>
                             <Text strong style={{ color: 'inherit', fontSize: 12 }}>{record?.start}</Text>
                             <SwapRightOutlined />
@@ -158,7 +158,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         day: record.start_time ? dayjs(record.start_time).tz(scheduleFilter.tz).format('YYYY-MM-DD') : selectedDay,
         shift_id: record.id || null,
         hasGuarantee: false,
-        guarantee: record.guarantee,
+        guarantee: record.guarantee || 0,
     })
     const floatingComponentHeight = hours.diff * 57 + 2
 
@@ -252,6 +252,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     values.guarantee = Number(values.guarantee)
                     !values.hasGuarantee && delete values.guarantee
                     delete values.hasGuarantee
+                    console.log(values, edit)
                     !edit ? // If edit mode is true, update shift
                     await createWeekShift(values)
                     .then(() => {
