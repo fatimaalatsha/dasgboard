@@ -20,7 +20,7 @@ const queryHandler = (params) => ({ // Get table params
   day: params.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
 })
 
-const DayView = ({selectedDay, dummy, hours, tz }) => {
+const DayView = ({selectedDay, dummy, hours, tz, city }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
   const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
@@ -68,6 +68,7 @@ const DayView = ({selectedDay, dummy, hours, tz }) => {
                         isCellFilled={record[hour][item].start === hour && record.name === record[hour][item].name}
                         record={record[hour][item]}
                         setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                        city={city}
                       />
                     )
                   }
@@ -80,6 +81,7 @@ const DayView = ({selectedDay, dummy, hours, tz }) => {
                     hour={hour}
                     day={selectedDay}
                     setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                    city={city}
                   />
                 )
               },

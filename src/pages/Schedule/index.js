@@ -202,7 +202,7 @@ const Schedule = () => {
                 </Space>
                 { view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
                 : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedDay={selectedDate.day} dummy={dayData} hours={dayHours} tz={scheduleFilter.tz} />
+                : <DayView selectedDay={selectedDate.day} dummy={dayData} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity}/>
                 }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
