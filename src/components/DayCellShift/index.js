@@ -13,6 +13,7 @@ import {
     Tag,
     Checkbox, 
     Input,
+    message,
 } from 'antd'
 import { 
     SwapRightOutlined, 
@@ -24,16 +25,24 @@ import {
     DollarOutlined, // Guarantee Icon
 
 } from '@ant-design/icons'
+
 import dayjs from 'dayjs'
+import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
+import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
+
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean, array } from 'yup' // Import Yup for form validation
+
+import { useFilterStore } from '../../store'
+
 import Submit from '../forms/SubmitWrapper'
+import { convertToHourTz, converToUTC, createWeekShift as createDayShift } from '../../utils/schedule-status'
+
+dayjs.extend(utc)
+dayjs.extend(timezone)
 
 const { useToken } = theme
 const { Text, Link } = Typography
-//const { Group } = Avatar
-
-//const daysOfWeek = ["monday", "tuesday", "wednesday", "thursday", "friday", "saturday", "sunday"]
 
 const getFilledHours = (end, start) => {
     const hoursDiff = dayjs(end, 'HH:mm').diff(dayjs(start, 'HH:mm'), 'hour', true)
@@ -41,8 +50,13 @@ const getFilledHours = (end, start) => {
 }
 
 const timeslotSchema = object().shape({
-    start: string().required('Start time is required'),
-    end: string().required('End time is required'),
+    start_time: string().required('Start time is required'),
+    end_time: string().required('End time is required'),
+    driver_ids: array().of(string()).required('Driver is required'),
+    city_id: number().required('Required'),
+    is_individual: boolean().required('Required'),
+    is_recurring: boolean().required('Required'),
+    capacity: number().required('Required'),
     checked: boolean(),
     guarantee: number()
                 .when('checked', {
@@ -163,17 +177,20 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus }) => {
     )
 }
 
-const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}) => {
+const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour, city}) => {
     const { token } = useToken()
+    const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [hours, setHours] = useState({
-        start: record.start || hour,
-        end: record.end,
-        diff: record.start ? getFilledHours(record.end, record.start) : 4,
+        start: record.start_time ? convertToHourTz(record.start_time, scheduleFilter.tz) : hour,
+        end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : hour,
+        diff: record.duration ? record.duration : 4,
         status: {},
         guarantee: {
             amount: 0,
             active: false,
         },
+        driver_id: record.key,
+        current_day: dayjs(day).tz(scheduleFilter.tz).format('YYYY-MM-DD')
     })
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -240,16 +257,30 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
             {isModalOpen && (
                 <Formik
                     initialValues={{
-                        start: hours.start,
-                        end: hours.end,
+                        start_time: hours.start,
+                        end_time: hours.end,
                         checked: false,
                         guarantee: hours.guarantee.amount,
+                        driver_ids: [hours.driver_id],
+                        city_id: Number(city),
+                        is_recurring: false,
+                        capacity: 1,
+                        is_individual: true,
                     }}
                     validationSchema={timeslotSchema}
-                    onSubmit={(values, { setSubmitting }) => {
+                    onSubmit={async (values, { setSubmitting }) => {
+                        values.start_time = converToUTC( hours.current_day, values.start_time, scheduleFilter.tz)
+                        values.end_time = converToUTC( hours.current_day, values.end_time, scheduleFilter.tz)
+                        values.guarantee = Number(values.guarantee)
+                        !values.checked && delete values.guarantee
+                        delete values.checked
                         console.log(values)
-                        setSubmitting(false)
-                        setIsModalOpen(false)
+                        await createDayShift(values)
+                        .then(() => {
+                            setSubmitting(false)
+                            setIsModalOpen(false)
+                            message.success('Shift created successfully')
+                        })
                     }}
                 >
                     { props => (
@@ -273,13 +304,13 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour}
                                     style={{ width: '100%' }} 
                                     format="HH:mm" 
                                     //defaultValue={[dayjs(hour, 'HH:mm'), null]} 
-                                    defaultValue={[dayjs(props.values.start, 'HH:mm'), props.values.end ? dayjs(props.values.end, 'HH:mm') : null]} 
+                                    defaultValue={[dayjs(props.values.start_time, 'HH:mm'), props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : null]} 
                                     allowClear={false}
                                     disabled={[true, false]} 
                                     //onChange={handleHoursChange}
                                     onChange={(time, timeString) => {
-                                        props.setFieldValue('start', timeString[0])
-                                        props.setFieldValue('end', timeString[1])
+                                        props.setFieldValue('start_time', timeString[0])
+                                        props.setFieldValue('end_time', timeString[1])
                                         handleHoursChange(timeString)
                                     }}
                                     hideDisabledOptions

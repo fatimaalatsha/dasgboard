@@ -20,10 +20,9 @@ const queryHandler = (params) => ({ // Get table params
   day: params.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
 })
 
-const DayView = ({selectedDay, dummy, hours, tz }) => {
+const DayView = ({selectedDay, dummy, hours, tz, city }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
-  const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
   const { data, isLoading, error, refetch } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler(selectedDay), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz) // Call useSchedule hook
 
   const columns = [
@@ -53,7 +52,7 @@ const DayView = ({selectedDay, dummy, hours, tz }) => {
               onCell: (record) => {
                   return {
                       onMouseEnter: () => { // Mouse enter event
-                          setHoveredCell({ name: record.name, hour: hour })
+                          setHoveredCell({ key: record.key, hour: hour })
                       },
                       onMouseLeave: () => { // Mouse leave event
                           setHoveredCell(null)
@@ -62,12 +61,15 @@ const DayView = ({selectedDay, dummy, hours, tz }) => {
               },
               render: (text, record ) => {
                 for ( let item = 0; item < record[hour].length; item++ ) {
-                  if ( record[hour][item].start === hour && record.name === record[hour][item].name ) {
+                  if ( dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).format('HH:mm') === hour ) {
                     return (
                       <DayCellShift 
-                        isCellFilled={record[hour][item].start === hour && record.name === record[hour][item].name}
+                        isCellFilled={dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).format('HH:mm') === hour}
                         record={record[hour][item]}
+                        hour={hour}
+                        day={selectedDay}
                         setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                        city={city}
                       />
                     )
                   }
@@ -75,11 +77,12 @@ const DayView = ({selectedDay, dummy, hours, tz }) => {
     
                 return (
                   <DayCellShift 
-                    display={hoveredCell?.name === record.name && hoveredCell?.hour === hour} 
+                    display={hoveredCell?.key === record.key && hoveredCell?.hour === hour} 
                     record={record} 
                     hour={hour}
                     day={selectedDay}
                     setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                    city={city}
                   />
                 )
               },
@@ -91,7 +94,7 @@ const DayView = ({selectedDay, dummy, hours, tz }) => {
   ]
 
   error && <>Something went wrong...</>
-  //console.log('data', data)
+  
   return (
     <div style={{ position: 'relative'}}>
       <Table 

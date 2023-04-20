@@ -252,7 +252,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     values.guarantee = Number(values.guarantee)
                     !values.hasGuarantee && delete values.guarantee
                     delete values.hasGuarantee
-                    console.log(values, edit)
                     !edit ? // If edit mode is true, update shift
                     await createWeekShift(values)
                     .then(() => {
