@@ -36,7 +36,7 @@ import { object, string, number, boolean, array } from 'yup' // Import Yup for f
 import { useFilterStore } from '../../store'
 
 import Submit from '../forms/SubmitWrapper'
-import { converToUTC, createWeekShift as createDayShift } from '../../utils/schedule-status'
+import { convertToHourTz, converToUTC, createWeekShift as createDayShift } from '../../utils/schedule-status'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -181,9 +181,9 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
     const { token } = useToken()
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [hours, setHours] = useState({
-        start: record.start || hour,
-        end: record.end,
-        diff: record.start ? getFilledHours(record.end, record.start) : 4,
+        start: record.start_time ? convertToHourTz(record.start_time, scheduleFilter.tz) : hour,
+        end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : hour,
+        diff: record.duration ? record.duration : 4,
         status: {},
         guarantee: {
             amount: 0,
