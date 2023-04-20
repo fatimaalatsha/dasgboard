@@ -36,7 +36,7 @@ import { object, string, number, boolean, array } from 'yup' // Import Yup for f
 import { useFilterStore } from '../../store'
 
 import Submit from '../forms/SubmitWrapper'
-import { convertToHourTz, converToUTC, createWeekShift as createDayShift } from '../../utils/schedule-status'
+import { convertToHourTz, converToUTC, createWeekShift as createDayShift, updateWeekShift as updateDayShift } from '../../utils/schedule-status'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -275,11 +275,20 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                         !values.checked && delete values.guarantee
                         delete values.checked
                         console.log(values)
+                        !edit ?
                         await createDayShift(values)
                         .then(() => {
                             setSubmitting(false)
                             setIsModalOpen(false)
                             message.success('Shift created successfully')
+                        })
+                        :
+                        delete values.driver_ids 
+                        updateDayShift(values, record.id)
+                        .then(() => {
+                            setSubmitting(false)
+                            setIsModalOpen(false)
+                            message.success('Shift updated successfully')
                         })
                     }}
                 >
