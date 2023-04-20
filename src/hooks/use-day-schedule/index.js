@@ -37,7 +37,8 @@ const useDaySchedule = (url, timezone) => {
             const dayData = items.reduce((acc, name) => {
                 const keyName = `${name.first_name} ${name.last_name}`
                 const timeObj = dayHours.reduce((obj, time) => {
-                    obj[time] = []
+                    obj[time] = name.shifts.filter(item => time === dayjs(item.start_time).tz(timezone).format('HH:mm'))
+                    obj[time] = obj[time] ? obj[time] : []
                     return obj
                 }, {})
 
