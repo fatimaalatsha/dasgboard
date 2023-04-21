@@ -5,6 +5,7 @@ import useFetch from "../../hooks/use-fetch";
 import useNewFetch from "../../hooks/use-new-fetch";
 import CardStatistic from "../../components/CardStatistic";
 import ChartColumn from "../../components/ChartColumn";
+import DateRangePicker from "../../components/DateRangePicker";
 import qs from "qs";
 
 const { Title } = Typography;
@@ -185,7 +186,7 @@ const Reports = () => {
         />
       </div>
       <Divider orientation="left" />
-
+      <DateRangePicker/>
       <Space direction="horizontal" size={100} style={{ marginTop: "10px" }}>
         <Card
           title={<Title level={4}>Inter-city Reports</Title>}

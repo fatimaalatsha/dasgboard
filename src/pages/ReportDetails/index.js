@@ -1,15 +1,11 @@
 import { useState } from 'react';
 import { Typography, Card, Space, Divider, Row, Col, Table, Tag } from 'antd';
 import useNewFetch from '../../hooks/use-new-fetch';
-import qs from 'qs';
 import dayjs from 'dayjs';
 import { useParams } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom';
 
-import { BarChartOutlined } from '@ant-design/icons';
-import ChartBar from '../../components/ChartBar';
 import ChartColumn from '../../components/ChartColumn';
-import ChartPie from '../../components/ChartPie';
 import CardStatistic from '../../components/CardStatistic';
 const { Title, Text } = Typography;
 
