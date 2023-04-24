@@ -19,21 +19,28 @@ import dayjs from "dayjs";
 import { EditOutlined } from "@ant-design/icons";
 import ChartColumn from "../../components/ChartColumn";
 import CardStatistic from "../../components/CardStatistic";
+import DateRangePicker from "../../components/DateRangePicker";
 
 const { Title, Text } = Typography;
 
 const ConversionRatesByApplication = () => {
-  const [date, setDate] = useState({
-    filter: {
-      date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD"),
-      date_to: dayjs().format("YYYY-MM-DD"),
-    },
+
+  const [selectedDateRange, setSelectedDateRange] = useState({
+    date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD"),
+    date_to: dayjs().format("YYYY-MM-DD"),
   });
-
-  const [isEnable, setIsEnable] = useState(false); // Set isEnable state
-
+  const handleDateSelect = (dateRange) => {
+    setSelectedDateRange(
+      {
+        date_from: dayjs(dateRange[0]).format("YYYY-MM-DD"),
+        date_to: dayjs(dateRange[1]).format("YYYY-MM-DD"),
+      }
+    );
+    console.log("helo from mother2", dateRange);
+  };
+    console.log("helo from mother", selectedDateRange);
   const getUserParams = () => {
-    const { date_from, date_to } = date.filter;
+    const { date_from, date_to } = selectedDateRange;
     return qs.stringify(
       {
         date_from,
@@ -106,58 +113,10 @@ const ConversionRatesByApplication = () => {
           >
             <Title level={3}>Conversion Rates By Application Date</Title>
             <Space align="start" direction="horizontal">
-              <DatePicker.RangePicker
-                open={isEnable}
-                allowClear={true}
-                inputReadOnly={true}
-                size="small"
-                showToday={false}
-                bordered={true}
-                onChange={(dates) => {
-                  setDate({
-                    filter: {
-                      date_from: dates[0].format("YYYY-MM-DD"),
-                      date_to: dates[1].format("YYYY-MM-DD"),
-                    },
-                  });
-                }}
-                renderExtraFooter={() => {
-                  return (
-                    <Space
-                      direction="horizontal"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Button
-                        type="primary"
-                        onClick={() => {
-                          setIsEnable(false);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="primary"
-                        onClick={() => {
-                          setIsEnable(false);
-                        }}
-                      >
-                        OK
-                      </Button>
-                    </Space>
-                  );
-                }}
+              <DateRangePicker
+                value={selectedDateRange}
+                onDateSelect={handleDateSelect}
               />
-              <Tooltip title="Select Range">
-                <Button
-                  style={{ padding: 0, height: "auto" }}
-                  onClick={() => setIsEnable(true)}
-                  type="link"
-                  icon={<EditOutlined />}
-                />
-              </Tooltip>
             </Space>
           </Space>
         }
@@ -213,8 +172,8 @@ const ConversionRatesByApplication = () => {
                 <Text>
                   {" "}
                   Eligible Rate and Total Rate from{" "}
-                  <Text strong>{date.filter.date_from}</Text> to{" "}
-                  <Text strong>{date.filter.date_to} </Text>
+                  <Text strong>{selectedDateRange.date_from}</Text> to{" "}
+                  <Text strong>{selectedDateRange.date_to} </Text>
                 </Text>
               </Divider>
               <div style={{ height: "700px" }}>
@@ -249,8 +208,8 @@ const ConversionRatesByApplication = () => {
               <Divider orientation="left" plain>
                 <Text>
                   Eligible Rate and Active Rate Users from{" "}
-                  <Text strong>{date.filter.date_from}</Text> to{" "}
-                  <Text strong>{date.filter.date_to} </Text>per City{" "}
+                  <Text strong>{selectedDateRange.date_from}</Text> to{" "}
+                  <Text strong>{selectedDateRange.date_to} </Text>per City{" "}
                 </Text>
               </Divider>
               <Table

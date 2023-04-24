@@ -1,23 +1,9 @@
 import React, { useState } from "react";
 import { DatePicker, Space, Button } from "antd";
-
 import dayjs from "dayjs";
+
 const { RangePicker } = DatePicker;
-const onChange = (date) => {
-  if (date) {
-    console.log("Date: ", date);
-  } else {
-    console.log("Clear");
-  }
-};
-const onRangeChange = (dates, dateStrings) => {
-  if (dates) {
-    console.log("From: ", dates[0], ", to: ", dates[1]);
-    console.log("From: ", dateStrings[0], ", to: ", dateStrings[1]);
-  } else {
-    console.log("Clear");
-  }
-};
+
 const rangePresets = [
   {
     label: "Last 7 Days",
@@ -38,47 +24,68 @@ const rangePresets = [
 ];
 
 
+const DateRangePicker = ({ value, onDateSelect }) => {
+  const [isEnable, setIsEnable] = useState(false); // Set isEnable state
+  const [dateValue, setDateValue] = useState(value); // Set date value state
+  const dateFormat = "YYYY-MM-DD"; // Set date format
 
-const DateRangePicker = () => {
-
-const [isEnable, setIsEnable] = useState(false);
-
-
-    return(
-         <Space direction="vertical" size={12}>
-        <RangePicker presets={rangePresets} onChange={onRangeChange}
-            renderExtraFooter={() => {
-                return (
-                  <Space
-                    direction="horizontal"
-                    style={{
-                      display: "flex",
-                      justifyContent: "space-between",
-                    }}
-                  >
-                    <Button
-                      type="primary"
-                      onClick={() => {
-                        setIsEnable(false);
-                      }}
-                    >
-                      Cancel
-                    </Button>
-                    <Button
-                      type="primary"
-                      onClick={() => {
-                        setIsEnable(false);
-                      }}
-                    >
-                      OK
-                    </Button>
-                  </Space>
-                );
-            }}
-
-        />
-  </Space>
-    )
-   
+  const onRangeChange = (dates, dateStrings) => {
+    if (dates) {
+      setDateValue(dateStrings);
+      setIsEnable(false);
+      onDateSelect(dateStrings); // Call onDateSelect with the selected value
+    } else {
+      console.log("Clear");
+    }
+  };
+  return (
+    <Space direction="vertical" size={12}>
+      <RangePicker
+        presets={rangePresets}
+        autoFocus={isEnable}
+        allowClear={true}
+        open={isEnable}
+        size="small"
+        format={dateFormat}
+        onClick={() => {
+          setIsEnable(true);
+        }}
+        onChange={(dates, dateStrings) => {
+          onRangeChange(dates, dateStrings);
+        }}
+        renderExtraFooter={() => {
+          return (
+            <Space
+              direction="horizontal"
+              style={{
+                display: "flex",
+                justifyContent: "flex-end",
+                padding: "10px",
+              }}
+            >
+              <Button
+                type="primary"
+                ghost={true}
+                onClick={() => {
+                  setIsEnable(false);
+                }}
+              >
+                Cancel
+              </Button>
+              <Button
+                type="primary"
+                marginLeft="10px"
+                onClick={() => {
+                  setIsEnable(false);
+                }}
+              >
+                Apply
+              </Button>
+            </Space>
+          );
+        }}
+      />
+    </Space>
+  );
 };
 export default DateRangePicker;

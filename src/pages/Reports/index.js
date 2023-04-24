@@ -155,7 +155,10 @@ const Reports = () => {
             height={120}
             width={165}
             value={
-            data.meta.total_average_time? data.meta.total_average_time + " days" : "unvailable"}
+              data.meta.total_average_time
+                ? data.meta.total_average_time + " days"
+                : "unvailable"
+            }
             color="#3f8600"
             popInfo="Average time for applicants from sign up to Activation"
           />
@@ -190,7 +193,6 @@ const Reports = () => {
         />
       </div>
       <Divider orientation="left" />
-      <DateRangePicker />
       <Space direction="horizontal" size={100} style={{ marginTop: "10px" }}>
         <Card
           title={<Title level={4}>Inter-city Reports</Title>}
