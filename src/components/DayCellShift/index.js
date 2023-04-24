@@ -182,7 +182,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [hours, setHours] = useState({
         start: record.start_time ? convertToHourTz(record.start_time, scheduleFilter.tz) : hour,
-        end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : null,
+        end: record?.end_time ? convertToHourTz(record?.end_time, scheduleFilter.tz) : null,
         diff: record.duration ? record.duration : 4,
         status: {},
         guarantee: {
