@@ -69,6 +69,7 @@ const DayView = ({selectedDay, dummy, hours, tz, city }) => {
                         hour={hour}
                         day={selectedDay}
                         setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                        refetch={refetch}
                         city={city}
                       />
                     )
@@ -82,6 +83,7 @@ const DayView = ({selectedDay, dummy, hours, tz, city }) => {
                     hour={hour}
                     day={selectedDay}
                     setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                    refetch={refetch}
                     city={city}
                   />
                 )
