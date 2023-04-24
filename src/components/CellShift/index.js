@@ -27,6 +27,7 @@ import { useFilterStore } from '../../store'
 import Input from '../forms/InputWrapper' // Import InputWrapper component
 import Submit from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import { CitySelect } from '../CitySelect' // Import CitySelect component
+import DriverSelect from '../DriverSelect' // Import DriverSelect component
 import generateName from '../../utils/name-creation' // Dummy name array generator
 import { convertToHourTz, converToUTC, createWeekShift, updateWeekShift, deleteWeekShift } from '../../utils/schedule-status'
 
@@ -354,6 +355,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                     label: item,
                                   }))}
                                 />
+                                <DriverSelect />
                                 <Input 
                                     name="capacity" 
                                     prefix={<UserOutlined />} 
