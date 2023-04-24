@@ -20,13 +20,14 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean, array } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../store'
 
 import Input from '../forms/InputWrapper' // Import InputWrapper component
 import Submit from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import { CitySelect } from '../CitySelect' // Import CitySelect component
+import DriverSelect from '../DriverSelect' // Import DriverSelect component
 import generateName from '../../utils/name-creation' // Dummy name array generator
 import { convertToHourTz, converToUTC, createWeekShift, updateWeekShift, deleteWeekShift } from '../../utils/schedule-status'
 
@@ -52,6 +53,7 @@ const shiftSchema = object().shape({
         then: number().min(10, 'Guarantee amount must be greater than or equal to 10.').required('Required'),
         otherwise: number().notRequired()
     }),
+    driver_ids: array().of(number().nullable()).notRequired(),
 })
 
 const generateNames = (numNames) => {
@@ -241,6 +243,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     city_id: Number(city),
                     guarantee: shift.guarantee,
                     hasGuarantee: shift.hasGuarantee,
+                    'driver_ids': [],
                 }}
                 enableReinitialize
                 validationSchema={shiftSchema}
@@ -251,6 +254,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     values.capacity = Number(values.capacity)
                     values.guarantee = Number(values.guarantee)
                     !values.hasGuarantee && delete values.guarantee
+                    values.driver_ids.length === 0 && delete values.driver_ids
                     delete values.hasGuarantee
                     !edit ? // If edit mode is true, update shift
                     await createWeekShift(values)
@@ -341,18 +345,10 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                     style={{ width: '100%' }}
                                     disabled
                                 />
-                                <Select
-                                  mode="multiple"
-                                  placeholder="Drivers"
-                                  value={selectedItems}
-                                  onChange={setSelectedItems}
-                                  style={{
-                                    width: '100%',
-                                  }}
-                                  options={filteredOptions.map((item) => ({
-                                    value: item,
-                                    label: item,
-                                  }))}
+                                <DriverSelect 
+                                    onChange={(value) => {
+                                        props.setFieldValue('driver_ids', value)
+                                    }}
                                 />
                                 <Input 
                                     name="capacity" 

@@ -177,12 +177,12 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus }) => {
     )
 }
 
-const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour, city}) => {
+const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour, refetch, city}) => {
     const { token } = useToken()
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [hours, setHours] = useState({
         start: record.start_time ? convertToHourTz(record.start_time, scheduleFilter.tz) : hour,
-        end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : hour,
+        end: record?.end_time ? convertToHourTz(record?.end_time, scheduleFilter.tz) : null,
         diff: record.duration ? record.duration : 4,
         status: {},
         guarantee: {
@@ -234,6 +234,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         if (!edit) {
             setIsHovering(!isHovering)
         }
+        refetch()
     }
 
     return (
@@ -281,6 +282,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                             setSubmitting(false)
                             setIsModalOpen(false)
                             message.success('Shift created successfully')
+                            refetch()
                         })
                         :
                         delete values.driver_ids 
@@ -289,6 +291,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                             setSubmitting(false)
                             setIsModalOpen(false)
                             message.success('Shift updated successfully')
+                            refetch()
                         })
                     }}
                 >
