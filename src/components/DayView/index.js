@@ -1,4 +1,4 @@
-import { useState } from 'react' // Import React hooks
+import { useState, useEffect } from 'react' // Import React hooks
 import { Table, Typography } from 'antd' // Import Ant components
 import qs from 'qs' // Import qs library
 import dayjs from 'dayjs' // Import dayjs
@@ -23,7 +23,13 @@ const queryHandler = (params) => ({ // Get table params
 const DayView = ({selectedDay, dummy, hours, tz, city }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
-  const { data, isLoading, error, refetch } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler(selectedDay), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz) // Call useSchedule hook
+  const { data, isLoading, error, refetch } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler(selectedDay), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, ) // Call useSchedule hook
+  const controller = new AbortController()// Create a new AbortController
+  
+  useEffect(() => {
+    refetch()
+    return () => controller.abort()// Abort fetch on unmount
+  }, [selectedDay])
 
   const columns = [
     {
