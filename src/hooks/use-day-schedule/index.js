@@ -66,7 +66,7 @@ const useDaySchedule = (url, timezone) => {
                 error: true,
             })
         }
-    }, [url, timezone])
+    }, [url])
 
     const refetch = () => {// Create a new refetch function
         setFetchedData({// Set fetched data
@@ -80,7 +80,7 @@ const useDaySchedule = (url, timezone) => {
     useEffect(() => {// Create a new useEffect
         fetchData()// Call fetchData function
         return () => controller.abort()// Abort fetch on unmount
-    }, [url])
+    }, [])
 
     const { data, isLoading, error } = fetchedData// Destructure fetchedData
     return { data, isLoading, error, refetch } // Return data, isLoading, error and refetch
