@@ -32,12 +32,9 @@ const ConversionRatesByApplication = () => {
         date_to: dayjs(dateRange[1]).format("YYYY-MM-DD"),
       }
     );
-    console.log("helo from mother2", dateRange);
   };
-    console.log("helo from mother", selectedDateRange);
   const getUserParams = () => {
     const { date_from, date_to } = selectedDateRange;
-    console.log("helo from mother3", date_from, date_to);
     return qs.stringify(
       {
         date_from,

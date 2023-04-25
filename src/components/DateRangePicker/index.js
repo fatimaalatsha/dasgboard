@@ -32,7 +32,6 @@ const DateRangePicker = ({ value, onDateSelect }) => {
   const onRangeChange = (dates, dateStrings) => {
     if (dates) {
       setDateValue(dateStrings);
-      setIsEnable(false);
       onDateSelect(dateStrings); // Call onDateSelect with the selected value
     } else {
       console.log("Clear");
@@ -74,7 +73,6 @@ const DateRangePicker = ({ value, onDateSelect }) => {
               </Button>
               <Button
                 type="primary"
-                marginLeft="10px"
                 onClick={() => {
                   setIsEnable(false);
                 }}
