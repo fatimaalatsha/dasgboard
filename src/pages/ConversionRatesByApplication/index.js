@@ -3,9 +3,6 @@ import {
   Typography,
   Card,
   Space,
-  DatePicker,
-  Button,
-  Tooltip,
   Result,
   Row,
   Col,
@@ -16,7 +13,6 @@ import useNewFetch from "../../hooks/use-new-fetch";
 import qs from "qs";
 import dayjs from "dayjs";
 
-import { EditOutlined } from "@ant-design/icons";
 import ChartColumn from "../../components/ChartColumn";
 import CardStatistic from "../../components/CardStatistic";
 import DateRangePicker from "../../components/DateRangePicker";
@@ -41,6 +37,7 @@ const ConversionRatesByApplication = () => {
     console.log("helo from mother", selectedDateRange);
   const getUserParams = () => {
     const { date_from, date_to } = selectedDateRange;
+    console.log("helo from mother3", date_from, date_to);
     return qs.stringify(
       {
         date_from,
@@ -136,22 +133,24 @@ const ConversionRatesByApplication = () => {
               >
                 <CardStatistic
                   title="Total Applicants"
-                  width={165}
                   value={data.meta.total_applicants}
                   color="#3f8600"
                   popInfo="Total Number of leads shown"
+                  width={175}
                 />
                 <CardStatistic
                   title="Active"
                   value={data.meta.total_active}
                   color="#3f8600"
                   popInfo={` Number of Activated drivers in the selected period`}
+                  width={175}
                 />
                 <CardStatistic
                   title="Eligible"
                   value={data.meta.total_eligible}
                   color="#f50707"
                   popInfo="Number of Eligible Drivers "
+                  width={175}
                 />
                 <CardStatistic
                   title=" Active Rate Total"
@@ -159,6 +158,7 @@ const ConversionRatesByApplication = () => {
                   value={data.meta.total_rate + "%"}
                   color="#3f8600"
                   popInfo="Total Conversion Rate across all cities"
+                  width={175}
                 />
                 <CardStatistic
                   title=" Eligible Rate Total "
@@ -166,6 +166,7 @@ const ConversionRatesByApplication = () => {
                   value={data.meta.eligible_rate + "%"}
                   color="#3f8600"
                   popInfo="Eligible Rate across all cities"
+                  width={175}
                 />
               </Space>
               <Divider orientation="left" plain>

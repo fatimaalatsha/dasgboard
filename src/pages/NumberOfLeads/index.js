@@ -21,6 +21,7 @@ import qs from "qs";
 import { EditOutlined } from "@ant-design/icons";
 import ChartColumn from "../../components/ChartColumn";
 import CardStatistic from "../../components/CardStatistic";
+import DateRangePicker from "../../components/DateRangePicker";
 const { Title, Text } = Typography;
 
  
@@ -37,7 +38,7 @@ const NumberOfLeads = () => {
   const [isEnable, setIsEnable] = useState(false); // Set isEnable state
   const [dateset, setDateset] = useState("");
   const [showIneligible, setShowIneligible] = useState(false);
-
+  
 
   const { data, error, isLoading } = useNewFetch(
     `/v1/reports/drivers-status?${qs.stringify(getUserParams(reportFilter), {
@@ -128,11 +129,11 @@ const NumberOfLeads = () => {
   };
 
   const handleChangeDate = (dates) => {
-    const [dateFrom, dateTo] = dates.map((date) => date.format("YYYY-MM-DD"));
+    console.log(dates);
+    const dateFrom = dates[0];
+    const dateTo = dates[1];
     setReportFilter({ ...reportFilter, date_from: dateFrom, date_to: dateTo });
   };
-
-
 
   if (data.total === 0) {
     return (
@@ -202,8 +203,9 @@ const NumberOfLeads = () => {
     );
   }
   return (
-    <>
+    
       <Card
+        alignItems="center"
         title={
           <Space
             direction="horizontal"
@@ -212,52 +214,10 @@ const NumberOfLeads = () => {
           >
             <Title level={3}> Number Of Leads By Application Status</Title>
             <Space align="start" direction="horizontal">
-              <DatePicker.RangePicker
-                open={isEnable}
-                allowClear={true}
-                inputReadOnly={true}
-                size="small"
-                showToday={false}
-                bordered={true}
-                onChange={handleChangeDate}
-                renderExtraFooter={() => {
-                  return (
-                    <Space
-                      direction="horizontal"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Button
-                        type="primary"
-                        onClick={() => {
-                          setIsEnable(false);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="primary"
-                        onClick={() => {
-                          setIsEnable(false);
-                          setDateset(getUserParams());
-                        }}
-                      >
-                        OK
-                      </Button>
-                    </Space>
-                  );
-                }}
+              <DateRangePicker
+                value={reportFilter}
+                onDateSelect={handleChangeDate}
               />
-              <Tooltip title="Select Range">
-                <Button
-                  style={{ padding: 0, height: "auto" }}
-                  onClick={() => setIsEnable(true)}
-                  type="link"
-                  icon={<EditOutlined />}
-                />
-              </Tooltip>
             </Space>
           </Space>
         }
@@ -349,7 +309,9 @@ const NumberOfLeads = () => {
                   onReady={(plot) => {
                     plot.on("plot:click", (evt) => {
                       const { data } = evt;
-                      data && (data.data.status === "Ineligible" || data.data.status === "Do not contact (DNC)")
+                      data &&
+                      (data.data.status === "Ineligible" ||
+                        data.data.status === "Do not contact (DNC)")
                         ? navigate(
                             `/reports/conversion_rates/${data.data.status}`,
                             {
@@ -368,7 +330,6 @@ const NumberOfLeads = () => {
           </Col>
         </Row>
       </Card>
-    </>
   );
 };
 
