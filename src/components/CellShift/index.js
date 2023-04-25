@@ -10,7 +10,6 @@ import {
     Button, 
     TimePicker, 
     Checkbox, 
-    Select,
     Dropdown,
     Tooltip,
     message,
@@ -28,7 +27,6 @@ import Input from '../forms/InputWrapper' // Import InputWrapper component
 import Submit from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import { CitySelect } from '../CitySelect' // Import CitySelect component
 import DriverSelect from '../DriverSelect' // Import DriverSelect component
-import generateName from '../../utils/name-creation' // Dummy name array generator
 import { convertToHourTz, converToUTC, createWeekShift, updateWeekShift, deleteWeekShift } from '../../utils/schedule-status'
 
 dayjs.extend(utc)
@@ -36,11 +34,6 @@ dayjs.extend(timezone)
 
 const { useToken } = theme
 const { Text, Title, Link } = Typography
-
-const getFilledHours = (end, start) => {
-    const hoursDiff = dayjs(end, 'HH:mm').diff(dayjs(start, 'HH:mm'), 'hour', true)
-    return hoursDiff
-}
 
 const shiftSchema = object().shape({
     capacity: number().min(10, 'Shift driver capacity must be greater than or equal to 10.').required('Required'),
@@ -56,16 +49,6 @@ const shiftSchema = object().shape({
     driver_ids: array().of(number().nullable()).notRequired(),
 })
 
-const generateNames = (numNames) => {
-    const names = [];
-    for (let i = 0; i < numNames; i++) {
-      names.push(generateName());
-    }
-    return names;
-  }
-  
-const namesArray = generateNames(30)
-
 const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetch}) => {
 
     const items = [
@@ -80,16 +63,13 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetc
         {
             key: 2,
             label: 'Send to Draft',
+            disabled: true,
         },
         {
             key: 3,
             danger: true,
-            onClick: async () => {
-                await deleteWeekShift(record.shift_id)
-                .then((res) => {
-                    message.success(res.message)
-                    refetch()
-                })
+            onClick: () => {
+                handleDelete()
             },
             label: 'Delete',
         },
@@ -142,9 +122,7 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetc
 
 const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch, city}) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
-    const [selectedItems, setSelectedItems] = useState([]) // State to hold selected options
     const [edit, setEdit] = useState(false) // State to hold edit mode
-    const filteredOptions = namesArray.filter((o) => !selectedItems.includes(o)) // Options to show in the dropdown
     const { token } = useToken()
     const [hours, setHours] = useState({
         start: record.start,
@@ -183,7 +161,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     }
 
     const handleDelete = async () => {
-        await deleteWeekShift(Number(city))
+        await deleteWeekShift(shift.shift_id)
         .then((res) => {
             message.success(res.message)
             refetch()
@@ -356,8 +334,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                     placeholder="Driver Limit" 
                                     type="number" 
                                     min={10} max={999} 
-                                    defaultValue={props.values.capacity} 
-                                    //onChange={(event) => {setShift({...shift, capacity: event.target.value})}} 
+                                    defaultValue={props.values.capacity}  
                                     onChange={(e) => {
                                         props.setFieldValue('capacity', e.target.value)
                                         setShift({...shift, drivers: e.target.value})
