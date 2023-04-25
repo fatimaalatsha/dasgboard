@@ -136,6 +136,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus, refetch 
             {
                 key: 'unassign',
                 label: 'Unassign',
+                danger: true,
             }
         )},
         {
