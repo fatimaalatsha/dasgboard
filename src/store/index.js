@@ -73,7 +73,7 @@ let filterStore = (set) => ({
   },
   setReportFilter: (filter) =>
     set((state) => ({
-      reportFilter: { ...state.reportFilter, ...filter }
+      reportFilter: { ...state.reportFilter, ...filter },
     })),
 })
 

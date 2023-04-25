@@ -13,31 +13,28 @@ import {
 } from "antd";
 import useNewFetch from "../../hooks/use-new-fetch";
 import { useNavigate } from "react-router-dom";
-import { useFilterStore } from '../../store' // Import filter store
+import { useFilterStore } from "../../store"; // Import filter store
 
 import qs from "qs";
-
 
 import { EditOutlined } from "@ant-design/icons";
 import ChartColumn from "../../components/ChartColumn";
 import CardStatistic from "../../components/CardStatistic";
+import DateRangePicker from "../../components/DateRangePicker";
 const { Title, Text } = Typography;
 
- 
 const getUserParams = (filter) => ({
-  ...filter
-})
+  ...filter,
+});
 
 const NumberOfLeads = () => {
   const reportFilter = useFilterStore((state) => state.reportFilter); // Get filter from store
   const setReportFilter = useFilterStore((state) => state.setReportFilter); // Set filter to store
   const navigate = useNavigate();
 
-
   const [isEnable, setIsEnable] = useState(false); // Set isEnable state
   const [dateset, setDateset] = useState("");
   const [showIneligible, setShowIneligible] = useState(false);
-
 
   const { data, error, isLoading } = useNewFetch(
     `/v1/reports/drivers-status?${qs.stringify(getUserParams(reportFilter), {
@@ -128,11 +125,11 @@ const NumberOfLeads = () => {
   };
 
   const handleChangeDate = (dates) => {
-    const [dateFrom, dateTo] = dates.map((date) => date.format("YYYY-MM-DD"));
+    console.log(dates);
+    const dateFrom = dates[0];
+    const dateTo = dates[1];
     setReportFilter({ ...reportFilter, date_from: dateFrom, date_to: dateTo });
   };
-
-
 
   if (data.total === 0) {
     return (
@@ -202,173 +199,131 @@ const NumberOfLeads = () => {
     );
   }
   return (
-    <>
-      <Card
-        title={
-          <Space
-            direction="horizontal"
-            size="large"
-            style={{ display: "flex", justifyContent: "space-between" }}
-          >
-            <Title level={3}> Number Of Leads By Application Status</Title>
-            <Space align="start" direction="horizontal">
-              <DatePicker.RangePicker
-                open={isEnable}
-                allowClear={true}
-                inputReadOnly={true}
-                size="small"
-                showToday={false}
-                bordered={true}
-                onChange={handleChangeDate}
-                renderExtraFooter={() => {
-                  return (
-                    <Space
-                      direction="horizontal"
-                      style={{
-                        display: "flex",
-                        justifyContent: "space-between",
-                      }}
-                    >
-                      <Button
-                        type="primary"
-                        onClick={() => {
-                          setIsEnable(false);
-                        }}
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="primary"
-                        onClick={() => {
-                          setIsEnable(false);
-                          setDateset(getUserParams());
-                        }}
-                      >
-                        OK
-                      </Button>
-                    </Space>
-                  );
+    <Card
+      title={
+        <Space
+          direction="horizontal"
+          size="large"
+          style={{ display: "flex", justifyContent: "space-between" }}
+        >
+          <Title level={3}> Number Of Leads By Application Status</Title>
+          <Space align="start" direction="horizontal">
+            <DateRangePicker
+              value={reportFilter}
+              onDateSelect={handleChangeDate}
+            />
+          </Space>
+        </Space>
+      }
+    >
+      <Row align="middle">
+        <Col span={24}>
+          <Space direction="vertical" size="large" style={{ width: "100%" }}>
+            <Space
+              direction="horizontal"
+              size="small"
+              style={{
+                width: "100%",
+                display: "flex",
+                alignItems: "center",
+                justifyContent: "center",
+              }}
+            >
+              <CardStatistic
+                title="Total Applicants"
+                width={160}
+                height={120}
+                padding={5}
+                value={countAll(mapDataToObjects(data))}
+                color="#3f8600"
+                popInfo="Total Number of leads shown"
+              />
+              <CardStatistic
+                title="Active"
+                width={160}
+                height={120}
+                padding={5}
+                value={countActive(mapDataToObjects(data))}
+                color="#3f8600"
+                popInfo={` Number of Activated drivers in the selected period`}
+              />
+              <CardStatistic
+                title="Awaiting "
+                width={160}
+                height={120}
+                padding={5}
+                value={
+                  countAll(mapDataToObjects(data)) -
+                  countActive(mapDataToObjects(data)) -
+                  countIneligible(mapDataToObjects(data))
+                }
+                color="#1307f5"
+                popInfo="In the process to be activated"
+              />
+              <CardStatistic
+                title="Ineligible"
+                width={160}
+                height={120}
+                padding={5}
+                value={countIneligible(mapDataToObjects(data))}
+                color="#f50707"
+                popInfo="Number of drivers that are not eligible to be activated & DNC"
+              />
+              <CardStatistic
+                title="Conversion Rate Total"
+                width={180}
+                height={120}
+                value={conversionRateAll(mapDataToObjects(data)) + "%"}
+                color="#3f8600"
+                popInfo="Total Conversion Rate across all cities"
+              />
+              <CardStatistic
+                title="Conversion Rate Eligible"
+                width={180}
+                height={120}
+                value={conversionRateEligible(mapDataToObjects(data)) + "%"}
+                color="#3f8600"
+                popInfo="Eligible Conversion Rate across all cities"
+              />
+            </Space>
+            <Divider orientation="left" plain>
+              <Text>
+                {" "}
+                Number Of Leads Per City from{" "}
+                <Text strong>{reportFilter.date_from}</Text> to{" "}
+                <Text strong>{reportFilter.date_to} </Text>
+              </Text>
+            </Divider>
+            <div style={{ height: "700px" }}>
+              <ChartColumn
+                props={mapDataToObjects(data)}
+                xField="status"
+                yField="count"
+                seriesField="city"
+                onReady={(plot) => {
+                  plot.on("plot:click", (evt) => {
+                    const { data } = evt;
+                    data &&
+                    (data.data.status === "Ineligible" ||
+                      data.data.status === "Do not contact (DNC)")
+                      ? navigate(
+                          `/reports/conversion_rates/${data.data.status}`,
+                          {
+                            state: {
+                              date_from: reportFilter.date_from,
+                              date_to: reportFilter.date_to,
+                            },
+                          }
+                        )
+                      : setShowIneligible(false);
+                  });
                 }}
               />
-              <Tooltip title="Select Range">
-                <Button
-                  style={{ padding: 0, height: "auto" }}
-                  onClick={() => setIsEnable(true)}
-                  type="link"
-                  icon={<EditOutlined />}
-                />
-              </Tooltip>
-            </Space>
+            </div>
           </Space>
-        }
-      >
-        <Row align="middle">
-          <Col span={24}>
-            <Space direction="vertical" size="large" style={{ width: "100%" }}>
-              <Space
-                direction="horizontal"
-                size="small"
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  alignItems: "center",
-                  justifyContent: "center",
-                }}
-              >
-                <CardStatistic
-                  title="Total Applicants"
-                  width={160}
-                  height={120}
-                  padding={5}
-                  value={countAll(mapDataToObjects(data))}
-                  color="#3f8600"
-                  popInfo="Total Number of leads shown"
-                />
-                <CardStatistic
-                  title="Active"
-                  width={160}
-                  height={120}
-                  padding={5}
-                  value={countActive(mapDataToObjects(data))}
-                  color="#3f8600"
-                  popInfo={` Number of Activated drivers in the selected period`}
-                />
-                <CardStatistic
-                  title="Awaiting "
-                  width={160}
-                  height={120}
-                  padding={5}
-                  value={
-                    countAll(mapDataToObjects(data)) -
-                    countActive(mapDataToObjects(data)) -
-                    countIneligible(mapDataToObjects(data))
-                  }
-                  color="#1307f5"
-                  popInfo="In the process to be activated"
-                />
-                <CardStatistic
-                  title="Ineligible"
-                  width={160}
-                  height={120}
-                  padding={5}
-                  value={countIneligible(mapDataToObjects(data))}
-                  color="#f50707"
-                  popInfo="Number of drivers that are not eligible to be activated & DNC"
-                />
-                <CardStatistic
-                  title="Conversion Rate Total"
-                  width={180}
-                  height={120}
-                  value={conversionRateAll(mapDataToObjects(data)) + "%"}
-                  color="#3f8600"
-                  popInfo="Total Conversion Rate across all cities"
-                />
-                <CardStatistic
-                  title="Conversion Rate Eligible"
-                  width={180}
-                  height={120}
-                  value={conversionRateEligible(mapDataToObjects(data)) + "%"}
-                  color="#3f8600"
-                  popInfo="Eligible Conversion Rate across all cities"
-                />
-              </Space>
-              <Divider orientation="left" plain>
-                <Text>
-                  {" "}
-                  Number Of Leads Per City from{" "}
-                  <Text strong>{reportFilter.date_from}</Text> to{" "}
-                  <Text strong>{reportFilter.date_to} </Text>
-                </Text>
-              </Divider>
-              <div style={{ height: "700px" }}>
-                <ChartColumn
-                  props={mapDataToObjects(data)}
-                  xField="status"
-                  yField="count"
-                  seriesField="city"
-                  onReady={(plot) => {
-                    plot.on("plot:click", (evt) => {
-                      const { data } = evt;
-                      data && (data.data.status === "Ineligible" || data.data.status === "Do not contact (DNC)")
-                        ? navigate(
-                            `/reports/conversion_rates/${data.data.status}`,
-                            {
-                              state: {
-                                date_from: reportFilter.date_from,
-                                date_to: reportFilter.date_to,
-                              },
-                            }
-                          )
-                        : setShowIneligible(false);
-                    });
-                  }}
-                />
-              </div>
-            </Space>
-          </Col>
-        </Row>
-      </Card>
-    </>
+        </Col>
+      </Row>
+    </Card>
   );
 };
 
