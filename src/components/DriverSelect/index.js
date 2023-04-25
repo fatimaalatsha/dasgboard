@@ -10,9 +10,9 @@ import { useFilterStore } from '../../store'
 const DriverSelect = forwardRef((props, ref) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const city = Number(scheduleFilter.filter.city_id.replace('in|', ''))
-    const { data, error, isLoading } = useFetch('/v1/drivers?paginated=false&filter[status]=in|active&filter[city_id]=in|' + city)
+    const { data, error, isLoading } = useFetch('/v1/drivers?paginated=false&filter[status]=in|active&filter[city_id]=in|' + city) // Fetches active drivers in selected city
     
-    const drivers = data?.data?.map((driver) => ({
+    const drivers = data?.data?.map((driver) => ({ // transforms data into format for select dropdown
         label: `${driver.first_name} ${driver.last_name}`,
         value: driver.user_id
     }))
