@@ -36,18 +36,19 @@ import { object, string, number, boolean, array } from 'yup' // Import Yup for f
 import { useFilterStore } from '../../store'
 
 import Submit from '../forms/SubmitWrapper'
-import { convertToHourTz, converToUTC, createWeekShift as createDayShift, updateWeekShift as updateDayShift } from '../../utils/schedule-status'
+import { 
+    convertToHourTz, 
+    converToUTC, 
+    createWeekShift as createDayShift, 
+    updateWeekShift as updateDayShift,
+    deleteWeekShift as deleteDayShift,
+} from '../../utils/schedule-status'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const { useToken } = theme
 const { Text, Link } = Typography
-
-const getFilledHours = (end, start) => {
-    const hoursDiff = dayjs(end, 'HH:mm').diff(dayjs(start, 'HH:mm'), 'hour', true)
-    return hoursDiff
-}
 
 const timeslotSchema = object().shape({
     start_time: string().required('Start time is required'),
@@ -65,29 +66,6 @@ const timeslotSchema = object().shape({
                     otherwise: number().notRequired()
                 }),
 })
-
-const items = [
-    {
-        key: 'edit',
-        label: 'Edit',
-    },
-    {
-        key: 'no-show',
-        label: 'No Show',
-    },
-    {
-        key: 'early-in',
-        label: 'Early In',
-    },
-    {
-        key: 'early-out',
-        label: 'Early Out',
-    },
-    {
-        key: 'late-out',
-        label: 'Late Out',
-    },
-]
 
 const CardStatus = ({ status, guarantee }) => {
     return (
@@ -131,17 +109,64 @@ const CardStatus = ({ status, guarantee }) => {
     )
 }
 
-const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus }) => {
+const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus, refetch }) => {
 
-    const onClick = ({ key }) => {
-        if (key === 'edit') {
-            handleEdit()
-            setEdit(true)
-        }
-        if (key !== 'edit') {
-            setStatus(key)
-        }
-    }
+    const items = [
+        {
+            key: 'edit',
+            label: 'Edit',
+            onClick: () => {
+                handleEdit()
+                setEdit(true)
+            },
+            disabled: !record?.is_individual,
+        },
+        {...( record.is_individual ? 
+            {
+                key: 'delete',
+                label: 'Delete',
+                danger: true,
+                onClick: async () => {
+                    await deleteDayShift(record.id)
+                    message.success('Shift deleted')
+                    refetch()
+                },
+            }
+            :
+            {
+                key: 'unassign',
+                label: 'Unassign',
+            }
+        )},
+        {
+            key: 'no-show',
+            label: 'No Show',
+            onClick: () => {
+                setStatus('no-show')
+            },
+        },
+        {
+            key: 'early-in',
+            label: 'Early In',
+            onClick: () => {
+                setStatus('early-in')
+            },
+        },
+        {
+            key: 'early-out',
+            label: 'Early Out',
+            onClick: () => {
+                setStatus('early-out')
+            },
+        },
+        {
+            key: 'late-out',
+            label: 'Late Out',
+            onClick: () => {
+                setStatus('late-out')
+            },
+        },
+    ]
 
     return (
         <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, height: '100%' }}>
@@ -150,7 +175,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus }) => {
                 bodyStyle={{ height: '100%', padding: 4 }}
             >
                 <Space direction="horizontal" style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'flex-start' }}>
-                    <Dropdown menu={{items, onClick}} >
+                    <Dropdown menu={{items}} >
                         <Link onClick={(e) => e.preventDefault()}>
                         <Space>
                             <MoreOutlined />
@@ -186,11 +211,13 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         diff: record.duration ? record.duration : 4,
         status: {},
         guarantee: {
-            amount: 0,
+            amount: record.guarantee ? record.guarantee : 0,
             active: false,
         },
         driver_id: record.key,
-        current_day: dayjs(day).tz(scheduleFilter.tz).format('YYYY-MM-DD')
+        current_day: dayjs(day).tz(scheduleFilter.tz).format('YYYY-MM-DD'),
+        is_individual: record.is_individual,
+        id: record.id,
     })
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -241,7 +268,14 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         <>
         <div className="container" style={{ minHeight: 24}}>
             { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={hours} handleEdit={handleClick} setEdit={setEdit} setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} />
+                    <ShiftCard 
+                        cardStyle={cardStyleConfig} 
+                        record={hours} 
+                        handleEdit={handleClick} 
+                        setEdit={setEdit} 
+                        setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
+                        refetch={refetch}
+                    />
             ) : (
             <>
                 { display && (
@@ -250,7 +284,14 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                     </Tooltip>
                 )}
                 { isHovering && (
-                    <ShiftCard cardStyle={cardStyleConfig} record={hours} handleEdit={handleClick} setEdit={setEdit} setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} />
+                    <ShiftCard 
+                        cardStyle={cardStyleConfig} 
+                        record={hours} 
+                        handleEdit={handleClick} 
+                        setEdit={setEdit} 
+                        setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
+                        refetch={refetch}
+                    />
                 )}
             </>
             )}
