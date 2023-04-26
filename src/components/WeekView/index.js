@@ -24,6 +24,7 @@ const queryHandler = (params) => ({ // Get table params
 })
 
 const WeekView = ({selectedWeek, dummy, days, tz, city }) => {
+    dayjs.tz.setDefault(tz)
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
     const filters = {
@@ -95,11 +96,11 @@ const WeekView = ({selectedWeek, dummy, days, tz, city }) => {
         },
         render: (text, record ) => {
             for ( let item = 0; item < record[day].length; item++ ) {
-                if (dayjs(record[day][item]?.start_time).tz(scheduleFilter.tz).format('dddd').toLowerCase() === day && dayjs(record[day][item]?.start_time).tz(scheduleFilter.tz).format('HH:mm') === record.time) {
+                if (dayjs(record[day][item]?.start_time).tz().format('dddd').toLowerCase() === day && dayjs(record[day][item]?.start_time).tz().format('HH:mm') === record.time) {
                     return (
                         <CellShift 
                             key={item} 
-                            isCellFilled={dayjs(record[day][item]?.start_time).tz(scheduleFilter.tz).format('dddd').toLowerCase() === day && dayjs(record[day][item]?.start_time).tz(scheduleFilter.tz).format('HH:mm') === record.time} 
+                            isCellFilled={dayjs(record[day][item]?.start_time).tz().format('dddd').toLowerCase() === day && dayjs(record[day][item]?.start_time).tz().format('HH:mm') === record.time} 
                             record={record[day][item]} 
                             setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
                             selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}

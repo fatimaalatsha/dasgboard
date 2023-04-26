@@ -11,6 +11,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const useDaySchedule = (url, timezone) => {
+    dayjs.tz.setDefault(timezone)
     const [fetchedData, setFetchedData] = useState({// Set initia fetch state to empty
         data: [],
         isLoading: true,
@@ -37,7 +38,7 @@ const useDaySchedule = (url, timezone) => {
             const dayData = items.reduce((acc, name) => {
                 const keyName = `${name.first_name} ${name.last_name}`
                 const timeObj = dayHours.reduce((obj, time) => {
-                    obj[time] = name.shifts.filter(item => time === dayjs(item.start_time).tz(timezone).format('HH:mm'))
+                    obj[time] = name.shifts.filter(item => time === dayjs(item.start_time).tz().format('HH:mm'))
                     obj[time] = obj[time] ? obj[time] : []
                     return obj
                 }, {})
