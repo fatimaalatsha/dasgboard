@@ -11,6 +11,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const useWeekSchedule = (url, timezone) => {
+    dayjs.tz.setDefault(timezone)
     const [fetchedData, setFetchedData] = useState({// Set initia fetch state to empty
         data: [],
         isLoading: true,
@@ -39,7 +40,7 @@ const useWeekSchedule = (url, timezone) => {
             const { data } = await response.data// Get data from response
             const weekData = weekHours.reduce((acc, time) => {
                 const dayObj = weekDays.reduce((obj, day) => {
-                    obj[day] = data.filter(item => day === dayjs(item.start_time).tz(timezone).format('dddd').toLowerCase() && time === dayjs(item.start_time).tz(timezone).format('HH:mm'))
+                    obj[day] = data.filter(item => day === dayjs(item.start_time).tz().format('dddd').toLowerCase() && time === dayjs(item.start_time).tz().format('HH:mm'))
                     obj[day] = obj[day] ? obj[day] : []
                     return obj
                 }, {})
