@@ -29,8 +29,8 @@ import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string } from 'yup';
-import API from '../../api/BaseUrl' // Import API base URL
-
+import dayjs from 'dayjs'
+import API from '../../api/NewUrl' // Import API base URL
 
 import EditableText from '../../components/EditableText' // Import editbale string component
 import EditableDate from '../../components/EditableDate' // Import editable date component
@@ -45,11 +45,11 @@ import DriverDetailsNotes from '../../components/DriverDetailsNotes' // Import D
 import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
 import SelectWrapper from '../../components/forms/SelectWrapper' // Import SelectWrapper component
 
-import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
+import useFetch from '../../hooks/use-new-fetch' // Import useFetch custom hook
 import { isAllApproved, deleteAdditionalDoc, enableAdditionalDocs, disableAdditionalDocs, readyToDrive } from '../../utils/doc-status' // Import isAllApproved function
 import { updateStatus, notifyDriver,updateApplicationStatus, updateDriver } from '../../utils/driver-status' // Import delete driver method
 import { getFromS3 } from '../../utils/s3-storage' // Import getFromS3 method
-import {app_status, exludeStatuses} from '../../assets/data/app_status' // Import application status object data
+import { app_status, exludeStatuses } from '../../assets/data/app_status' // Import application status object data
 
 
 const { confirm } = Modal // Destructure config from Modal
@@ -66,7 +66,8 @@ const appStatusSchema = object().shape({
 })
 
 const SelectFeeder = (props) => {
-  const { data, isLoading, error } = useFetch(`/v1/cities`)// Call useFetch custom hook
+  const { data, isLoading, error } = useFetch(`/v1/cities?paginated=false&filter[status]=in|active`)// Call useFetch custom hook
+
   if (isLoading) {
     return <>Loading...</>
   }
@@ -75,7 +76,21 @@ const SelectFeeder = (props) => {
     return <>Something went wrong</>
   }
   
-  return  <EditableSelect updateCallback={props.updateCallback} value={props.value} options={data.items} name="city_id" />
+  return  <EditableSelect updateCallback={props.updateCallback} value={props.value} options={data.data} name="city_id" />
+}
+
+const LicenseTypeFeeder = (props) => {
+  const { data, isLoading, error } = useFetch(`/v1/licenses-types?paginated=false&filter[province_id]=in|${props.province}`)// Call useFetch custom hook
+
+  if (isLoading) {
+    return <>Loading...</>
+  }
+  
+  if (error) {
+    return <>Something went wrong</>
+  }
+  
+  return  <EditableSelect updateCallback={props.updateCallback} value={props.value} options={data.data} name="license_type_id" />
 }
 
 const ProfileAvatar = ({objectKey, driverName, driverid, picture, refetch}) => {
@@ -185,7 +200,7 @@ const DriverDetails = () => {
   pathArray.pop()
   const parentUrl = pathArray.join('/')
   const navigate = useNavigate() // Navigate to other pages
-  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}`)// Call useFetch custom hook
+  const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/${id}`)// Call useFetch custom hook
   const [loading, setLoading] = useState(false)// Set loading state
   const [open, setOpen] = useState(false)// Set custom message state
   const [documentDrawer, setDocumentDrawer] = useState(false)// Set document drawer state
@@ -197,17 +212,21 @@ const DriverDetails = () => {
   }
 
   const updateText = async (payload) => { // Update text method
+    payload.city_id && (payload.city_id = Number(payload.city_id))
+    payload.birth_date && (payload.birth_date = dayjs(payload.birth_date).format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'))
+    payload.reviewed_at && (payload.reviewed_at = dayjs(payload.reviewed_at).format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'))
+    console.log(payload)
     try {
         const auth = await Auth.currentSession()// Get current session
         const token = auth.getAccessToken().getJwtToken()// Get token from session
         const options = { // Set options for fetch
             headers: {
                 'Authorization': token,
-                ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+                ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
             }
         }
         const body = payload
-        const response = await API.put(`/v1/drivers/cc/${id}`, body, options)
+        const response = await API.put(`/v1/drivers/${id}`, body, options)
         const data = await response.data
         if(data) {
             refetch() // Refetch data
@@ -405,6 +424,9 @@ const showConfirm = (status) => {
                 <Descriptions.Item label="Licence Number">
                   <EditableText name='license_number' value={data.license_number} updateCallback={updateText} />
                 </Descriptions.Item>
+                <Descriptions.Item label="Licence Type">
+                  <LicenseTypeFeeder name='license_type_id' province={data.city?.province_id} value={data.license?.name} updateCallback={updateText} />
+                </Descriptions.Item>
                 <Descriptions.Item label="City">
                   <SelectFeeder value={data.city?.name} updateCallback={updateText} />
                 </Descriptions.Item>
@@ -412,16 +434,17 @@ const showConfirm = (status) => {
                   <EditableText name='address' value={data.address} updateCallback={updateText} />
                 </Descriptions.Item>
                 <Descriptions.Item label="Date of Birth">
-                  <EditableDate name='birth_date' value={data.date_birth} updateCallback={updateText} />
+                  <EditableDate name='birth_date' value={data.birth_date} updateCallback={updateText} />
                 </Descriptions.Item>
                 <Descriptions.Item label="HST Number">
                   <EditableText name='hst_number' value={data.hst_number} updateCallback={updateText} />
                 </Descriptions.Item>
                 <Descriptions.Item label="Last Reviewed">
-                  <EditableDate name='reviewed_at' value={data.reviewed_at?.split('T')[0]} updateCallback={updateText} />
+                  {/* <EditableDate name='reviewed_at' value={data.reviewed_at.split('T')[0]} updateCallback={updateText} /> */}
+                  <Text name='reviewed_at'>{data.reviewed_at?.split('T')[0]}</Text> 
               </Descriptions.Item>
               <Descriptions.Item label="Application Date">
-                  <Text name='created_at'>{data.created_at.split('T')[0]}</Text> 
+                  <Text name='created_at'>{data.created_at?.split('T')[0]}</Text> 
                 </Descriptions.Item>
             </Descriptions>
           </PageHeader>
@@ -431,7 +454,7 @@ const showConfirm = (status) => {
                 <Title level={4} style={{ marginBottom: 26.6 }}>Driver Documents</Title>
               </Divider>
             </Col>
-            <EnableAdditionalDocs status={data.additional_docs} id={id} refetch={refetch} />
+            <EnableAdditionalDocs status={data.extra_docs} id={id} refetch={refetch} />
           </Row>
             <Space 
               style={{
