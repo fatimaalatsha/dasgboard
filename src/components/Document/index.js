@@ -108,7 +108,7 @@ const Document = (props) => {
     }
     
     const showUpload = () => { // Show upload feature
-        return props.status === 'missing' && props.app_status === 'Existing Driver'
+        return props.status === 'missing'
     }
 
     return (

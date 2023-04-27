@@ -4,7 +4,7 @@ import API from '../../api/BaseUrl' // Import API base URL
 import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
 import Document from '../Document' // Import Document component
 
-const DriverDocument = ({ id, sub, app_status }) => {
+const DriverDocument = ({ id, sub }) => {
   const { data, isLoading, error, refetch } = useFetch(`/v1/documents/cc/drivers/${id}`)// Call useFetch custom hook
 
   if (isLoading) {
@@ -43,7 +43,7 @@ const DriverDocument = ({ id, sub, app_status }) => {
     <>
     {
       data.items.map((item, index) => (
-        <Document key={index} data={item} sub={sub} app_status={app_status} updateText={updateText} refetch={refetch} />
+        <Document key={index} data={item} sub={sub} updateText={updateText} refetch={refetch} />
       ))
     }
     </>
