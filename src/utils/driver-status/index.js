@@ -142,4 +142,24 @@ const archiveDriverNotes = async (noteId) => { // Archive driver notes
     }
 }
 
-export { deleteDriver, updateStatus, notifyDriver, updateApplicationStatus, updateDriver, createDriverNotes, archiveDriverNotes }
+const getActiveVehicleId = async (driverId) => { // Get active vehicle id
+    try {
+        const auth = await Auth.currentSession()// Get current session
+        const token = auth.getAccessToken().getJwtToken()// Get token from session
+        const options = { // Set options for endpoint
+            headers: {
+                'Authorization': token,
+                ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
+            }
+        }
+        const response = await NEW_API.get(`/v1/drivers/${driverId}/vehicles`, options)
+        const data = await response.data
+        const vehicleid = data.items.find(item => item.status === 'active').vehicle_id
+        return vehicleid
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+export { deleteDriver, updateStatus, notifyDriver, updateApplicationStatus, updateDriver, createDriverNotes, archiveDriverNotes, getActiveVehicleId }

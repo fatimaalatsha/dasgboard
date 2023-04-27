@@ -1,12 +1,16 @@
 import { useState } from "react"
 import { Button, Drawer, Upload, message } from "antd"
 import { UploadOutlined } from '@ant-design/icons'
+import { useParams } from "react-router-dom"
 
 import { putToS3 } from "../../utils/s3-storage"
+import { getActiveVehicleId } from "../../utils/driver-status"
 
 const UploadDriverDoc = (props) => {
+    const { id } = useParams(); // Get id from url
     const [open, setOpen] = useState(false)
     const [file, setFile] = useState(null)
+    const [isLoading, setIsLoading] = useState(false)
 
     const uploadConfig = {
         maxCount: 1,
@@ -58,8 +62,52 @@ const UploadDriverDoc = (props) => {
         return false
     }
 
-    const handleUpload = () => {
-        console.log(file)
+    const handleUpload = async () => {
+        setIsLoading(true)
+        const folder = await getFolder(props.name)
+        await putToS3(props.sub, file, folder, 'document')
+        .then((response) => {
+            message.success(`File uploaded successfully`)
+            setIsLoading(false)
+            console.log(response)
+            props.refetch()
+            // TODO - Add file to database
+            // TODO - Add DL validation
+        })
+        .catch((error) => {
+            message.error(`Error uploading file`)
+            console.log(error)
+        })
+    }
+
+    const getVehicleId = async () => {
+        const vehicleID = await getActiveVehicleId(id)
+        return vehicleID
+    }
+
+    const getFolder = async (name) => {
+        let vehicleid = null
+        switch (name) {
+            case 'background':
+                return 'Background'
+            case 'work_permit':
+                return 'Work'
+            case 'driver_license':
+                return 'License'
+            case 'abstract':
+                return 'Abstract'
+            case 'insurance':
+                vehicleid = await getVehicleId()
+                return `Vehicle/${vehicleid}/Insurance`
+            case 'safety':
+                vehicleid = await getVehicleId()
+                return `Vehicle/${vehicleid}/Safety`
+            case 'ownership':
+                vehicleid = await getVehicleId()
+                return `Vehicle/${vehicleid}/Owner`
+            default:
+                return 'other'
+        }
     }
 
     return (
@@ -74,13 +122,14 @@ const UploadDriverDoc = (props) => {
                 <Button 
                     type="primary" 
                     onClick={handleUpload}
-                    disabled={!file}
+                    disabled={!file || isLoading}
                     style={{
                         marginTop: 16,
                     }}
                     block
+                    loading={isLoading}
                 >
-                    Upload File
+                    { isLoading ? 'Uploading' : 'Upload File' }
                 </Button>
             </Drawer>
         </>

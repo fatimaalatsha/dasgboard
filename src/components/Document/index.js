@@ -47,7 +47,6 @@ const RejectFeeder = ({name}) => {
 }
 
 const Document = (props) => {
-    console.log("Document Props: ",props)
     const [isModalVisible, setIsModalVisible] = useState(false) // Set modal state to false
     const [documentStatus, setDocumentStatus] = useState({// Set document status state manager
         status: props.status,
@@ -119,7 +118,14 @@ const Document = (props) => {
             header={props.document?.title}
             extra={
                 <Space>
-                    {showUpload() && <UploadDriverDoc title={props.document?.title}/>}
+                    { showUpload() && (
+                        <UploadDriverDoc 
+                            title={props.document?.title} 
+                            name={props.document?.name} 
+                            sub={props.sub} 
+                            refetch={() => props.refetch()}
+                        />
+                    )}
                     <Tag {...tagConfig}>
                         {documentStatus.status}
                     </Tag>
