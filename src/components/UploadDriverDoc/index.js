@@ -74,7 +74,6 @@ const UploadDriverDoc = (props) => {
             console.log(response)
             props.refetch()
             // TODO - Add file to database
-            // TODO - Add DL validation
         })
         .catch((error) => {
             message.error(`Error uploading file`)
