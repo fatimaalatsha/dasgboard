@@ -123,6 +123,7 @@ const Document = (props) => {
                             title={props.document?.title} 
                             name={props.document?.name} 
                             sub={props.sub} 
+                            doc_id={props.document?.id}
                             refetch={() => props.refetch()}
                         />
                     )}
