@@ -22,6 +22,7 @@ import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper compo
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import EditableDate from '../../components/EditableDate' // Import Driver contact information component
 import API from '../../api/BaseUrl' // Import API base URL
+import UploadDriverDoc from '../UploadDriverDoc' // Import allowed upload on existing driver component
 
 const { Panel } = Collapse // Destructure Panel from Collapse
 const { Text } = Typography // Destructure Text from Typography
@@ -46,6 +47,7 @@ const RejectFeeder = ({name}) => {
 }
 
 const Document = (props) => {
+    console.log("Document Props: ",props)
     const [isModalVisible, setIsModalVisible] = useState(false) // Set modal state to false
     const [documentStatus, setDocumentStatus] = useState({// Set document status state manager
         status: props.status,
@@ -106,6 +108,9 @@ const Document = (props) => {
         setDocumentStatus({...documentStatus, active: key})
     }
     
+    const showUpload = () => { // Show upload feature
+        return props.status === 'missing' && props.app_status === 'Existing Driver'
+    }
 
     return (
         <>
@@ -113,9 +118,12 @@ const Document = (props) => {
             <Panel 
             header={props.document?.title}
             extra={
-                <Tag {...tagConfig}>
-                    {documentStatus.status}
-                </Tag>
+                <Space>
+                    {showUpload() && <UploadDriverDoc title={props.document?.title}/>}
+                    <Tag {...tagConfig}>
+                        {documentStatus.status}
+                    </Tag>
+                </Space>
             }
             >
                 <Row gutter={16}>

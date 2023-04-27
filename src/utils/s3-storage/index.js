@@ -1,6 +1,7 @@
 import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
 import { S3Client, GetObjectCommand , PutObjectCommand } from '@aws-sdk/client-s3'// Import S3Client and GetObjectCommand from @aws-sdk/client-s3
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner" // Import presigner
+import dayjs from 'dayjs'// Import dayjs
 
 const getFromS3 = async (key) => {
     try {
@@ -63,7 +64,15 @@ const uint8ArrayToS3 = async (sub, file) => {
     }
 }
 
+const putToS3 = async (sub, file, folder, label) => {
+    const today = dayjs().format('YYYY-MM-DD')
+    const fileType = file.name.match(/\.([^.]+)$/)[1]
+    const fileSize = file.size
+    const fileName = `${label}_${today}.${fileType.toLowerCase()}`
+    const objectKey = `${folder}/${fileName}` // Set object key
+}
+
     
 
 
-export { getFromS3, uint8ArrayToS3 }
+export { getFromS3, uint8ArrayToS3, putToS3 }

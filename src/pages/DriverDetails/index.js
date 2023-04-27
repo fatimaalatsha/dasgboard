@@ -455,7 +455,7 @@ const showConfirm = (status) => {
               <Button type="primary" icon={<SendOutlined />} loading={loading} onClick={() => setOpen(true)}>Notify Driver</Button>
             </Space>
           </Space>
-            <DriverDocument id={id} sub={data.sub_id} />
+            <DriverDocument id={id} sub={data.sub_id} app_status={data.application_status} />
             <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
             <DriverVehicle id={id} sub={data.sub_id} />
             <Divider orientation="left"><Title level={4}>Driver Trainings</Title></Divider>
