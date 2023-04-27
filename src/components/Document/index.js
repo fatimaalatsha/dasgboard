@@ -22,6 +22,7 @@ import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper compo
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import EditableDate from '../../components/EditableDate' // Import Driver contact information component
 import API from '../../api/BaseUrl' // Import API base URL
+import UploadDriverDoc from '../UploadDriverDoc' // Import allowed upload on existing driver component
 
 const { Panel } = Collapse // Destructure Panel from Collapse
 const { Text } = Typography // Destructure Text from Typography
@@ -106,6 +107,9 @@ const Document = (props) => {
         setDocumentStatus({...documentStatus, active: key})
     }
     
+    const showUpload = () => { // Show upload feature
+        return props.status === 'missing' && props.app_status === 'Existing Driver'
+    }
 
     return (
         <>
@@ -113,9 +117,19 @@ const Document = (props) => {
             <Panel 
             header={props.document?.title}
             extra={
-                <Tag {...tagConfig}>
-                    {documentStatus.status}
-                </Tag>
+                <Space>
+                    { showUpload() && (
+                        <UploadDriverDoc 
+                            title={props.document?.title} 
+                            name={props.document?.name} 
+                            sub={props.sub} 
+                            refetch={() => props.refetch()}
+                        />
+                    )}
+                    <Tag {...tagConfig}>
+                        {documentStatus.status}
+                    </Tag>
+                </Space>
             }
             >
                 <Row gutter={16}>
