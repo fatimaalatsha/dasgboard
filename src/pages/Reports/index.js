@@ -1,11 +1,9 @@
 import { Card, Table, Typography, Space, Divider } from "antd";
 import { AreaChartOutlined } from "@ant-design/icons";
 import { useNavigate } from "react-router-dom";
-import useFetch from "../../hooks/use-fetch";
 import useNewFetch from "../../hooks/use-new-fetch";
 import CardStatistic from "../../components/CardStatistic";
 import ChartColumn from "../../components/ChartColumn";
-import qs from "qs";
 
 const { Title } = Typography;
 
@@ -55,10 +53,7 @@ const Reports = () => {
     navigate(`/reports/${record.key}`);
   };
 
-  const { data, error, isLoading } = useNewFetch(
-    `/v1/reports/applicants-overview`
-  );
-
+  const { data, error, isLoading } = useNewFetch(`/v1/reports/applicants-overview`);
   const processData = (data) => {
     const result = [];
     // loop over the items array
@@ -154,6 +149,18 @@ const Reports = () => {
             color="#3f8600"
             popInfo="Total number of ineligible applicants "
           />
+          <CardStatistic
+            title="Average Activation Time"
+            height={120}
+            width={165}
+            value={
+              data.meta.total_average_time
+                ? data.meta.total_average_time + " days"
+                : "unvailable"
+            }
+            color="#3f8600"
+            popInfo="Average time for applicants from sign up to Activation"
+          />
         </Space>
       </Space>
       <Divider orientation="left">Number of Leads Per City </Divider>
@@ -172,7 +179,7 @@ const Reports = () => {
               opacity: 1,
             },
             content: (item) => {
-              return item.count ? `${item.count}` : "";
+              return item.count> 10 ? `${item.count}` : "";
             },
             rotate: false,
             layout: [
@@ -185,7 +192,6 @@ const Reports = () => {
         />
       </div>
       <Divider orientation="left" />
-
       <Space direction="horizontal" size={100} style={{ marginTop: "10px" }}>
         <Card
           title={<Title level={4}>Inter-city Reports</Title>}
