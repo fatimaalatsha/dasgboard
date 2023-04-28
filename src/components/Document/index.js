@@ -11,10 +11,12 @@ import {
     Empty,
     Input,
     Space,
+    Result
 } from 'antd' // Import antd components
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form , Field} from 'formik' // Import Formik form components
 import { object, string } from 'yup'
+import { ErrorBoundary } from 'react-error-boundary'
 
 import DocumentList from "../../hoc/DocumentList" // import DocumentList HOC
 import DocViewer from '../DocViewer' // import document viewer component
@@ -133,6 +135,7 @@ const Document = (props) => {
                 </Space>
             }
             >
+                <ErrorBoundary fallback={<Result status="500" title="Unexpected Error" subTitle="Sorry, something went wrong" />}>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Row justify='center'>
@@ -202,6 +205,7 @@ const Document = (props) => {
                         </Button>
                     </Col>
                 </Row>
+                </ErrorBoundary>
             </Panel>
         </Collapse>
         <Formik

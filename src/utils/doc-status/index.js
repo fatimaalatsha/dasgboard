@@ -9,10 +9,10 @@ const isAllApproved = async (driverId) => {
     const options = { // Set options for endpoint
         headers: {
             'Authorization': token,
-            ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+            ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
         }
     }
-    const response = await API.post(`/v1/drivers/cc/${driverId}/activate`, {}, options)
+    const response = await NEW_API.post(`/v1/drivers/${driverId}/activate`, {}, options)
     const data = await response.data
     return data
   } catch (error) {
