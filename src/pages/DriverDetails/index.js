@@ -744,7 +744,7 @@ const AdditionalDocsDrawer = ({ province, status, open, setOpen, driverid, sub, 
 }
 
 const AdditionalDocsFeeder = ({ driverid, sub }) => {
-  const { data, isLoading, error, refetch } = useFetch(`/v1/documents/cc/additional/${driverid}`)// Call useFetch custom hook
+  const { data, isLoading, error, refetch } = useFetch(`/v1/documents/additional/${driverid}`)// Call useFetch custom hook
  
   const PopDeleteButton = ({id}) => {
     const [ popState, setPopState ] = useState({
