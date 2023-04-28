@@ -23,20 +23,24 @@ const rangePresets = [
   },
 ];
 
-
 const DateRangePicker = ({ value, onDateSelect }) => {
-  const [isEnable, setIsEnable] = useState(false); // Set isEnable state
-  const [dateValue, setDateValue] = useState(value); // Set date value state
-  const dateFormat = "YYYY-MM-DD"; // Set date format
+  const [isEnable, setIsEnable] = useState(false);
+  const [selectedRange, setSelectedRange] = useState(value);
+  const dateFormat = "YYYY-MM-DD";
 
   const onRangeChange = (dates, dateStrings) => {
     if (dates) {
-      setDateValue(dateStrings);
-      onDateSelect(dateStrings); // Call onDateSelect with the selected value
+      setSelectedRange(dateStrings);
     } else {
       console.log("Clear");
     }
   };
+
+  const onApply = () => {
+    onDateSelect(selectedRange);
+    setIsEnable(false);
+  };
+
   return (
     <Space direction="vertical" size={12}>
       <RangePicker
@@ -71,12 +75,7 @@ const DateRangePicker = ({ value, onDateSelect }) => {
               >
                 Cancel
               </Button>
-              <Button
-                type="primary"
-                onClick={() => {
-                  setIsEnable(false);
-                }}
-              >
+              <Button type="primary" onClick={onApply}>
                 Apply
               </Button>
             </Space>
@@ -86,4 +85,5 @@ const DateRangePicker = ({ value, onDateSelect }) => {
     </Space>
   );
 };
+
 export default DateRangePicker;
