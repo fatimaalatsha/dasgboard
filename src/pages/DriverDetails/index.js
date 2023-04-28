@@ -460,7 +460,7 @@ const DriverDetails = () => {
               >
                 Activate Driver
               </Button>,
-              data.application_status === 'Existing Driver' && data.status !== 'active' && <ChangeDriverStatus id={id} refetch={refetch}/> ,
+              data.status !== 'active' && <ChangeDriverStatus id={id} refetch={refetch}/> ,
             ]}
           >
                 <Descriptions labelStyle={{ fontWeight: 'bold' }}  >
