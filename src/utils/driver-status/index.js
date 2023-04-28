@@ -66,6 +66,29 @@ const updateApplicationStatus = async (driverId,applicationStatus,statusReason =
     }
 }
 
+const changeDriverStatus = async (driverId, status) => {
+    try {
+      const auth = await Auth.currentSession()// Get current session
+      const token = auth.getAccessToken().getJwtToken()// Get token from session
+      const options = { // Set options for fetch
+          headers: {
+              'Authorization': token,
+              ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
+          }
+      }
+      const body = {
+        'status': status,
+        'reason': 'Existing driver'
+    }
+      const response = await NEW_API.post(`/v1/drivers/${driverId}/status`, body, options)
+      const data = await response.data
+      return data
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
 const notifyDriver = async (driverId, body) => {
     try {
         const auth = await Auth.currentSession()// Get current session
@@ -162,4 +185,4 @@ const getActiveVehicleId = async (driverId) => { // Get active vehicle id
     }
 }
 
-export { deleteDriver, updateStatus, notifyDriver, updateApplicationStatus, updateDriver, createDriverNotes, archiveDriverNotes, getActiveVehicleId }
+export { deleteDriver, updateStatus, notifyDriver, updateApplicationStatus, updateDriver, createDriverNotes, archiveDriverNotes, getActiveVehicleId, changeDriverStatus }
