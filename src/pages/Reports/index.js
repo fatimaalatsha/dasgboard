@@ -4,7 +4,6 @@ import { useNavigate } from "react-router-dom";
 import useNewFetch from "../../hooks/use-new-fetch";
 import CardStatistic from "../../components/CardStatistic";
 import ChartColumn from "../../components/ChartColumn";
-import DateRangePicker from "../../components/DateRangePicker";
 
 const { Title } = Typography;
 
@@ -151,7 +150,7 @@ const Reports = () => {
             popInfo="Total number of ineligible applicants "
           />
           <CardStatistic
-            title="Average Time to Activation"
+            title="Average Activation Time"
             height={120}
             width={165}
             value={

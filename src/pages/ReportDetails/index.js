@@ -87,7 +87,7 @@ const ReportDetails = () => {
                   popInfo="Number Of Applicants In The Last 7 Days"
                 />
                 <CardStatistic
-                  title="Average Time To Activation"
+                  title="Average Activation Time"
                   height={120}
                   width={175}
                   value={
