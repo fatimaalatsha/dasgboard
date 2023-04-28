@@ -1,5 +1,5 @@
 import { useState } from "react"
-import { Button, Drawer, Upload, message, Row, Col, Typography } from "antd"
+import { Button, Drawer, Upload, message, Row, Col, Typography, Popconfirm } from "antd"
 import { UploadOutlined } from '@ant-design/icons'
 import { useParams } from "react-router-dom"
 
@@ -7,7 +7,7 @@ import { putToS3 } from "../../utils/s3-storage"
 import { getActiveVehicleId } from "../../utils/driver-status"
 import { createDocument } from "../../utils/doc-status"
 
-const { Title } = Typography
+const { Title, Text } = Typography
 
 const UploadDriverDoc = (props) => {
     const { id } = useParams(); // Get id from url
@@ -176,18 +176,29 @@ const UploadDriverDoc = (props) => {
                             <Button icon={<UploadOutlined />} block >Select File</Button>
                         </Upload>
                         { props.name !== 'driver_license' &&
-                            <Button 
-                                type="primary" 
-                                onClick={() => handleUpload('document')}
-                                disabled={!file || isLoading}
-                                style={{
-                                    marginTop: 16,
-                                }}
-                                block
-                                loading={isLoading}
+                            <Popconfirm
+                                title="Upload confirmation"
+                                description={
+                                    <Text style={{ width: '300px' }}>
+                                        {"By uploading this file, you confirm that you are deleting"} <br /> {"any copy of this file from you local computer and/or storage."}
+                                    </Text>
+                                }
+                                placement="bottomRight"
+                                onConfirm={() => handleUpload('document')}
+                                okText="Confirm"
                             >
-                                { isLoading ? 'Uploading' : 'Upload File' }
-                            </Button>
+                                <Button 
+                                    type="primary" 
+                                    disabled={!file || isLoading}
+                                    style={{
+                                        marginTop: 16,
+                                    }}
+                                    block
+                                    loading={isLoading}
+                                >
+                                    { isLoading ? 'Uploading' : 'Upload File' }
+                                </Button>
+                            </Popconfirm>
                         }
                     </Col>
                     { props.name === 'driver_license' &&
@@ -196,18 +207,28 @@ const UploadDriverDoc = (props) => {
                             <Upload {...backUploadConfig}>
                                 <Button disabled={!file} icon={<UploadOutlined />} block >Select File</Button>
                             </Upload>
-                            <Button 
-                                type="primary" 
-                                onClick={() => handleLicenseUpload('front', 'back')}
-                                disabled={!backFile || isLoading}
-                                style={{
-                                    marginTop: 16,
-                                }}
-                                block
-                                loading={isLoading}
+                            <Popconfirm
+                                title="Upload confirmation"
+                                description={
+                                    <Text style={{ width: '300px' }}>
+                                        {"By uploading these files, you confirm that you are deleting"} <br /> {" any copy of these files from you local computer and/or storage."}
+                                    </Text>
+                                }
+                                placement="bottomRight"
+                                onConfirm={() => handleLicenseUpload('front', 'back')}
                             >
-                                { isLoading ? 'Uploading' : 'Upload File' }
-                            </Button>
+                                <Button 
+                                    type="primary" 
+                                    disabled={!backFile || isLoading}
+                                    style={{
+                                        marginTop: 16,
+                                    }}
+                                    block
+                                    loading={isLoading}
+                                >
+                                    { isLoading ? 'Uploading' : 'Upload File' }
+                                </Button>
+                            </Popconfirm>
                         </Col>
                     }
                 </Row>
