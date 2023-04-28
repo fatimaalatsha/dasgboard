@@ -10,6 +10,7 @@ import {
   Row,
   Col,
   Divider,
+  Modal,
 } from "antd";
 import useNewFetch from "../../hooks/use-new-fetch";
 import { useNavigate } from "react-router-dom";
@@ -27,6 +28,43 @@ const getUserParams = (filter) => ({
   ...filter,
 });
 
+const MoreDetails = ({ data, open, close, status }) => {
+  const [showDetils, setShowDetils] = useState(open);
+  const getStatusDetials = (data) => {
+    const result = [];
+    for (let i = 0; i < data.length; i++) {
+      if (data[i].status === status) {
+        result.push(data[i]);
+      }
+    }
+    return result;
+  };
+
+  if (!showDetils) return null;
+  if (data.length === 0) return null;
+
+
+  return (
+    <Modal
+      title={`Number Of Drivers Status Per City - ${status} `}
+      open={open}
+      okButtonProps={{ style: { display: "none" } }}
+      onCancel={() => {
+        close();
+      }}
+      width={1000}
+      cancelText="Close"
+    >
+      <ChartColumn
+        props={getStatusDetials(data)}
+        xField="city"
+        yField="count"
+        seriesField="status"
+      />
+    </Modal>
+  );
+};
+
 const NumberOfLeads = () => {
   const reportFilter = useFilterStore((state) => state.reportFilter); // Get filter from store
   const setReportFilter = useFilterStore((state) => state.setReportFilter); // Set filter to store
@@ -34,7 +72,8 @@ const NumberOfLeads = () => {
 
   const [isEnable, setIsEnable] = useState(false); // Set isEnable state
   const [dateset, setDateset] = useState("");
-  const [showIneligible, setShowIneligible] = useState(false);
+  const [showDetils, setShowDetils] = useState(false);
+  const [dataDetails, setDataDetails] = useState({});
 
   const { data, error, isLoading } = useNewFetch(
     `/v1/reports/drivers-status?${qs.stringify(getUserParams(reportFilter), {
@@ -130,6 +169,30 @@ const NumberOfLeads = () => {
     const dateTo = dates[1];
     setReportFilter({ ...reportFilter, date_from: dateFrom, date_to: dateTo });
   };
+
+  const handleChartClick = (evt, reportFilter) => {
+    const { data } = evt;
+    if (
+      data &&
+      (data.data.status === "Ineligible" ||
+        data.data.status === "Do not contact (DNC)")
+    ) {
+      navigate(`/reports/conversion_rates/${data.data.status}`, {
+        state: {
+          date_from: reportFilter.date_from,
+          date_to: reportFilter.date_to,
+        },
+      });
+    } else {
+      data && setDataDetails(data.data.status);
+      setShowDetils(true);
+    }
+  };
+
+  const handleOnClose = () => {
+    setShowDetils(false);
+  };
+
 
   if (data.total === 0) {
     return (
@@ -302,24 +365,19 @@ const NumberOfLeads = () => {
                 seriesField="city"
                 onReady={(plot) => {
                   plot.on("plot:click", (evt) => {
-                    const { data } = evt;
-                    data &&
-                    (data.data.status === "Ineligible" ||
-                      data.data.status === "Do not contact (DNC)")
-                      ? navigate(
-                          `/reports/conversion_rates/${data.data.status}`,
-                          {
-                            state: {
-                              date_from: reportFilter.date_from,
-                              date_to: reportFilter.date_to,
-                            },
-                          }
-                        )
-                      : setShowIneligible(false);
+                    handleChartClick(evt, reportFilter);
                   });
                 }}
               />
             </div>
+            {showDetils && (
+              <MoreDetails
+                data={mapDataToObjects(data)}
+                open={showDetils}
+                close={handleOnClose}
+                status={dataDetails}
+              />
+            )}
           </Space>
         </Col>
       </Row>

@@ -151,7 +151,7 @@ const Reports = () => {
             popInfo="Total number of ineligible applicants "
           />
           <CardStatistic
-            title="Average Time"
+            title="Average Time to Activation"
             height={120}
             width={165}
             value={
@@ -180,7 +180,7 @@ const Reports = () => {
               opacity: 1,
             },
             content: (item) => {
-              return item.count ? `${item.count}` : "";
+              return item.count> 10 ? `${item.count}` : "";
             },
             rotate: false,
             layout: [

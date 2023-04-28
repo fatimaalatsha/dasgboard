@@ -22,7 +22,7 @@ const ChartColumn = ({
   label = {
     position: "middle",
     content: (item) => {
-      return item.count;
+    return item.count > 10 ? `${item.count}` : "";
     },
     style: {
       fill: "#fff",
@@ -30,6 +30,12 @@ const ChartColumn = ({
     formatter: ({ value }) => {
       return value.toFixed(2);
     },
+    layout: [
+      { type: "interval-hide-overlap" },
+      { type: "adjust-color" },
+      { type: "interval-adjust-position" },
+      { type: "interval-rect-mask" },
+    ],
   },
 }) => {
   const sortedData = props.sort((a, b) => b[yField] - a[yField]);

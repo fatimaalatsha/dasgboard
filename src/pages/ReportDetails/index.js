@@ -56,13 +56,15 @@ const ReportDetails = () => {
               >
                 <CardStatistic
                   title="Total Applicant Pool"
-                  width={180}
+                  height={120}
+                  width={175}
                   value={data.total}
                   color="#3f8600"
                   popInfo="Total Number of applicants, active and ineligible"
                 />
                 <CardStatistic
                   title="Active"
+                  height={120}
                   width={165}
                   value={data.active}
                   color="#3f8600"
@@ -70,6 +72,7 @@ const ReportDetails = () => {
                 />
                 <CardStatistic
                   title="Eligible Applicants"
+                  height={120}
                   width={165}
                   value={data.applicants}
                   color="#3f8600"
@@ -77,16 +80,21 @@ const ReportDetails = () => {
                 />
                 <CardStatistic
                   title="New Applicants"
+                  height={120}
                   width={165}
                   value={data.applicants_seven_days}
                   color="#1307f5"
                   popInfo="Number Of Applicants In The Last 7 Days"
                 />
                 <CardStatistic
-                  title="Average Time"
+                  title="Average Time To Activation"
                   height={120}
-                  width={165}
-                  value={data.average_time ? data.average_time + " days" : "unavailable"}
+                  width={175}
+                  value={
+                    data.average_time
+                      ? data.average_time + " days"
+                      : "unavailable"
+                  }
                   color="#3f8600"
                   popInfo="Average time for applicants from sign up to Activation"
                 />
