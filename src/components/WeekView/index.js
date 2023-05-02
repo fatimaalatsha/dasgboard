@@ -20,7 +20,8 @@ const { Text, Title } = Typography
 
 //get the papams that will be passed to filters through qs
 const queryHandler = (params) => ({ // Get table params
-  filter:{...params}
+  filter:{...params},
+  paginated: false,
 })
 
 const WeekView = ({selectedWeek, dummy, days, tz, city }) => {

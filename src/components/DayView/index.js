@@ -17,7 +17,8 @@ const { Text, Title } = Typography
 
 //get the papams that will be passed to filters through qs
 const queryHandler = (params) => ({ // Get table params
-  day: params.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+  day: params.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'),
+  paginated: false,
 })
 
 const DayView = ({selectedDay, dummy, hours, tz, city }) => {
