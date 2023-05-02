@@ -82,7 +82,8 @@ const deleteWeekShift = async (id) => {
         const data = await response.data
         return data
     } catch (error) {
-        throw new Error(error)
+        console.log(error)
+        return error.response.data
     }
 }
 

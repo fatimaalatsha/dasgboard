@@ -55,7 +55,7 @@ const shiftSchema = object().shape({
     driver_ids: array().of(number().nullable()).notRequired(),
 })
 
-const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetch}) => {
+const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete }) => {
 
     const items = [
         {
@@ -169,7 +169,11 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     const handleDelete = async () => {
         await deleteWeekShift(shift.shift_id)
         .then((res) => {
-            message.success(res.message)
+            if(res.status === 400) {
+                message.error(res.message)
+            } else {
+                message.success(res.message)
+            }
             refetch()
         })
     }
@@ -205,7 +209,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         <>
             <div className="container" style={{ minHeight: 24}}>
                 { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} refetch={refetch}/>
+                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} />
                 ) : (
                 <>
                     {  display && (
@@ -214,7 +218,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     </Tooltip> 
                     )}
                         { isHovering && (
-                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} refetch={refetch}/>
+                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} />
                         )}
                 </>
                 )}
