@@ -8,11 +8,12 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const CurrentTimeLine = ({axis, tz}) => {
-    const [currentTime, setCurrentTime] = useState(dayjs().tz(tz))
+    dayjs.tz.setDefault(tz)
+    const [currentTime, setCurrentTime] = useState(dayjs().tz())
 
     useEffect(() => {
         const interval = setInterval(() => {
-            setCurrentTime(dayjs().tz(tz))
+            setCurrentTime(dayjs().tz())
         }, 60000)
 
         return () => {

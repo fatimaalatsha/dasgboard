@@ -17,7 +17,8 @@ const { Text, Title } = Typography
 
 //get the papams that will be passed to filters through qs
 const queryHandler = (params) => ({ // Get table params
-  day: params.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+  day: params.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'),
+  paginated: false,
 })
 
 const DayView = ({selectedDay, dummy, hours, tz, city }) => {
@@ -67,16 +68,17 @@ const DayView = ({selectedDay, dummy, hours, tz, city }) => {
               },
               render: (text, record ) => {
                 for ( let item = 0; item < record[hour].length; item++ ) {
-                  if ( dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).format('HH:mm') === hour ) {
+                  if ( dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour ) {
                     return (
                       <DayCellShift 
-                        isCellFilled={dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).format('HH:mm') === hour}
+                        isCellFilled={dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour}
                         record={record[hour][item]}
                         hour={hour}
                         day={selectedDay}
                         setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
                         refetch={refetch}
                         city={city}
+                        user_id={record.key}
                       />
                     )
                   }
@@ -91,6 +93,7 @@ const DayView = ({selectedDay, dummy, hours, tz, city }) => {
                     setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
                     refetch={refetch}
                     city={city}
+                    user_id={record.key}
                   />
                 )
               },

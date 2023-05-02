@@ -20,15 +20,20 @@ const { Text, Title } = Typography
 
 //get the papams that will be passed to filters through qs
 const queryHandler = (params) => ({ // Get table params
-  filter:{...params}
+    city_id: params.city_id,
+    date_from: params.date_from,
+    date_to: params.date_to,
+    paginated: false,
 })
 
 const WeekView = ({selectedWeek, dummy, days, tz, city }) => {
+    dayjs.tz.setDefault(tz)
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
     const filters = {
-        city_id: scheduleFilter.filter.city_id,
-        start_time: `between|${selectedWeek.startOf('week').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')},${selectedWeek.endOf('week').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')}`,
+        city_id: Number(scheduleFilter.filter.city_id.replace('in|', '')),
+        date_from: selectedWeek.startOf('week').format('YYYY-MM-DD'),
+        date_to: selectedWeek.endOf('week').format('YYYY-MM-DD'),
     }
     const { data, isLoading, error, refetch } = useWeekSchedule(`/v1/shifts?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz) // Call useSchedule hook
     const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
@@ -95,11 +100,11 @@ const WeekView = ({selectedWeek, dummy, days, tz, city }) => {
         },
         render: (text, record ) => {
             for ( let item = 0; item < record[day].length; item++ ) {
-                if (dayjs(record[day][item]?.start_time).tz(scheduleFilter.tz).format('dddd').toLowerCase() === day && dayjs(record[day][item]?.start_time).tz(scheduleFilter.tz).format('HH:mm') === record.time) {
+                if (dayjs(record[day][item]?.start_time).tz().utc().format('dddd').toLowerCase() === day && dayjs(record[day][item]?.start_time).tz().utc().format('HH:mm') === record.time) {
                     return (
                         <CellShift 
                             key={item} 
-                            isCellFilled={dayjs(record[day][item]?.start_time).tz(scheduleFilter.tz).format('dddd').toLowerCase() === day && dayjs(record[day][item]?.start_time).tz(scheduleFilter.tz).format('HH:mm') === record.time} 
+                            isCellFilled={dayjs(record[day][item]?.start_time).tz().utc().format('dddd').toLowerCase() === day && dayjs(record[day][item]?.start_time).tz().utc().format('HH:mm') === record.time} 
                             record={record[day][item]} 
                             setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
                             selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
