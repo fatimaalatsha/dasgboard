@@ -247,18 +247,18 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     !edit ? // If edit mode is true, update shift
                     await createWeekShift(values)
                     .then(() => {
+                        message.success('Shift created successfully')
                         setSubmitting(false)
                         resetForm()
                         setIsModalOpen(false)
-                        message.success('Shift created successfully')
                         refetch()
                     })
                     : await updateWeekShift(values, shift.shift_id)
                     .then(() => {
+                        message.success('Shift updated successfully')
                         setSubmitting(false)
                         resetForm()
                         setIsModalOpen(false)
-                        message.success('Shift updated successfully')
                         refetch()
                     })
                 }}
