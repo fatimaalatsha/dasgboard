@@ -68,10 +68,10 @@ const DayView = ({selectedDay, dummy, hours, tz, city }) => {
               },
               render: (text, record ) => {
                 for ( let item = 0; item < record[hour].length; item++ ) {
-                  if ( dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).format('HH:mm') === hour ) {
+                  if ( dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour ) {
                     return (
                       <DayCellShift 
-                        isCellFilled={dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).format('HH:mm') === hour}
+                        isCellFilled={dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour}
                         record={record[hour][item]}
                         hour={hour}
                         day={selectedDay}
