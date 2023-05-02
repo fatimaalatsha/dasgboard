@@ -10,17 +10,19 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const convertToHourTz = (date, timezone) => {
-    return dayjs(date).tz(timezone).format('HH:mm')
+    return dayjs(date).tz(timezone).utc().format('HH:mm')
 }
 
 const converToUTC = (date, timestring, timezone) => {
-    const localTime = dayjs(`${date}T${timestring}:00.00Z`).tz(timezone)
-    const utcTime = localTime.utc()
-    const offsetInMinutes = localTime.utcOffset()
+    const localTime = dayjs(`${date}T${timestring}:00.00Z`).tz(timezone).utc()
+   // const utcTime = localTime.utc()
+    //const offsetInMinutes = localTime.utcOffset()
 
-    return offsetInMinutes >= 0 
-    ? utcTime.add(offsetInMinutes, 'minute').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
-    : utcTime.subtract(offsetInMinutes, 'minute').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+    return localTime.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+
+    //return offsetInMinutes >= 0 
+    //? utcTime.add(offsetInMinutes, 'minute').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+    //: utcTime.subtract(offsetInMinutes, 'minute').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
 }
 
 const createWeekShift = async (payload) => {

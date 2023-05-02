@@ -40,7 +40,7 @@ const useWeekSchedule = (url, timezone) => {
             const { data } = await response.data// Get data from response
             const weekData = weekHours.reduce((acc, time) => {
                 const dayObj = weekDays.reduce((obj, day) => {
-                    obj[day] = data.filter(item => day === dayjs(item.start_time).tz().format('dddd').toLowerCase() && time === dayjs(item.start_time).tz().format('HH:mm'))
+                    obj[day] = data.filter(item => day === dayjs(item.start_time).tz().utc().format('dddd').toLowerCase() && time === dayjs(item.start_time).tz().utc().format('HH:mm'))
                     obj[day] = obj[day] ? obj[day] : []
                     return obj
                 }, {})
