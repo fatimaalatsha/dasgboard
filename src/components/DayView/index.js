@@ -78,6 +78,7 @@ const DayView = ({selectedDay, dummy, hours, tz, city }) => {
                         setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
                         refetch={refetch}
                         city={city}
+                        user_id={record.key}
                       />
                     )
                   }
@@ -92,6 +93,7 @@ const DayView = ({selectedDay, dummy, hours, tz, city }) => {
                     setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
                     refetch={refetch}
                     city={city}
+                    user_id={record.key}
                   />
                 )
               },

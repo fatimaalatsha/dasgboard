@@ -42,6 +42,7 @@ import {
     createWeekShift as createDayShift, 
     updateWeekShift as updateDayShift,
     deleteWeekShift as deleteDayShift,
+    unassignFromShift
 } from '../../utils/schedule-status'
 
 dayjs.extend(utc)
@@ -110,7 +111,6 @@ const CardStatus = ({ status, guarantee }) => {
 }
 
 const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus, refetch }) => {
-
     const items = [
         {
             key: 'edit',
@@ -137,6 +137,11 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus, refetch 
                 key: 'unassign',
                 label: 'Unassign',
                 danger: true,
+                onClick: async () => {
+                    await unassignFromShift({driver_id: record.driver_id}, record.id)
+                    message.success('Shift unassigned')
+                    refetch()
+                },
             }
         )},
         {
@@ -203,7 +208,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus, refetch 
     )
 }
 
-const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour, refetch, city}) => {
+const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour, refetch, city, user_id}) => {
     const { token } = useToken()
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [hours, setHours] = useState({
@@ -215,7 +220,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
             amount: record.guarantee ? record.guarantee : 0,
             active: false,
         },
-        driver_id: record.key,
+        driver_id: user_id,
         current_day: dayjs(day).tz(scheduleFilter.tz).format('YYYY-MM-DD'),
         is_individual: record.is_individual,
         id: record.id,
