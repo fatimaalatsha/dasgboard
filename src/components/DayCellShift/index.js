@@ -223,7 +223,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
             active: Boolean(record.guarantee) || false,
         },
         driver_id: user_id,
-        current_day: dayjs(day).tz(scheduleFilter.tz).format('YYYY-MM-DD'),
+        current_day: dayjs(day).tz(scheduleFilter.tz).utc().format('YYYY-MM-DD'),
         is_individual: record.is_individual,
         id: record.id,
     })
@@ -319,27 +319,29 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                         is_individual: true,
                     }}
                     validationSchema={timeslotSchema}
-                    onSubmit={async (values, { setSubmitting }) => {
+                    onSubmit={async (values, { setSubmitting, resetForm }) => {
                         values.start_time = converToUTC( hours.current_day, values.start_time, scheduleFilter.tz)
                         values.end_time = converToUTC( hours.current_day, values.end_time, scheduleFilter.tz)
                         values.guarantee = Number(values.guarantee)
                         !values.checked && delete values.guarantee
                         delete values.checked
+                        edit && delete values.driver_ids
                         !edit ?
                         await createDayShift(values)
                         .then(() => {
-                            setSubmitting(false)
-                            setIsModalOpen(false)
                             message.success('Shift created successfully')
+                            setSubmitting(false)
+                            resetForm()
+                            setIsModalOpen(false)
                             refetch()
                         })
                         :
-                        delete values.driver_ids 
-                        updateDayShift(values, record.id)
+                        await updateDayShift(values, hours.id)
                         .then(() => {
-                            setSubmitting(false)
-                            setIsModalOpen(false)
                             message.success('Shift updated successfully')
+                            setSubmitting(false)
+                            resetForm()
+                            setIsModalOpen(false)
                             refetch()
                         })
                     }}

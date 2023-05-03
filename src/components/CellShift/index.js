@@ -141,7 +141,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         drivers: record.capacity || 0,
         start: record.start_time ? convertToHourTz(record.start_time, scheduleFilter.tz) : record.time,
         end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : null,
-        day: record.start_time ? dayjs(record.start_time).tz(scheduleFilter.tz).format('YYYY-MM-DD') : selectedDay,
+        day: record.start_time ? dayjs(record.start_time).tz(scheduleFilter.tz).utc().format('YYYY-MM-DD') : selectedDay,
         shift_id: record.id || null,
         hasGuarantee: false,
         guarantee: record.guarantee || 0,
