@@ -325,7 +325,6 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                         values.guarantee = Number(values.guarantee)
                         !values.checked && delete values.guarantee
                         delete values.checked
-                        console.log(values)
                         !edit ?
                         await createDayShift(values)
                         .then(() => {
