@@ -30,7 +30,7 @@ const DayView = ({selectedDay, dummy, hours, tz, city }) => {
   useEffect(() => {
     refetch()
     return () => controller.abort()// Abort fetch on unmount
-  }, [selectedDay])
+  }, [selectedDay, city])
 
   const columns = [
     {

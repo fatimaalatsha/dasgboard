@@ -15,14 +15,7 @@ const convertToHourTz = (date, timezone) => {
 
 const converToUTC = (date, timestring, timezone) => {
     const localTime = dayjs(`${date}T${timestring}:00.00Z`).tz(timezone).utc()
-   // const utcTime = localTime.utc()
-    //const offsetInMinutes = localTime.utcOffset()
-
     return localTime.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
-
-    //return offsetInMinutes >= 0 
-    //? utcTime.add(offsetInMinutes, 'minute').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
-    //: utcTime.subtract(offsetInMinutes, 'minute').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
 }
 
 const createWeekShift = async (payload) => {

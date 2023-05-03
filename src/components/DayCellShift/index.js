@@ -66,6 +66,7 @@ const timeslotSchema = object().shape({
                     then: number().min(1, 'Guarantee must be greater than 0').max(1000, 'Guarantee must be less than 1000').required('Guarantee is required'),
                     otherwise: number().notRequired()
                 }),
+    guarantee_specs: string().notRequired(),
 })
 
 const CardStatus = ({ status, guarantee }) => {
@@ -218,10 +219,11 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         status: {},
         guarantee: {
             amount: record.guarantee ? record.guarantee : 0,
-            active: false,
+            description: record.guarantee_specs ? record.guarantee_specs : '',
+            active: Boolean(record.guarantee) || false,
         },
         driver_id: user_id,
-        current_day: dayjs(day).tz(scheduleFilter.tz).format('YYYY-MM-DD'),
+        current_day: dayjs(day).tz(scheduleFilter.tz).utc().format('YYYY-MM-DD'),
         is_individual: record.is_individual,
         id: record.id,
     })
@@ -307,8 +309,9 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                     initialValues={{
                         start_time: hours.start,
                         end_time: hours.end,
-                        checked: false,
+                        checked: hours.guarantee.active,
                         guarantee: hours.guarantee.amount,
+                        guarantee_specs: hours.guarantee.description,
                         driver_ids: [hours.driver_id],
                         city_id: Number(city),
                         is_recurring: false,
@@ -316,28 +319,29 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                         is_individual: true,
                     }}
                     validationSchema={timeslotSchema}
-                    onSubmit={async (values, { setSubmitting }) => {
+                    onSubmit={async (values, { setSubmitting, resetForm }) => {
                         values.start_time = converToUTC( hours.current_day, values.start_time, scheduleFilter.tz)
                         values.end_time = converToUTC( hours.current_day, values.end_time, scheduleFilter.tz)
                         values.guarantee = Number(values.guarantee)
                         !values.checked && delete values.guarantee
                         delete values.checked
-                        console.log(values)
+                        edit && delete values.driver_ids
                         !edit ?
                         await createDayShift(values)
                         .then(() => {
-                            setSubmitting(false)
-                            setIsModalOpen(false)
                             message.success('Shift created successfully')
+                            setSubmitting(false)
+                            resetForm()
+                            setIsModalOpen(false)
                             refetch()
                         })
                         :
-                        delete values.driver_ids 
-                        updateDayShift(values, record.id)
+                        await updateDayShift(values, hours.id)
                         .then(() => {
-                            setSubmitting(false)
-                            setIsModalOpen(false)
                             message.success('Shift updated successfully')
+                            setSubmitting(false)
+                            resetForm()
+                            setIsModalOpen(false)
                             refetch()
                         })
                     }}
@@ -398,6 +402,8 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                                     }}
                                 />
                                 <Checkbox 
+                                    name="checked"
+                                    checked={props.values.checked}
                                     onChange={(e) => {
                                         props.setFieldValue('checked', e.target.checked)
                                         setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, active: e.target.checked } }))
@@ -409,21 +415,34 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                                     Guarantee?
                                 </Checkbox>
                                 { hours.guarantee.active && (
-                                    <Input 
-                                        name="guarantee"
-                                        placeholder="Guarantee amount"
-                                        type="number"
-                                        min={0}
-                                        max={1000}
-                                        prefix="$" 
-                                        suffix="CAD" 
-                                        defaultValue={props.values.guarantee}
-                                        onChange={(e) => {
-                                            const value = Number(e.target.value)
-                                            props.setFieldValue('guarantee', value)
-                                            setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, amount: value } }))
-                                        }}
-                                    />
+                                    <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                        <Input 
+                                            name="guarantee"
+                                            placeholder="Guarantee amount"
+                                            type="number"
+                                            min={0}
+                                            max={1000}
+                                            prefix="$" 
+                                            suffix="CAD" 
+                                            defaultValue={props.values.guarantee}
+                                            onChange={(e) => {
+                                                const value = Number(e.target.value)
+                                                props.setFieldValue('guarantee', value)
+                                                setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, amount: value } }))
+                                            }}
+                                        />
+                                        <Input.TextArea 
+                                            name="guarantee_specs"
+                                            defaultValue={props.values.guarantee_specs}
+                                            rows={4} 
+                                            placeholder="Guarantee description (optional)"
+                                            onChange={(e) => {
+                                                const value = e.target.value
+                                                props.setFieldValue('guarantee_specs', value)
+                                                setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, description: value } }))
+                                            }}
+                                        />
+                                    </Space>
                                 )}
                             </Space>
                         </Modal>
