@@ -1,6 +1,7 @@
 import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
 import { S3Client, GetObjectCommand , PutObjectCommand } from '@aws-sdk/client-s3'// Import S3Client and GetObjectCommand from @aws-sdk/client-s3
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner" // Import presigner
+import dayjs from 'dayjs'// Import dayjs
 
 const getFromS3 = async (key) => {
     try {
@@ -63,7 +64,51 @@ const uint8ArrayToS3 = async (sub, file) => {
     }
 }
 
+const putToS3 = async (sub, file, folder, label) => {
+    const today = dayjs().format('YYYY-MM-DD')
+    const fileType = file.name.match(/\.([^.]+)$/)[1]
+    const fileSize = file.size
+    const fileName = `${label}_${today}.${fileType.toLowerCase()}`
+    const objectKey = `${folder}/${fileName}` // Set object key
+    try {
+        const auth = await Auth.currentCredentials() // Get cognito credentials
+        const s3ObjectKey = `private/${sub}/${objectKey}` // Set s3 object key
+        const s3 = new S3Client({// Create new S3 client instance
+            region: 'us-east-2',
+            credentials: auth
+        })
+        const params = { // Create parameters for S3 client
+            Bucket: process.env.REACT_APP_S3_BUCKET,
+            Key: s3ObjectKey,
+            Body: file,
+            ACL: 'private',
+            ContentType: fileType,
+            ContentLength: fileSize,
+            Metadata: {
+                'x-amz-meta-size': fileSize.toString(),
+            }
+        }
+        const data = await s3.send(new PutObjectCommand(params))
+        if (data) {
+            return {
+                key: objectKey,
+                complete: true,
+            }
+        }
+        return {
+            key: '',
+            complete: false,
+        }
+    } catch (error) {
+        console.log(error)
+        return {
+            key: '',
+            complete: false,
+        }
+    }
+}
+
     
 
 
-export { getFromS3, uint8ArrayToS3 }
+export { getFromS3, uint8ArrayToS3, putToS3 }

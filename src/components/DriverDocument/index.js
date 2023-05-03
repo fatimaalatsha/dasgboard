@@ -6,6 +6,7 @@ import Document from '../Document' // Import Document component
 
 const DriverDocument = ({ id, sub }) => {
   const { data, isLoading, error, refetch } = useFetch(`/v1/documents/cc/drivers/${id}`)// Call useFetch custom hook
+
   if (isLoading) {
     return <div>Loading...</div>
   }

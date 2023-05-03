@@ -57,7 +57,7 @@ const EditableSelect = (props) => {
                     >
                         {
                             props.options.map((item, index) => (
-                                <Option key={index} value={item.city_id || item.make_id || item.model_id}>{item.name}</Option>
+                                <Option key={index} value={item.id || item.make_id || item.model_id}>{item.name}</Option>
                             ))
                         }
                     </Select>
