@@ -11,10 +11,12 @@ import {
     Empty,
     Input,
     Space,
+    Result
 } from 'antd' // Import antd components
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form , Field} from 'formik' // Import Formik form components
 import { object, string } from 'yup'
+import { ErrorBoundary } from 'react-error-boundary'
 
 import DocumentList from "../../hoc/DocumentList" // import DocumentList HOC
 import DocViewer from '../DocViewer' // import document viewer component
@@ -22,6 +24,7 @@ import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper compo
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import EditableDate from '../../components/EditableDate' // Import Driver contact information component
 import API from '../../api/BaseUrl' // Import API base URL
+import UploadDriverDoc from '../UploadDriverDoc' // Import allowed upload on existing driver component
 
 const { Panel } = Collapse // Destructure Panel from Collapse
 const { Text } = Typography // Destructure Text from Typography
@@ -106,6 +109,9 @@ const Document = (props) => {
         setDocumentStatus({...documentStatus, active: key})
     }
     
+    const showUpload = () => { // Show upload feature
+        return props.status === 'missing'
+    }
 
     return (
         <>
@@ -113,11 +119,23 @@ const Document = (props) => {
             <Panel 
             header={props.document?.title}
             extra={
-                <Tag {...tagConfig}>
-                    {documentStatus.status}
-                </Tag>
+                <Space>
+                    { showUpload() && (
+                        <UploadDriverDoc 
+                            title={props.document?.title} 
+                            name={props.document?.name} 
+                            sub={props.sub} 
+                            doc_id={props.document?.id}
+                            refetch={() => props.refetch()}
+                        />
+                    )}
+                    <Tag {...tagConfig}>
+                        {documentStatus.status}
+                    </Tag>
+                </Space>
             }
             >
+                <ErrorBoundary fallback={<Result status="500" title="Unexpected Error" subTitle="Sorry, something went wrong" />}>
                 <Row gutter={16}>
                     <Col span={12}>
                         <Row justify='center'>
@@ -187,6 +205,7 @@ const Document = (props) => {
                         </Button>
                     </Col>
                 </Row>
+                </ErrorBoundary>
             </Panel>
         </Collapse>
         <Formik
