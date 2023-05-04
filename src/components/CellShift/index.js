@@ -19,7 +19,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean, array } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../store'
 
@@ -45,7 +45,7 @@ const shiftSchema = object().shape({
     capacity: number().min(10, 'Shift driver capacity must be greater than or equal to 10.').required('Required'),
     start_time: string().required('Required'),
     end_time: string().required('Required'),
-    city_id: number().required('Required'),
+    city_id: mixed().required('Required'),
     hasGuarantee: boolean().notRequired(),
     guarantee: number().when('hasGuarantee', {
         is: true,
@@ -228,7 +228,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     start_time: shift.start,
                     end_time: shift.end,
                     capacity: shift.drivers,
-                    city_id: Number(city),
+                    city_id: !edit ? [Number(city)] : Number(city),
                     guarantee: shift.guarantee,
                     hasGuarantee: shift.hasGuarantee,
                     'driver_ids': [],
