@@ -31,7 +31,7 @@ import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean, array } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../store'
 
@@ -55,7 +55,7 @@ const timeslotSchema = object().shape({
     start_time: string().required('Start time is required'),
     end_time: string().required('End time is required'),
     driver_ids: array().of(string()).required('Driver is required'),
-    city_id: number().required('Required'),
+    city_id: mixed().required('Required'),
     is_individual: boolean().required('Required'),
     is_recurring: boolean().required('Required'),
     capacity: number().required('Required'),
@@ -177,6 +177,12 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus, refetch 
 
     return (
         <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, height: '100%' }}>
+        <Tooltip 
+            title={`${record?.start} ➡ ${record?.end}`}
+            overlayStyle={{
+                ...(cardStyle.width >= 100 && { display: 'none' })
+            }}
+        >
             <Card 
                 style={cardStyle}
                 bodyStyle={{ height: '100%', padding: 4 }}
@@ -193,9 +199,13 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus, refetch 
                         <Row>
                             <Space>
                                 <Space size={3}>
-                                    <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
-                                    <SwapRightOutlined />
-                                    <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
+                                {   cardStyle.width >= 100 && (
+                                    <>
+                                        <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
+                                        <SwapRightOutlined />
+                                        <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
+                                    </>
+                                )}
                                 </Space>
                             </Space>
                         </Row>
@@ -205,6 +215,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setEdit, setStatus, refetch 
                     </Space>
                 </Space>
             </Card>
+        </Tooltip>
         </div>
     )
 }
@@ -313,7 +324,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                         guarantee: hours.guarantee.amount,
                         guarantee_specs: hours.guarantee.description,
                         driver_ids: [hours.driver_id],
-                        city_id: Number(city),
+                        city_id: !edit ? [Number(city)] : Number(city),
                         is_recurring: false,
                         capacity: 1,
                         is_individual: true,

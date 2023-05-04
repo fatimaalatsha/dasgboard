@@ -26,7 +26,7 @@ const queryHandler = (params) => ({ // Get table params
     paginated: false,
 })
 
-const WeekView = ({selectedWeek, dummy, days, tz, city }) => {
+const WeekView = ({selectedWeek, days, tz, city }) => {
     dayjs.tz.setDefault(tz)
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
