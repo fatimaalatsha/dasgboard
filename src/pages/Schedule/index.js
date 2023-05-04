@@ -8,55 +8,18 @@ import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
 import WeekView from '../../components/WeekView'
 import DayView from '../../components/DayView'
-import generateName from '../../utils/name-creation'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
-//import { getCityTimezone, getCities } from '../../utils/city-status'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const days = ["sunday","monday", "tuesday", "wednesday", "thursday", "friday", "saturday",]
 
-/* const weekHours = [];
-for (let hour = 0, minute = 0; hour < 24 && !(hour === 23 && minute === 30); minute += 30) {
-    if (minute === 60) {
-      hour += 1
-      minute = 0
-    }
-    weekHours.push( dayjs().hour(hour).minute(minute).format('HH:mm') )
-} */
-
-const weekHours = [];
-for (let hour = 0; hour < 24 ; hour++) {
-    weekHours.push( dayjs().hour(hour).minute(0).format('HH:mm') )
-} 
-
 const dayHours = [];
 for (let hour = 0; hour < 24; hour++) {
     dayHours.push( dayjs().hour(hour).minute(0).format('HH:mm') )
 }
-
-const generateNames = (numNames) => {
-    const names = [];
-    for (let i = 0; i < numNames; i++) {
-      names.push(generateName());
-    }
-    return names;
-}
-  
-const namesArray = generateNames(10)
-
-const generateRandomHour = () => { // Generate a random hour
-    const randomHour = Math.floor(Math.random() * 20)
-    return `${randomHour < 10 ? '0' : ''}${randomHour}:00`
-}
-
-const addFourHours = (hourString) => { // Add 4 hours to a time string
-    const [hour, minute] = hourString.split(':')
-    const newHour = (parseInt(hour, 10) + 4) % 24
-    return `${newHour < 10 ? '0' : ''}${newHour}:${minute}`
-  }
 
 const Schedule = () => {
     //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
@@ -74,32 +37,6 @@ const Schedule = () => {
         selectedTime: null,
         selectedDay: null,
     })
-    /* const [dummy, setDummy] = useState(weekHours.map((time) => ({
-        key: time,
-        time,
-        monday: [],
-        tuesday: [{dayOfWeek: 'tuesday', day: '28', start: '00:00', end: '03:00', drivers: 25}, {dayOfWeek: 'tuesday', day: '28', start: '04:00', end: '12:00', drivers: 25}],
-        wednesday: [{dayOfWeek: 'wednesday', day: '28', start: '00:00', end: '06:00', drivers: 25}],
-        thursday: [],
-        friday: [],
-        saturday: [],
-        sunday: [],
-        
-    }))) */
-    const [dayData, setDayData] = useState(namesArray.reduce((acc, name) => {
-        const timeObj = dayHours.reduce((obj, time) => {
-          obj[time] = time === /* generateRandomHour() */ '0' ? [{ name: name, start: time, end: addFourHours(time) }] : []
-          return obj
-        }, {})
-      
-        acc.push({
-          key: name,
-          name,
-          ...timeObj
-        })
-
-        return acc
-      }, []))
         
     const [view, setView] = useState(1)
 
@@ -140,10 +77,6 @@ const Schedule = () => {
     } 
     
     const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
-        /* const newData = [...dummy]
-        const rowIndex = weekHours.indexOf(modal.selectedTime.start)
-        newData[rowIndex][modal.selectedDay.dayOfWeek.toLowerCase()] = [{dayOfWeek: modal.selectedDay.dayOfWeek.toLowerCase(), day: modal.selectedDay.day, start: modal.selectedTime.start, end: modal.selectedTime.end, drivers: Number(modal.drivers)}]
-        setDummy(newData) */
         setModal({...modal, open: false})
     }
 
@@ -202,7 +135,7 @@ const Schedule = () => {
                 </Space>
                 { view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
                 : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedDay={selectedDate.day} dummy={dayData} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity}/>
+                : <DayView selectedDay={selectedDate.day} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity}/>
                 }
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>

@@ -21,7 +21,7 @@ const queryHandler = (params) => ({ // Get table params
   paginated: false,
 })
 
-const DayView = ({selectedDay, dummy, hours, tz, city }) => {
+const DayView = ({selectedDay, hours, tz, city }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
   const { data, isLoading, error, refetch } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler(selectedDay), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, ) // Call useSchedule hook
