@@ -10,16 +10,20 @@ const rangePresets = [
     value: [dayjs().add(-7, "d"), dayjs()],
   },
   {
-    label: "Last 14 Days",
-    value: [dayjs().add(-14, "d"), dayjs()],
-  },
-  {
     label: "Last 30 Days",
     value: [dayjs().add(-30, "d"), dayjs()],
   },
   {
     label: "Last 90 Days",
     value: [dayjs().add(-90, "d"), dayjs()],
+  },
+  {
+    label: "Last 6 Months",
+    value: [dayjs().add(-6, "M"), dayjs()],
+  },
+  {
+    label: "All Time",
+    value: [dayjs("2022-12-08"), dayjs()],
   },
 ];
 
