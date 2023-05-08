@@ -13,6 +13,10 @@ import {
     Dropdown,
     Tooltip,
     message,
+    Divider,
+    Radio,
+    DatePicker,
+    InputNumber 
 } from 'antd'
 import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
@@ -145,6 +149,14 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         shift_id: record.id || null,
         hasGuarantee: false,
         guarantee: record.guarantee || 0,
+        hasRecurrency: false,
+        pattern: 'weekly', // once, daily, weekly
+        ends: 'never', // never, after, on
+        recurrency: {
+            pattern: 'weekly', // once, daily, weekly
+            end_date: null,
+            ocurrences: null,
+        }
     })
     const floatingComponentHeight = hours.diff * 57 + 2
 
@@ -350,6 +362,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                         setShift({...shift, drivers: e.target.value})
                                     }}
                                 />
+                                <Divider>
                                 <Checkbox
                                     onChange={() => {
                                         setShift({ ...shift, hasGuarantee: !shift.hasGuarantee })
@@ -357,6 +370,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 >
                                     Guarantee?
                                 </Checkbox>
+                                </Divider>
                                 { shift.hasGuarantee && (
                                     <Input 
                                         name="guarantee"
@@ -373,6 +387,48 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                             setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, amount: value } }))
                                         }}
                                     />
+                                )}
+                                <Divider>
+                                <Checkbox
+                                    onChange={() => {
+                                        setShift({ ...shift, hasRecurrency: !shift.hasRecurrency })
+                                    }}
+                                >
+                                    Recurring Shift?
+                                </Checkbox>
+                                </Divider>
+                                {  shift.hasRecurrency && (
+                                    <Radio.Group style={{ width: '100%' }} onChange={(e) => setShift({...shift, pattern: e.target.value })} value={shift.pattern}>
+                                        <Space direction="vertical" style={{ width: '100%' }}>
+                                            <Radio value={'daily'}>Daily</Radio>
+                                            <Radio value={'weekly'}>Weekly</Radio>
+                                            <Radio value={'custom'}>Custom</Radio>
+                                        { shift.pattern === 'custom' && (
+                                            <>
+                                            <Divider orientation="left" plain>Custom Recurrence</Divider>
+                                            <Radio.Group value={shift.recurrency.pattern} buttonStyle="solid" onChange={(e) => setShift({...shift, recurrency: {...shift.recurrency, pattern: e.target.value }})}>
+                                                <Radio.Button value="once">Once</Radio.Button>
+                                                <Radio.Button value="daily">Daily</Radio.Button>
+                                                <Radio.Button value="weekly">Weekly</Radio.Button>
+                                            </Radio.Group>
+                                            <Divider orientation="left" plain>Ends</Divider>
+                                            <Radio.Group  onChange={(e) => setShift({...shift, ends: e.target.value })}>
+                                            <Space direction="vertical">
+                                                <Radio value="never">Never</Radio>
+                                                <Radio value="on">
+                                                    On
+                                                    <DatePicker disabled={shift.ends !== 'on' } style={{ marginLeft: 16 }} onChange={(date, dateString) => console.log(date, dateString)} />
+                                                </Radio>
+                                                <Radio value="after">
+                                                    After
+                                                    <InputNumber disabled={shift.ends !== 'after' } style={{ width: 180, marginLeft: 8 }} addonAfter="occurrences" min={1} defaultValue={3} onChange={(value) => console.log(value)} />
+                                                </Radio>
+                                            </Space>
+                                            </Radio.Group>
+                                            </>
+                                        )}
+                                        </Space>
+                                    </Radio.Group>
                                 )}
                             </Space>
                         </Modal>
