@@ -23,7 +23,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean, array, mixed, date } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../store'
 
@@ -57,6 +57,27 @@ const shiftSchema = object().shape({
         otherwise: number().notRequired()
     }),
     driver_ids: array().of(number().nullable()).notRequired(),
+    is_recurring: boolean().notRequired(),
+    pattern: string().when('is_recurring', {
+        is: true,
+        then: string().required('Required'),
+        otherwise: string().notRequired()
+    }),
+    ends: string().when('pattern', {
+        is: 'custom',
+        then: string().required('Required'),
+        otherwise: string().notRequired()
+    }),
+    end_date: mixed().when('ends', {
+        is: 'on' || 'never',
+        then: mixed().required('Required'),
+        otherwise: mixed().notRequired()
+    }),
+    max_occurrences: number().when('ends', {
+        is: 'after',
+        then: number().required('Required'),
+        otherwise: number().notRequired()
+    }),
 })
 
 const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete }) => {
@@ -151,11 +172,11 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         guarantee: record.guarantee || 0,
         hasRecurrency: false,
         pattern: 'weekly', // once, daily, weekly
-        ends: 'never', // never, after, on
+        ends: 'after', // never, after, on
         recurrency: {
             pattern: 'weekly', // once, daily, weekly
             end_date: null,
-            ocurrences: null,
+            occurrences: null,
         }
     })
     const floatingComponentHeight = hours.diff * 57 + 2
@@ -244,19 +265,31 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     guarantee: shift.guarantee,
                     hasGuarantee: shift.hasGuarantee,
                     'driver_ids': [],
+                    is_recurring: shift.hasRecurrency,
+                    pattern: shift.pattern !== 'custom' ? shift.pattern : shift.recurrency.pattern,
+                    ends: shift.ends,
+                    end_date: shift.recurrency.end_date || shift.day,
+                    max_occurrences: shift.recurrency.occurrences || 3,
                 }}
                 enableReinitialize
                 validationSchema={shiftSchema}
                 onSubmit={async (values, { setSubmitting, resetForm }) => {
+                    console.log(values)
                     values.start_time = converToUTC( shift.day, values.start_time, scheduleFilter.tz)
                     values.end_time = converToUTC(shift.day, values.end_time, scheduleFilter.tz)
-                    values.is_recurring = false
+                    //values.is_recurring = false
                     values.capacity = Number(values.capacity)
                     values.guarantee = Number(values.guarantee)
                     !values.hasGuarantee && delete values.guarantee
                     values.driver_ids.length === 0 && delete values.driver_ids
+                    if (!values.is_recurring) {
+                        delete values.pattern 
+                        delete values.ends 
+                        delete values.end_date 
+                        delete values.max_occurrences
+                    }
                     delete values.hasGuarantee
-                    !edit ? // If edit mode is true, update shift
+                    /* !edit ? // If edit mode is true, update shift
                     await createWeekShift(values)
                     .then(() => {
                         message.success('Shift created successfully')
@@ -272,13 +305,13 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                         resetForm()
                         setIsModalOpen(false)
                         refetch()
-                    })
+                    }) */
                 }}
             >
                 {props => (
                     <FormikForm>
                         <Modal 
-                            title="New Shift" 
+                            title={`New Shift: ${dayjs(shift.day).format(' MMM, dddd DD - YYYY')}`}
                             open={isModalOpen} 
                             onCancel={handleCancel}
                             destroyOnClose
@@ -309,7 +342,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                     defaultValue={[dayjs(props.values.start_time, 'HH:mm'), props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : null]} 
                                     allowClear={false}
                                     disabled={[true, false]} 
-                                    //onChange={handleHoursChange}
                                     onChange={(time, timeString) => {
                                         props.setFieldValue('start_time', timeString[0])
                                         props.setFieldValue('end_time', timeString[1])
@@ -390,7 +422,9 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 )}
                                 <Divider>
                                 <Checkbox
-                                    onChange={() => {
+                                    name="is_recurring"
+                                    onChange={(e) => {
+                                        props.setFieldValue('is_recurring', e.target.checked)
                                         setShift({ ...shift, hasRecurrency: !shift.hasRecurrency })
                                     }}
                                 >
@@ -406,22 +440,29 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                         { shift.pattern === 'custom' && (
                                             <>
                                             <Divider orientation="left" plain>Custom Recurrence</Divider>
-                                            <Radio.Group value={shift.recurrency.pattern} buttonStyle="solid" onChange={(e) => setShift({...shift, recurrency: {...shift.recurrency, pattern: e.target.value }})}>
+                                            <Radio.Group value={props.values.pattern} buttonStyle="solid" onChange={(e) => setShift({...shift, recurrency: {...shift.recurrency, pattern: e.target.value }})}>
                                                 <Radio.Button value="once">Once</Radio.Button>
                                                 <Radio.Button value="daily">Daily</Radio.Button>
                                                 <Radio.Button value="weekly">Weekly</Radio.Button>
                                             </Radio.Group>
                                             <Divider orientation="left" plain>Ends</Divider>
-                                            <Radio.Group  onChange={(e) => setShift({...shift, ends: e.target.value })}>
+                                            <Radio.Group 
+                                                name="ends"
+                                                value={props.values.ends}
+                                                onChange={(e) => {
+                                                    props.setFieldValue('ends', e.target.value)
+                                                    setShift({...shift, ends: e.target.value })
+                                                }}
+                                            >
                                             <Space direction="vertical">
                                                 <Radio value="never">Never</Radio>
                                                 <Radio value="on">
                                                     On
-                                                    <DatePicker disabled={shift.ends !== 'on' } style={{ marginLeft: 16 }} onChange={(date, dateString) => console.log(date, dateString)} />
+                                                    <DatePicker disabled={shift.ends !== 'on' } style={{ marginLeft: 16 }} onChange={(date, dateString) => props.setFieldValue('end_date', dateString)} />
                                                 </Radio>
                                                 <Radio value="after">
                                                     After
-                                                    <InputNumber disabled={shift.ends !== 'after' } style={{ width: 180, marginLeft: 8 }} addonAfter="occurrences" min={1} defaultValue={3} onChange={(value) => console.log(value)} />
+                                                    <InputNumber name="max_occurrences" disabled={shift.ends !== 'after' } style={{ width: 180, marginLeft: 8 }} addonAfter="occurrences" min={1} value={props.values.max_occurrences} onChange={(value) => props.setFieldValue('max_occurrences', Number(value))} />
                                                 </Radio>
                                             </Space>
                                             </Radio.Group>
