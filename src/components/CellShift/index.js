@@ -80,6 +80,8 @@ const shiftSchema = object().shape({
     }),
 })
 
+const weeklyDaysReccurence = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+
 const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete }) => {
 
     const items = [
@@ -434,8 +436,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 {  shift.hasRecurrency && (
                                     <Radio.Group style={{ width: '100%' }} onChange={(e) => setShift({...shift, pattern: e.target.value })} value={shift.pattern}>
                                         <Space direction="vertical" style={{ width: '100%' }}>
-                                            <Radio value={'daily'}>Daily</Radio>
-                                            <Radio value={'weekly'}>Weekly</Radio>
+                                            <Radio value={'daily'}>{`Daily (Mon to Sun)`}</Radio>
+                                            <Radio value={'weekly'}>{`Weekly on: ${dayjs(shift.day).format('dddd')}`}</Radio>
                                             <Radio value={'custom'}>Custom</Radio>
                                         { shift.pattern === 'custom' && (
                                             <>
@@ -445,6 +447,20 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                 <Radio.Button value="daily">Daily</Radio.Button>
                                                 <Radio.Button value="weekly">Weekly</Radio.Button>
                                             </Radio.Group>
+                                            <Divider orientation="left" plain>Repeat On</Divider>
+                                            { shift.recurrency.pattern === 'weekly' && (
+                                                <Radio.Group onChange={e => console.log(e.target.value)}>
+                                                    { weeklyDaysReccurence.map((day, index) => (
+                                                        <Radio key={index} value={day.toLowerCase()}>{day}</Radio>
+                                                    ))}
+                                                </Radio.Group>
+                                            )}
+                                            { shift.recurrency.pattern === 'daily' && (
+                                                <Radio.Group onChange={e => console.log(e.target.value)}>
+                                                    <Radio value={'weekday'}>Weekday (Mon to Fri)</Radio>
+                                                    <Radio value={'calendar_week'}>Calendar Week (Mon to Sun)</Radio>
+                                                </Radio.Group>
+                                            )}
                                             <Divider orientation="left" plain>Ends</Divider>
                                             <Radio.Group 
                                                 name="ends"
