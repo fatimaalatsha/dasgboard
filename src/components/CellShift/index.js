@@ -178,7 +178,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         recurrency: {
             pattern: 'weekly', // once, daily, weekly
             end_date: null,
-            occurrences: null,
+            occurrences: 1,
         }
     })
     const floatingComponentHeight = hours.diff * 57 + 2
@@ -442,24 +442,36 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                         { shift.pattern === 'custom' && (
                                             <>
                                             <Divider orientation="left" plain>Custom Recurrence</Divider>
-                                            <Radio.Group value={props.values.pattern} buttonStyle="solid" onChange={(e) => setShift({...shift, recurrency: {...shift.recurrency, pattern: e.target.value }})}>
+                                            <Radio.Group 
+                                                value={props.values.pattern} 
+                                                buttonStyle="solid" 
+                                                onChange={(e) => {
+                                                    e.target.value === 'once' && props.setFieldValue('max_occurrences', 10)
+                                                    setShift({...shift, recurrency: {...shift.recurrency, pattern: e.target.value }})
+                                                }}
+                                            >
                                                 <Radio.Button value="once">Once</Radio.Button>
                                                 <Radio.Button value="daily">Daily</Radio.Button>
                                                 <Radio.Button value="weekly">Weekly</Radio.Button>
                                             </Radio.Group>
-                                            <Divider orientation="left" plain>Repeat On</Divider>
                                             { shift.recurrency.pattern === 'weekly' && (
+                                                <>
+                                                <Divider orientation="left" plain>Repeat On</Divider>
                                                 <Radio.Group onChange={e => console.log(e.target.value)}>
                                                     { weeklyDaysReccurence.map((day, index) => (
                                                         <Radio key={index} value={day.toLowerCase()}>{day}</Radio>
                                                     ))}
                                                 </Radio.Group>
+                                                </>
                                             )}
                                             { shift.recurrency.pattern === 'daily' && (
+                                                <>
+                                                <Divider orientation="left" plain>Repeat On</Divider>
                                                 <Radio.Group onChange={e => console.log(e.target.value)}>
                                                     <Radio value={'weekday'}>Weekday (Mon to Fri)</Radio>
                                                     <Radio value={'calendar_week'}>Calendar Week (Mon to Sun)</Radio>
                                                 </Radio.Group>
+                                                </>
                                             )}
                                             <Divider orientation="left" plain>Ends</Divider>
                                             <Radio.Group 
@@ -470,17 +482,25 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                     setShift({...shift, ends: e.target.value })
                                                 }}
                                             >
-                                            <Space direction="vertical">
-                                                <Radio value="never">Never</Radio>
-                                                <Radio value="on">
-                                                    On
-                                                    <DatePicker disabled={shift.ends !== 'on' } style={{ marginLeft: 16 }} onChange={(date, dateString) => props.setFieldValue('end_date', dateString)} />
-                                                </Radio>
-                                                <Radio value="after">
-                                                    After
-                                                    <InputNumber name="max_occurrences" disabled={shift.ends !== 'after' } style={{ width: 180, marginLeft: 8 }} addonAfter="occurrences" min={1} value={props.values.max_occurrences} onChange={(value) => props.setFieldValue('max_occurrences', Number(value))} />
-                                                </Radio>
-                                            </Space>
+                                                <Space direction="vertical">
+                                                    <Radio disabled={props.values.pattern === 'once'} value="never">Never</Radio>
+                                                    <Radio disabled={props.values.pattern === 'once'} value="on">
+                                                        On
+                                                        <DatePicker disabled={shift.ends !== 'on' } style={{ marginLeft: 16 }} onChange={(date, dateString) => props.setFieldValue('end_date', dateString)} />
+                                                    </Radio>
+                                                    <Radio disabled={props.values.pattern === 'once'} value="after">
+                                                        After
+                                                        <InputNumber 
+                                                            name="max_occurrences" 
+                                                            disabled={shift.ends !== 'after' || props.values.pattern === 'once'} 
+                                                            style={{ width: 180, marginLeft: 8 }} 
+                                                            addonAfter="occurrences" 
+                                                            min={1} 
+                                                            value={props.values.max_occurrences} 
+                                                            onChange={(value) => props.setFieldValue('max_occurrences', Number(value))} 
+                                                        />
+                                                    </Radio>
+                                                </Space>
                                             </Radio.Group>
                                             </>
                                         )}
