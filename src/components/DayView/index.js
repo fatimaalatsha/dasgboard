@@ -38,9 +38,7 @@ const DayView = ({selectedDay, hours, tz, city }) => {
       dataIndex: 'name',
       key: 'name',
       width: 100,
-      render: (text, record) => {
-        console.log(record)
-        return (
+      render: (text, record) => (
         <Tooltip 
           color={'#FFF'} 
           placement="topLeft"
@@ -54,7 +52,7 @@ const DayView = ({selectedDay, hours, tz, city }) => {
         >
           <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '...' }} >{text}</Text>
         </Tooltip>
-      )}
+      )
     },
     {
       title: (
