@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react' // Import React hooks
-import { Table, Typography } from 'antd' // Import Ant components
+import { Table, Typography, Tooltip, Space } from 'antd' // Import Ant components
 import qs from 'qs' // Import qs library
 import dayjs from 'dayjs' // Import dayjs
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -39,7 +39,19 @@ const DayView = ({selectedDay, hours, tz, city }) => {
       key: 'name',
       width: 100,
       render: (text, record) => (
-        <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '...', tooltip: true }} >{text}</Text>
+        <Tooltip 
+          color={'#FFF'} 
+          placement="topLeft"
+          title={
+            <Space direction="vertical">
+              <Text>{text}</Text>
+              <Text>{`DL# ${record.license_number}`}</Text>
+              <Text>{`Tel. ${record.phone}`}</Text>
+            </Space>
+          } 
+        >
+          <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '...' }} >{text}</Text>
+        </Tooltip>
       )
     },
     {
