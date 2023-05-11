@@ -285,7 +285,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                 enableReinitialize
                 validationSchema={shiftSchema}
                 onSubmit={async (values, { setSubmitting, resetForm }) => {
-                    console.log(values)
+                    //console.log(values)
                     values.start_time = converToUTC( shift.day, values.start_time, scheduleFilter.tz)
                     values.end_time = converToUTC(shift.day, values.end_time, scheduleFilter.tz)
                     //values.is_recurring = false
