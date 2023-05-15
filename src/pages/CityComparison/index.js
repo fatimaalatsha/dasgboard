@@ -4,36 +4,33 @@ import {
   Card,
   Space,
   Result,
-  Row,
-  Col,
   Divider,
   Select,
   Modal,
-  Button,
   Radio,
+  Button,
 } from "antd";
-import useNewFetch from "../../hooks/use-new-fetch";
+import useNewFetch from "../../hooks/use-new-fetch"; // Import custom hook for fetching data
+import * as yup from "yup"; // Import Yup validation library
+import { Formik, Form } from "formik"; // Import Formik form components
 import dayjs from "dayjs";
 import qs from "qs";
 
 import ChartLine from "../../components/ChartLine";
-import DateRangePicker from "../../components/DateRangePicker";
+import SubmitWrapper from "../../components/forms/SubmitWrapper";
+
 const { Title, Text } = Typography;
 
-const { Option } = Select;
-
 const CityComparison = () => {
-  const [cityId1, setCityId1] = useState([]);
-  const [cityDateFrom1, setCityDateFrom1] = useState([]);
-  const [cityId2, setCityId2] = useState([]);
-  const [cityDateFrom2, setCityDateFrom2] = useState([]);
+  const [firstCityId, setFirstCityId] = useState([]);
+  const [secondCityId, setSecondCityId] = useState([]);
+  const [firstCityDateFrom, setFirstCityDateFrom] = useState([]);
+  const [secondCityDateFrom, setSecondCityDateFrom] = useState([]);
   const [showReport, setShowReport] = useState(false);
   const [date, setDate] = useState();
   const [open, setOpen] = useState(true);
   const { data, error, isLoading } = useNewFetch(`/v1/cities`);
-  console.log(data);
-  console.log(data.data);
-  console.log(date)
+
 
   const options = data?.data?.map((item) => ({
     label: item.name,
@@ -41,65 +38,104 @@ const CityComparison = () => {
     launch_date: item.launch_date ? item.launch_date : "2021-12-08",
   }));
 
+  const validationSchema = yup.object().shape({
+    firstCityId: yup.string().required("Please select a city"),
+    secondCityId: yup.string().required("Please select a city"),
+    date: yup.number().required("Please select a date range"),
+  });
+
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
   return (
     <>
       <Modal
-        title="Select City"
+        title="Select Cities to Compare"
         open={open}
-        onOk={() => {
-          setOpen(false);
-          setShowReport(true);
-          console.log(cityId1);
-          console.log(cityId2);
-          console.log(date);
-        }}
-        okText="Generate Report"
-        onCancel={() => {
-          setOpen(false);
-        }}
+        closable={false}
+        distroyOnClose={true}
+        footer={[
+          <Button key="cancel" onClick={() => setOpen(false)}>
+            Cancel
+          </Button>,
+          <Button
+            key="submit"
+            type="primary"
+            disabled={!firstCityId || !secondCityId || !date}
+            onClick={() => {
+              setOpen(false);
+              setShowReport(true);
+            }}
+          >
+            Generate Report
+          </Button>,
+        ]}
       >
-        <Divider />
+        <Divider orientation="left"> Select First City </Divider>
         <Select
           style={{ width: "100%" }}
           placeholder="Please select"
           onChange={(value, date) => {
-            setCityId1(value);
-            setCityDateFrom1(date);
+            setFirstCityId(value);
+            setFirstCityDateFrom(date);
           }}
           options={options}
         ></Select>
-        <Divider />
+        <Divider orientation="left"> Select Secand City </Divider>
         <Select
           style={{ width: "100%" }}
           placeholder="Please select"
           onChange={(value, date) => {
-            setCityId2(value);
-            setCityDateFrom2(date);
+            setSecondCityId(value);
+            setSecondCityDateFrom(date);
           }}
           options={options}
-        ></Select>
-        <Radio.Group onChange={(e) => {setDate(e.target.value)}} >
-          <Radio value={30} >30 Days</Radio>
+        />
+        <Divider orientation="left"> Select Date Range </Divider>
+        <Radio.Group
+          onChange={(e) => {
+            setDate(e.target.value);
+          }}
+        >
+          <Radio value={30}>30 Days</Radio>
           <Radio value={60}>First 60 Days</Radio>
           <Radio value={90}>First 90 Days</Radio>
           <Radio value={6}>First 6 Months</Radio>
           <Radio value={1}>All Time</Radio>
         </Radio.Group>
       </Modal>
-      {showReport && (
-        <CitySelection cityData1={cityDateFrom1} cityData2={cityDateFrom2} dateTo={date} />
-      )}
+      <Card
+        title={
+          <Space
+            direction="horizontal"
+            size="large"
+            style={{ display: "flex", justifyContent: "space-between" }}>
+            <Title level={3}> Driver Application Comparison Per City </Title>
+            <Button type="primary" onClick={() => setOpen(true)}>
+              Generate Report
+            </Button>
+          </Space>
+        }
+      >
+        {!showReport && (
+          <Result
+            status="info"
+            title="Select cities and date range to generate report"
+          />
+        )
+        }
+        {showReport && (
+          <CitySelection
+            cityData1={firstCityDateFrom}
+            cityData2={secondCityDateFrom}
+            dateTo={date}
+          />
+        )}
+      </Card>
     </>
   );
 };
 
-
 const CitySelection = (city1) => {
-  console.log(city1);
-  console.log(city1.dateTo);
-
   const endDate = (data) => {
     if (data === 30) {
       return dayjs(city1.cityData1.launch_date)
@@ -122,18 +158,10 @@ const CitySelection = (city1) => {
     }
   };
 
-  console.log(endDate(city1.dateTo));
-
   const [selectedDateRange, setSelectedDateRange] = useState({
     date_from: city1.cityData1.launch_date,
     date_to: endDate(city1.dateTo),
   });
-  // const handleDateSelect = (dateRange) => {
-  //   setSelectedDateRange({
-  //     date_from: dayjs(dateRange[0]).format("YYYY-MM-DD"),
-  //     date_to: dayjs(dateRange[1]).format("YYYY-MM-DD"),
-  //   });
-  // };
 
   const getUserParams = () => {
     const { date_from, date_to } = selectedDateRange;
@@ -150,7 +178,6 @@ const CitySelection = (city1) => {
   const { data, error, isLoading } = useNewFetch(
     `/v1/reports/applicants-rolling/${id}?${getUserParams()}`
   );
-  console.log(data);
 
   const id2 = city1.cityData2.value;
   const {
@@ -158,56 +185,70 @@ const CitySelection = (city1) => {
     error: error2,
     isLoading: isLoading2,
   } = useNewFetch(`/v1/reports/applicants-rolling/${id2}?${getUserParams()}`);
-  console.log(data2);
 
+  const addCityToData = (data) => {
+    return data?.items?.map((item) => ({
+      date: item.date,
+      count: item.count,
+      city: city1.cityData1.label,
+    }));
+  };
+
+  const addCityToData2 = (data2) => {
+    return data2?.items?.map((item) => ({
+      date: item.date,
+      count: item.count,
+      city: city1.cityData2.label,
+    }));
+  };
+  const combineCityData = (data, data2, city1) => {
+    const city1Data = data?.items
+      ? addCityToData(data, city1.cityData1.label)
+      : [];
+    const city2Data = data2?.items
+      ? addCityToData2(data2, city1.cityData2.label)
+      : [];
+    return [...city1Data, ...city2Data];
+  };
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
- 
-  // if (data.total === 0) {
-  //   return (
-  //     <>
-  //       <Space
-  //         direction="vertical"
-  //         size="large"
-  //         style={{ width: "100%", alignItems: "center" }}
-  //       >
-  //         <Title level={3}> Driver Application Comparison Per City </Title>
-  //         <Result
-  //           status="404"
-  //           title="No Data Found"
-  //           subTitle="Sorry, there is no data for your selected date range. Please try again
-  //             with a different date range"
-  //         />
-  //         <DateRangePicker
-  //           vlue={selectedDateRange}
-  //           onDateSelect={handleDateSelect}
-  //         />
-  //       </Space>
-  //     </>
-  //   );
-  // }
 
-  /*const ChartLine = ({ props, xField, yField, seriesField })*/
+  if (data.total === 0 && data2.total === 0) {
+    return (
+      <>
+        <Space
+          direction="vertical"
+          size="large"
+          style={{ width: "100%", alignItems: "center" }}
+        >
+          <Title level={3}> Driver Application Comparison Per City </Title>
+          <Result
+            status="404"
+            title="No Data Found"
+            subTitle="Sorry, there is no data for your selected date range. Please try again
+              with a different date range"
+          />
+        </Space>
+      </>
+    );
+  }
 
   return (
     <>
-      <Card title="we are almost there " width="100%">
-
-      <Space
-        direction="vertical"
-        size="large"
-        style={{ width: "100%", alignItems: "center" }}
-      >
-        <Title level={3}> Driver Application Comparison Per City </Title>
-              <ChartLine
-                props={data?.items}
-                xField="date"
-                yField="count"
-              />
-        </Space>
+      <Card>
+        <Divider orientation="left">
+          {city1.cityData1.label} vs {city1.cityData2.label}
+          {/* <Text strong> {reportFilter.date_from} </Text> to
+          <Text strong> {reportFilter.date_to} </Text> */}
+        </Divider>
+        <ChartLine
+          props={combineCityData(data, data2, city1)}
+          xField="date"
+          yField="count"
+          seriesField="city"
+          />
       </Card>
-
     </>
   );
 };

@@ -16,10 +16,8 @@ const ChartLine = ({ props, xField, yField, seriesField }) => {
         shared: true,
       }}
       xAxis={{
-        label: {
-          autoHide: true,
-          autoRotate: true,
-        },
+        label:false
+        
       }}
       yAxis={{
         label: {
