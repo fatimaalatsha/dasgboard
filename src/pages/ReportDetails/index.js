@@ -5,8 +5,33 @@ import { useParams } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom';
 
 import ChartColumn from '../../components/ChartColumn';
+import ChartLine from '../../components/ChartLine';
 import CardStatistic from '../../components/CardStatistic';
 const { Title, Text } = Typography;
+
+const CityLine = (cityId) => {
+  const { id } = useParams();
+  
+
+  const { data, error, isLoading } = useNewFetch(
+    `/v1/reports/applicants-rolling/${id}?date_from=2022-12-08&date_to=2023-05-15`
+  );
+  console.log(data)
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Something went wrong...</p>;
+
+  return (
+    <div style={{ height: '600px' }}>
+      <ChartLine
+        props={data?.items}
+        xField="date"
+        yField="count"
+        
+        // seriesField={'status'}
+      />
+    </div>
+  );
+}
 
 
 
@@ -115,6 +140,7 @@ const ReportDetails = () => {
               <Divider orientation="left">
                 <Text strong>Recent Applicants List</Text>
               </Divider>
+              <CityLine cityId={id} />
               <Table
                 columns={[
                   {
