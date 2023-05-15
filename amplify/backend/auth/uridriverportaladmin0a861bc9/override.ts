@@ -22,7 +22,7 @@ export function override(resources: AmplifyAuthCognitoStackTemplate) {
         ProviderDetails: {
           client_id: "***REMOVED***-jvk3ld5ca3ijm2q8v09i01eu062hifea.apps.googleusercontent.com",
           client_secret: "***REMOVED***",
-          authorize_scopes: "openid email profile",
+          authorize_scopes: "openid email profile"
         },
         ProviderName: "Google",
         ProviderType: "Google",
