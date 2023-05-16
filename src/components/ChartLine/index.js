@@ -1,5 +1,4 @@
 import { Line } from "@ant-design/plots";
-import { Line } from "@ant-design/plots";
 
 const ChartLine = ({ props, xField, yField, seriesField, onReady }) => {
   return (
