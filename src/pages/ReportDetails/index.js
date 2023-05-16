@@ -8,7 +8,6 @@ import { useState } from 'react';
 import ChartColumn from '../../components/ChartColumn';
 import ChartLine from '../../components/ChartLine';
 import CardStatistic from '../../components/CardStatistic';
-import { mod } from '@antv/util';
 const { Title, Text } = Typography;
 
 const CityLine = (date) => {
@@ -41,29 +40,7 @@ const CityLine = (date) => {
       props={data?.items}
       xField="date"
       yField="count"
-      onReady={(plot) => {
-        plot.on("plot:click", (evt) => {
-          const { x, y } = evt;
-          const { xField } = plot.options;
-          const tooltipData = plot.chart.getTooltipItems({ x, y });
-          const data = tooltipData[0]?.data;
-          if (data) {
-            const date = data[xField];
-            setModalOpen(true);
-            console.log(date);
-          }
-        });
-
-      }} // seriesField={'status'}
     />
-    {/* <Modal
-      title="Details"
-      open={modalOpen}
-      onOk={() => {}}
-      onCancel={() => {}}
-    >
-      <p>{date}</p>
-    </Modal> */}
     </>
   );
 }
@@ -73,8 +50,7 @@ const CityLine = (date) => {
 const ReportDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
-  const [date, setDate] = useState('3');
-  console.log(date)
+  const [date, setDate] = useState(3);
   const { data, error, isLoading } = useNewFetch(`/v1/reports/city-overview/${id}`);
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
@@ -174,17 +150,15 @@ const ReportDetails = () => {
                 />
               </div>
               <Divider orientation="left">
-                <Text strong> {data.city} Rolling 7 Days</Text>
+                <Text strong> {data.city} Applicant Rolling </Text>
               </Divider>
-              <Space direction="vertical" size="large" align="center"style={{ width: "100%" }}
->
+              <Space direction="vertical" size="large" align="center"style={{ width: "100%" }}>
               <Radio.Group value={date} onChange={(e) => setDate(e.target.value)} >
                 <Radio.Button type="primary" value={3}>View Last 3 Months </Radio.Button>
                 <Radio.Button type="primary" value={6}>View Last 6 Months </Radio.Button>
                 <Radio.Button type="primary" value={12}>View Last 12 Months </Radio.Button>
                 </Radio.Group>
               </Space>
-
                 <CityLine date={date} />
               <Divider orientation="left">
                 <Text strong>Recent Applicants List</Text>
