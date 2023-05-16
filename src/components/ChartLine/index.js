@@ -1,6 +1,7 @@
 import { Line } from "@ant-design/plots";
+import { Line } from "@ant-design/plots";
 
-const ChartLine = ({ props, xField, yField, seriesField }) => {
+const ChartLine = ({ props, xField, yField, seriesField, onReady }) => {
   return (
     <Line
       data={props}
@@ -9,6 +10,7 @@ const ChartLine = ({ props, xField, yField, seriesField }) => {
       seriesField={seriesField}
       // theme="dark"
       defaultColor="#2593fc"
+      onReady={onReady}
       //   color={["#2593fc", "#f507c9", "#3f8600"]}
       smooth={true}
       tooltip={{
@@ -16,8 +18,7 @@ const ChartLine = ({ props, xField, yField, seriesField }) => {
         shared: true,
       }}
       xAxis={{
-        label:false
-        
+        label: false,
       }}
       yAxis={{
         label: {
@@ -31,10 +32,10 @@ const ChartLine = ({ props, xField, yField, seriesField }) => {
       animation={{
         appear: {
           animation: "wave-in",
-          duration: 5000,
+          duration: 3000,
         },
       }}
-        //   point={{ visible:  xField > 0 , }}
+      //   point={{ visible:  xField > 0 , }}
     />
   );
 };
