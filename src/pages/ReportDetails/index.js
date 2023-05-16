@@ -1,4 +1,4 @@
-import { Typography, Card, Space, Divider, Row, Col, Table, Tag, Result, Radio } from 'antd';
+import { Typography, Card, Space, Divider, Row, Col, Table, Tag, Result, Radio, Modal, Input } from 'antd';
 import useNewFetch from '../../hooks/use-new-fetch';
 import dayjs from 'dayjs';
 import { useParams } from 'react-router-dom'
@@ -8,11 +8,12 @@ import { useState } from 'react';
 import ChartColumn from '../../components/ChartColumn';
 import ChartLine from '../../components/ChartLine';
 import CardStatistic from '../../components/CardStatistic';
+import { mod } from '@antv/util';
 const { Title, Text } = Typography;
 
 const CityLine = (date) => {
   const { id } = useParams();
-
+  const [modalOpen, setModalOpen] = useState(false);
   const setDateRange = (date) => {
     const today = new Date();
     date === 3 && today.setMonth(today.getMonth() - 3);
@@ -35,13 +36,35 @@ const CityLine = (date) => {
     );
   }
   return (
-      <ChartLine
-        props={data?.items}
-        xField="date"
-        yField="count"
-        
-        // seriesField={'status'}
-      />
+    <>
+    <ChartLine
+      props={data?.items}
+      xField="date"
+      yField="count"
+      onReady={(plot) => {
+        plot.on("plot:click", (evt) => {
+          const { x, y } = evt;
+          const { xField } = plot.options;
+          const tooltipData = plot.chart.getTooltipItems({ x, y });
+          const data = tooltipData[0]?.data;
+          if (data) {
+            const date = data[xField];
+            setModalOpen(true);
+            console.log(date);
+          }
+        });
+
+      }} // seriesField={'status'}
+    />
+    {/* <Modal
+      title="Details"
+      open={modalOpen}
+      onOk={() => {}}
+      onCancel={() => {}}
+    >
+      <p>{date}</p>
+    </Modal> */}
+    </>
   );
 }
 
