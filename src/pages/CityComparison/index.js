@@ -12,12 +12,10 @@ import {
 } from "antd";
 import useNewFetch from "../../hooks/use-new-fetch"; // Import custom hook for fetching data
 import * as yup from "yup"; // Import Yup validation library
-import { Formik, Form } from "formik"; // Import Formik form components
 import dayjs from "dayjs";
 import qs from "qs";
 
 import ChartLine from "../../components/ChartLine";
-import SubmitWrapper from "../../components/forms/SubmitWrapper";
 
 const { Title, Text } = Typography;
 
@@ -29,20 +27,13 @@ const CityComparison = () => {
   const [showReport, setShowReport] = useState(false);
   const [date, setDate] = useState();
   const [open, setOpen] = useState(true);
-  const { data, error, isLoading } = useNewFetch(`/v1/cities`);
-
+  const { data, error, isLoading } = useNewFetch(`/v1/cities?order=ASC&limit=50&paginated=true`);
 
   const options = data?.data?.map((item) => ({
     label: item.name,
     value: item.id,
     launch_date: item.launch_date ? item.launch_date : "2021-12-08",
   }));
-
-  const validationSchema = yup.object().shape({
-    firstCityId: yup.string().required("Please select a city"),
-    secondCityId: yup.string().required("Please select a city"),
-    date: yup.number().required("Please select a date range"),
-  });
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
@@ -185,7 +176,6 @@ const CitySelection = (city1) => {
     error: error2,
     isLoading: isLoading2,
   } = useNewFetch(`/v1/reports/applicants-rolling/${id2}?${getUserParams()}`);
-
   const addCityToData = (data) => {
     return data?.items?.map((item) => ({
       date: item.date,
@@ -210,7 +200,6 @@ const CitySelection = (city1) => {
       : [];
     return [...city1Data, ...city2Data];
   };
-
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
 
