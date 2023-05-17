@@ -7,9 +7,7 @@ const ChartLine = ({ props, xField, yField, seriesField }) => {
       xField={xField}
       yField={yField}
       seriesField={seriesField}
-      // theme="dark"
       defaultColor="#2593fc"
-      //   color={["#2593fc", "#f507c9", "#3f8600"]}
       smooth={true}
       tooltip={{
         showMarkers: false,
@@ -34,7 +32,6 @@ const ChartLine = ({ props, xField, yField, seriesField }) => {
           duration: 5000,
         },
       }}
-        //   point={{ visible:  xField > 0 , }}
     />
   );
 };
