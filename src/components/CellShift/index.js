@@ -63,7 +63,7 @@ const shiftSchema = object().shape({
         then: string().required('Required'),
         otherwise: string().notRequired()
     }),
-    repeats_on: mixed().when('pattern', {
+    days_of_week: mixed().when('pattern', {
         is: 'custom',
         then: mixed().required('Required'),
         otherwise: mixed().notRequired()
@@ -185,7 +185,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
             pattern: 'weekly', // once, daily, weekly
             end_date: null,
             occurrences: 0,
-            repeats_on: [DEFAULT_DAY],
+            days_of_week: [DEFAULT_DAY],
         }
     })
 
@@ -280,7 +280,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     ends: shift.ends,
                     end_date: shift.recurrency.end_date || shift.day,
                     max_occurrences: shift.recurrency.occurrences,
-                    'repeats_on': shift.recurrency.repeats_on,
+                    'days_of_week': shift.recurrency.days_of_week,
                 }}
                 enableReinitialize
                 validationSchema={shiftSchema}
@@ -298,11 +298,12 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                         delete values.ends 
                         delete values.end_date 
                         delete values.max_occurrences
-                        delete values.repeats_on
+                        delete values.days_of_week
                     }
                     if (values.ends === 'never') {
                         delete values.end_date
                         delete values.max_occurrences
+                        values.never_ends = true
                     }
                     if (values.pattern === 'once') {
                         delete values.end_date
@@ -312,7 +313,13 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     } else {
                         delete values.max_occurrences
                     }
+                    if(values.days_of_week === 'weekday') {
+                        values.days_of_week = [1,2,3,4,5]
+                    } else if (values.days_of_week === 'weekend') {
+                        values.days_of_week = [0,6]
+                    }
                     delete values.hasGuarantee
+                    delete values.ends
                     !edit ? // If edit mode is true, update shift
                     await createWeekShift(values)
                     .then(() => {
@@ -464,7 +471,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                     pattern: e.target.value,
                                                     recurrency: {
                                                         ...shift.recurrency,
-                                                        repeats_on: e.target.value === 'weekly' || e.target.value === 'custom' ? [DEFAULT_DAY] : [...Array(7)].map((_,idx) => idx)
+                                                        days_of_week: e.target.value === 'weekly' || e.target.value === 'custom' ? [DEFAULT_DAY] : [...Array(7)].map((_,idx) => idx)
                                                     }
                                                 })
                                             } 
@@ -500,7 +507,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                             { shift.recurrency.pattern === 'weekly' && (
                                                 <>
                                                 <Divider orientation="left" plain>Repeat On</Divider>
-                                                <Radio.Group name='repeats_on' value={props.values.repeats_on[0]} onChange={e =>props.setFieldValue('repeats_on', [Number(e.target.value)])}>
+                                                <Radio.Group name='days_of_week' value={props.values.days_of_week[0]} onChange={e =>props.setFieldValue('days_of_week', [Number(e.target.value)])}>
                                                     { weeklyDaysReccurence.map((day, index) => (
                                                         <Radio key={index} value={index}>{day}</Radio>
                                                     ))}
@@ -510,7 +517,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                             { shift.recurrency.pattern === 'daily' && (
                                                 <>
                                                 <Divider orientation="left" plain>Repeat On</Divider>
-                                                <Radio.Group name='repeats_on' onChange={e =>props.setFieldValue('repeats_on', e.target.value)}>
+                                                <Radio.Group name='days_of_week' onChange={e =>props.setFieldValue('days_of_week', e.target.value)}>
                                                     <Radio value={'weekday'}>Weekday (Mon to Fri)</Radio>
                                                     <Radio value={'weekends'}>Weekend (Sat and Sun)</Radio>
                                                 </Radio.Group>
