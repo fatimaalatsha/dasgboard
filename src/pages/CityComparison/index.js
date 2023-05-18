@@ -11,7 +11,6 @@ import {
   Button,
 } from "antd";
 import useNewFetch from "../../hooks/use-new-fetch"; // Import custom hook for fetching data
-import * as yup from "yup"; // Import Yup validation library
 import dayjs from "dayjs";
 import qs from "qs";
 
