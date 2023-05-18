@@ -150,7 +150,7 @@ const ReportDetails = () => {
                 />
               </div>
               <Divider orientation="left">
-                <Text strong> {data.city} Applicant Rolling </Text>
+                <Text strong> {data.city} Application History </Text>
               </Divider>
               <Space direction="vertical" size="large" align="center"style={{ width: "100%" }}>
               <Radio.Group value={date} onChange={(e) => setDate(e.target.value)} >
