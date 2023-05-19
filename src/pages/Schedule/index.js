@@ -8,6 +8,7 @@ import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
 import WeekView from '../../components/schedule/WeekView'
 import DayView from '../../components/schedule/DayView'
+import ShiftApproval from '../../components/schedule/ShiftApproval'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
 
@@ -94,7 +95,7 @@ const Schedule = () => {
                 : <DayView selectedDay={selectedDate.day} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity}/>
         ,
         draft: <>Draft</>,
-        approval: <>Approval</>,
+        approval: <ShiftApproval />,
     }
 
     return (
