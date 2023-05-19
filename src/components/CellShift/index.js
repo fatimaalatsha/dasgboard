@@ -47,7 +47,7 @@ const { useToken } = theme
 const { Text, Title, Link } = Typography
 
 const shiftSchema = object().shape({
-    capacity: number().min(10, 'Shift driver capacity must be greater than or equal to 10.').required('Required'),
+    capacity: number().min(1, 'Shift driver capacity must be greater than or equal to 1.').required('Required'),
     start_time: string().required('Required'),
     end_time: string().required('Required'),
     city_id: mixed().required('Required'),
@@ -428,7 +428,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                     prefix={<UserOutlined />} 
                                     placeholder="Driver Limit" 
                                     type="number" 
-                                    min={10} max={999} 
+                                    min={1} max={999} 
                                     value={props.values.capacity}  
                                     onChange={(e) => {
                                         props.setFieldValue('capacity', e.target.value)
