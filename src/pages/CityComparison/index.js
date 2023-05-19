@@ -19,12 +19,15 @@ import ChartLine from "../../components/ChartLine";
 const { Title, Text } = Typography;
 
 const CityComparison = () => {
-  const [firstCityId, setFirstCityId] = useState([]);
-  const [secondCityId, setSecondCityId] = useState([]);
-  const [firstCityDateFrom, setFirstCityDateFrom] = useState([]);
-  const [secondCityDateFrom, setSecondCityDateFrom] = useState([]);
+  const [firstCityId, setFirstCityId] = useState('');
+  const [secondCityId, setSecondCityId] = useState('');
+  const [firstCityDateFrom, setFirstCityDateFrom] = useState('');
+  const [secondCityDateFrom, setSecondCityDateFrom] = useState('');
   const [showReport, setShowReport] = useState(false);
   const [date, setDate] = useState();
+  const [info, setInfo] = useState();
+  const [info2, setInfo2] = useState();
+  const [dateValue, setDateValue] = useState();
   const [open, setOpen] = useState(true);
   const { data, error, isLoading } = useNewFetch(`/v1/cities?order=ASC&limit=50&paginated=true`);
 
@@ -33,6 +36,20 @@ const CityComparison = () => {
     value: item.id,
     launch_date: item.launch_date ? item.launch_date : "2021-12-08",
   }));
+
+  const handleSubmit = () => {
+    // setDate(dateValue);
+    setOpen(false);
+    setShowReport(true);
+    setFirstCityId(info.value);
+    console.log(info.value);
+    console.log(firstCityId);
+    setSecondCityId(info2.value);
+    console.log(secondCityId)
+    console.log(info2.value);
+  
+  };
+
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
@@ -43,6 +60,10 @@ const CityComparison = () => {
         open={open}
         closable={false}
         distroyOnClose={true}
+        handleCancel={() => {
+          setOpen(false);
+          setShowReport(false);
+        }}
         footer={[
           <Button key="cancel" onClick={() => setOpen(false)}>
             Cancel
@@ -50,11 +71,8 @@ const CityComparison = () => {
           <Button
             key="submit"
             type="primary"
-            disabled={!firstCityId || !secondCityId || !date}
-            onClick={() => {
-              setOpen(false);
-              setShowReport(true);
-            }}
+            // disabled={!firstCityId || !secondCityId || !dateValue}
+            onClick={handleSubmit}
           >
             Generate Report
           </Button>,
@@ -65,25 +83,28 @@ const CityComparison = () => {
           style={{ width: "100%" }}
           placeholder="Please select"
           onChange={(value, date) => {
-            setFirstCityId(value);
-            setFirstCityDateFrom(date);
+            // setFirstCityId(value);
+            setInfo(date);
+            console.log(date);
+            console.log(value);
           }}
           options={options}
-        ></Select>
+        />
         <Divider orientation="left"> Select Secand City </Divider>
         <Select
           style={{ width: "100%" }}
           placeholder="Please select"
           onChange={(value, date) => {
-            setSecondCityId(value);
-            setSecondCityDateFrom(date);
+            // setSecondCityId(value);
+            setInfo2(date);
+            console.log(date);
           }}
           options={options}
         />
         <Divider orientation="left"> Select Date Range </Divider>
         <Radio.Group
           onChange={(e) => {
-            setDate(e.target.value);
+            setDateValue(e.target.value);
           }}
         >
           <Radio value={30}>30 Days</Radio>
@@ -98,7 +119,8 @@ const CityComparison = () => {
           <Space
             direction="horizontal"
             size="large"
-            style={{ display: "flex", justifyContent: "space-between" }}>
+            style={{ display: "flex", justifyContent: "space-between" }}
+          >
             <Title level={3}> Driver Application Comparison Per City </Title>
             <Button type="primary" onClick={() => setOpen(true)}>
               Generate Report
@@ -111,12 +133,11 @@ const CityComparison = () => {
             status="info"
             title="Select cities and date range to generate report"
           />
-        )
-        }
+        )}
         {showReport && (
           <CitySelection
-            cityData1={firstCityDateFrom}
-            cityData2={secondCityDateFrom}
+            cityData1={firstCityId}
+            cityData2={secondCityId}
             dateTo={date}
           />
         )}
