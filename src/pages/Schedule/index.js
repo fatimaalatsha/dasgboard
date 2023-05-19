@@ -6,8 +6,8 @@ import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
-import WeekView from '../../components/WeekView'
-import DayView from '../../components/DayView'
+import WeekView from '../../components/schedule/WeekView'
+import DayView from '../../components/schedule/DayView'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
 
