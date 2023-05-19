@@ -7,8 +7,8 @@ import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
 import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import DayCellShift from '../DayCellShift' // Import CellShift component
-import { useFilterStore } from '../../store' // Import useFilterStore hook
-import useDaySchedule from '../../hooks/use-day-schedule' // Import useDaySchedule hook
+import { useFilterStore } from '../../../store' // Import useFilterStore hook
+import useDaySchedule from '../../../hooks/use-day-schedule' // Import useDaySchedule hook
 
 dayjs.extend(utc)
 dayjs.extend(timezone)

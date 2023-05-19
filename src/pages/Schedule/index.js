@@ -6,8 +6,8 @@ import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
-import WeekView from '../../components/WeekView'
-import DayView from '../../components/DayView'
+import WeekView from '../../components/schedule/WeekView'
+import DayView from '../../components/schedule/DayView'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
 
@@ -22,7 +22,7 @@ for (let hour = 0; hour < 24; hour++) {
 }
 
 const Schedule = () => {
-    //const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
+    const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
     const [selectedDate, setSelectedDate] = useState({ // Create state to store the selected week's date
@@ -48,6 +48,10 @@ const Schedule = () => {
         {
             key: 'draft',
             tab: 'Draft',
+        },
+        {
+            key: 'approval',
+            tab: 'Pending Approval',
         }
     ]
     const options = [
@@ -84,6 +88,15 @@ const Schedule = () => {
         setModal({...modal, open: false})
     }
 
+    const schedulTabContent = {
+        active:   view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
+                : view === 2 ? <div>Month View 👀</div>
+                : <DayView selectedDay={selectedDate.day} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity}/>
+        ,
+        draft: <>Draft</>,
+        approval: <>Approval</>,
+    }
+
     return (
         <>
             <Card 
@@ -91,6 +104,8 @@ const Schedule = () => {
                 extra={<Button onClick={() => setModal({...modal, open: true})} type="primary">Create Shift</Button>}
                 style={{ margin: 15 }} 
                 tabList={tabList}
+                activeTabKey={tabKey}
+                onTabChange={key => setTabKey(key)}
                 bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16 }}
             >
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>                    
@@ -133,10 +148,7 @@ const Schedule = () => {
                         <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>
-                { view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
-                : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedDay={selectedDate.day} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity}/>
-                }
+                {schedulTabContent[tabKey]}
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
                 <Space direction="vertical" size={16}>
