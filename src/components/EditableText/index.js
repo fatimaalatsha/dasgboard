@@ -1,7 +1,7 @@
 import { useState } from 'react'
 import { Typography, Modal } from 'antd' // Import antd components
 
-const { Text } = Typography // Destructure Text from Typography
+const { Text, Title } = Typography // Destructure Text from Typography
 const { confirm } = Modal // Destructure config from Modal 
 
 const EditableText = ({...props}) => {
@@ -37,7 +37,11 @@ const EditableText = ({...props}) => {
 
     return (
         <>
-            <Text {...textConfig}>{`${editableString}`}</Text>
+            { !props.heading ? 
+                (<Text {...textConfig}>{`${editableString}`}</Text>)
+                :
+                (<Title level={4} type="secondary" style={{ margin: 0 }} {...textConfig} strong>{`${editableString}`}</Title>)
+            }
         </>
     )
 }

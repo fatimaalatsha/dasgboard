@@ -29,6 +29,7 @@ import { useFilterStore } from '../../store'
 
 import Input from '../forms/InputWrapper' // Import InputWrapper component
 import Submit from '../forms/SubmitWrapper' // Import SubmitWrapper component
+import EditableText from '../EditableText' // EditableText component for inline editing capacity
 import { CitySelect } from '../CitySelect' // Import CitySelect component
 import DriverSelect from '../DriverSelect' // Import DriverSelect component
 import { 
@@ -87,7 +88,7 @@ const shiftSchema = object().shape({
 
 const weeklyDaysReccurence = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
 
-const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete }) => {
+const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetch }) => {
 
     const items = [
         {
@@ -132,7 +133,16 @@ const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete }) => {
                     <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
                         <Space style={{ display: 'flex', columnGap: 2, alignItems: 'baseline' }}>
                             <Title level={1} style={{ margin: 0 }}>0</Title>
-                            <Title level={4} type="secondary" style={{ margin: 0 }}>{`/ ${record?.drivers}`}</Title>
+                                 <Title level={4}>/</Title>
+                                <EditableText
+                                    value={record?.drivers}
+                                    heading={true}
+                                    name="capacity"
+                                    updateCallback={ async (values) => {
+                                        await updateWeekShift(values, record.shift_id)
+                                        refetch()
+                                    }}
+                                />
                         </Space>
                         { record.guarantee !== 0 && <Text>${record.guarantee}</Text>}
                         <Space>
@@ -252,7 +262,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         <>
             <div className="container" style={{ minHeight: 24}}>
                 { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} />
+                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} refetch={refetch} />
                 ) : (
                 <>
                     {  display && (
@@ -261,7 +271,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     </Tooltip> 
                     )}
                         { isHovering && (
-                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} />
+                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} refetch={refetch} />
                         )}
                 </>
                 )}
