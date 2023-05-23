@@ -16,7 +16,7 @@ import {
     Divider,
     Radio,
     DatePicker,
-    InputNumber 
+    InputNumber,
 } from 'antd'
 import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
@@ -86,7 +86,36 @@ const shiftSchema = object().shape({
     }),
 })
 
-const weeklyDaysReccurence = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat']
+const weeklyDaysReccurence = [
+    {
+        label: 'Sun',
+        value: 0,
+    }, 
+    {
+        label: 'Mon',
+        value: 1,
+    }, 
+    {
+        label: 'Tue',
+        value: 2,
+    }, 
+    {
+        label: 'Wed',
+        value: 3,
+    }, 
+    {
+        label: 'Thu',
+        value: 4,
+    }, 
+    {
+        label: 'Fri',
+        value: 5,
+    }, 
+    {
+        label: 'Sat',
+        value: 6,
+    }
+]
 
 const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetch }) => {
 
@@ -519,7 +548,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                 <Divider orientation="left" plain>Repeat On</Divider>
                                                 <Radio.Group name='days_of_week' value={props.values.days_of_week[0]} onChange={e =>props.setFieldValue('days_of_week', [Number(e.target.value)])}>
                                                     { weeklyDaysReccurence.map((day, index) => (
-                                                        <Radio key={index} value={index}>{day}</Radio>
+                                                        <Radio key={index} value={index}>{day.label}</Radio>
                                                     ))}
                                                 </Radio.Group>
                                                 </>
@@ -531,6 +560,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                     <Radio value={'weekday'}>Weekday (Mon to Fri)</Radio>
                                                     <Radio value={'weekends'}>Weekend (Sat and Sun)</Radio>
                                                 </Radio.Group>
+                                                <Checkbox.Group options={weeklyDaysReccurence} defaultValue={[1]} onChange={(value) => console.log(value)} />
                                                 </>
                                             )}
                                             <Divider orientation="left" plain>Ends</Divider>
