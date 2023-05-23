@@ -352,11 +352,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     } else {
                         delete values.max_occurrences
                     }
-                    if(values.days_of_week === 'weekday') {
-                        values.days_of_week = [1,2,3,4,5]
-                    } else if (values.days_of_week === 'weekend') {
-                        values.days_of_week = [0,6]
-                    }
                     delete values.hasGuarantee
                     delete values.ends
                     !edit ? // If edit mode is true, update shift
@@ -556,11 +551,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                             { shift.recurrency.pattern === 'daily' && (
                                                 <>
                                                 <Divider orientation="left" plain>Repeat On</Divider>
-                                                <Radio.Group name='days_of_week' onChange={e =>props.setFieldValue('days_of_week', e.target.value)}>
-                                                    <Radio value={'weekday'}>Weekday (Mon to Fri)</Radio>
-                                                    <Radio value={'weekends'}>Weekend (Sat and Sun)</Radio>
-                                                </Radio.Group>
-                                                <Checkbox.Group options={weeklyDaysReccurence} defaultValue={[1]} onChange={(value) => console.log(value)} />
+                                                <Checkbox.Group options={weeklyDaysReccurence} defaultValue={dayjs(shift.day).format('d')} onChange={(value) => props.setFieldValue('days_of_week', value)} />
                                                 </>
                                             )}
                                             <Divider orientation="left" plain>Ends</Divider>
