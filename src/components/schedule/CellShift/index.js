@@ -17,6 +17,7 @@ import {
     Radio,
     DatePicker,
     InputNumber,
+    Input,
 } from 'antd'
 import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
@@ -27,7 +28,7 @@ import { object, string, number, boolean, array, mixed, date } from 'yup' // Imp
 
 import { useFilterStore } from '../../../store'
 
-import Input from '../../forms/InputWrapper' // Import InputWrapper component
+import InputWrapper from '../../forms/InputWrapper' // Import InputWrapper component
 import Submit from '../../forms/SubmitWrapper' // Import SubmitWrapper component
 import EditableText from '../../EditableText' // EditableText component for inline editing capacity
 import { CitySelect } from '../../CitySelect' // Import CitySelect component
@@ -57,6 +58,7 @@ const shiftSchema = object().shape({
         then: number().min(10, 'Guarantee amount must be greater than or equal to 10.').required('Required'),
         otherwise: number().notRequired()
     }),
+    guarantee_specs: string().notRequired(),
     driver_ids: array().of(number().nullable()).notRequired(),
     is_recurring: boolean().notRequired(),
     pattern: string().when('is_recurring', {
@@ -217,6 +219,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         shift_id: record.id || null,
         hasGuarantee: false,
         guarantee: record.guarantee || 0,
+        guarantee_specs: record.guarantee_specs || '',
         hasRecurrency: false,
         pattern: 'weekly', // once, daily, weekly
         ends: 'never', // never, after, on
@@ -312,26 +315,29 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     capacity: shift.drivers,
                     city_id: !edit ? [Number(city)] : Number(city),
                     guarantee: shift.guarantee,
+                    guarantee_specs: shift.guarantee_specs,
                     hasGuarantee: shift.hasGuarantee,
                     'driver_ids': [],
                     is_recurring: shift.hasRecurrency,
-                    pattern: shift.pattern !== 'custom' ? shift.pattern : shift.recurrency.pattern,
+                    pattern: shift.pattern,
                     ends: shift.ends,
                     end_date: shift.recurrency.end_date || shift.day,
                     max_occurrences: shift.recurrency.occurrences,
                     'days_of_week': shift.recurrency.days_of_week,
                 }}
-                enableReinitialize
                 validationSchema={shiftSchema}
                 onSubmit={async (values, { setSubmitting, resetForm }) => {
-                    //console.log(values)
+                    console.log(shift.pattern)
                     values.start_time = converToUTC( shift.day, values.start_time, scheduleFilter.tz)
                     values.end_time = converToUTC(shift.day, values.end_time, scheduleFilter.tz)
-                    //values.is_recurring = false
                     values.capacity = Number(values.capacity)
                     values.guarantee = Number(values.guarantee)
-                    !values.hasGuarantee && delete values.guarantee
+                    values.pattern = shift.pattern !== 'custom' ? shift.pattern : shift.recurrency.pattern
                     values.driver_ids.length === 0 && delete values.driver_ids
+                    if (!values.guarantee) {
+                        delete values.guarantee
+                        delete values.guarantee_specs
+                    }
                     if (!values.is_recurring) {
                         delete values.pattern 
                         delete values.ends 
@@ -346,6 +352,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     }
                     if (values.pattern === 'once') {
                         delete values.end_date
+                        delete values.never_ends
+                        values.max_occurrences = 1
                     }
                     if (values.max_occurrences) {
                         delete values.end_date
@@ -354,6 +362,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     }
                     delete values.hasGuarantee
                     delete values.ends
+                    //console.log(values)
                     !edit ? // If edit mode is true, update shift
                     await createWeekShift(values)
                     .then(() => {
@@ -447,7 +456,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                         props.setFieldValue('driver_ids', value)
                                     }}
                                 />
-                                <Input 
+                                <InputWrapper 
                                     name="capacity" 
                                     prefix={<UserOutlined />} 
                                     placeholder="Driver Limit" 
@@ -469,21 +478,30 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 </Checkbox>
                                 </Divider>
                                 { shift.hasGuarantee && (
-                                    <Input 
-                                        name="guarantee"
-                                        placeholder="Guarantee amount"
-                                        type="number"
-                                        min={0}
-                                        max={1000}
-                                        prefix="$" 
-                                        suffix="CAD" 
-                                        value={props.values.guarantee}
-                                        onChange={(e) => {
-                                            const value = Number(e.target.value)
-                                            props.setFieldValue('guarantee', value)
-                                            setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, amount: value } }))
-                                        }}
-                                    />
+                                    <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                        <InputWrapper 
+                                            name="guarantee"
+                                            placeholder="Guarantee amount"
+                                            type="number"
+                                            min={0}
+                                            max={1000}
+                                            prefix="$" 
+                                            suffix="CAD" 
+                                            value={props.values.guarantee}
+                                            onChange={(e) => {
+                                                props.setFieldValue('guarantee', Number(e.target.value))
+                                            }}
+                                        />
+                                        <Input.TextArea 
+                                            name="guarantee_specs"
+                                            defaultValue={props.values.guarantee_specs}
+                                            rows={4} 
+                                            placeholder="Guarantee description (optional)"
+                                            onChange={(e) => {
+                                                props.setFieldValue('guarantee_specs', e.target.value)
+                                            }}
+                                        />
+                                    </Space>
                                 )}
                                 <Divider>
                                 <Checkbox
@@ -508,6 +526,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                         days_of_week: e.target.value === 'weekly' || e.target.value === 'custom' ? [DEFAULT_DAY] : [...Array(7)].map((_,idx) => idx)
                                                     }
                                                 })
+                                                e.target.value === 'daily' && props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
                                             } 
                                         } 
                                         value={shift.pattern}
@@ -520,7 +539,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                             <>
                                             <Divider orientation="left" plain>Custom Recurrence</Divider>
                                             <Radio.Group 
-                                                value={props.values.pattern} 
+                                                value={shift.recurrency.pattern} 
                                                 buttonStyle="solid" 
                                                 onChange={(e) => {
                                                     setShift({
@@ -557,33 +576,38 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                             <Divider orientation="left" plain>Ends</Divider>
                                             <Radio.Group 
                                                 name="ends"
-                                                value={props.values.ends}
+                                                value={shift.ends}
                                                 onChange={(e) => {
                                                     props.setFieldValue('ends', e.target.value)
                                                     setShift({...shift, ends: e.target.value })
                                                 }}
                                             >
                                                 <Space direction="vertical">
-                                                    <Radio disabled={props.values.pattern === 'once'} value="never">Never</Radio>
-                                                    <Radio disabled={props.values.pattern === 'once'} value="on">
+                                                    <Radio disabled={shift.recurrency.pattern === 'once'} value="never">Never</Radio>
+                                                    <Radio disabled={shift.recurrency.pattern === 'once'} value="on">
                                                         On
                                                         <DatePicker 
                                                             disabled={shift.ends !== 'on' } 
                                                             style={{ marginLeft: 16 }} 
                                                             value={dayjs(props.values.end_date)}
                                                             onChange={(date, dateString) => props.setFieldValue('end_date', dateString)} 
+                                                            allowClear={false}
                                                         />
                                                     </Radio>
-                                                    <Radio disabled={props.values.pattern === 'once'} value="after">
+                                                    <Radio disabled={shift.recurrency.pattern === 'once'} value="after">
                                                         After
                                                         <InputNumber 
                                                             name="max_occurrences" 
-                                                            disabled={shift.ends !== 'after' || props.values.pattern === 'once'} 
+                                                            disabled={shift.ends !== 'after' || shift.recurrency.pattern === 'once'} 
                                                             style={{ width: 180, marginLeft: 8 }} 
                                                             addonAfter="occurrences" 
                                                             min={1} 
-                                                            value={shift.ends === 'on' ? 0 : props.values.max_occurrences} 
-                                                            onChange={(value) => props.setFieldValue('max_occurrences', Number(value))} 
+                                                            value={shift.ends === 'on' ? 0 : shift.recurrency.occurrences} 
+                                                            onChange={(value) => {
+                                                                props.setFieldValue('max_occurrences', Number(value))
+                                                                setShift({...shift, recurrency: { ...shift.recurrency, occurrences: Number(value) } })
+                                                                }
+                                                            } 
                                                         />
                                                     </Radio>
                                                 </Space>
