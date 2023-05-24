@@ -95,7 +95,7 @@ const Schedule = () => {
                 : <DayView selectedDay={selectedDate.day} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity}/>
         ,
         draft: <>Draft</>,
-        approval: <ShiftApproval />,
+        approval: <ShiftApproval selectedWeek={selectedDate.week} tz={scheduleFilter.tz} />,
     }
 
     return (
