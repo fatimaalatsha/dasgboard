@@ -23,58 +23,48 @@ const queryHandler = (params) => ({ // Get table params
 const columns = [
     {
       title: 'ID',
-      dataIndex: 'key',
-      key: 'key',  
+      dataIndex: 'user_id',
+      key: 'user_id',  
     },
-  {
-    title: 'Name',
-    dataIndex: 'name',
-    key: 'name',
-    render: (text) => <a>{text}</a>,
-  },
-  {
-    title: 'Reliability Score',
-    dataIndex: 'age',
-    key: 'age',
-  },
-  {
-    title: 'Shift Details',
-    dataIndex: 'address',
-    key: 'address',
-  },
-  {
-    title: 'Action',
-    key: 'action',
-    render: (_, record) => (
-      <Space size="middle">
-        <Button danger >Reject</Button>
-        <Button type="primary" >Approve</Button>
-      </Space>
-    ),
-  },
-];
-const oldData = [
-  {
-    key: '1',
-    name: 'John Brown',
-    age: 32,
-    address: 'May, Friday 19 - 2023 07:00 ➡ 08:00',
-    tags: ['nice', 'developer'],
-  },
-  {
-    key: '2',
-    name: 'Jim Green',
-    age: 42,
-    address: 'May, Friday 19 - 2023 07:00 ➡ 08:00',
-    tags: ['loser'],
-  },
-  {
-    key: '3',
-    name: 'Joe Black',
-    age: 32,
-    address: 'May, Friday 19 - 2023 07:00 ➡ 08:00',
-    tags: ['cool', 'teacher'],
-  },
+    {
+      title: 'Driver',
+      dataIndex: 'user',
+      key: 'full_name',
+      render: (user) => <>{`${user.first_name} ${user.last_name}`}</>,
+    },
+    {
+      title: 'City',
+      dataIndex: ['shift', 'city', 'name'],
+      key: 'name',
+    },
+    {
+      title: 'Shift Details',
+      dataIndex: 'shift',
+      key: 'shift_details',
+      render: (shift) => <>{`${dayjs(shift.start_time).utc().format('MMM, dddd DD - YYYY HH:mm')} ➡ ${dayjs(shift.end_time).utc().format('HH:mm')}`}</>,
+    },
+    {
+      title: 'Shift Status',
+      dataIndex: ['shift', 'status'],
+      key: 'status',
+      render: (status) => <Tag style={{ textTransform: 'capitalize' }} color={status === 'active' ? 'green' : status === 'rejected' ? 'red' : 'blue'}>{status}</Tag>,
+    },
+    {
+      title: 'Application Status',
+      dataIndex: 'status',
+      key: 'app_status',
+      render: (app_status) => <Tag style={{ textTransform: 'capitalize' }} color={app_status === 'approved' ? 'green' : app_status === 'rejected' ? 'red' : 'orange'}>{app_status}</Tag>,
+    },
+    {
+      title: 'Action',
+      key: 'action',
+      render: (_, record) => (
+        <Space size="middle">
+          <Button danger size="small">Reject</Button>
+          <Button type="primary" size="small">Approve</Button>
+        </Space>
+      ),
+    },
 ]
 
 const ShiftApproval = ({ selectedWeek, tz }) => {
@@ -85,15 +75,18 @@ const ShiftApproval = ({ selectedWeek, tz }) => {
       date_from: selectedWeek.startOf('week').format('YYYY-MM-DD'),
       date_to: selectedWeek.endOf('week').format('YYYY-MM-DD'),
   }
-  const { data, isLoading, error, refetch } = useFetch(`/v1/shifts?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`)
+  const { data, isLoading, error, refetch } = useFetch(`/v1/shifts/applications?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`)
   
 
   error && <>Something went wrong...</>
 
-  console.log(data)
-
   return (
-    <Table columns={columns} dataSource={oldData} />
+    <Table 
+    columns={columns} 
+    dataSource={data.data} 
+    loading={isLoading}
+    rowKey="id"
+    />
   )
 }
 
