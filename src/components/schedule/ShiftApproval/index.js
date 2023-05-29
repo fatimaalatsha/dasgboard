@@ -67,13 +67,14 @@ const columns = [
     },
 ]
 
-const ShiftApproval = ({ selectedWeek, tz }) => {
+const ShiftApproval = ({ selectedDate, tz, view }) => {
   dayjs.tz.setDefault(tz)
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+  console.log(selectedDate)
   const filters = {
       city_id: Number(scheduleFilter.filter.city_id.replace('in|', '')),
-      date_from: selectedWeek.startOf('week').format('YYYY-MM-DD'),
-      date_to: selectedWeek.endOf('week').format('YYYY-MM-DD'),
+      date_from: view === 1 ? selectedDate.week.startOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
+      date_to: view === 1 ? selectedDate.week.endOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
   }
   const { data, isLoading, error, refetch } = useFetch(`/v1/shifts/applications?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`)
   
