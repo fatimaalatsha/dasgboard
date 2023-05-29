@@ -38,11 +38,11 @@ const ChartColumn = ({
     ],
   },
 }) => {
-  const sortedData = props.sort((a, b) => b[yField] - a[yField]);
+  // const sortedData = props.sort((a, b) => b[yField] - a[yField]);
 
   return (
     <Column
-      data={sortedData}
+      data={props}
       xField={xField}
       yField={yField}
       seriesField={seriesField}
