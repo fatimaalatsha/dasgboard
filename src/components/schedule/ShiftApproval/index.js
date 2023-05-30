@@ -1,4 +1,5 @@
-import { Space, Table, Tag, Button } from 'antd'
+import { Space, Table, Tag, Button, Popconfirm, message } from 'antd'
+import { QuestionCircleOutlined } from '@ant-design/icons'
 
 import dayjs from 'dayjs' // Import dayjs
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -8,6 +9,7 @@ import qs from 'qs' // Import qs library
 
 import useFetch from '../../../hooks/use-new-fetch'
 import { useFilterStore } from '../../../store'
+import { confirmApplication } from '../../../utils/schedule-status'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -20,7 +22,27 @@ const queryHandler = (params) => ({ // Get table params
     paginated: false,
 })
 
-const columns = [
+const ShiftApproval = ({ selectedDate, tz, view }) => {
+  dayjs.tz.setDefault(tz)
+  const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+
+  const filters = {
+      city_id: Number(scheduleFilter.filter.city_id.replace('in|', '')),
+      date_from: view === 1 ? selectedDate.week.startOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
+      date_to: view === 1 ? selectedDate.week.endOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
+  }
+
+  const { data, isLoading, error, refetch } = useFetch(`/v1/shifts/applications?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`)
+
+  const handleApplication = async (shiftId, driverId, status) => {
+    const payload = { "action": status, "driver_id": driverId }
+    await confirmApplication(payload, shiftId).then(() => {
+      status === 'approved' ? message.success('Application Approved') : message.success('Application Rejected')
+      refetch()
+    } )
+  }
+  
+  const columns = [
     {
       title: 'ID',
       dataIndex: 'user_id',
@@ -60,33 +82,47 @@ const columns = [
       key: 'action',
       render: (_, record) => (
         <Space size="middle">
-          <Button danger size="small">Reject</Button>
-          <Button type="primary" size="small">Approve</Button>
+          <Popconfirm
+            title="Reject Application"
+            description="Are you sure to reject this application?"
+            icon={
+              <QuestionCircleOutlined
+                style={{
+                  color: 'red',
+                }}
+              />
+            }
+            onConfirm={() => handleApplication(record.shift_id, record.user_id, 'decline')}
+            okText="Yes, decline it"
+            okButtonProps={{
+              danger: true,
+            }}
+            cancelText="No"
+          >
+            <Button danger size="small">Decline</Button>
+          </Popconfirm>
+          <Popconfirm
+            title="Approve Application"
+            description="Are you sure to approve this application?"
+            onConfirm={() => handleApplication(record.shift_id, record.user_id, 'approved')}
+            okText="Yes, approve it"
+            cancelText="No"
+          >
+            <Button type="primary" size="small">Approve</Button>
+          </Popconfirm>
         </Space>
       ),
     },
-]
-
-const ShiftApproval = ({ selectedDate, tz, view }) => {
-  dayjs.tz.setDefault(tz)
-  const scheduleFilter = useFilterStore(state => state.scheduleFilter)
-  console.log(selectedDate)
-  const filters = {
-      city_id: Number(scheduleFilter.filter.city_id.replace('in|', '')),
-      date_from: view === 1 ? selectedDate.week.startOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
-      date_to: view === 1 ? selectedDate.week.endOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
-  }
-  const { data, isLoading, error, refetch } = useFetch(`/v1/shifts/applications?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`)
-  
+  ]
 
   error && <>Something went wrong...</>
 
   return (
     <Table 
-    columns={columns} 
-    dataSource={data.data} 
-    loading={isLoading}
-    rowKey="id"
+      columns={columns} 
+      dataSource={data.data} 
+      loading={isLoading}
+      rowKey="id"
     />
   )
 }
