@@ -35,10 +35,6 @@ const dataSet = [
     key: "conversion_rates_by_application",
     name: "Conversion Rates By Application",
   },
-  {
-    key: "driver_application_comparison_by_city",
-    name: "Driver Application Comparison By City",
-  },
 ];
 
 const Reports = () => {
@@ -89,6 +85,9 @@ const Reports = () => {
       // push the new object into the result array
       result.push(NewLeadsObj);
     });
+
+    //order the result array by count  descending
+    result.sort((a, b) => b.count - a.count);
     return result;
   };
 
