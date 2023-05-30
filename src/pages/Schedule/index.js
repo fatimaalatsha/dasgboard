@@ -23,7 +23,6 @@ for (let hour = 0; hour < 24; hour++) {
 }
 
 const Schedule = () => {
-    const [tabKey, setTabKey] = useState('active') // Create state to store the tab key
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
     const [selectedDate, setSelectedDate] = useState({ // Create state to store the selected week's date
@@ -89,7 +88,7 @@ const Schedule = () => {
         setModal({...modal, open: false})
     }
 
-    const schedulTabContent = {
+    const scheduleTabContent = {
         active:   view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
                 : view === 2 ? <div>Month View 👀</div>
                 : <DayView selectedDay={selectedDate.day} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity}/>
@@ -105,8 +104,8 @@ const Schedule = () => {
                 extra={<Button onClick={() => setModal({...modal, open: true})} type="primary">Create Shift</Button>}
                 style={{ margin: 15 }} 
                 tabList={tabList}
-                activeTabKey={tabKey}
-                onTabChange={key => setTabKey(key)}
+                activeTabKey={scheduleFilter.navigation.tab}
+                onTabChange={key => setScheduleFilter({...scheduleFilter, navigation: { ...scheduleFilter.navigation, tab: key } })}
                 bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16 }}
             >
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>                    
@@ -146,10 +145,10 @@ const Schedule = () => {
                             value={view === 1 ? selectedDate.week : selectedDate.day}
                             allowClear={false}
                         />
-                        <Radio.Group options={options} value={view} defaultValue={view} optionType="button" onChange={(e) => setView(e.target.value)}/>
+                        <Radio.Group options={options} value={view} defaultValue={scheduleFilter.navigation.view} optionType="button" onChange={(e) => setView(e.target.value)}/>
                     </Space>
                 </Space>
-                {schedulTabContent[tabKey]}
+                {scheduleTabContent[scheduleFilter.navigation.tab]}
             </Card>
             <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
                 <Space direction="vertical" size={16}>

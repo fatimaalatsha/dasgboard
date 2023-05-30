@@ -63,6 +63,10 @@ let filterStore = (set) => ({
       tz: 'America/Thunder_Bay',
       city_label: '',
       paginated: false,
+      navigation: {
+        tab: 'active', // active, draft, approval
+        view: 1, // 1 = week, 0 = day, 2 = month (default: 1) 
+      }
     },
     setScheduleFilter: (filter) => set((state) => ({ scheduleFilter: { ...state.scheduleFilter, ...filter } })),
 })
