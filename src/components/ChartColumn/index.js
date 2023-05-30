@@ -38,7 +38,6 @@ const ChartColumn = ({
     ],
   },
 }) => {
-  // const sortedData = props.sort((a, b) => b[yField] - a[yField]);
 
   return (
     <Column

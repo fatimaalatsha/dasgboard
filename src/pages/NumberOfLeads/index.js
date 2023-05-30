@@ -81,7 +81,6 @@ const NumberOfLeads = () => {
       arrayFormat: "comma",
     })}`
   );
-  console.log(data);
 
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
@@ -181,15 +180,10 @@ const NumberOfLeads = () => {
        });
      }
    }
-
-   // Sort the mappedData array based on the order values of statuse  
-  //  mappedData.sort((a, b) => statusOrder[b.status] - statusOrder[a.status]);
-
    return mappedData;
  };
  
  
-  console.log(mapDataToObjects(data));
  const orderStatus = (data) => {
    const statusGroups = {
      "Step 1 - Contact Info": [],
@@ -201,7 +195,7 @@ const NumberOfLeads = () => {
      "Step 7 - Driver History": [],
      "Step 8 - Profile Picture": [],
      "Awaiting Documents": [],
-     "Pending - Document Review": [],
+     "Pending - Document review": [],
      "Existing Driver": [],
      "Existing driver": [],
      "Active": [],
@@ -226,11 +220,9 @@ const NumberOfLeads = () => {
 
    return orderedData;
  };
-  console.log(orderStatus(mapDataToObjects(data)));
 
 
   const handleChangeDate = (dates) => {
-    console.log(dates);
     const dateFrom = dates[0];
     const dateTo = dates[1];
     setReportFilter({ ...reportFilter, date_from: dateFrom, date_to: dateTo });

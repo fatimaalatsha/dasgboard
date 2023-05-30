@@ -24,6 +24,8 @@ const ReportDetails = () => {
   result.push({ status: 'Applicants', count: data.applicants });
   result.push({ status: 'Applicants Seven Days', count: data.applicants_seven_days });
   result.push({ status: 'Total', count: data.total });
+  //order the result array by count  descending
+    result.sort((a, b) => b.count - a.count);
   return result;
 };
 
