@@ -37,17 +37,25 @@ const CityComparison = () => {
     launch_date: item.launch_date ? item.launch_date : "2021-12-08",
   }));
 
+  // const handleSubmit = () => {
+  //   // setDate(dateValue);
+  //   setOpen(false);
+  //   setShowReport(true);
+  //   setFirstCityId(info.value);
+  //   console.log(info.value);
+  //   console.log(firstCityId);
+  //   setSecondCityId(info2.value);
+  //   console.log(secondCityId)
+  //   console.log(info2.value);
+  
+  // };
   const handleSubmit = () => {
-    // setDate(dateValue);
+    const firstCityIdValue = info;
+    const secondCityIdValue = info2;
+    setFirstCityId(firstCityIdValue);
+    setSecondCityId(secondCityIdValue);
     setOpen(false);
     setShowReport(true);
-    setFirstCityId(info.value);
-    console.log(info.value);
-    console.log(firstCityId);
-    setSecondCityId(info2.value);
-    console.log(secondCityId)
-    console.log(info2.value);
-  
   };
 
 
@@ -59,7 +67,7 @@ const CityComparison = () => {
         title="Select Cities to Compare"
         open={open}
         closable={false}
-        distroyOnClose={true}
+        destroyOnClose={true}
         handleCancel={() => {
           setOpen(false);
           setShowReport(false);
@@ -107,7 +115,7 @@ const CityComparison = () => {
             setDateValue(e.target.value);
           }}
         >
-          <Radio value={30}>30 Days</Radio>
+          <Radio value={30}>First 30 Days</Radio>
           <Radio value={60}>First 60 Days</Radio>
           <Radio value={90}>First 90 Days</Radio>
           <Radio value={6}>First 6 Months</Radio>
@@ -136,9 +144,9 @@ const CityComparison = () => {
         )}
         {showReport && (
           <CitySelection
-            cityData1={firstCityId}
-            cityData2={secondCityId}
-            dateTo={date}
+            firstCityId={firstCityId}
+            secondCityId={secondCityId}
+            dateTo={dateValue}
           />
         )}
       </Card>
@@ -146,22 +154,22 @@ const CityComparison = () => {
   );
 };
 
-const CitySelection = (city1) => {
+const CitySelection = (props) => {
   const endDate = (data) => {
     if (data === 30) {
-      return dayjs(city1.cityData1.launch_date)
+      return dayjs(props.firstCityId.launch_date)
         .add(30, "day")
         .format("YYYY-MM-DD");
     } else if (data === 60) {
-      return dayjs(city1.cityData1.launch_date)
+      return dayjs(props.firstCityId.launch_date)
         .add(60, "day")
         .format("YYYY-MM-DD");
     } else if (data === 90) {
-      return dayjs(city1.cityData1.launch_date)
+      return dayjs(props.firstCityId.launch_date)
         .add(90, "day")
         .format("YYYY-MM-DD");
     } else if (data === 6) {
-      return dayjs(city1.cityData1.launch_date)
+      return dayjs(props.firstCityId.launch_date)
         .add(6, "month")
         .format("YYYY-MM-DD");
     } else if (data === 1) {
@@ -169,9 +177,10 @@ const CitySelection = (city1) => {
     }
   };
 
+  console.log(props);
   const [selectedDateRange, setSelectedDateRange] = useState({
-    date_from: city1.cityData1.launch_date,
-    date_to: endDate(city1.dateTo),
+    date_from: props.firstCityId.launch_date,
+    date_to: endDate(props.dateTo),
   });
 
   const getUserParams = () => {
@@ -185,38 +194,39 @@ const CitySelection = (city1) => {
     );
   };
 
-  const id = city1.cityData1.value;
+  const id = props.firstCityId.value;  
   const { data, error, isLoading } = useNewFetch(
     `/v1/reports/applicants-rolling/${id}?${getUserParams()}`
   );
 
-  const id2 = city1.cityData2.value;
+  const id2 = props.secondCityId.value;
   const {
     data: data2,
     error: error2,
     isLoading: isLoading2,
   } = useNewFetch(`/v1/reports/applicants-rolling/${id2}?${getUserParams()}`);
+
   const addCityToData = (data) => {
-    return data?.items?.map((item) => ({
-      date: item.date,
+    return data?.items?.map((item, index) => ({
+      date: `Day ${index + 1}`,
       count: item.count,
-      city: city1.cityData1.label,
+      city: props.firstCityId.label,
     }));
   };
 
   const addCityToData2 = (data2) => {
-    return data2?.items?.map((item) => ({
-      date: item.date,
+    return data2?.items?.map((item, index) => ({
+      date: `Day ${index + 1}`,
       count: item.count,
-      city: city1.cityData2.label,
+      city: props.secondCityId.label,
     }));
   };
-  const combineCityData = (data, data2, city1) => {
+  const combineCityData = (data, data2, props) => {
     const city1Data = data?.items
-      ? addCityToData(data, city1.cityData1.label)
+      ? addCityToData(data, props.firstCityId.label)
       : [];
     const city2Data = data2?.items
-      ? addCityToData2(data2, city1.cityData2.label)
+      ? addCityToData2(data2, props.secondCityId.label)
       : [];
     return [...city1Data, ...city2Data];
   };
@@ -247,12 +257,12 @@ const CitySelection = (city1) => {
     <>
       <Card>
         <Divider orientation="left">
-          {city1.cityData1.label} vs {city1.cityData2.label}
+          {props.firstCityId.label} vs {props.secondCityId.label}
           {/* <Text strong> {reportFilter.date_from} </Text> to
           <Text strong> {reportFilter.date_to} </Text> */}
         </Divider>
         <ChartLine
-          props={combineCityData(data, data2, city1)}
+          props={combineCityData(data, data2, props)}
           xField="date"
           yField="count"
           seriesField="city"
