@@ -36,7 +36,7 @@ const dataSet = [
     name: "Conversion Rates By Application",
   },
   {
-    key: "driver_application_comparison_by_city",
+    key: "driver_application_comparison_by_city ",
     name: "Driver Application Comparison By City",
   },
 ];
