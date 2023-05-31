@@ -9,6 +9,7 @@ import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 import WeekView from '../../components/schedule/WeekView'
 import DayView from '../../components/schedule/DayView'
 import ShiftApproval from '../../components/schedule/ShiftApproval'
+import ShiftDraft from '../../components/schedule/ShiftDraft'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
 
@@ -93,7 +94,7 @@ const Schedule = () => {
                 : view === 2 ? <div>Month View 👀</div>
                 : <DayView selectedDay={selectedDate.day} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity}/>
         ,
-        draft: <>Draft</>,
+        draft: <ShiftDraft />,
         approval: <ShiftApproval selectedDate={selectedDate} tz={scheduleFilter.tz} view={view}/>,
     }
 
@@ -101,7 +102,7 @@ const Schedule = () => {
         <>
             <Card 
                 title="Schedule"
-                extra={<Button onClick={() => setModal({...modal, open: true})} type="primary">Create Shift</Button>}
+                extra={<Button onClick={() => setModal({...modal, open: true})} type="primary">Create {scheduleFilter.navigation.tab === 'active' ? 'Shift' : 'Draft'}</Button>}
                 style={{ margin: 15 }} 
                 tabList={tabList}
                 activeTabKey={scheduleFilter.navigation.tab}
