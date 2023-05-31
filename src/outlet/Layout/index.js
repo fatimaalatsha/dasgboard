@@ -19,7 +19,7 @@ import Applicants from '../../pages/Applicants'
 import Reports from '../../pages/Reports'
 import ReportDetails from '../../pages/ReportDetails'
 import NumberOfleads from '../../pages/NumberOfLeads' 
-import NumberOfDrivers from '../../pages/NumberOfDrivers'
+import CityComparison from "../../pages/CityComparison";
 import ConversionRatesByApplication from '../../pages/ConversionRatesByApplication'
 import IneligibleApplicants from '../../pages/IneligibleApplicants'
 
@@ -52,7 +52,7 @@ const Layout = () => {
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/reports/conversion_rates" element={<NumberOfleads />} />
                     <Route path="/reports/city_overview/:id" element={<ReportDetails />} />
-                    <Route path='/reports/number_of_drivers' element={<NumberOfDrivers />} />
+                    <Route path="/reports/driver_application_comparison_by_city"element={<CityComparison/>} />
                     <Route path='/reports/conversion_rates_by_application' element={<ConversionRatesByApplication />} />
                     <Route path='/reports/conversion_rates/:state' element={<IneligibleApplicants />} />
                     {['/documents/:id', '/drivers/:id', '/applicants/:id'].map(path => <Route key="Details" path={path} element={<DriverDetails />} />)}
