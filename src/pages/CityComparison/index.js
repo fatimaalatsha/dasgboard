@@ -1,4 +1,4 @@
-import { useState } from "react";
+import {useEffect, useState } from "react";
 import {
   Typography,
   Card,
@@ -21,8 +21,6 @@ const { Title, Text } = Typography;
 const CityComparison = () => {
   const [firstCityId, setFirstCityId] = useState('');
   const [secondCityId, setSecondCityId] = useState('');
-  const [firstCityDateFrom, setFirstCityDateFrom] = useState('');
-  const [secondCityDateFrom, setSecondCityDateFrom] = useState('');
   const [showReport, setShowReport] = useState(false);
   const [date, setDate] = useState();
   const [info, setInfo] = useState();
@@ -30,30 +28,19 @@ const CityComparison = () => {
   const [dateValue, setDateValue] = useState();
   const [open, setOpen] = useState(true);
   const { data, error, isLoading } = useNewFetch(`/v1/cities?order=ASC&limit=50&paginated=true`);
-
   const options = data?.data?.map((item) => ({
     label: item.name,
     value: item.id,
     launch_date: item.launch_date ? item.launch_date : "2021-12-08",
   }));
 
-  // const handleSubmit = () => {
-  //   // setDate(dateValue);
-  //   setOpen(false);
-  //   setShowReport(true);
-  //   setFirstCityId(info.value);
-  //   console.log(info.value);
-  //   console.log(firstCityId);
-  //   setSecondCityId(info2.value);
-  //   console.log(secondCityId)
-  //   console.log(info2.value);
-  
-  // };
   const handleSubmit = () => {
     const firstCityIdValue = info;
     const secondCityIdValue = info2;
+    const startDate = dateValue;
     setFirstCityId(firstCityIdValue);
     setSecondCityId(secondCityIdValue);
+    setDate(startDate);
     setOpen(false);
     setShowReport(true);
   };
@@ -67,7 +54,7 @@ const CityComparison = () => {
         title="Select Cities to Compare"
         open={open}
         closable={false}
-        destroyOnClose={true}
+        // destroyOnClose={true}
         handleCancel={() => {
           setOpen(false);
           setShowReport(false);
@@ -79,7 +66,7 @@ const CityComparison = () => {
           <Button
             key="submit"
             type="primary"
-            // disabled={!firstCityId || !secondCityId || !dateValue}
+            disabled={!info || !info2 || !dateValue}
             onClick={handleSubmit}
           >
             Generate Report
@@ -89,23 +76,18 @@ const CityComparison = () => {
         <Divider orientation="left"> Select First City </Divider>
         <Select
           style={{ width: "100%" }}
-          placeholder="Please select"
-          onChange={(value, date) => {
-            // setFirstCityId(value);
-            setInfo(date);
-            console.log(date);
-            console.log(value);
+          placeholder="First City ..."
+          onChange={(value, city) => {
+            setInfo(city);
           }}
           options={options}
         />
-        <Divider orientation="left"> Select Secand City </Divider>
+        <Divider orientation="left"> Select Second City </Divider>
         <Select
           style={{ width: "100%" }}
-          placeholder="Please select"
-          onChange={(value, date) => {
-            // setSecondCityId(value);
-            setInfo2(date);
-            console.log(date);
+          placeholder="Second City ..."
+          onChange={(value, city) => {
+            setInfo2(city);
           }}
           options={options}
         />
@@ -146,7 +128,7 @@ const CityComparison = () => {
           <CitySelection
             firstCityId={firstCityId}
             secondCityId={secondCityId}
-            dateTo={dateValue}
+            dateTo={date}
           />
         )}
       </Card>
@@ -155,29 +137,37 @@ const CityComparison = () => {
 };
 
 const CitySelection = (props) => {
-  const endDate = (data) => {
-    if (data === 30) {
+  const endDate = (days) => {
+    if (days === 30) {
       return dayjs(props.firstCityId.launch_date)
         .add(30, "day")
         .format("YYYY-MM-DD");
-    } else if (data === 60) {
+    } else if (days === 60) {
       return dayjs(props.firstCityId.launch_date)
         .add(60, "day")
         .format("YYYY-MM-DD");
-    } else if (data === 90) {
+    } else if (days === 90) {
       return dayjs(props.firstCityId.launch_date)
         .add(90, "day")
         .format("YYYY-MM-DD");
-    } else if (data === 6) {
+    } else if (days === 6) {
       return dayjs(props.firstCityId.launch_date)
         .add(6, "month")
         .format("YYYY-MM-DD");
-    } else if (data === 1) {
+    } else if (days === 1) {
       return dayjs().format("YYYY-MM-DD");
     }
   };
 
-  console.log(props);
+     useEffect(() => {
+       const endDateValue = endDate(props.dateTo);
+
+       setSelectedDateRange({
+         date_from: props.firstCityId.launch_date,
+         date_to: endDateValue,
+       });
+     }, [props.dateTo]);
+
   const [selectedDateRange, setSelectedDateRange] = useState({
     date_from: props.firstCityId.launch_date,
     date_to: endDate(props.dateTo),
@@ -205,7 +195,7 @@ const CitySelection = (props) => {
     error: error2,
     isLoading: isLoading2,
   } = useNewFetch(`/v1/reports/applicants-rolling/${id2}?${getUserParams()}`);
-
+ 
   const addCityToData = (data) => {
     return data?.items?.map((item, index) => ({
       date: `Day ${index + 1}`,
@@ -222,12 +212,8 @@ const CitySelection = (props) => {
     }));
   };
   const combineCityData = (data, data2, props) => {
-    const city1Data = data?.items
-      ? addCityToData(data, props.firstCityId.label)
-      : [];
-    const city2Data = data2?.items
-      ? addCityToData2(data2, props.secondCityId.label)
-      : [];
+      const city1Data = data?.items ? addCityToData(data) : [];
+      const city2Data = data2?.items ? addCityToData2(data2) : []; 
     return [...city1Data, ...city2Data];
   };
   if (isLoading) return <p>Loading...</p>;
@@ -241,12 +227,10 @@ const CitySelection = (props) => {
           size="large"
           style={{ width: "100%", alignItems: "center" }}
         >
-          <Title level={3}> Driver Application Comparison Per City </Title>
           <Result
             status="404"
             title="No Data Found"
-            subTitle="Sorry, there is no data for your selected date range. Please try again
-              with a different date range"
+            subTitle="No data found for the selected cities in the selected date range."
           />
         </Space>
       </>
@@ -258,8 +242,6 @@ const CitySelection = (props) => {
       <Card>
         <Divider orientation="left">
           {props.firstCityId.label} vs {props.secondCityId.label}
-          {/* <Text strong> {reportFilter.date_from} </Text> to
-          <Text strong> {reportFilter.date_to} </Text> */}
         </Divider>
         <ChartLine
           props={combineCityData(data, data2, props)}
