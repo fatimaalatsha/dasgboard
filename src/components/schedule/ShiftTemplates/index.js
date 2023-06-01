@@ -1,7 +1,8 @@
 import { useState } from 'react'
 import { Row, Col, Card, Space, Button } from 'antd'
+import { DeleteOutlined, EditOutlined, SendOutlined } from '@ant-design/icons'
 
-const ShiftDraft = ({ shift, onEdit, onDelete }) => {
+const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
     const [dummy, setDummy] = useState([
         { id: 1, title: 'Shift 1', guarantee: null, guarantee_specs: '', capacity: 0, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 00:00:00', is_recurring: true, end_date: null, never_ends: false, pattern: 'weekly', days_of_week: [0, 1, 2, 3, 4, 5, 6], max_occurrences: 0 },
         { id: 1, title: 'Shift 2', guarantee: null, guarantee_specs: '', capacity: 0, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 00:00:00', is_recurring: true, end_date: null, never_ends: false, pattern: 'weekly', days_of_week: [0, 1, 2, 3, 4, 5, 6], max_occurrences: 0 },
@@ -23,12 +24,18 @@ const ShiftDraft = ({ shift, onEdit, onDelete }) => {
                     <Col {...colConfig} key={index}>
                         <Card
                             title={item.title}
-                            extra={
-                                <Space>
-                                    <Button size="small" danger onClick={() => onDelete(item)}>Delete</Button>
-                                    <Button size="small" type="primary" onClick={() => onEdit(item)}>Edit</Button>
-                                </Space>
-                            }
+                            actions={[
+                                <Button danger type="text" key="delete" icon={<DeleteOutlined />} />,
+                                <Button ghost type="primary" key="edit" icon={<EditOutlined />} />,
+                                <Button 
+                                    icon={<SendOutlined />} 
+                                    type="primary" 
+                                    onClick={() => onEdit(item)}
+                                >
+                                    Publish
+                                </Button>,
+                                
+                            ]}
                         >
                             <p>Guarantee: {item.guarantee}</p>
                             <p>Guarantee Specs: {item.guarantee_specs}</p>
@@ -49,4 +56,4 @@ const ShiftDraft = ({ shift, onEdit, onDelete }) => {
     )
 }
 
-export default ShiftDraft
+export default ShiftTemplates

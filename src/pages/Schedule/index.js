@@ -9,7 +9,7 @@ import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 import WeekView from '../../components/schedule/WeekView'
 import DayView from '../../components/schedule/DayView'
 import ShiftApproval from '../../components/schedule/ShiftApproval'
-import ShiftDraft from '../../components/schedule/ShiftDraft'
+import ShiftTemplates from '../../components/schedule/ShiftTemplates'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
 
@@ -44,11 +44,11 @@ const Schedule = () => {
     const tabList = [
         {
             key: 'active',
-            tab: 'Active',
+            tab: 'Calendar',
         },
         {
             key: 'draft',
-            tab: 'Draft',
+            tab: 'Templates',
         },
         {
             key: 'approval',
@@ -94,7 +94,7 @@ const Schedule = () => {
                 : view === 2 ? <div>Month View 👀</div>
                 : <DayView selectedDay={selectedDate.day} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity}/>
         ,
-        draft: <ShiftDraft />,
+        draft: <ShiftTemplates />,
         approval: <ShiftApproval selectedDate={selectedDate} tz={scheduleFilter.tz} view={view}/>,
     }
 
