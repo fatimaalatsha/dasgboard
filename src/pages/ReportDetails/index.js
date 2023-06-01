@@ -1,22 +1,60 @@
-import { Typography, Card, Space, Divider, Row, Col, Table, Tag } from 'antd';
+import { Typography, Card, Space, Divider, Row, Col, Table, Tag, Result, Radio, Modal, Input } from 'antd';
 import useNewFetch from '../../hooks/use-new-fetch';
 import dayjs from 'dayjs';
 import { useParams } from 'react-router-dom'
 import { useNavigate } from 'react-router-dom';
+import { useState } from 'react';
 
 import ChartColumn from '../../components/ChartColumn';
+import ChartLine from '../../components/ChartLine';
 import CardStatistic from '../../components/CardStatistic';
 const { Title, Text } = Typography;
+
+const CityLine = (date) => {
+  const { id } = useParams();
+  const [modalOpen, setModalOpen] = useState(false);
+  const setDateRange = (date) => {
+    const today = new Date();
+    date === 3 && today.setMonth(today.getMonth() - 3);
+    date === 6 && today.setMonth(today.getMonth() - 6);
+    date === 12 && today.setMonth(today.getMonth() - 12);
+    return today.toISOString().split('T')[0];
+  }
+  const { data, error, isLoading } = useNewFetch(
+    `/v1/reports/applicants-rolling/${id}?date_from=${setDateRange(date.date)}&date_to=${new Date().toISOString().split('T')[0]}`
+  );
+  if (isLoading) return <p>Loading...</p>;
+  if (error) return <p>Something went wrong...</p>;
+
+  if (data.total === 0) {
+    return (
+      <div style={{ textAlign: 'center' }}>
+        <Result status="warning" title="No Data Available For Selected Period" />
+        <br />
+      </div>
+    );
+  }
+  return (
+    <>
+    <ChartLine
+      props={data?.items}
+      xField="date"
+      yField="count"
+    />
+    </>
+  );
+}
 
 
 
 const ReportDetails = () => {
   const { id } = useParams();
   const navigate = useNavigate();
+  const [date, setDate] = useState(3);
   const { data, error, isLoading } = useNewFetch(`/v1/reports/city-overview/${id}`);
   if (isLoading) return <p>Loading...</p>;
   if (error) return <p>Something went wrong...</p>;
-
+ 
   const getStatusCount = (data) => {
   const result = [];
   result.push({ status: 'Active', count: data.active });
@@ -41,7 +79,6 @@ const ReportDetails = () => {
       >
         <Row align="middle">
           <Col span={24}>
-            <Space direction="horizontal" size="large"></Space>
             <Space
               direction="vertical"
               width={165}
@@ -114,6 +151,17 @@ const ReportDetails = () => {
                   seriesField={"status"}
                 />
               </div>
+              <Divider orientation="left">
+                <Text strong> {data.city} Application History </Text>
+              </Divider>
+              <Space direction="vertical" size="large" align="center"style={{ width: "100%" }}>
+              <Radio.Group value={date} onChange={(e) => setDate(e.target.value)} >
+                <Radio.Button type="primary" value={3}>View Last 3 Months </Radio.Button>
+                <Radio.Button type="primary" value={6}>View Last 6 Months </Radio.Button>
+                <Radio.Button type="primary" value={12}>View Last 12 Months </Radio.Button>
+                </Radio.Group>
+              </Space>
+                <CityLine date={date} />
               <Divider orientation="left">
                 <Text strong>Recent Applicants List</Text>
               </Divider>
