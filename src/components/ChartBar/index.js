@@ -18,9 +18,7 @@ const ChartBar = ({props, xField, yField, seriesField}) => {
               textBaseline: 'middle',
             },
           }}
-
           isStack={true}
-
           label={{
             position: 'middle',
             content: (item) => {
@@ -31,14 +29,12 @@ const ChartBar = ({props, xField, yField, seriesField}) => {
             },
             style: {
               fill: '#fff',
-
             },
             formatter: ({ value }) => {
               console.log(value);
               return value.toFixed(2);
             },
             
-
           }}
           legend={{
             position: 'top',
