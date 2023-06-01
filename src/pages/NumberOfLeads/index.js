@@ -138,33 +138,91 @@ const NumberOfLeads = () => {
     return total;
   };
 
-  const mapDataToObjects = (data) => {
-    const { items } = data;
-    const mappedData = [];
+ const mapDataToObjects = (data) => {
+   const { items } = data;
+   
+   const mappedData = [];
 
-    // Loop over the status objects and data objects
-    for (const statusObj of Object.values(items)) {
-      if (typeof statusObj === "object" && statusObj.data) {
-        for (const dataObj of statusObj.data) {
-          mappedData.push({
-            city: dataObj.city,
-            status: statusObj.status,
-            count: dataObj.count,
-          });
-        }
-      } else {
-        mappedData.push({
-          city: statusObj.city,
-          status: items.status,
-          count: statusObj.count,
-        });
-      }
-    }
-    return mappedData;
-  };
+   // Loop over the status objects and data objects
+   for (const statusObj of Object.values(items)) {
+     if (typeof statusObj === "object" && statusObj.data) {
+       for (const dataObj of statusObj.data) {
+         mappedData.push({
+           city: dataObj.city,
+           status: statusObj.status,
+           count: dataObj.count,
+         });
+       }
+     } else {
+       
+       const statusOrder = {
+      "Step 1 - Contact Info": 1,
+      "step2": 2,
+      "step3": 3,
+      "step4": 4,
+      "step5": 5,
+      "step6": 6,
+      "step7": 7,
+      "step8": 8,
+      "Awaiting documents": 9,
+      "Pending - Document Review": 10,
+      "Existing Driver": 11,
+      "Active": 12,
+      "Unresponsive": 13,
+      "Inelgible": 14,
+      "DNC": 15,
+      "Inactive": 16,
+       };
+       mappedData.push({
+         city: statusObj.city,
+         status: items.status,
+         count: statusObj.count,
+       });
+     }
+   }
+   return mappedData;
+ };
+ 
+ 
+ const orderStatus = (data) => {
+   const statusGroups = {
+     "Step 1 - Contact Info": [],
+     "Step 2 - Licence": [],
+     "Step 3 - Work Eligibility'": [],
+     "Step 4 - Vehicle Ownership": [],
+     "Step 5 - Insurance": [],
+     "Step 6 - Safety": [],
+     "Step 7 - Driver History": [],
+     "Step 8 - Profile Picture": [],
+     "Awaiting Documents": [],
+     "Pending - Document review": [],
+     "Existing Driver": [],
+     "Existing driver": [],
+     "Active": [],
+     "Unresponsive": [],
+     "Ineligible": [],
+     "Do not contact (DNC)": [],
+     "On Hold/Contact Later": [],
+     "Inactive": [],
+   };
+
+   for (const obj of data) {
+     const { status } = obj;
+     if (statusGroups.hasOwnProperty(status)) {
+       statusGroups[status].push(obj);
+     }
+   }
+
+   const orderedData = Object.values(statusGroups).reduce(
+     (arr, group) => arr.concat(group),
+     []
+   );
+
+   return orderedData;
+ };
+
 
   const handleChangeDate = (dates) => {
-    console.log(dates);
     const dateFrom = dates[0];
     const dateTo = dates[1];
     setReportFilter({ ...reportFilter, date_from: dateFrom, date_to: dateTo });
@@ -188,6 +246,8 @@ const NumberOfLeads = () => {
       setShowDetils(true);
     }
   };
+
+  
 
   const handleOnClose = () => {
     setShowDetils(false);
@@ -359,7 +419,7 @@ const NumberOfLeads = () => {
             </Divider>
             <div style={{ height: "700px" }}>
               <ChartColumn
-                props={mapDataToObjects(data)}
+                props={orderStatus(mapDataToObjects(data))}
                 xField="status"
                 yField="count"
                 seriesField="city"

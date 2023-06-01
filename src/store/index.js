@@ -1,6 +1,10 @@
 import create from "zustand";
 import { devtools, persist } from "zustand/middleware";
-import dayjs from "dayjs";
+import pageSize from "../assets/data/table_page_size"; // Import table page size definition
+import dayjs from "dayjs"; // Import date handlers
+import utc from "dayjs/plugin/utc"; // Import dayjs utc plugin
+
+dayjs.extend(utc);
 
 let filterStore = (set) => ({
   driverFilter: {
@@ -8,6 +12,7 @@ let filterStore = (set) => ({
       current: 1,
       pageSize: 50,
       showSizeChanger: true,
+      pageSizeOptions: pageSize,
       position: ["bottomRight", "topRight"],
     },
     sort: {
@@ -24,6 +29,7 @@ let filterStore = (set) => ({
       current: 1,
       pageSize: 20,
       showSizeChanger: true,
+      pageSizeOptions: pageSize,
       position: ["bottomRight", "topRight"],
     },
     sort: {
@@ -42,6 +48,7 @@ let filterStore = (set) => ({
       current: 1,
       pageSize: 50,
       showSizeChanger: true,
+      pageSizeOptions: pageSize,
       position: ["bottomRight", "topRight"],
     },
     sort: {
@@ -54,6 +61,19 @@ let filterStore = (set) => ({
   setApplicantFilter: (filter) =>
     set((state) => ({
       applicantFilter: { ...state.applicantFilter, ...filter },
+    })),
+  scheduleFilter: {
+    filter: {
+      city_id: "",
+      status: null,
+    },
+    tz: "America/Thunder_Bay",
+    city_label: "",
+    paginated: false,
+  },
+  setScheduleFilter: (filter) =>
+    set((state) => ({
+      scheduleFilter: { ...state.scheduleFilter, ...filter },
     })),
   reportFilter: {
     date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD"),

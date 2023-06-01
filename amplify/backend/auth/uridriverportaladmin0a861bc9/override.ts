@@ -1,29 +1,12 @@
 import { AmplifyAuthCognitoStackTemplate } from '@aws-amplify/cli-extensibility-helper';
 
 export function override(resources: AmplifyAuthCognitoStackTemplate) {
-  const firstNameAttribute = {
-    attributeDataType: 'String',
-    developerOnlyAttribute: false,
-    mutable: true,
-    name: 'first_name',
-    required: false,
-    stringAttributeConstraints: {
-      maxLength: '256',
-      minLength: '1',
-    },
-  }
 
-  const lastNameAttribute = {
-    attributeDataType: 'String',
-    developerOnlyAttribute: false,
-    mutable: true,
-    name: 'last_name',
-    required: false,
-    stringAttributeConstraints: {
-      maxLength: '256',
-      minLength: '1',
-    },
-  }
+  resources.userPool.lambdaConfig = {
+    ...resources.userPool.lambdaConfig,
+    postConfirmation: "arn:aws:lambda:us-east-2:***REMOVED***:function:***REMOVED***",
+    preSignUp: "arn:aws:lambda:us-east-2:***REMOVED***:function:***REMOVED***"
+  };
 
   resources.addCfnResource(
     {
@@ -34,12 +17,12 @@ export function override(resources: AmplifyAuthCognitoStackTemplate) {
           email: "email",
           email_verified: "email_verified",
           'custom:first_name': "given_name",
-          'custom:last_name': "family_name",
+          'custom:last_name': "family_name"
         },
         ProviderDetails: {
           client_id: "***REMOVED***-jvk3ld5ca3ijm2q8v09i01eu062hifea.apps.googleusercontent.com",
           client_secret: "***REMOVED***",
-          authorize_scopes: "openid email profile",
+          authorize_scopes: "openid email profile"
         },
         ProviderName: "Google",
         ProviderType: "Google",
@@ -50,16 +33,4 @@ export function override(resources: AmplifyAuthCognitoStackTemplate) {
     },
     "google-social-provider"
   );
-
-  resources.userPool.lambdaConfig = {
-    ...resources.userPool.lambdaConfig,
-    postConfirmation: "arn:aws:lambda:us-east-2:***REMOVED***:function:uri-portal-cognito-dev-post-confirmation-admin-005-04",
-    preSignUp: "arn:aws:lambda:us-east-2:***REMOVED***:function:uri-portal-cognito-dev-pre-signup-admin-005-03"
-  };
-
-  resources.userPool.schema = [
-    ...(resources.userPool.schema as any[]),
-    firstNameAttribute,
-    lastNameAttribute
-  ]
 }
