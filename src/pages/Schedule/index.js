@@ -107,7 +107,7 @@ const Schedule = () => {
                 tabList={tabList}
                 activeTabKey={scheduleFilter.navigation.tab}
                 onTabChange={key => setScheduleFilter({...scheduleFilter, navigation: { ...scheduleFilter.navigation, tab: key } })}
-                bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16 }}
+                bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16, ...(scheduleFilter.navigation.tab === 'draft' && { backgroundColor: '#F9F9F9'} )  }}
             >
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>                    
                     <Space style={{ display: 'flex', width: '100%'}}>
