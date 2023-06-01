@@ -89,6 +89,9 @@ const Reports = () => {
       // push the new object into the result array
       result.push(NewLeadsObj);
     });
+
+    //order the result array by count  descending
+    result.sort((a, b) => b.count - a.count);
     return result;
   };
 

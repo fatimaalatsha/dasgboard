@@ -74,6 +74,9 @@ const ConversionRatesByApplication = () => {
 
       // push the new object into the result array
       result.push(activeObj);
+
+      //order the result array by rate descending
+      result.sort((a, b) => b.count - a.count);
     });
     return result;
   };
