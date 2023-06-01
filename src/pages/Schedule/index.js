@@ -9,6 +9,7 @@ import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 import WeekView from '../../components/schedule/WeekView'
 import DayView from '../../components/schedule/DayView'
 import ShiftApproval from '../../components/schedule/ShiftApproval'
+import ShiftTemplates from '../../components/schedule/ShiftTemplates'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
 
@@ -43,11 +44,11 @@ const Schedule = () => {
     const tabList = [
         {
             key: 'active',
-            tab: 'Active',
+            tab: 'Calendar',
         },
         {
             key: 'draft',
-            tab: 'Draft',
+            tab: 'Templates',
         },
         {
             key: 'approval',
@@ -93,7 +94,7 @@ const Schedule = () => {
                 : view === 2 ? <div>Month View 👀</div>
                 : <DayView selectedDay={selectedDate.day} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity}/>
         ,
-        draft: <>Draft</>,
+        draft: <ShiftTemplates />,
         approval: <ShiftApproval selectedDate={selectedDate} tz={scheduleFilter.tz} view={view}/>,
     }
 
@@ -101,12 +102,12 @@ const Schedule = () => {
         <>
             <Card 
                 title="Schedule"
-                extra={<Button onClick={() => setModal({...modal, open: true})} type="primary">Create Shift</Button>}
+                extra={<Button onClick={() => setModal({...modal, open: true})} type="primary">Create {scheduleFilter.navigation.tab === 'active' ? 'Shift' : 'Draft'}</Button>}
                 style={{ margin: 15 }} 
                 tabList={tabList}
                 activeTabKey={scheduleFilter.navigation.tab}
                 onTabChange={key => setScheduleFilter({...scheduleFilter, navigation: { ...scheduleFilter.navigation, tab: key } })}
-                bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16 }}
+                bodyStyle={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 16, ...(scheduleFilter.navigation.tab === 'draft' && { backgroundColor: '#F9F9F9'} )  }}
             >
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>                    
                     <Space style={{ display: 'flex', width: '100%'}}>
