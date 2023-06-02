@@ -459,7 +459,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 <InputWrapper 
                                     name="capacity" 
                                     prefix={<UserOutlined />} 
-                                    placeholder="Driver Limit" 
+                                    placeholder="Shift Capacity" 
                                     type="number" 
                                     min={1} max={999} 
                                     value={props.values.capacity}  
