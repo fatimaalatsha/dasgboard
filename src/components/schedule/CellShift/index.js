@@ -24,7 +24,7 @@ import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean, array, mixed, date } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../../store'
 

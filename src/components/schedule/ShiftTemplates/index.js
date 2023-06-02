@@ -16,6 +16,7 @@ const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
         { id: 1, title: 'Shift 7', guarantee: null, guarantee_specs: '', capacity: 2, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 15:00:00', is_recurring: true, end_date: '2021-01-01', never_ends: false, pattern: 'weekly', days_of_week: [1, 3, 5], max_occurrences: 0 },
         { id: 1, title: 'Shift 8', guarantee: null, guarantee_specs: '', capacity: 33, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 13:00:00', is_recurring: true, end_date: null, never_ends: false, pattern: 'daily', days_of_week: [2, 4, 6], max_occurrences: 3 },
     ])
+    
     const colConfig = {
         span: 6,
     }
@@ -53,7 +54,7 @@ const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
                                 {item.is_recurring && <Descriptions.Item label="Repeats on">
                                     <Space direction="vertical">
                                         { item.days_of_week.map((day, idx) => (
-                                            <Tag key={idx} bordered={false} color="blue">{dayjs().day(day).format('dddd')}</Tag>
+                                            <Tag key={idx} color="blue">{dayjs().day(day).format('dddd')}</Tag>
                                         ))}
                                     </Space>
                                 </Descriptions.Item>}
