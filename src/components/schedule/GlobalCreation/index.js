@@ -62,8 +62,11 @@ const GlobalCreation = () => {
             <Button onClick={() => setOpen(true)} type="primary">Create {scheduleFilter.navigation.tab === 'active' ? 'Shift' : 'Template'}</Button>
             <Formik
                 initialValues={{
-                    capacity: 1,
+                    capacity: 0,
+                    guarantee: 0,
+                    guarantee_specs: '',
                     hasGuarantee: false,
+                    is_recurring: false,
                     days_of_week: [],
                 }}
             >
@@ -104,23 +107,49 @@ const GlobalCreation = () => {
                             />
                             <Divider>
                             <Checkbox
-                               /*  onChange={() => {
-                                    setShift({ ...shift, hasGuarantee: !shift.hasGuarantee })
-                                }} */
+                                onChange={(e) => {
+                                    props.setFieldValue('hasGuarantee', e.target.checked)
+                                }}
                             >
                                 Guarantee?
                             </Checkbox>
                             </Divider>
+                                { props.values.hasGuarantee && (
+                                    <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                        <InputWrapper 
+                                            name="guarantee"
+                                            placeholder="Guarantee amount"
+                                            type="number"
+                                            min={0}
+                                            max={1000}
+                                            prefix="$" 
+                                            suffix="CAD" 
+                                            value={props.values.guarantee}
+                                            onChange={(e) => {
+                                                props.setFieldValue('guarantee', Number(e.target.value))
+                                            }}
+                                        />
+                                        <Input.TextArea 
+                                            name="guarantee_specs"
+                                            defaultValue={props.values.guarantee_specs}
+                                            rows={4} 
+                                            placeholder="Guarantee description (optional)"
+                                            onChange={(e) => {
+                                                props.setFieldValue('guarantee_specs', e.target.value)
+                                            }}
+                                        />
+                                    </Space>
+                                )}
                             <Divider>
                             <Checkbox
-                               /*  onChange={() => {
-                                    setShift({ ...shift, hasGuarantee: !shift.hasGuarantee })
-                                }} */
+                                onChange={(e) => {
+                                    props.setFieldValue('is_recurring', e.target.checked)
+                                }}
                             >
                                 Recurring Shift?
                             </Checkbox>
                             </Divider>
-                                {  true && (
+                                {  props.values.is_recurring && (
                                     <Radio.Group 
                                         style={{ width: '100%' }} 
                                         /* onChange={ (e) => {
