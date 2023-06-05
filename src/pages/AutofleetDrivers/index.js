@@ -20,8 +20,6 @@ const { Text } = Typography;
     const [driver, setDriver] = useState({});
     const [vendorId, setVendorId] = useState([]);
     const { data, error, isLoading } = useNewFetch(`/v1/active-drivers?${qs.stringify(getUserParams)}`);
-    console.log(data);
-    console.log(vendorId);
     
 
     const columns = [   
@@ -70,16 +68,13 @@ const { Text } = Typography;
     // fiund one driver by id
     const findDriver = (id) => {
         const driver = data.data.find((driver) => driver.id === id);
-        console.log(driver);
         setDriver(driver);
         return driver;
     }
     const updateText = async (value) => {
-        console.log(value);
         const  idValue = value.vendor_id;
         const updated = await updateVendorId(driver.driver_id, idValue);
         if (updated) {
-            console.log(updated);
             message.success(updated.message);
             setDriver({ ...driver, vendor_id: value.vendor_id });
         }
@@ -116,7 +111,6 @@ const { Text } = Typography;
         <Formik
           initialValues={{ vendor_id: driver.vendor_id || "" }}
           onSubmit={async (values, actions) => {
-            console.log(values);
             await updateText(values).then(() => {
               actions.resetForm();
               setOpen(false);
