@@ -327,7 +327,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                 }}
                 validationSchema={shiftSchema}
                 onSubmit={async (values, { setSubmitting, resetForm }) => {
-                    console.log(shift.pattern)
                     values.start_time = converToUTC( shift.day, values.start_time, scheduleFilter.tz)
                     values.end_time = converToUTC(shift.day, values.end_time, scheduleFilter.tz)
                     values.capacity = Number(values.capacity)
