@@ -1,8 +1,8 @@
 import { useState } from 'react'
-import { Button, Modal, Input, TimePicker, Checkbox, Select, Space, DatePicker, Divider, Radio, InputNumber } from "antd"
-import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons'
+import { Button, Modal, Input, TimePicker, Checkbox, Space, DatePicker, Divider, Radio, InputNumber } from "antd"
+import { UserOutlined } from '@ant-design/icons'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean, array } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../../store'
 import InputWrapper from '../../forms/InputWrapper'
@@ -46,6 +46,47 @@ const weeklyDaysReccurence = [
     }
 ]
 
+const templateSchema = object().shape({
+    capacity: number().min(1, 'Shift driver capacity must be greater than or equal to 1.').required('Required'),
+    day: string().required('Required'),
+    start_time: string().required('Required'),
+    end_time: string().required('Required'),
+    hasGuarantee: boolean().notRequired(),
+    guarantee: number().when('hasGuarantee', {
+        is: true,
+        then: number().min(1, 'Shift driver guarantee must be greater than or equal to 1.').required('Required'),
+        otherwise: number().notRequired(),
+    }),
+    guarantee_specs: string().notRequired(),
+    is_recurring: boolean().notRequired(),
+    pattern: string().when('is_recurring', {
+        is: true,
+        then: string().required('Required'),
+        otherwise: string().notRequired(),
+    }),
+    template: string().notRequired(),
+    days_of_week: array().when('is_recurring', {
+        is: true,
+        then: array().required('Required'),
+        otherwise: array().notRequired(),
+    }),
+    ends: string().when('template', {
+        is: 'custom',
+        then: string().required('Required'),
+        otherwise: string().notRequired(),
+    }),
+    end_date: string().when('ends', {
+        is: 'on' || 'never',
+        then: string().required('Required'),
+        otherwise: string().notRequired(),
+    }),
+    max_occurrences: number().when('ends', {
+        is: 'after',
+        then: number().min(1, 'Shift max occurrences must be greater than or equal to 1.').required('Required'),
+        otherwise: number().notRequired(),
+    }),
+})
+
 const GlobalCreation = () => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const DEFAULT_DAY = dayjs().tz(scheduleFilter.tz).utc()
@@ -79,6 +120,7 @@ const GlobalCreation = () => {
                     ends: '',
                     end_date: DEFAULT_DAY,
                 }}
+                validationSchema={templateSchema}
                 onSubmit={ async (values, { setSubmitting }) => {
                     console.log(values)
                 }}
@@ -190,7 +232,7 @@ const GlobalCreation = () => {
                                                     props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
                                                     props.setFieldValue('pattern', 'daily')
                                                 e.target.value === 'weekly' &&
-                                                    props.setFieldValue('days_of_week', [dayjs().day()])
+                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
                                                     props.setFieldValue('pattern', 'weekly')
                                                 e.target.value === 'custom' &&
                                                     props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
