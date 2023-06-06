@@ -7,6 +7,7 @@ import { object, string, number, boolean, array } from 'yup' // Import Yup for f
 import { useFilterStore } from '../../../store'
 import InputWrapper from '../../forms/InputWrapper'
 import SubmitWrapper from '../../forms/SubmitWrapper'
+import { converToUTC } from '../../../utils/schedule-status'
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -89,7 +90,7 @@ const templateSchema = object().shape({
 
 const GlobalCreation = () => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
-    const DEFAULT_DAY = dayjs().tz(scheduleFilter.tz).utc()
+    const DEFAULT_DAY = dayjs()
     const [open, setOpen] = useState(false)
     
     const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
@@ -123,6 +124,40 @@ const GlobalCreation = () => {
                 validationSchema={templateSchema}
                 onSubmit={ async (values, { setSubmitting }) => {
                     console.log(values)
+                    values.start_time = converToUTC( values.day.format('YYYY-MM-DD'), values.start_time, scheduleFilter.tz)
+                    values.end_time = converToUTC( values.day.format('YYYY-MM-DD'), values.end_time, scheduleFilter.tz)
+                    values.capacity = Number(values.capacity)
+                    values.guarantee = Number(values.guarantee)
+                    if (!values.hasGuarantee) {
+                        delete values.guarantee
+                        delete values.guarantee_specs
+                    }
+                    if (!values.is_recurring) {
+                        delete values.pattern 
+                        delete values.ends 
+                        delete values.end_date 
+                        delete values.max_occurrences
+                        delete values.days_of_week
+                    }
+                    if (values.ends === 'never') {
+                        delete values.end_date
+                        delete values.max_occurrences
+                        values.never_ends = true
+                    }
+                    if (values.pattern === 'once') {
+                        delete values.end_date
+                        delete values.never_ends
+                        values.max_occurrences = 1
+                    }
+                    if (values.max_occurrences) {
+                        delete values.end_date
+                    } else {
+                        delete values.max_occurrences
+                    }
+                    delete values.hasGuarantee
+                    delete values.ends
+                    delete values.day
+                    delete values.template
                 }}
             >
                 {props => (
@@ -157,7 +192,7 @@ const GlobalCreation = () => {
                                 style={{ width: '30%' }}
                                 defaultValue={props.values.day} format="ddd D MMM" 
                                 allowClear={false}
-                                onChange={(date) => props.setFieldValue('day', date.format('YYYY-MM-DD') ) } 
+                                onChange={(date) => props.setFieldValue('day', date ) } 
                                 />
                             <TimePicker.RangePicker 
                                 style={{ width: '70%' }} 
