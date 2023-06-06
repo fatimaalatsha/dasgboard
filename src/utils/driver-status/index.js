@@ -185,4 +185,44 @@ const getActiveVehicleId = async (driverId) => { // Get active vehicle id
     }
 }
 
-export { deleteDriver, updateStatus, notifyDriver, updateApplicationStatus, updateDriver, createDriverNotes, archiveDriverNotes, getActiveVehicleId, changeDriverStatus }
+const updateVendorId = async (driverId, vendorId) => { // Update vendor id
+    try {
+        const auth = await Auth.currentSession()// Get current session
+        const token = auth.getAccessToken().getJwtToken()// Get token from session
+        const options = { // Set options for endpoint
+            headers: {
+                'Authorization': token,
+                ...(process.env.REACT_APP_NEW_ENV && { 'env': process.env.REACT_APP_NEW_ENV }),
+            }
+        }
+        const response = await NEW_API.patch(`/v1/active-drivers/${driverId}`, { 'vendor_id': vendorId }, options)
+        const data = await response.data
+        return data
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+const getVendorId = async () => { // Get vendor id
+    try {
+        const auth = await Auth.currentSession()// Get current session
+        const token = auth.getAccessToken().getJwtToken()// Get token from session
+        const options = { // Set options for endpoint
+            headers: {
+                'Authorization': token,
+                ...(process.env.REACT_APP_NEW_ENV && { 'env': process.env.REACT_APP_NEW_ENV }),
+            }
+        }
+        const response = await NEW_API.get(`/v1/vendors`, options);
+        const data = await response.data
+        console.log(response.data.items);
+        return data.items;
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
+
+
+export { deleteDriver, updateStatus, notifyDriver, updateApplicationStatus, updateDriver, createDriverNotes, archiveDriverNotes, getActiveVehicleId, changeDriverStatus, updateVendorId, getVendorId }
