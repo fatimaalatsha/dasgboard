@@ -47,6 +47,7 @@ const weeklyDaysReccurence = [
 
 const GlobalCreation = () => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+    const DEFAULT_DAY = dayjs().tz(scheduleFilter.tz).utc().day()
     const [open, setOpen] = useState(false)
     
     const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
@@ -59,7 +60,7 @@ const GlobalCreation = () => {
 
     return (
         <>
-            <Button onClick={() => setOpen(true)} type="primary">Create {scheduleFilter.navigation.tab === 'active' ? 'Shift' : 'Template'}</Button>
+            <Button disabled={scheduleFilter.navigation.tab === 'active'} onClick={() => setOpen(true)} type="primary">Create {scheduleFilter.navigation.tab === 'active' ? 'Shift' : 'Template'}</Button>
             <Formik
                 initialValues={{
                     capacity: 0,
@@ -68,6 +69,11 @@ const GlobalCreation = () => {
                     hasGuarantee: false,
                     is_recurring: false,
                     days_of_week: [],
+                    template: 'weekly',
+                    pattern: 'weekly',
+                    max_occurrences: 0,
+                    ends: '',
+                    end_date: DEFAULT_DAY,
                 }}
             >
                 {props => (
@@ -76,7 +82,10 @@ const GlobalCreation = () => {
                             title={`New ${scheduleFilter.navigation.tab === 'active' ? 'Shift' : 'Template'}`}
                             open={open} 
                             onOk={handleModalOk} 
-                            onCancel={handleModalCancel}
+                            onCancel={ () => {
+                                handleModalCancel()
+                                props.resetForm()
+                            }}
                             destroyOnClose
                          >
                         <Space direction="vertical" size={16}>
@@ -152,47 +161,42 @@ const GlobalCreation = () => {
                                 {  props.values.is_recurring && (
                                     <Radio.Group 
                                         style={{ width: '100%' }} 
-                                        /* onChange={ (e) => {
-                                                setShift({
-                                                    ...shift, 
-                                                    pattern: e.target.value,
-                                                    recurrency: {
-                                                        ...shift.recurrency,
-                                                        days_of_week: e.target.value === 'weekly' || e.target.value === 'custom' ? [DEFAULT_DAY] : [...Array(7)].map((_,idx) => idx)
-                                                    }
-                                                })
-                                                e.target.value === 'daily' && props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
+                                        onChange={ (e) => {
+                                            console.log(e.target.value)
+                                            props.setFieldValue('template', e.target.value)
+                                                e.target.value === 'daily' && 
+                                                    props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
+                                                    props.setFieldValue('pattern', 'daily')
+                                                e.target.value === 'weekly' &&
+                                                    props.setFieldValue('days_of_week', [dayjs().day()])
+                                                    props.setFieldValue('pattern', 'weekly')
+                                                e.target.value === 'custom' &&
+                                                    props.setFieldValue('days_of_week', [])
+                                                    props.setFieldValue('pattern', 'weekly')
                                             } 
                                         } 
-                                        value={shift.pattern} */
+                                        value={props.values.template}
                                     >
                                         <Space direction="vertical" style={{ width: '100%' }}>
                                             <Radio value={'daily'}>{`Daily (Mon to Sun)`}</Radio>
                                             <Radio value={'weekly'}>{`Weekly on: ${dayjs().format('dddd')}`}</Radio>
                                             <Radio value={'custom'}>Custom</Radio>
-                                        { /* shift.pattern === 'custom' */ true && (
+                                        { props.values.template === 'custom' && (
                                             <>
                                             <Divider orientation="left" plain>Custom Recurrence</Divider>
                                             <Radio.Group 
-                                                //value={shift.recurrency.pattern} 
+                                                value={props.values.pattern} 
                                                 buttonStyle="solid" 
-                                                /* onChange={(e) => {
-                                                    setShift({
-                                                        ...shift, 
-                                                        ...(e.target.value === 'once' ? { ends: 'after' } : {}),
-                                                        recurrency: {
-                                                            ...shift.recurrency, 
-                                                            pattern: e.target.value,
-                                                        ...(e.target.value === 'once' ? { occurrences: 1 } : {}),
-                                                        }
-                                                    })
-                                                }} */
+                                                onChange={(e) => {
+                                                    props.setFieldValue('pattern', e.target.value)
+                                                    e.target.value === 'once' && props.setFieldValue('max_occurrences', 1)
+                                                }}
                                             >
                                                 <Radio.Button value="once">Once</Radio.Button>
                                                 <Radio.Button value="daily">Daily</Radio.Button>
                                                 <Radio.Button value="weekly">Weekly</Radio.Button>
                                             </Radio.Group>
-                                            { /* shift.recurrency.pattern === 'weekly' */ true && (
+                                            { props.values.pattern === 'weekly' && (
                                                 <>
                                                 <Divider orientation="left" plain>Repeat On</Divider>
                                                 <Radio.Group name='days_of_week' value={props.values.days_of_week[0]} onChange={e =>props.setFieldValue('days_of_week', [Number(e.target.value)])}>
@@ -202,7 +206,7 @@ const GlobalCreation = () => {
                                                 </Radio.Group>
                                                 </>
                                             )}
-                                            { /* shift.recurrency.pattern === 'daily' */ true && (
+                                            { props.values.pattern === 'daily'  && (
                                                 <>
                                                 <Divider orientation="left" plain>Repeat On</Divider>
                                                 <Checkbox.Group options={weeklyDaysReccurence} defaultValue={dayjs().format('d')} onChange={(value) => props.setFieldValue('days_of_week', value)} />
@@ -211,38 +215,33 @@ const GlobalCreation = () => {
                                             <Divider orientation="left" plain>Ends</Divider>
                                             <Radio.Group 
                                                 name="ends"
-                                                /* value={shift.ends}
+                                                value={props.values.ends}
                                                 onChange={(e) => {
                                                     props.setFieldValue('ends', e.target.value)
-                                                    setShift({...shift, ends: e.target.value })
-                                                }} */
+                                                }}
                                             >
                                                 <Space direction="vertical">
-                                                    <Radio /* disabled={shift.recurrency.pattern === 'once'} */ value="never">Never</Radio>
-                                                    <Radio /* disabled={shift.recurrency.pattern === 'once'}  */value="on">
+                                                    <Radio disabled={props.values.pattern === 'once'} value="never">Never</Radio>
+                                                    <Radio disabled={props.values.pattern === 'once'} value="on">
                                                         On
                                                         <DatePicker 
-                                                            /* disabled={shift.ends !== 'on' } */ 
+                                                            disabled={props.values.ends !== 'on' } 
                                                             style={{ marginLeft: 16 }} 
-                                                            /* value={dayjs(props.values.end_date)}
-                                                            onChange={(date, dateString) => props.setFieldValue('end_date', dateString)}  */
+                                                            value={dayjs(props.values.end_date)}
+                                                            onChange={(date, dateString) => props.setFieldValue('end_date', dateString)} 
                                                             allowClear={false}
                                                         />
                                                     </Radio>
-                                                    <Radio /* disabled={shift.recurrency.pattern === 'once'} */ value="after">
+                                                    <Radio disabled={props.values.pattern === 'once'} value="after">
                                                         After
                                                         <InputNumber 
                                                             name="max_occurrences" 
-                                                            /* disabled={shift.ends !== 'after' || shift.recurrency.pattern === 'once'}  */
+                                                            disabled={props.values.ends !== 'after' || props.values.pattern === 'once'} 
                                                             style={{ width: 180, marginLeft: 8 }} 
                                                             addonAfter="occurrences" 
                                                             min={1} 
-                                                            /* value={shift.ends === 'on' ? 0 : shift.recurrency.occurrences} 
-                                                            onChange={(value) => {
-                                                                props.setFieldValue('max_occurrences', Number(value))
-                                                                setShift({...shift, recurrency: { ...shift.recurrency, occurrences: Number(value) } })
-                                                                }
-                                                            }  */
+                                                            value={props.values.ends === 'on' ? 0 : props.values.max_occurrences} 
+                                                            onChange={(value) => props.setFieldValue('max_occurrences', Number(value))} 
                                                         />
                                                     </Radio>
                                                 </Space>
