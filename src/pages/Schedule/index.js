@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Card, Space, Button, DatePicker, Select, Radio, Modal, Input, TimePicker, Checkbox } from 'antd' // Import Ant components
+import { Card, Space, Button, DatePicker, Select, Radio } from 'antd' // Import Ant components
 import { LeftOutlined, RightOutlined } from '@ant-design/icons' // Import Ant icons
 
 import dayjs from 'dayjs' // Import date handlers
@@ -10,6 +10,7 @@ import WeekView from '../../components/schedule/WeekView'
 import DayView from '../../components/schedule/DayView'
 import ShiftApproval from '../../components/schedule/ShiftApproval'
 import ShiftTemplates from '../../components/schedule/ShiftTemplates'
+import GlobalCreation from '../../components/schedule/GlobalCreation'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
 
@@ -31,13 +32,6 @@ const Schedule = () => {
         day: dayjs().startOf('day'),
     })
     const [selectedCity, setSelectedCity] = useState(Number(scheduleFilter.filter.city_id.replace('in|', ''))) // Create state to store the selected city
-
-    const [modal, setModal] = useState({ // Create state to store the modal
-        open: false,
-        drivers: null,
-        selectedTime: null,
-        selectedDay: null,
-    })
         
     const [view, setView] = useState(1)
 
@@ -80,14 +74,6 @@ const Schedule = () => {
     const handleTodayClick = () => { // Handle this week click
       setSelectedDate({week: dayjs().startOf('week'), day: dayjs().startOf('day')})
     } 
-    
-    const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
-        setModal({...modal, open: false})
-    }
-
-    const handleModalCancel = () => {
-        setModal({...modal, open: false})
-    }
 
     const scheduleTabContent = {
         active:   view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
@@ -102,7 +88,7 @@ const Schedule = () => {
         <>
             <Card 
                 title="Schedule"
-                extra={<Button onClick={() => setModal({...modal, open: true})} type="primary">Create {scheduleFilter.navigation.tab === 'active' ? 'Shift' : 'Draft'}</Button>}
+                extra={<GlobalCreation />}
                 style={{ margin: 15 }} 
                 tabList={tabList}
                 activeTabKey={scheduleFilter.navigation.tab}
@@ -151,56 +137,6 @@ const Schedule = () => {
                 </Space>
                 {scheduleTabContent[scheduleFilter.navigation.tab]}
             </Card>
-            <Modal title="New Shift" open={modal.open} onOk={handleModalOk} onCancel={handleModalCancel}>
-                <Space direction="vertical" size={16}>
-                    <Input.Group compact>
-                    <DatePicker 
-                        style={{ width: '30%' }}
-                        defaultValue={dayjs()} format="ddd D MMM" 
-                        onChange={(date) => setModal({ ...modal, selectedDay: {dayOfWeek: date.format('dddd'), day: date.format('DD')} }) } 
-                        />
-                    <TimePicker.RangePicker 
-                        style={{ width: '70%' }} 
-                        format="HH:mm" 
-                        onChange={(time, timeString) => setModal({ ...modal, selectedTime: {start: timeString[0], end: timeString[1]} })} 
-                    />
-                    </Input.Group>
-                    <Checkbox>All Day</Checkbox>
-                    <Select
-                        placeholder="Frequency"
-                        optionFilterProp="children"
-                        style={{ width: '100%' }}
-                        options={[
-                            { label: 'Does not repeat', value: 'Does not repeat' },
-                            { label: 'Daily', value: 'Daily' },
-                            { label: 'Weekly on Friday', value: 'Weekly on Friday' },
-                            { label: 'Montly on the second Friday', value: 'Montly on the second Friday' },
-                            { label: 'Annualy on February 24', value: 'Annualy on February 24' },
-                            { label: 'Every weekday (Mon to Fri)', value: 'Every weekday (Mon to Fri)' },
-                            { label: 'Custom...', value: 'Custom...' },
-                        ]}
-                    />
-                    <Select
-                        placeholder="City"
-                        optionFilterProp="children"
-                        style={{ width: '100%' }}
-                        options={[
-                            { label: 'Thunder Bay', value: 'Thunder Bay' },
-                            { label: 'Toronto', value: 'Toronto' },
-                        ]}
-                    />
-                    <Select
-                        placeholder="Drivers"
-                        optionFilterProp="children"
-                        style={{ width: '100%' }}
-                        options={[
-                            { label: 'Thunder Bay', value: 'Thunder Bay' },
-                            { label: 'Toronto', value: 'Toronto' },
-                        ]}
-                    />
-                    <Input placeholder="Driver Limit" type="number" min={10} max={50} defaultValue={10} onChange={(event) => {setModal({ ...modal, drivers: event.target.value})}} />
-                </Space>
-            </Modal>
         </>
     )
 }
