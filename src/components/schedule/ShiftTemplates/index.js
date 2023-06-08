@@ -78,7 +78,13 @@ const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
             dataIndex: 'end_date',
             key: 'end_date',
             render: (text, record) => (
-                record.is_recurring && <>{record.never_ends ? <Text strong color="blue">Never</Text> : <Text strong color="blue">{dayjs(text).format('DD MMM YYYY')}</Text>}</>
+                record.is_recurring && (
+                    <>
+                        {record.max_occurrences > 0 && <p>After {record.max_occurrences} occurrences</p>}
+                        {record.never_ends && <p>Never</p>}
+                        {record.end_date && <p>On {dayjs(record.end_date).format('MMM, dddd DD')}</p>}
+                    </>
+                )
             )
         },
         {
@@ -158,6 +164,8 @@ const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
                 <Table
                     columns={columns}
                     dataSource={dummy}
+                    pagination={false}
+                    bordered
                 />
             )
         }
