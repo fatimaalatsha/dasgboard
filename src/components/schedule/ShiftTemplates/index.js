@@ -1,9 +1,11 @@
 import { useState } from 'react'
-import { Row, Col, Card, Descriptions, Button, Badge, Tag, Space } from 'antd'
+import { Row, Col, Card, Descriptions, Button, Badge, Typography } from 'antd'
 import { DeleteOutlined, EditOutlined, SendOutlined } from '@ant-design/icons'
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
+
+const { Text } = Typography
 
 const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
     const [dummy, setDummy] = useState([
@@ -52,11 +54,9 @@ const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
                                 </Descriptions.Item>
                                 {item.is_recurring && <Descriptions.Item label="Pattern" style={{ textTransform: 'capitalize' }}>{item.pattern}</Descriptions.Item>}
                                 {item.is_recurring && <Descriptions.Item label="Repeats on">
-                                    <Space direction="vertical">
-                                        { item.days_of_week.map((day, idx) => (
-                                            <Tag key={idx} color="blue">{dayjs().day(day).format('dddd')}</Tag>
-                                        ))}
-                                    </Space>
+                                    { item.days_of_week.map((day, idx) => (
+                                        <Text strong key={idx} color="blue">{dayjs().day(day).format('ddd') + `, `}</Text>
+                                    ))}
                                 </Descriptions.Item>}
                                 {item.is_recurring && <Descriptions.Item label="Ends">
                                     <>
