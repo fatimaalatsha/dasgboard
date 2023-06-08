@@ -171,7 +171,7 @@ const { Text } = Typography;
                   Cancel
                 </Button>,
                 <SubmitWrapper key="submit" type="primary">
-                  update Driver Vendor ID
+                  Update Driver Vendor ID
                 </SubmitWrapper>,
               ]}
             >
@@ -227,7 +227,7 @@ const { Text } = Typography;
                       <Text strong> {driver.vendor_id}</Text>
                     </Space>
                     <Text>
-                        <IdcardOutlined style={{ color: "blue" }} /> Select New Vendor Id:{" "}
+                        <IdcardOutlined style={{ color: "blue" }} /> Select New Vendor ID:{" "}
                     </Text>
                         {/* <Text>
                         <HistoryOutlined  style={{ color: "blue" }} />
