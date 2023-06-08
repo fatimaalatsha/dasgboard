@@ -126,6 +126,7 @@ const GlobalCreation = () => {
                 validationSchema={templateSchema}
                 onSubmit={ async (values, { setSubmitting }) => {
                     const payload = {
+                        'title': values.title,
                         'start_time': converToUTC( values.day.format('YYYY-MM-DD'), values.start_time, scheduleFilter.tz),
                         'end_time': converToUTC( values.day.format('YYYY-MM-DD'), values.end_time, scheduleFilter.tz),
                         'capacity': Number(values.capacity),
@@ -148,6 +149,7 @@ const GlobalCreation = () => {
                             }),
                         }),
                     }
+                    console.table(payload)
                 }}
             >
                 {props => (
@@ -176,7 +178,7 @@ const GlobalCreation = () => {
                                 </SubmitWrapper>,
                             ]}
                          >
-                        <Space direction="vertical" size={16}>
+                        <Space direction="vertical" size={16} style={{ width: '100%' }}>
                             <InputWrapper 
                                 name="title" 
                                 placeholder="Template Title" 
@@ -187,14 +189,14 @@ const GlobalCreation = () => {
                                 }}
                             />
                             <Input.Group compact>
-                            <DatePicker 
+                            {/* <DatePicker 
                                 style={{ width: '30%' }}
                                 defaultValue={props.values.day} format="ddd D MMM" 
                                 allowClear={false}
                                 onChange={(date) => props.setFieldValue('day', date ) } 
-                                />
+                                /> */}
                             <TimePicker.RangePicker 
-                                style={{ width: '70%' }} 
+                                style={{ width: '100%' }} 
                                 format="HH:mm" 
                                 onChange={(time, timeString) => {
                                     props.setFieldValue('start_time', timeString[0])
