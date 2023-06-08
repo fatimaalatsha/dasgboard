@@ -119,14 +119,13 @@ const weeklyDaysReccurence = [
     }
 ]
 
-const ShiftCard = ({record, cardStyle, handleEdit, setEdit, handleDelete, refetch }) => {
+const ShiftCard = ({record, cardStyle, handleEdit, handleDelete, refetch }) => {
 
     const items = [
         {
             key: 1,
             onClick: () => {
-                handleEdit()
-                setEdit(true)
+                handleEdit(true)
             },
             label: 'Edit',
         },
@@ -263,6 +262,11 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         })
     }
 
+    const handleEdit = (value) => {
+        setEdit(value)
+        handleClick()
+    }
+
     const handleHoursChange = (timeString) => {
         setShift({
             ...shift,
@@ -294,7 +298,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         <>
             <div className="container" style={{ minHeight: 24}}>
                 { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} refetch={refetch} />
+                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} refetch={refetch} />
                 ) : (
                 <>
                     {  display && (
@@ -303,7 +307,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     </Tooltip> 
                     )}
                         { isHovering && (
-                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={handleClick} setEdit={setEdit} handleDelete={handleDelete} refetch={refetch} />
+                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} refetch={refetch} />
                         )}
                 </>
                 )}
@@ -330,6 +334,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     values.start_time = converToUTC( shift.day, values.start_time, scheduleFilter.tz)
                     values.end_time = converToUTC(shift.day, values.end_time, scheduleFilter.tz)
                     values.capacity = Number(values.capacity)
+                    values.city_id = !edit ? [Number(city)] : Number(city)
                     values.guarantee = Number(values.guarantee)
                     values.pattern = shift.pattern !== 'custom' ? shift.pattern : shift.recurrency.pattern
                     values.driver_ids.length === 0 && delete values.driver_ids
