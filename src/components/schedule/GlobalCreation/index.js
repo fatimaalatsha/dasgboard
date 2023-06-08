@@ -48,6 +48,7 @@ const weeklyDaysReccurence = [
 ]
 
 const templateSchema = object().shape({
+    title: string().required('Required'),
     capacity: number().min(1, 'Shift driver capacity must be greater than or equal to 1.').required('Required'),
     day: string().required('Required'),
     start_time: string().required('Required'),
@@ -106,6 +107,7 @@ const GlobalCreation = () => {
             <Button disabled={scheduleFilter.navigation.tab === 'active'} onClick={() => setOpen(true)} type="primary">Create {scheduleFilter.navigation.tab === 'active' ? 'Shift' : 'Template'}</Button>
             <Formik
                 initialValues={{
+                    title: '',
                     day: DEFAULT_DAY,
                     start_time: '',
                     end_time: '',
@@ -123,41 +125,29 @@ const GlobalCreation = () => {
                 }}
                 validationSchema={templateSchema}
                 onSubmit={ async (values, { setSubmitting }) => {
-                    console.log(values)
-                    values.start_time = converToUTC( values.day.format('YYYY-MM-DD'), values.start_time, scheduleFilter.tz)
-                    values.end_time = converToUTC( values.day.format('YYYY-MM-DD'), values.end_time, scheduleFilter.tz)
-                    values.capacity = Number(values.capacity)
-                    values.guarantee = Number(values.guarantee)
-                    if (!values.hasGuarantee) {
-                        delete values.guarantee
-                        delete values.guarantee_specs
+                    const payload = {
+                        'start_time': converToUTC( values.day.format('YYYY-MM-DD'), values.start_time, scheduleFilter.tz),
+                        'end_time': converToUTC( values.day.format('YYYY-MM-DD'), values.end_time, scheduleFilter.tz),
+                        'capacity': Number(values.capacity),
+                        'is_recurring': values.is_recurring,
+                        ...(values.hasGuarantee && {
+                            'guarantee': Number(values.guarantee),
+                            'guarantee_specs': values.guarantee_specs,
+                        }),
+                        ...(values.is_recurring && {
+                            'pattern': values.pattern,
+                            'days_of_week': values.days_of_week,
+                            ...(values.ends === 'never' && {
+                                'never_ends': true,
+                            }),
+                            ...((values.pattern === 'once' || values.ends === 'after') && {
+                                'max_occurrences': values.max_occurrences,
+                            }),
+                            ...(values.ends === 'on' && {
+                                'end_date': values.end_date,
+                            }),
+                        }),
                     }
-                    if (!values.is_recurring) {
-                        delete values.pattern 
-                        delete values.ends 
-                        delete values.end_date 
-                        delete values.max_occurrences
-                        delete values.days_of_week
-                    }
-                    if (values.ends === 'never') {
-                        delete values.end_date
-                        delete values.max_occurrences
-                        values.never_ends = true
-                    }
-                    if (values.pattern === 'once') {
-                        delete values.end_date
-                        delete values.never_ends
-                        values.max_occurrences = 1
-                    }
-                    if (values.max_occurrences) {
-                        delete values.end_date
-                    } else {
-                        delete values.max_occurrences
-                    }
-                    delete values.hasGuarantee
-                    delete values.ends
-                    delete values.day
-                    delete values.template
                 }}
             >
                 {props => (
@@ -187,6 +177,15 @@ const GlobalCreation = () => {
                             ]}
                          >
                         <Space direction="vertical" size={16}>
+                            <InputWrapper 
+                                name="title" 
+                                placeholder="Template Title" 
+                                type="text" 
+                                value={props.values.title}  
+                                onChange={(e) => {
+                                    props.setFieldValue('title', e.target.value)
+                                }}
+                            />
                             <Input.Group compact>
                             <DatePicker 
                                 style={{ width: '30%' }}
@@ -263,15 +262,16 @@ const GlobalCreation = () => {
                                         style={{ width: '100%' }} 
                                         onChange={ (e) => {
                                             props.setFieldValue('template', e.target.value)
-                                                e.target.value === 'daily' && 
-                                                    props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
-                                                    props.setFieldValue('pattern', 'daily')
-                                                e.target.value === 'weekly' &&
-                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
-                                                    props.setFieldValue('pattern', 'weekly')
-                                                e.target.value === 'custom' &&
-                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
-                                                    props.setFieldValue('pattern', 'weekly')
+                                            props.setFieldValue('pattern', e.target.value)
+                                            e.target.value === 'daily' ? 
+                                                props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
+                                            : e.target.value === 'weekly' ?
+                                                props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                            : props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                            
+                                            if (e.target.value === 'custom') {
+                                                props.setFieldValue('pattern', 'weekly')
+                                            }
                                             } 
                                         } 
                                         value={props.values.template}
