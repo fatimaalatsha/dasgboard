@@ -45,7 +45,6 @@ const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
                         >
                             <Descriptions column={1} bordered>
                                 <Descriptions.Item label="Capacity">{item.capacity}</Descriptions.Item>
-                                <Descriptions.Item label="Day">{dayjs(item.start_time).format('MMM, dddd DD')}</Descriptions.Item>
                                 <Descriptions.Item label="Time">{dayjs(item.start_time).format('HH:mm') + ` ➡ ` + dayjs(item.end_time).format('HH:mm')}</Descriptions.Item>
                                 {item.guarantee && <Descriptions.Item label="Guarantee">{`$ ` + item.guarantee}</Descriptions.Item>}
                                 {item.guarantee_specs && <Descriptions.Item label="Guarantee Description">{item.guarantee_specs}</Descriptions.Item>}
