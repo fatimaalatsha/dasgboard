@@ -10,7 +10,7 @@ import WeekView from '../../components/schedule/WeekView'
 import DayView from '../../components/schedule/DayView'
 import ShiftApproval from '../../components/schedule/ShiftApproval'
 import ShiftTemplates from '../../components/schedule/ShiftTemplates'
-import GlobalCreation from '../../components/schedule/GlobalCreation'
+import CreateTemplate from '../../components/schedule/CreateTemplate'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
 
@@ -103,7 +103,6 @@ const Schedule = () => {
         <>
             <Card 
                 title="Schedule"
-                extra={<GlobalCreation />}
                 style={{ margin: 15 }} 
                 tabList={tabList}
                 activeTabKey={scheduleFilter.navigation.tab}
@@ -153,6 +152,7 @@ const Schedule = () => {
                                 </Space>
                             </>
                         ) : (
+                            <>
                             <Radio.Group 
                             size="large" 
                             options={templateViewOptions} 
@@ -169,6 +169,8 @@ const Schedule = () => {
                                 })
                             }
                             />
+                            <CreateTemplate />
+                            </>
                         )}
                     </Space>
                 {scheduleTabContent[scheduleFilter.navigation.tab]}
