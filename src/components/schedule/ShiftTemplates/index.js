@@ -1,6 +1,6 @@
 import { useState } from 'react'
-import { Row, Col, Card, Descriptions, Button, Badge, Typography, Table, Space } from 'antd'
-import { DeleteOutlined, EditOutlined, SendOutlined } from '@ant-design/icons'
+import { Row, Col, Card, Descriptions, Button, Badge, Typography, Table, Space, Popconfirm } from 'antd'
+import { DeleteOutlined, EditOutlined, SendOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -93,15 +93,28 @@ const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
             key: 'actions',
             render: (text, record) => (
                 <Space size="middle">
-                    <Button danger type="text" icon={<DeleteOutlined />} />
-                    <Button ghost type="primary" icon={<EditOutlined />} />
-                    <Button
-                        icon={<SendOutlined />}
-                        type="primary"
-                        onClick={() => onEdit(record)}
+                    <Popconfirm
+                    title="Delete template"
+                    description="Are you sure to delete this template?"
+                    icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                    onConfirm={() => console.log('delete', record)}
+                    onCancel={() => console.log('cancel')}
+                    okText="Yes, Delete it"
+                    cancelText="Cancel"
                     >
-                        Publish
-                    </Button>
+                        <Button danger type="text" icon={<DeleteOutlined />} />
+                    </Popconfirm>
+                    <Button ghost type="primary" icon={<EditOutlined />} />
+                    <Popconfirm
+                    title="Publish template"
+                    description="Are you sure to publish this template?"
+                    onConfirm={() => console.log('publish', record)}
+                    onCancel={() => console.log('cancel')}
+                    okText="Yes, Publish it"
+                    cancelText="Cancel"
+                    >
+                        <Button icon={<SendOutlined />} type="primary"> Publish </Button>
+                    </Popconfirm>
                 </Space>
             )
         }
@@ -121,15 +134,28 @@ const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
                         <Card
                             title={item.title}
                             actions={[
-                                <Button danger type="text" key="delete" icon={<DeleteOutlined />} />,
-                                <Button ghost type="primary" key="edit" icon={<EditOutlined />} />,
-                                <Button 
-                                    icon={<SendOutlined />} 
-                                    type="primary" 
-                                    onClick={() => onEdit(item)}
+                                <Popconfirm
+                                title="Delete template"
+                                description="Are you sure to delete this template?"
+                                icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                                onConfirm={() => console.log('delete', item)}
+                                onCancel={() => console.log('cancel')}
+                                okText="Yes, Delete it"
+                                cancelText="Cancel"
                                 >
-                                    Publish
-                                </Button>,
+                                    <Button danger type="text" key="delete" icon={<DeleteOutlined />} />
+                                </Popconfirm>,
+                                <Button ghost type="primary" key="edit" icon={<EditOutlined />} />,
+                                <Popconfirm
+                                title="Publish template"
+                                description="Are you sure to publish this template?"
+                                onConfirm={() => console.log('publish', item)}
+                                onCancel={() => console.log('cancel')}
+                                okText="Yes, Publish it"
+                                cancelText="Cancel"
+                                >
+                                    <Button icon={<SendOutlined />} type="primary"> Publish </Button>
+                                </Popconfirm>,
                             ]}
                             bordered={false}
                         >
