@@ -1,16 +1,31 @@
 import { useState } from 'react'
-import { Row, Col, Card, Descriptions, Button, Badge, Typography, Table, Space, Popconfirm } from 'antd'
+import { Row, Col, Card, Descriptions, Button, Badge, Typography, Table, Space, Popconfirm, Modal, DatePicker } from 'antd'
 import { DeleteOutlined, EditOutlined, SendOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
+import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
+import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
 
-import { useFilterStore } from '../../../store'
+import { useFilterStore } from '../../../store' // Import useFilterStore to access filter store state
+import { CitySelect } from '../../CitySelect' // Import CitySelect component
+import DriverSelect from '../../DriverSelect' // Import DriverSelect component
+import SubmitWrapper from '../../forms/SubmitWrapper'
+
+dayjs.extend(utc)
 
 const { Text } = Typography
 
-const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
+const publishSchema = object().shape({
+    city_id: number().required('Required'),
+    day: string().required('Required'),
+    driver_ids: array().of(number().nullable()).notRequired(),
+})
+
+const ShiftTemplates = () => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+    const DEFAULT_DAY = dayjs()
+    const [open, setOpen] = useState(false)
     const [dummy, setDummy] = useState([
         { id: 1, title: 'Shift 1', guarantee: null, guarantee_specs: '', capacity: 10, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 05:00:00', is_recurring: true, end_date: null, never_ends: true, pattern: 'weekly', days_of_week: [0, 1, 2, 3, 4, 5, 6], max_occurrences: 0 },
         { id: 2, title: 'Shift 2', guarantee: null, guarantee_specs: '', capacity: 5, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 05:00:00', is_recurring: false, end_date: null, never_ends: false, pattern: 'weekly', days_of_week: [ 2, 4, 6], max_occurrences: 0 },
@@ -108,7 +123,7 @@ const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
                     <Popconfirm
                     title="Publish template"
                     description="Are you sure to publish this template?"
-                    onConfirm={() => console.log('publish', record)}
+                    onConfirm={handleModalOpen}
                     onCancel={() => console.log('cancel')}
                     okText="Yes, Publish it"
                     cancelText="Cancel"
@@ -122,6 +137,18 @@ const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
     
     const colConfig = {
         span: 6,
+    }
+    
+    const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
+        setOpen(false)
+    }
+
+    const handleModalCancel = () => {
+        setOpen(false)
+    }
+
+    const handleModalOpen = () => {
+        setOpen(true)
     }
 
     return (
@@ -149,7 +176,7 @@ const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
                                 <Popconfirm
                                 title="Publish template"
                                 description="Are you sure to publish this template?"
-                                onConfirm={() => console.log('publish', item)}
+                                onConfirm={handleModalOpen}
                                 onCancel={() => console.log('cancel')}
                                 okText="Yes, Publish it"
                                 cancelText="Cancel"
@@ -195,6 +222,68 @@ const ShiftTemplates = ({ shift, onEdit, onDelete }) => {
                 />
             )
         }
+        
+        <Formik
+                initialValues={{
+                    day: DEFAULT_DAY,
+                    city_id: null,
+                    driver_ids: [],
+                }}
+                validationSchema={publishSchema}
+                onSubmit={ async (values, { setSubmitting }) => {
+                    console.table(values)
+                }}
+            >
+                {props => (
+                    <FormikForm>
+                        <Modal 
+                            title="Publish Template"
+                            open={open} 
+                            onOk={handleModalOk} 
+                            onCancel={ () => {
+                                handleModalCancel()
+                                props.resetForm()
+                            }}
+                            destroyOnClose
+                            footer={[
+                                <Button 
+                                    key="back" 
+                                    onClick={() => {
+                                        handleModalCancel()
+                                        props.resetForm()
+                                    }}
+                                >
+                                    Cancel
+                                </Button>,
+                                <SubmitWrapper key="submit" type="primary" htmlType="submit" loading={props.isSubmitting}>
+                                    Publish
+                                </SubmitWrapper>,
+                            ]}
+                         >
+                        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                            
+                            <CitySelect
+                                onChange={(value) => {
+                                    props.setFieldValue('city', Number(value))
+                                }}   
+                                style={{ width: '100%' }}
+                            />
+                            <DatePicker 
+                                style={{ width: '100%' }}
+                                format="ddd D MMM" 
+                                allowClear={false}
+                                onChange={(date) => props.setFieldValue('day', date ) } 
+                            />
+                            <DriverSelect 
+                                onChange={(value) => {
+                                    props.setFieldValue('driver_ids', value)
+                                }}
+                            />
+                        </Space>
+                        </Modal>
+                    </FormikForm>
+                )}
+            </Formik>
         </>
     )
 }
