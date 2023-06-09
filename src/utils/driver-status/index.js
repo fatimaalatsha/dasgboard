@@ -216,6 +216,7 @@ const getVendorId = async () => { // Get vendor id
         }
         const response = await NEW_API.get(`/v1/vendors`, options);
         const data = await response.data
+        console.log(data)
         return data.items;
     } catch (error) {
         console.log(error)
