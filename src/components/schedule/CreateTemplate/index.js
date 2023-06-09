@@ -89,7 +89,7 @@ const templateSchema = object().shape({
     }),
 })
 
-const GlobalCreation = () => {
+const CreateTemplate = () => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const DEFAULT_DAY = dayjs()
     const [open, setOpen] = useState(false)
@@ -104,7 +104,7 @@ const GlobalCreation = () => {
  
     return (
         <>
-            <Button disabled={scheduleFilter.navigation.tab === 'active'} onClick={() => setOpen(true)} type="primary">Create {scheduleFilter.navigation.tab === 'active' ? 'Shift' : 'Template'}</Button>
+            <Button  onClick={() => setOpen(true)} type="primary">Create Template</Button>
             <Formik
                 initialValues={{
                     title: '',
@@ -361,4 +361,4 @@ const GlobalCreation = () => {
     )
 }
 
-export default GlobalCreation
+export default CreateTemplate
