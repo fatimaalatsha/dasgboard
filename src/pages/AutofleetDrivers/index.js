@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
 import useNewFetch from "../../hooks/use-new-fetch";
 import qs from 'qs' // Import qs library
-import { Typography, Table, Tag, Modal, Button, Space, message, Avatar, Card } from "antd";
-import { UserOutlined, SolutionOutlined, IdcardOutlined, EnvironmentOutlined, PhoneOutlined, HistoryOutlined } from '@ant-design/icons';
+import { Typography, Table, Tag, Modal, Button, Space, message, Col ,Row,  Card } from "antd";
+import { UserOutlined, SolutionOutlined, IdcardOutlined, EditOutlined, EnvironmentOutlined, PhoneOutlined, HistoryOutlined } from '@ant-design/icons';
 import SelectWrapper from "../../components/forms/SelectWrapper";
 import SubmitWrapper from "../../components/forms/SubmitWrapper";
 import { Formik, Form } from "formik";
@@ -20,8 +20,7 @@ const { Text } = Typography;
     const [open, setOpen] = useState(false);
     const [driver, setDriver] = useState({});
     const [vendorId, setVendorId] = useState([]);
-    const { data, error, isLoading } = useNewFetch(`/v1/active-drivers?${qs.stringify(getUserParams)}`);
-
+    const { data, error, isLoading, refetch } = useNewFetch(`/v1/active-drivers?${qs.stringify(getUserParams)}`);
     const columns = [
       {
         title: "Driver ID",
@@ -109,72 +108,72 @@ const { Text } = Typography;
         const  idValue = value.vendor_id;
         const updated = await updateVendorId(driver.driver_id, idValue);
         if (updated) {
-            message.success(updated.message);
-            setDriver({ ...driver, vendor_id: value.vendor_id });
+          message.success(updated.message);
+          refetch();
+          setDriver({ ...driver, vendor_id: value.vendor_id });
         }
         else {
             message.error("Something went wrong");
         }
 
-    }
-   
+  }
+ 
     isLoading && <p>Loading...</p>
     error && <p>{error}</p>
     return (
-
-  <Card title={'Autofleet Drivers'} style={{ margin: 15 }}>
-      <Space direction="vertical" size="large" style={{ width: '100%' }}>    
-        <Table
-          columns={columns}
-          dataSource={data.data}
-          loading={isLoading}
-          rowKey="id"
-          onRow={(record, rowIndex) => {
-            return {
-              onClick: (event) => {
-                setOpen(true);
-                findDriver(record.id);
-              },
-            };
-          }}
-          pagination={{
-            pageSize: data?.meta?.pagination?.limit,
-            total: data?.meta?.pagination?.total,
-            current: data?.meta?.pagination?.page,
-          }}
-        />
-        <Formik
-          initialValues={{ vendor_id: driver.vendor_id || "" }}
-          onSubmit={async (values, actions) => {
-            await updateText(values).then(() => {
-              actions.resetForm();
-              setOpen(false);
-            });
-          }}
-        >
-          <Form>
-            <Modal
-              title="Update Driver Vendor ID"
-              destroyOnClose={true}
-              style={{
-                top: 200,
-                width: "100%",
-                maxWidth: "500px",
-                margin: "0 auto",
-                left: "0",
-                right: "0",
-              }}
-              open={open}
-              onCancel={() => setOpen(false)}
-              footer={[
-                <Button key="cancel" onClick={() => setOpen(false)}>
-                  Cancel
-                </Button>,
-                <SubmitWrapper key="submit" type="primary">
-                  Update Driver Vendor ID
-                </SubmitWrapper>,
-              ]}
-            >
+      <Card title={"Autofleet Drivers"} style={{ margin: 15 }}>
+        <Space direction="vertical" size="large" style={{ width: "100%" }}>
+          <Table
+            columns={columns}
+            dataSource={data.data}
+            loading={isLoading}
+            rowKey="id"
+            onRow={(record, rowIndex) => {
+              return {
+                onClick: (event) => {
+                  setOpen(true);
+                  findDriver(record.id);
+                },
+              };
+            }}
+            pagination={{
+              pageSize: data?.meta?.pagination?.limit,
+              total: data?.meta?.pagination?.total,
+              current: data?.meta?.pagination?.page,
+            }}
+          />
+          <Formik
+            initialValues={{ vendor_id: driver.vendor_id || "" }}
+            onSubmit={async (values, actions) => {
+              await updateText(values).then(() => {
+                actions.resetForm();
+                setOpen(false);
+              });
+            }}
+          >
+            <Form>
+              <Modal
+                title="Update Driver Vendor ID"
+                destroyOnClose={true}
+                style={{
+                  top: 200,
+                  width: "100%",
+                  maxWidth: "500px",
+                  margin: "0 auto",
+                  left: "0",
+                  right: "0",
+                }}
+                open={open}
+                onCancel={() => setOpen(false)}
+                footer={[
+                  <Button key="cancel" onClick={() => setOpen(false)}>
+                    Cancel
+                  </Button>,
+                  <SubmitWrapper key="submit" type="primary">
+                    Update Driver Vendor ID
+                  </SubmitWrapper>,
+                ]}
+              >
                 {/* <Space
                   direction="vertical"
                   position="center"
@@ -194,55 +193,74 @@ const { Text } = Typography;
                 <Space
                   direction="vertical"
                   position="center"
-                  style={{ width: "100%", fontSize: "16px", textAlign: "center" }}
+                  style={{
+                    width: "100%",
+                    fontSize: "16px",
+                    textAlign: "center",
+                  }}
                 >
-                      <Space>
+                  {/* <Space>
                         <Text>
-                          <SolutionOutlined style={{ color: "blue" }} /> Full Name:{" "}
+                            <PhoneOutlined style={{ color: "blue" }} /> Phone Number:{" "}
                         </Text>
-                        <Text strong>
-                          { driver.first_name } { driver.last_name } 
-                      
-                      </Text>
-                      <Tag color={driver.status === "online" ? "green" : (driver.status === "stand-by" ? "gold" : "red")}> {driver.status} </Tag>
-                      {/* <Tag color = "blue"> {driver.rank} </Tag> */}
-                                  </Space>
-                                  {/* <Space>
-                                      <Text>
-                                          <PhoneOutlined style={{ color: "blue" }} /> Phone Number:{" "}
-                                      </Text>
-                                      <Text strong>{driver.phone}</Text>
-                                  </Space> */}
+                        <Text strong>{driver.phone}</Text>
+                    </Space> */}
 
-                      {/* <Space>
+                  {/* <Space>
                       <Text>
                         <EnvironmentOutlined style={{ color: "blue" }} /> Address:{" "}
                       </Text>
                       <Text strong>{driver.address}</Text>
                     </Space> */}
-                    <Space>
-                    <Text>
-                      <IdcardOutlined style={{ color: "blue" }} /> Vendor ID:
-                    </Text>
-                      <Text strong> {driver.vendor_id}</Text>
-                    </Space>
-                    <Text>
-                        <IdcardOutlined style={{ color: "blue" }} /> Select New Vendor ID:{" "}
-                    </Text>
-                        {/* <Text>
-                        <HistoryOutlined  style={{ color: "blue" }} />
-                          last update: {driver.updated_at}                                
-                        </Text> */}
-                    <SelectWrapper
-                      name="vendor_id"
-                      datasource={vendorId}
-                      placeholder={driver.vendor_id}
-                                />
-              </Space>
-            </Modal>
-          </Form>
-                </Formik>
-            </Space>
+                  <Row>
+                    <Col span={6}>
+                      <SolutionOutlined style={{ color: "blue" }} /> Full Name:{" "}
+                    </Col>
+                    <Col span={18}>
+                      <Text strong>
+                        {" "}
+                        {driver.first_name} {driver.last_name}
+                      </Text>
+                    </Col>
+
+                    <Col span={6}>
+                      <Text>
+                        <IdcardOutlined style={{ color: "blue" }} /> Vendor ID:
+                      </Text>
+                    </Col>
+                    <Col span={18}>
+                      <Text strong> {driver.vendor}</Text>
+                    </Col>
+                    <Col span={7}>
+                      <Text>
+                        <EditOutlined style={{ color: "blue" }}/> Edit vendor ID:
+                      </Text>
+                    </Col>
+                    <Col span={16}>
+                      <SelectWrapper
+                        name="vendor_id"
+                        datasource={vendorId}
+                        placeholder={"Select New Vendor ID"}
+                      />{" "}
+                    </Col>
+
+                    {/* <Space direction="vertical" size={20}>
+                      <Row align="middle">
+                        <Col span={18}>
+                          <EditOutlined style={{ color: "blue" }} />
+                        </Col>
+                        <Col span={6}>
+                          <Text>Select New Vendor ID: </Text>
+                        </Col>
+                        <Col flex="none"></Col>
+                      </Row>
+                    </Space> */}
+                  </Row>
+                </Space>
+              </Modal>
+            </Form>
+          </Formik>
+        </Space>
       </Card>
     );
 }

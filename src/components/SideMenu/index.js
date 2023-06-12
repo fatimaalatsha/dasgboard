@@ -70,15 +70,14 @@ const SideMenu = ({collapsed}) => {
       icon: <RocketOutlined />,
     },
     {
+      key: "/documents",
+      label: "Documents",
+      icon: <FileOutlined />,
+    },
+    {
       key: "/autofleet_drivers",
       label: 'Autofleet Drivers',
       icon: <TeamOutlined />,
-
-    },
-    {
-      key: "/documents",
-      label: 'Documents',
-      icon: <FileOutlined />,
     },
     {
       key: "/schedule",
