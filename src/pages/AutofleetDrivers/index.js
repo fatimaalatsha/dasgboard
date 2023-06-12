@@ -20,9 +20,7 @@ const { Text } = Typography;
     const [open, setOpen] = useState(false);
     const [driver, setDriver] = useState({});
     const [vendorId, setVendorId] = useState([]);
-    const [vendorName, setVendorName] = useState('');
-    const { data, error, isLoading } = useNewFetch(`/v1/active-drivers?${qs.stringify(getUserParams)}`);
-    console.log(data);
+    const { data, error, isLoading, refetch } = useNewFetch(`/v1/active-drivers?${qs.stringify(getUserParams)}`);
     const columns = [
       {
         title: "Driver ID",
@@ -110,8 +108,9 @@ const { Text } = Typography;
         const  idValue = value.vendor_id;
         const updated = await updateVendorId(driver.driver_id, idValue);
         if (updated) {
-            message.success(updated.message);
-            setDriver({ ...driver, vendor_id: value.vendor_id });
+          message.success(updated.message);
+          refetch();
+          setDriver({ ...driver, vendor_id: value.vendor_id });
         }
         else {
             message.error("Something went wrong");
