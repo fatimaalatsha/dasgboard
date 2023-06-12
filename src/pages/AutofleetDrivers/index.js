@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import useNewFetch from "../../hooks/use-new-fetch";
 import qs from 'qs' // Import qs library
 import { Typography, Table, Tag, Modal, Button, Space, message, Col ,Row,  Card } from "antd";
-import { UserOutlined, SolutionOutlined, IdcardOutlined, EditOutlined, EnvironmentOutlined, PhoneOutlined, HistoryOutlined } from '@ant-design/icons';
+import { UserOutlined, SolutionOutlined, IdcardOutlined, EditOutlined, HomeOutlined } from '@ant-design/icons';
 import SelectWrapper from "../../components/forms/SelectWrapper";
 import SubmitWrapper from "../../components/forms/SubmitWrapper";
 import { Formik, Form } from "formik";
@@ -20,7 +20,7 @@ const { Text } = Typography;
     const [open, setOpen] = useState(false);
     const [driver, setDriver] = useState({});
     const [vendorId, setVendorId] = useState([]);
-    const { data, error, isLoading, refetch } = useNewFetch(`/v1/active-drivers?${qs.stringify(getUserParams)}`);
+  const { data, error, isLoading, refetch } = useNewFetch(`/v1/active-drivers?${qs.stringify(getUserParams)}`);
     const columns = [
       {
         title: "Driver ID",
@@ -61,16 +61,17 @@ const { Text } = Typography;
         dataIndex: "external_id",
         key: "external_id",
       },
+      
       {
-        title: "Address",
-        dataIndex: "address",
-        key: "address",
+        title: "City",
+        dataIndex: "city",
+        key: "city",
       },
-      // {
-      //   title: "Vendor ID",
-      //   dataIndex: "vendor_id",
-      //   key: "vendor_id",
-      // },
+      {
+        title: "Vendor",
+        dataIndex: "vendor",
+        key: "vendor",
+      },
       // {
       //   title: 'Action',
       //   dataIndex: 'action',
@@ -212,9 +213,11 @@ const { Text } = Typography;
                       </Text>
                       <Text strong>{driver.address}</Text>
                     </Space> */}
-                  <Row>
+                  <Row
+                    gutter={[16, 16]}
+                  >
                     <Col span={6}>
-                      <SolutionOutlined style={{ color: "blue" }} /> Full Name:{" "}
+                      <SolutionOutlined style={{ color: "blue" }} /> Full Name :{" "}
                     </Col>
                     <Col span={18}>
                       <Text strong>
@@ -225,18 +228,26 @@ const { Text } = Typography;
 
                     <Col span={6}>
                       <Text>
-                        <IdcardOutlined style={{ color: "blue" }} /> Vendor ID:
+                        <IdcardOutlined style={{ color: "blue" }} /> Vendor ID :
                       </Text>
                     </Col>
                     <Col span={18}>
                       <Text strong> {driver.vendor}</Text>
                     </Col>
-                    <Col span={7}>
+                    <Col span={4}>
                       <Text>
-                        <EditOutlined style={{ color: "blue" }}/> Edit vendor ID:
+                        <HomeOutlined style={{ color: "blue" }} /> City :
                       </Text>
                     </Col>
-                    <Col span={16}>
+                    <Col span={18}>
+                      <Text strong> {driver.city}</Text>
+                    </Col>
+                    <Col span={6}>
+                      <Text>
+                        <EditOutlined style={{ color: "blue" }} /> Edit vendor :
+                      </Text>
+                    </Col>
+                    <Col span={18}>
                       <SelectWrapper
                         name="vendor_id"
                         datasource={vendorId}
