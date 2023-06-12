@@ -189,15 +189,10 @@ const CreateTemplate = () => {
                                 }}
                             />
                             <Input.Group compact>
-                            {/* <DatePicker 
-                                style={{ width: '30%' }}
-                                defaultValue={props.values.day} format="ddd D MMM" 
-                                allowClear={false}
-                                onChange={(date) => props.setFieldValue('day', date ) } 
-                                /> */}
                             <TimePicker.RangePicker 
                                 style={{ width: '100%' }} 
                                 format="HH:mm" 
+                                allowClear={false}
                                 onChange={(time, timeString) => {
                                     props.setFieldValue('start_time', timeString[0])
                                     props.setFieldValue('end_time', timeString[1])
