@@ -220,7 +220,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         hasGuarantee: Boolean(record.guarantee),
         guarantee: record.guarantee || 0,
         guarantee_specs: record.guarantee_specs || '',
-        hasRecurrency: record.is_recurring,
+        hasRecurrency: record.is_recurring || false,
         pattern: 'weekly', // once, daily, weekly
         ends: 'never', // never, after, on
         recurrency: {
