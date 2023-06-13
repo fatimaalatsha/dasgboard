@@ -76,9 +76,24 @@ let filterStore = (set) => ({
       template: 1, // 1 = Table, 0 = Grid (default: 1)
     }
   },
+  autofleetFilter: {
+    pagination: {
+      current: 1,
+      pageSize: 50,
+      showSizeChanger: true,
+      pageSizeOptions: pageSize,
+      position: ["bottomRight", "topRight"],
+      },
+    sort: {
+      created_at: "desc",
+    },
+    filter: {},
+  },
   setAutofleetFilter: (filter) =>
     set((state) => ({
-      autofleetFilter: { ...state.autofleetFilter, ...filter,
+      autofleetFilter: {
+      ...state.autofleetFilter,
+      ...filter,
       },
     })),
   setScheduleFilter: (filter) =>

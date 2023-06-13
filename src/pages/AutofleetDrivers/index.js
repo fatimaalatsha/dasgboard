@@ -24,23 +24,13 @@ const { Text } = Typography;
 })
     
 const AutofleetDrivers = () => {
-  const autofleetFilter = useFilterStore((state) => state.autofleetFilter) || {
-    pagination: {
-      current: 1,
-      pageSize: 10,
-    },
-    filter: {
-      city_id: ["in|undefined"],
-    },
-    full_name: ["in|undefined"],
-  }; // Get filter from store
+  const autofleetFilter = useFilterStore((state) => state.autofleetFilter) // Get filter from store
   const setAutofleetFilter = useFilterStore((state) => state.setAutofleetFilter); // Set filter to
-    const [searchText, setSearchText] = useState(autofleetFilter.full_name || "");
     const [open, setOpen] = useState(false);
     const [driver, setDriver] = useState({});
     const [vendorId, setVendorId] = useState([]);
-  const [filter, setFilter] = useState({});//filter object
-  
+    const [searchText, setSearchText] = useState( autofleetFilter.full_name || '' );
+
   // fetch vendor id list from API
     const getVendorIdList = async () => {
       const vendorIdList = await getVendorId();
@@ -140,6 +130,8 @@ const AutofleetDrivers = () => {
         dataIndex: "city",
         key: "city",
         filteredValue: null,
+        sorter: true,
+        align: "center",
       },
       {
         title: "Driver Licence",
