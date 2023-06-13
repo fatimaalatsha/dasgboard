@@ -148,6 +148,16 @@ const AutofleetDrivers = () => {
         title: "Status",
         dataIndex: "status",
         key: "status",
+        filters: [
+          { text: "Online", value: "online" },
+          { text: "Stand-by", value: "stand-by" },
+          { text: "Activating", value: "activating" },
+          { text: "Offline", value: "offline" },
+          { text: "Active", value: "active" },
+        ],
+        filteredValue: null,
+      ...( autofleetFilter.filter?.status && { defaultFilteredValue: autofleetFilter.filter?.status.map((status) => status.replace('in|', '')) }),
+      ...( autofleetFilter.filter?.status && { filteredValue: autofleetFilter.filter?.status.map((status) => status.replace('in|', '')) }),
         render: (status) => (
           <Tag
             color={
