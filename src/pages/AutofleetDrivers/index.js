@@ -1,12 +1,20 @@
 import React, { useState, useEffect } from "react";
+
+import { Input, Typography, Table, Tag, Modal, Button, Space, message, Col ,Row,  Card } from "antd";
+import { ReloadOutlined, SolutionOutlined, IdcardOutlined, EditOutlined, HomeOutlined } from '@ant-design/icons';
+
 import useNewFetch from "../../hooks/use-new-fetch";
+
 import qs from 'qs' // Import qs library
-import { Typography, Table, Tag, Modal, Button, Space, message, Col ,Row,  Card } from "antd";
-import { UserOutlined, SolutionOutlined, IdcardOutlined, EditOutlined, HomeOutlined } from '@ant-design/icons';
+import { Formik, Form } from "formik";
+
 import SelectWrapper from "../../components/forms/SelectWrapper";
 import SubmitWrapper from "../../components/forms/SubmitWrapper";
-import { Formik, Form } from "formik";
 import { updateVendorId, getVendorId } from "../../utils/driver-status";
+
+import { useFilterStore } from '../../store' // Import filter store
+
+const { Text } = Typography;
 
   //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
@@ -16,27 +24,133 @@ import { updateVendorId, getVendorId } from "../../utils/driver-status";
 })
     
 const AutofleetDrivers = () => {
-const { Text } = Typography;
+  const autofleetFilter = useFilterStore((state) => state.autofleetFilter) || {
+    pagination: {
+      current: 1,
+      pageSize: 10,
+    },
+    filter: {
+      city_id: ["in|undefined"],
+    },
+    full_name: ["in|undefined"],
+  }; // Get filter from store
+  const setAutofleetFilter = useFilterStore((state) => state.setAutofleetFilter); // Set filter to
+    const [searchText, setSearchText] = useState(autofleetFilter.full_name || "");
     const [open, setOpen] = useState(false);
     const [driver, setDriver] = useState({});
     const [vendorId, setVendorId] = useState([]);
-  const { data, error, isLoading, refetch } = useNewFetch(`/v1/active-drivers?${qs.stringify(getUserParams)}`);
+  const [filter, setFilter] = useState({});//filter object
+  
+  // fetch vendor id list from API
+    const getVendorIdList = async () => {
+      const vendorIdList = await getVendorId();
+      setVendorId(
+        vendorIdList.map((vendor) => ({
+          name: vendor.name,
+          value: vendor.id,
+        }))
+      );
+      };
+
+  
+    const { data, error, isLoading, refetch } = useNewFetch(`/v1/active-drivers?${qs.stringify(getUserParams(autofleetFilter), { skipNulls: true, arrayFormat: 'comma' })}`);
+     
+  // handle table change
+   const handleTableChange = (pagination, filter, sorter) => {
+     // Handle table change
+     Object.keys(filter).forEach((key) => {
+       if (filter[key]) {
+         filter[key].unshift("in|" + filter[key][0]);
+         filter[key].splice(1, 1);
+       }
+     });
+     setAutofleetFilter({
+       // Set filter to store
+       pagination: {
+         ...autofleetFilter.pagination,
+         ...pagination,
+       },
+       filter: {
+         ...filter,
+         ...(autofleetFilter.filter?.city_id &&
+           filter.city_id &&
+           filter.city_id[0] === "in|undefined" && {
+             city_id: autofleetFilter.filter?.city_id,
+           }),
+         ...(filter.status === null && { status: ["in|onboard", "pending"] }),
+         ...(filter.application_status &&
+           filter.application_status[0] === "in|null" && {
+             application_status: ["is|null"],
+           }),
+       },
+       ...(Object.keys(sorter).length !== 0 && {
+         sort: {
+           [`${sorter.columnKey === "city_id" ? "name" : sorter.columnKey}`]:
+             sorter.order === "ascend" ? "asc" : "desc",
+         },
+       }),
+     });
+   };
+
+   const handleSearch = (selectedKeys) => {
+     const regex = /^(?:\s|[\d]|\W)+$/g; // TODO: Should be validated on the backend, temporary solution
+     const found = selectedKeys ? selectedKeys[0]?.match(regex) : null; // Check if search value is a number or space
+     setAutofleetFilter({
+       full_name: selectedKeys && !found ? selectedKeys[0] : null,
+       pagination: {
+         ...autofleetFilter.pagination,
+         current: 1,
+       },
+     });
+     selectedKeys ?? setSearchText("");
+   };
+
     const columns = [
       {
         title: "Driver ID",
         dataIndex: "id",
         key: "id",
-        sorter: (a, b) => a.id - b.id,
+        sorter: true,
+        align: "center",
+        ...(autofleetFilter.sort?.user_id && {
+          defaultSort:
+            autofleetFilter.sort?.user_id === "ascend" ? "desc" : "asc",
+        }),
+        filteredValue: null,
       },
       {
         title: "First Name",
         dataIndex: "first_name",
         key: "first_name",
+        sorter: true,
+        ...(autofleetFilter.sort?.first_name && {
+          defaultSortOrder:
+            autofleetFilter.sort?.first_name === "asc" ? "ascend" : "descend",
+        }),
+        filteredValue: null,
       },
       {
         title: "Last Name",
         dataIndex: "last_name",
         key: "last_name",
+        filteredValue: null,
+      },
+      {
+        title: "City",
+        dataIndex: "city",
+        key: "city",
+        filteredValue: null,
+      },
+      {
+        title: "Driver Licence",
+        dataIndex: "external_id",
+        key: "external_id",
+      },
+
+      {
+        title: "Vendor",
+        dataIndex: "vendor",
+        key: "vendor",
       },
       {
         title: "Status",
@@ -56,47 +170,52 @@ const { Text } = Typography;
           </Tag>
         ),
       },
-      {
-        title: "Driver Licence",
-        dataIndex: "external_id",
-        key: "external_id",
-      },
-      
-      {
-        title: "City",
-        dataIndex: "city",
-        key: "city",
-      },
-      {
-        title: "Vendor",
-        dataIndex: "vendor",
-        key: "vendor",
-      },
-      // {
-      //   title: 'Action',
-      //   dataIndex: 'action',
-      //   key: 'action',
-      //   render: (text, record) => (
-      //       <Space size="middle">
-      //       {/* <Button type="primary" onClick={() => findDriver(record.id)}>View</Button> */}
-      //       <Button type="primary" onClick={() => setOpen(true)}>Update Vendor Id</Button>
-      //     </Space>
-      //   ),
-      // }
     ];
     //get vendor id list from api
-    useEffect(() => {
-        const getVendorIdList = async () => {
-            const vendorIdList = await getVendorId();
-            setVendorId(
-                vendorIdList.map((vendor) => ({
-                    name: vendor.name,
-                    value: vendor.id,
-                }))
-            );
-        }
-        getVendorIdList();
-    }, [])
+  useEffect(() => {
+    let isMounted = true;
+   setAutofleetFilter({ pagination: {
+      ...autofleetFilter.pagination,
+    total: data?.meta?.pagination?.total,
+        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Applicants`,
+    }
+   })
+    if (isMounted) {
+      getVendorIdList();
+    }
+    return () => {
+      isMounted = false;
+    };
+
+  }, [data])
+  const refetchConfig = {
+    icon: <ReloadOutlined />,
+    onClick: () => refetch(),
+    type: "primary",
+    ghost: true,
+    size: "large",
+    style: {
+      marginBottom: "16px",
+    },
+  };
+
+  const searchConfig = {
+    placeholder: "Full Name Search",
+    addonBefore: (
+      <Button type="text" size="small" onClick={() => handleSearch(null)}>
+        Clear
+      </Button>
+    ),
+    value: searchText,
+    type: "text",
+    onChange: (e) => setSearchText(e.target.value ? [e.target.value] : []),
+    onPressEnter: () => handleSearch(searchText),
+    style: {
+      marginBottom: 8,
+      width: "calc(50% - 80px)",
+    },
+  };
+
   
 
     // find one driver by id
@@ -124,11 +243,19 @@ const { Text } = Typography;
     return (
       <Card title={"Autofleet Drivers"} style={{ margin: 15 }}>
         <Space direction="vertical" size="large" style={{ width: "100%" }}>
+          <Input.Group compact>
+            <Input {...searchConfig} />
+            <Button type="primary" onClick={() => handleSearch(searchText)}>
+              Search
+            </Button>
+          </Input.Group>
           <Table
             columns={columns}
             dataSource={data.data}
             loading={isLoading}
             rowKey="id"
+            pagination={autofleetFilter.pagination}
+            onChange={handleTableChange}
             onRow={(record, rowIndex) => {
               return {
                 onClick: (event) => {
@@ -136,11 +263,6 @@ const { Text } = Typography;
                   findDriver(record.id);
                 },
               };
-            }}
-            pagination={{
-              pageSize: data?.meta?.pagination?.limit,
-              total: data?.meta?.pagination?.total,
-              current: data?.meta?.pagination?.page,
             }}
           />
           <Formik
@@ -175,22 +297,6 @@ const { Text } = Typography;
                   </SubmitWrapper>,
                 ]}
               >
-                {/* <Space
-                  direction="vertical"
-                  position="center"
-                  style={{ width: "100%", fontSize: "16px", textAlign: "center" }}
-                >
-                  <Avatar
-                    style={{
-                      backgroundColor: "#87d068",
-                      verticalAlign: "middle",
-                    }}
-                    size="large"
-                    gap={4}
-                  > 
-                      <UserOutlined />
-                  </Avatar>
-                </Space> */}
                 <Space
                   direction="vertical"
                   position="center"
@@ -200,22 +306,7 @@ const { Text } = Typography;
                     textAlign: "center",
                   }}
                 >
-                  {/* <Space>
-                        <Text>
-                            <PhoneOutlined style={{ color: "blue" }} /> Phone Number:{" "}
-                        </Text>
-                        <Text strong>{driver.phone}</Text>
-                    </Space> */}
-
-                  {/* <Space>
-                      <Text>
-                        <EnvironmentOutlined style={{ color: "blue" }} /> Address:{" "}
-                      </Text>
-                      <Text strong>{driver.address}</Text>
-                    </Space> */}
-                  <Row
-                    gutter={[16, 16]}
-                  >
+                  <Row gutter={[16, 16]}>
                     <Col span={6}>
                       <SolutionOutlined style={{ color: "blue" }} /> Full Name :{" "}
                     </Col>
@@ -254,18 +345,6 @@ const { Text } = Typography;
                         placeholder={"Select New Vendor ID"}
                       />{" "}
                     </Col>
-
-                    {/* <Space direction="vertical" size={20}>
-                      <Row align="middle">
-                        <Col span={18}>
-                          <EditOutlined style={{ color: "blue" }} />
-                        </Col>
-                        <Col span={6}>
-                          <Text>Select New Vendor ID: </Text>
-                        </Col>
-                        <Col flex="none"></Col>
-                      </Row>
-                    </Space> */}
                   </Row>
                 </Space>
               </Modal>

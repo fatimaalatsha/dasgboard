@@ -76,6 +76,11 @@ let filterStore = (set) => ({
       template: 1, // 1 = Table, 0 = Grid (default: 1)
     }
   },
+  setAutofleetFilter: (filter) =>
+    set((state) => ({
+      autofleetFilter: { ...state.autofleetFilter, ...filter,
+      },
+    })),
   setScheduleFilter: (filter) =>
     set((state) => ({
       scheduleFilter: { ...state.scheduleFilter, ...filter },
