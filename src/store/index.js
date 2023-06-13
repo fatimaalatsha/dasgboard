@@ -71,6 +71,11 @@ let filterStore = (set) => ({
     city_label: "",
     paginated: false,
   },
+  setAutofleetFilter: (filter) =>
+    set((state) => ({
+      autofleetFilter: { ...state.autofleetFilter, ...filter,
+      },
+    })),
   setScheduleFilter: (filter) =>
     set((state) => ({
       scheduleFilter: { ...state.scheduleFilter, ...filter },
