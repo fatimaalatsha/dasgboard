@@ -19,7 +19,7 @@ import {
     InputNumber,
     Input,
 } from 'antd'
-import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined } from '@ant-design/icons'
+import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
@@ -120,7 +120,7 @@ const weeklyDaysReccurence = [
     }
 ]
 
-const ShiftCard = ({record, cardStyle, handleEdit, handleDelete, refetch }) => {
+const ShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatus, refetch }) => {
 
     const items = [
         {
@@ -132,8 +132,13 @@ const ShiftCard = ({record, cardStyle, handleEdit, handleDelete, refetch }) => {
         },
         {
             key: 2,
-            label: 'Send to Draft',
-            disabled: true,
+            label: record.status === 'active' ? 'Deactivate' : 'Activate',
+            onClick: () => {
+                handleStatus(record.status === 'active' ? 'inactive' : 'active')
+            },
+        },
+        {
+            type: 'divider',
         },
         {
             key: 3,
@@ -141,6 +146,7 @@ const ShiftCard = ({record, cardStyle, handleEdit, handleDelete, refetch }) => {
             onClick: () => {
                 handleDelete()
             },
+            icon: (<DeleteOutlined />),
             label: 'Delete',
         },
     ]
@@ -212,6 +218,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     const [isModalOpen, setIsModalOpen] = useState(false)
     const DEFAULT_DAY = dayjs(selectedDay).tz(scheduleFilter.tz).utc().day()
     const [shift, setShift] = useState({
+        status: record.status,
         drivers: record.capacity || 0,
         start: record.start_time ? convertToHourTz(record.start_time, scheduleFilter.tz) : record.time,
         end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : null,
@@ -234,8 +241,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     const floatingComponentHeight = hours.diff * 57 + 2
 
     const cardStyleConfig = {
-        backgroundColor: token.colorSuccessBg,
-        borderColor: token.colorSuccessBorder,
+        backgroundColor: shift.status === 'active' ? token.colorSuccessBg : token.colorWarningBg,
+        borderColor: shift.status === 'active' ? token.colorSuccessBorder : token.colorWarningBorder,
         height: floatingComponentHeight,
     }
 
@@ -279,6 +286,17 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         setHoveredCell({ time: timeString[0], day: day })
     }
 
+    const handleStatusChange = async (value) => {
+        const payload = {
+            status: value,
+        }
+        await updateWeekShift(payload, shift.shift_id)
+        .then(() => {
+            message.success('Shift status updated')
+            refetch()
+        })
+    }
+
     const showModal = () => { 
       setIsModalOpen(true)
     }
@@ -299,7 +317,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         <>
             <div className="container" style={{ minHeight: 24}}>
                 { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} refetch={refetch} />
+                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
                 ) : (
                 <>
                     {  display && (
@@ -308,7 +326,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     </Tooltip> 
                     )}
                         { isHovering && (
-                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} refetch={refetch} />
+                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
                         )}
                 </>
                 )}
