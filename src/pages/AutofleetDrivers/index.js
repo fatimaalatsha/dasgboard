@@ -12,6 +12,7 @@ import {
   Col,
   Row,
   Card,
+  Tooltip,
 } from "antd";
 import {
   ReloadOutlined,
@@ -224,6 +225,7 @@ const AutofleetDrivers = () => {
       isMounted = false;
     };
   }, [data]);
+
   const refetchConfig = {
     icon: <ReloadOutlined />,
     onClick: () => refetch(),
@@ -235,6 +237,7 @@ const AutofleetDrivers = () => {
     },
   };
 
+  
   const searchConfig = {
     placeholder: "Full Name Search",
     addonBefore: (
@@ -275,6 +278,9 @@ const AutofleetDrivers = () => {
   return (
     <Card title={"Autofleet Drivers"} style={{ margin: 15 }}>
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
+        <Tooltip title="Reload data">
+          <Button {...refetchConfig} />
+        </Tooltip>
         <Input.Group compact>
           <Input {...searchConfig} />
           <Button type="primary" onClick={() => handleSearch(searchText)}>
