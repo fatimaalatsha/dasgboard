@@ -12,6 +12,7 @@ import {
   Col,
   Row,
   Card,
+  Tooltip,
 } from "antd";
 import {
   ReloadOutlined,
@@ -28,6 +29,8 @@ import { Formik, Form } from "formik";
 
 import SelectWrapper from "../../components/forms/SelectWrapper";
 import SubmitWrapper from "../../components/forms/SubmitWrapper";
+
+import { getCities } from "../../utils/city-status";
 import { updateVendorId, getVendorId } from "../../utils/driver-status";
 
 import { useFilterStore } from "../../store"; // Import filter store
@@ -51,6 +54,7 @@ const AutofleetDrivers = () => {
   const [driver, setDriver] = useState({});
   const [vendorId, setVendorId] = useState([]);
   const [searchText, setSearchText] = useState(autofleetFilter.full_name || "");
+  const [cities, setCities] = useState([]);
 
   // fetch vendor id list from API
   const getVendorIdList = async () => {
@@ -62,6 +66,15 @@ const AutofleetDrivers = () => {
       }))
     );
   };
+
+  // load cities from API
+    const loadCities = async () => {
+      await getCities().then((response) => {
+        setCities(response);
+      });
+    };
+ 
+
 
   const { data, error, isLoading, refetch } = useNewFetch(
     `/v1/active-drivers?${qs.stringify(getUserParams(autofleetFilter), {
@@ -111,7 +124,7 @@ const AutofleetDrivers = () => {
     const regex = /^(?:\s|[\d]|\W)+$/g; // TODO: Should be validated on the backend, temporary solution
     const found = selectedKeys ? selectedKeys[0]?.match(regex) : null; // Check if search value is a number or space
     setAutofleetFilter({
-      full_name: selectedKeys && !found ? selectedKeys[0] : null,
+      query: selectedKeys && !found ? selectedKeys[0] : null,
       pagination: {
         ...autofleetFilter.pagination,
         current: 1,
@@ -154,9 +167,26 @@ const AutofleetDrivers = () => {
       title: "City",
       dataIndex: "city",
       key: "city",
-      filteredValue: null,
       sorter: true,
       align: "center",
+      filters: cities,
+      filterSearch: true,
+      filteredValue: null,
+      ...(autofleetFilter.filter?.city_id && {
+        defaultFilteredValue: autofleetFilter.filter?.city_id.map(
+          (city, index) =>
+            index === 0 ? city.replace("in|", "") : city.toString()
+        ),
+      }),
+      ...(autofleetFilter.sort?.name && {
+        defaultSortOrder:
+          autofleetFilter.sort?.name === "asc" ? "ascend" : "descend",
+      }),
+      ...(autofleetFilter.filter?.city_id && {
+        filteredValue: autofleetFilter.filter?.city_id.map((city, index) =>
+          index === 0 ? city.replace("in|", "") : city.toString()
+        ),
+      }),
     },
     {
       title: "Driver Licence",
@@ -219,11 +249,13 @@ const AutofleetDrivers = () => {
     });
     if (isMounted) {
       getVendorIdList();
+      loadCities();
     }
     return () => {
       isMounted = false;
     };
   }, [data]);
+
   const refetchConfig = {
     icon: <ReloadOutlined />,
     onClick: () => refetch(),
@@ -235,8 +267,9 @@ const AutofleetDrivers = () => {
     },
   };
 
+  
   const searchConfig = {
-    placeholder: "Full Name Search",
+    placeholder: "Full Name and Driver Licence Search",
     addonBefore: (
       <Button type="text" size="small" onClick={() => handleSearch(null)}>
         Clear
@@ -275,6 +308,9 @@ const AutofleetDrivers = () => {
   return (
     <Card title={"Autofleet Drivers"} style={{ margin: 15 }}>
       <Space direction="vertical" size="large" style={{ width: "100%" }}>
+        <Tooltip title="Reload data">
+          <Button {...refetchConfig} />
+        </Tooltip>
         <Input.Group compact>
           <Input {...searchConfig} />
           <Button type="primary" onClick={() => handleSearch(searchText)}>
