@@ -411,7 +411,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 <Space direction="vertical">
                                     <Title level={5} style={{ marginTop: 4 }}>{`New Shift: ${dayjs(shift.day).format(' MMM, dddd DD - YYYY')}`}</Title>
                                     {!edit && (<Space>
-                                        <Text>Save for later?</Text>
+                                        <Text>Hide shift?</Text>
                                         <Switch
                                             checkedChildren={<CheckOutlined />}
                                             unCheckedChildren={<CloseOutlined />}
