@@ -70,7 +70,6 @@ const AutofleetDrivers = () => {
   // load cities from API
     const loadCities = async () => {
       await getCities().then((response) => {
-        console.log(response);
         setCities(response);
       });
     };
@@ -125,7 +124,7 @@ const AutofleetDrivers = () => {
     const regex = /^(?:\s|[\d]|\W)+$/g; // TODO: Should be validated on the backend, temporary solution
     const found = selectedKeys ? selectedKeys[0]?.match(regex) : null; // Check if search value is a number or space
     setAutofleetFilter({
-      full_name: selectedKeys && !found ? selectedKeys[0] : null,
+      query: selectedKeys && !found ? selectedKeys[0] : null,
       pagination: {
         ...autofleetFilter.pagination,
         current: 1,
@@ -270,7 +269,7 @@ const AutofleetDrivers = () => {
 
   
   const searchConfig = {
-    placeholder: "Full Name Search",
+    placeholder: "Full Name and Driver Licence Search",
     addonBefore: (
       <Button type="text" size="small" onClick={() => handleSearch(null)}>
         Clear
