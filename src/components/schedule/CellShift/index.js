@@ -410,7 +410,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                             title={
                                 <Space direction="vertical">
                                     <Title level={5} style={{ marginTop: 4 }}>{`New Shift: ${dayjs(shift.day).format(' MMM, dddd DD - YYYY')}`}</Title>
-                                    {!edit && (<Space>
+                                    <Space>
                                         <Text>Hide shift?</Text>
                                         <Switch
                                             checkedChildren={<CheckOutlined />}
@@ -418,10 +418,9 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                             checked={props.values.status}
                                             onChange={(value) => {
                                                 props.setFieldValue('status', value)
-                                                props.setFieldValue('is_recurring', false)
                                             }}
                                         />
-                                    </Space>)}
+                                    </Space>
                                 </Space>
                             }
                             open={isModalOpen} 
@@ -545,7 +544,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 <Divider>
                                 <Checkbox
                                     name="is_recurring"
-                                    disabled={props.values.status}
                                     checked={props.values.is_recurring}
                                     onChange={(e) => {
                                         props.setFieldValue('is_recurring', e.target.checked)
