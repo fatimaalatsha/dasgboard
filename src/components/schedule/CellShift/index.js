@@ -18,8 +18,9 @@ import {
     DatePicker,
     InputNumber,
     Input,
+    Switch,
 } from 'antd'
-import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons'
+import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined, DeleteOutlined, CheckOutlined, CloseOutlined  } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
@@ -53,6 +54,7 @@ const shiftSchema = object().shape({
     end_time: string().required('Required'),
     city_id: mixed().required('Required'),
     hasGuarantee: boolean().notRequired(),
+    status: boolean().notRequired(),
     guarantee: number().when('hasGuarantee', {
         is: true,
         then: number().min(10, 'Guarantee amount must be greater than or equal to 10.').required('Required'),
@@ -348,6 +350,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     end_date: shift.recurrency.end_date || shift.day,
                     max_occurrences: shift.recurrency.occurrences,
                     'days_of_week': shift.recurrency.days_of_week,
+                    status: false,
                 }}
                 validationSchema={shiftSchema}
                 onSubmit={async (values, { setSubmitting, resetForm }) => {
@@ -358,6 +361,9 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                         'capacity': Number(values.capacity),
                         'city_id': !edit ? [Number(city)] : Number(city),
                         'is_recurring': values.is_recurring,
+                        ...(values.status && {
+                            'status': 'inactive',
+                            }),
                         ...(values.driver_ids.length > 0 && {
                             'driver_ids': values.driver_ids,
                             }),
@@ -401,7 +407,23 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                 {props => (
                     <FormikForm>
                         <Modal 
-                            title={`New Shift: ${dayjs(shift.day).format(' MMM, dddd DD - YYYY')}`}
+                            title={
+                                <Space direction="vertical">
+                                    <Title level={5} style={{ marginTop: 4 }}>{`New Shift: ${dayjs(shift.day).format(' MMM, dddd DD - YYYY')}`}</Title>
+                                    {!edit && (<Space>
+                                        <Text>Save for later?</Text>
+                                        <Switch
+                                            checkedChildren={<CheckOutlined />}
+                                            unCheckedChildren={<CloseOutlined />}
+                                            checked={props.values.status}
+                                            onChange={(value) => {
+                                                props.setFieldValue('status', value)
+                                                props.setFieldValue('is_recurring', false)
+                                            }}
+                                        />
+                                    </Space>)}
+                                </Space>
+                            }
                             open={isModalOpen} 
                             onCancel={handleCancel}
                             destroyOnClose
@@ -523,6 +545,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 <Divider>
                                 <Checkbox
                                     name="is_recurring"
+                                    disabled={props.values.status}
                                     checked={props.values.is_recurring}
                                     onChange={(e) => {
                                         props.setFieldValue('is_recurring', e.target.checked)
@@ -540,8 +563,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                 e.target.value === 'daily' ? 
                                                     props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
                                                 : e.target.value === 'weekly' ?
-                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
-                                                : props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY])
+                                                : props.setFieldValue('days_of_week', [DEFAULT_DAY])
                                                 
                                                 if (e.target.value === 'custom') {
                                                     props.setFieldValue('pattern', 'weekly')
