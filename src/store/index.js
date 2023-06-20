@@ -78,17 +78,19 @@ let filterStore = (set) => ({
       showSizeChanger: true,
       pageSizeOptions: pageSize,
       position: ["bottomRight", "topRight"],
-      },
+    },
     sort: {
       created_at: "desc",
     },
-    filter: {},
+    filter: {
+      status: ["in|online", "stand-by", "activating", "offline", "active"],
+    },
   },
   setAutofleetFilter: (filter) =>
     set((state) => ({
       autofleetFilter: {
-      ...state.autofleetFilter,
-      ...filter,
+        ...state.autofleetFilter,
+        ...filter,
       },
     })),
   setScheduleFilter: (filter) =>
