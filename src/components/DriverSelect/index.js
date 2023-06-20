@@ -24,9 +24,9 @@ const Tags = (props) => {
 
     return (
         <Tag {...tagConfig}>
-            <Space>
+            <Space style={{ marginRight: 8 }}>
             {label}
-            <Switch size="small" style={{ marginRight: 8 }} defaultChecked />
+            <Switch size="small" defaultChecked />
             </Space>
         </Tag>
     )
