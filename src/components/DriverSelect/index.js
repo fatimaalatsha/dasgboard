@@ -3,9 +3,34 @@
 * It leaves onChange and value up to the parent component.
 */
 import { forwardRef } from 'react'
-import { Select } from 'antd'
+import { Select, Tag, Space, Switch } from 'antd'
 import useFetch from '../../hooks/use-new-fetch'
 import { useFilterStore } from '../../store'
+
+const Tags = (props) => {
+    const { label, value, closable, onClose } = props
+
+    const onPreventMouseDown = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+    }
+
+    const tagConfig = {
+        closable,
+        onClose,
+        style: { marginRight: 4 },
+        onPreventMouseDown:{onPreventMouseDown}
+    }
+
+    return (
+        <Tag {...tagConfig}>
+            <Space>
+            {label}
+            <Switch size="small" style={{ marginRight: 8 }} defaultChecked />
+            </Space>
+        </Tag>
+    )
+}
 
 const DriverSelect = forwardRef((props, ref) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
@@ -23,6 +48,7 @@ const DriverSelect = forwardRef((props, ref) => {
         style: { width: '100%' },
         optionFilterProp: "children",
         options: drivers,
+        tagRender: Tags,
         ref,
         ...props
     }
