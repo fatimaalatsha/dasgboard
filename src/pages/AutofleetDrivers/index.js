@@ -105,11 +105,9 @@ const AutofleetDrivers = () => {
           filter.city_id[0] === "in|undefined" && {
             city_id: autofleetFilter.filter?.city_id,
           }),
-        ...(filter.status === null && { status: ["in|onboard", "pending"] }),
-        ...(filter.application_status &&
-          filter.application_status[0] === "in|null" && {
-            application_status: ["is|null"],
-          }),
+        ...(filter.status === null && {
+          status: ["in|online", "stand-by", "activating", "offline", "active"],
+        }),
       },
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
@@ -121,7 +119,7 @@ const AutofleetDrivers = () => {
   };
 
   const handleSearch = (selectedKeys) => {
-    const regex = /^(?:\s|[\d]|\W)+$/g; // TODO: Should be validated on the backend, temporary solution
+    const regex = /^(?:\s|[\d]|\W)+$/g; 
     const found = selectedKeys ? selectedKeys[0]?.match(regex) : null; // Check if search value is a number or space
     setAutofleetFilter({
       query: selectedKeys && !found ? selectedKeys[0] : null,
@@ -210,17 +208,9 @@ const AutofleetDrivers = () => {
         { text: "Offline", value: "offline" },
         { text: "Active", value: "active" },
       ],
-      filteredValue: null,
-      ...(autofleetFilter.filter?.status && {
-        defaultFilteredValue: autofleetFilter.filter?.status.map((status) =>
-          status.replace("in|", "")
-        ),
-      }),
-      ...(autofleetFilter.filter?.status && {
-        filteredValue: autofleetFilter.filter?.status.map((status) =>
-          status.replace("in|", "")
-        ),
-      }),
+      // filteredValue: ["online", "stand-by", "activating", "offline", "active"],
+      ...(autofleetFilter.filter?.status && {defaultFilteredValue: autofleetFilter.filter?.status.map((status) => status.replace("in|", "")),}),
+      ...(autofleetFilter.filter?.status && {filteredValue: autofleetFilter.filter?.status.map((status) =>status.replace("in|", "")),}),
       render: (status) => (
         <Tag
           color={
@@ -269,7 +259,7 @@ const AutofleetDrivers = () => {
 
   
   const searchConfig = {
-    placeholder: "Full Name and Driver Licence Search",
+    placeholder: "Search Full Name or Driver Licence",
     addonBefore: (
       <Button type="text" size="small" onClick={() => handleSearch(null)}>
         Clear
