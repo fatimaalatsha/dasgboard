@@ -2,48 +2,75 @@
 * This component is a standalone select dropdown that is used to select a driver.
 * It leaves onChange and value up to the parent component.
 */
-import { forwardRef } from 'react'
+import { forwardRef, useState, useEffect } from 'react'
 import { Select, Tag, Space, Switch, Tooltip } from 'antd'
+import { useFormikContext } from 'formik'
+
 import useFetch from '../../hooks/use-new-fetch'
 import { useFilterStore } from '../../store'
-
-const Tags = (props) => {
-    const { label, value, closable, onClose } = props
-
-    const onPreventMouseDown = (event) => {
-      event.preventDefault();
-      event.stopPropagation();
-    }
-
-    const tagConfig = {
-        closable,
-        onClose,
-        style: { margin: 4 },
-        onMouseDown: onPreventMouseDown
-    }
-
-    return (
-        <Tag {...tagConfig}>
-            <Space style={{ marginRight: 8 }}>
-            {label}
-            <Tooltip title="Permanent Driver?">
-                <Switch size="small" onChange={() => console.log(value)}/>
-            </Tooltip>
-            </Space>
-        </Tag>
-    )
-}
 
 const DriverSelect = forwardRef((props, ref) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const city = Number(scheduleFilter.filter.city_id.replace('in|', ''))
     const { data, error, isLoading } = useFetch('/v1/drivers?paginated=false&filter[status]=in|active&filter[city_id]=in|' + city) // Fetches active drivers in selected city
+    const [drivers, setDrivers] = useState([])
+
+    useEffect(() => {
+        if (data) {
+            setDrivers(data?.data?.map((driver) => ({ // transforms data into format for select dropdown
+                label: `${driver.first_name} ${driver.last_name}`,
+                value: driver.user_id,
+                is_permanent: false,
+            })))
+        }
+    }, [data])
     
-    const drivers = data?.data?.map((driver) => ({ // transforms data into format for select dropdown
+    /* const drivers = data?.data?.map((driver) => ({ // transforms data into format for select dropdown
         label: `${driver.first_name} ${driver.last_name}`,
         value: driver.user_id,
         is_permanent: false,
-    }))
+    })) */
+
+    const Tags = (props) => {
+        const { label, value, closable, onClose } = props
+        const { values, setFieldValue } = useFormikContext()
+
+        const onPreventMouseDown = (event) => {
+        event.preventDefault();
+        event.stopPropagation();
+        }
+
+        const tagConfig = {
+            closable,
+            onClose,
+            style: { margin: 4 },
+            onMouseDown: onPreventMouseDown
+        }
+
+        return (
+            <Tag {...tagConfig}>
+                <Space style={{ marginRight: 8 }}>
+                {label}
+                <Tooltip title="Permanent Driver?">
+                    <Switch 
+                        size="small" 
+                        checked={values.drivers.find((driver) => driver.driver_id === value)?.is_permanent}
+                        onChange={(checked) => {
+                            const result = values.drivers.map((driver) => {
+                                if (driver.driver_id === value) {
+                                    driver.is_permanent = checked
+                                }
+                                return driver
+                            })
+                            setFieldValue('drivers', result)
+                            setDrivers(prevState => [...prevState, ...result])
+                        }}
+                    />
+                </Tooltip>
+                </Space>
+            </Tag>
+        )
+    }
 
     const selectConfig = {
         placeholder: "Driver",
