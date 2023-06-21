@@ -3,7 +3,7 @@
 * It leaves onChange and value up to the parent component.
 */
 import { forwardRef } from 'react'
-import { Select, Tag, Space, Switch } from 'antd'
+import { Select, Tag, Space, Switch, Tooltip } from 'antd'
 import useFetch from '../../hooks/use-new-fetch'
 import { useFilterStore } from '../../store'
 
@@ -18,15 +18,17 @@ const Tags = (props) => {
     const tagConfig = {
         closable,
         onClose,
-        style: { marginRight: 4 },
-        onPreventMouseDown:{onPreventMouseDown}
+        style: { margin: 4 },
+        onMouseDown: onPreventMouseDown
     }
 
     return (
         <Tag {...tagConfig}>
             <Space style={{ marginRight: 8 }}>
             {label}
-            <Switch size="small" defaultChecked />
+            <Tooltip title="Permanent Driver?">
+                <Switch size="small" onChange={() => console.log(value)}/>
+            </Tooltip>
             </Space>
         </Tag>
     )
@@ -39,14 +41,14 @@ const DriverSelect = forwardRef((props, ref) => {
     
     const drivers = data?.data?.map((driver) => ({ // transforms data into format for select dropdown
         label: `${driver.first_name} ${driver.last_name}`,
-        value: driver.user_id
+        value: driver.user_id,
+        is_permanent: false,
     }))
 
     const selectConfig = {
         placeholder: "Driver",
         mode: "multiple",
         style: { width: '100%' },
-        optionFilterProp: "children",
         options: drivers,
         tagRender: Tags,
         ref,

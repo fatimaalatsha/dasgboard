@@ -61,7 +61,7 @@ const shiftSchema = object().shape({
         otherwise: number().notRequired()
     }),
     guarantee_specs: string().notRequired(),
-    driver_ids: array().of(number().nullable()).notRequired(),
+    drivers: array().of(mixed().nullable()).notRequired(),
     is_recurring: boolean().notRequired(),
     pattern: string().when('is_recurring', {
         is: true,
@@ -342,7 +342,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     guarantee: shift.guarantee,
                     guarantee_specs: shift.guarantee_specs,
                     hasGuarantee: shift.hasGuarantee,
-                    'driver_ids': [],
+                    'drivers': [],
                     is_recurring: shift.hasRecurrency,
                     template: 'weekly',
                     pattern: shift.pattern,
@@ -364,8 +364,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                         ...(values.status && {
                             'status': 'inactive',
                             }),
-                        ...(values.driver_ids.length > 0 && {
-                            'driver_ids': values.driver_ids,
+                        ...(values.drivers.length > 0 && {
+                            'drivers': values.drivers,
                             }),
                         ...(values.hasGuarantee && {
                             'guarantee': Number(values.guarantee),
@@ -385,7 +385,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                             }),
                         }),
                     }
-                    !edit ? // If edit mode is true, update shift
+                    console.log(payload)
+                    /* !edit ? // If edit mode is true, update shift
                     await createWeekShift(payload)
                     .then(() => {
                         message.success('Shift created successfully')
@@ -401,7 +402,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                         resetForm()
                         setIsModalOpen(false)
                         refetch()
-                    })
+                    }) */
                 }}
             >
                 {props => (
@@ -489,8 +490,13 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                     disabled
                                 />
                                 <DriverSelect 
-                                    onChange={(value) => {
-                                        props.setFieldValue('driver_ids', value)
+                                    onChange={(value, label) => {
+                                        const driverFormatted = label.map((item) => { // format driver object to match payload
+                                            const { label, value, ...rest } = item
+                                            return {...rest, driver_id: value}
+                                          
+                                        })
+                                        props.setFieldValue('drivers', driverFormatted)
                                     }}
                                 />
                                 <InputWrapper 
