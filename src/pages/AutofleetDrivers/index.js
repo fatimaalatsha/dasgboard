@@ -30,10 +30,11 @@ import { Formik, Form } from "formik";
 import SelectWrapper from "../../components/forms/SelectWrapper";
 import SubmitWrapper from "../../components/forms/SubmitWrapper";
 
-import { getCities } from "../../utils/city-status";
+import { getAutoFleetCities } from "../../utils/city-status";
 import { updateVendorId, getVendorId } from "../../utils/driver-status";
 
 import { useFilterStore } from "../../store"; // Import filter store
+import { fill } from "pdf-lib";
 
 const { Text } = Typography;
 
@@ -68,13 +69,12 @@ const AutofleetDrivers = () => {
   };
 
   // load cities from API
-    const loadCities = async () => {
-      await getCities().then((response) => {
-        setCities(response);
-      });
-    };
- 
-
+  const loadCities = async () => {
+    await getAutoFleetCities().then((response) => {
+      console.log(response);
+      setCities(response);
+    });
+  };
 
   const { data, error, isLoading, refetch } = useNewFetch(
     `/v1/active-drivers?${qs.stringify(getUserParams(autofleetFilter), {
@@ -83,15 +83,52 @@ const AutofleetDrivers = () => {
     })}`
   );
 
-  // handle table change
+  /**
+   * const { city_id, ...restFilter } = filter;
+const updatedCityIdFilter = city_id ? [...city_id] : undefined;
+
+// ...
+
+setAutofleetFilter({
+  // Set filter to store
+  pagination: {
+    ...autofleetFilter.pagination,
+    ...pagination,
+  },
+  filter: {
+    ...restFilter,
+    ...(filter.status === null && {
+      status: ["in|online", "stand-by", "activating", "offline", "active"],
+    }),
+  },
+  order: updatedCityIdSorter,
+  city_id: updatedCityIdFilter,
+});
+ */
+
   const handleTableChange = (pagination, filter, sorter) => {
     // Handle table change
     Object.keys(filter).forEach((key) => {
       if (filter[key]) {
-        filter[key].unshift("in|" + filter[key][0]);
-        filter[key].splice(1, 1);
+        if (key !== "city_id") {
+          filter[key].unshift("in|" + filter[key][0]);
+          filter[key].splice(1, 1);
+        }
       }
     });
+
+    console.log("filter", filter);
+    // Remove [0] from city_id
+    const { city_id, ...restFilter } = filter;
+    const updatedCityIdFilter = city_id ? [...city_id] : undefined;
+
+    // Remove [0] from city_id sorter
+    const { city_id: cityIdSorter, ...restSorter } = sorter;
+    const updatedCityIdSorter = cityIdSorter ? [...cityIdSorter] : undefined;
+    //set default city filter and save it to store
+    const { savedCityFilter, ...restSavedFilter } = autofleetFilter.filter;
+    console.log("savedCityFilter", savedCityFilter);
+
     setAutofleetFilter({
       // Set filter to store
       pagination: {
@@ -99,27 +136,18 @@ const AutofleetDrivers = () => {
         ...pagination,
       },
       filter: {
-        ...filter,
-        ...(autofleetFilter.filter?.city_id &&
-          filter.city_id &&
-          filter.city_id[0] === "in|undefined" && {
-            city_id: autofleetFilter.filter?.city_id,
-          }),
+        ...restFilter,
         ...(filter.status === null && {
           status: ["in|online", "stand-by", "activating", "offline", "active"],
         }),
       },
-      ...(Object.keys(sorter).length !== 0 && {
-        sort: {
-          [`${sorter.columnKey === "city_id" ? "name" : sorter.columnKey}`]:
-            sorter.order === "ascend" ? "asc" : "desc",
-        },
-      }),
+      order: updatedCityIdSorter,
+      city_id: updatedCityIdFilter? updatedCityIdFilter : null,
     });
   };
 
   const handleSearch = (selectedKeys) => {
-    const regex = /^(?:\s|[\d]|\W)+$/g; 
+    const regex = /^(?:\s|[\d]|\W)+$/g;
     const found = selectedKeys ? selectedKeys[0]?.match(regex) : null; // Check if search value is a number or space
     setAutofleetFilter({
       query: selectedKeys && !found ? selectedKeys[0] : null,
@@ -149,10 +177,6 @@ const AutofleetDrivers = () => {
       dataIndex: "first_name",
       key: "first_name",
       sorter: true,
-      ...(autofleetFilter.sort?.first_name && {
-        defaultSortOrder:
-          autofleetFilter.sort?.first_name === "asc" ? "ascend" : "descend",
-      }),
       filteredValue: null,
     },
     {
@@ -163,28 +187,24 @@ const AutofleetDrivers = () => {
     },
     {
       title: "City",
-      dataIndex: "city",
-      key: "city",
+      dataIndex: "city_id",
+      key: "city_id",
       sorter: true,
       align: "center",
       filters: cities,
       filterSearch: true,
       filteredValue: null,
       ...(autofleetFilter.filter?.city_id && {
-        defaultFilteredValue: autofleetFilter.filter?.city_id.map(
-          (city, index) =>
-            index === 0 ? city.replace("in|", "") : city.toString()
-        ),
+        defaultFilteredValue: autofleetFilter.updatedCityIdFilter,
       }),
-      ...(autofleetFilter.sort?.name && {
-        defaultSortOrder:
-          autofleetFilter.sort?.name === "asc" ? "ascend" : "descend",
+      ...(autofleetFilter.sort?.city_id && {
+        defaultSort:
+          autofleetFilter.sort?.city_id === "ascend" ? "desc" : "asc",
       }),
       ...(autofleetFilter.filter?.city_id && {
-        filteredValue: autofleetFilter.filter?.city_id.map((city, index) =>
-          index === 0 ? city.replace("in|", "") : city.toString()
-        ),
+        filteredValue: autofleetFilter.updatedCityIdFilter,
       }),
+
     },
     {
       title: "Driver Licence",
@@ -208,9 +228,16 @@ const AutofleetDrivers = () => {
         { text: "Offline", value: "offline" },
         { text: "Active", value: "active" },
       ],
-      // filteredValue: ["online", "stand-by", "activating", "offline", "active"],
-      ...(autofleetFilter.filter?.status && {defaultFilteredValue: autofleetFilter.filter?.status.map((status) => status.replace("in|", "")),}),
-      ...(autofleetFilter.filter?.status && {filteredValue: autofleetFilter.filter?.status.map((status) =>status.replace("in|", "")),}),
+      ...(autofleetFilter.filter?.status && {
+        defaultFilteredValue: autofleetFilter.filter?.status.map((status) =>
+          status.replace("in|", "")
+        ),
+      }),
+      ...(autofleetFilter.filter?.status && {
+        filteredValue: autofleetFilter.filter?.status.map((status) =>
+          status.replace("in|", "")
+        ),
+      }),
       render: (status) => (
         <Tag
           color={
@@ -257,7 +284,6 @@ const AutofleetDrivers = () => {
     },
   };
 
-  
   const searchConfig = {
     placeholder: "Search Full Name or Driver Licence",
     addonBefore: (
