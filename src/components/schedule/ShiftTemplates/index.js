@@ -219,6 +219,7 @@ const ShiftTemplates = () => {
                     dataSource={dummy}
                     pagination={false}
                     bordered
+                    rowKey="id"
                 />
             )
         }
