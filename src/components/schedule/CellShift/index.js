@@ -386,7 +386,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                         }),
                     }
                     console.log(payload)
-                    /* !edit ? // If edit mode is true, update shift
+                    !edit ? // If edit mode is true, update shift
                     await createWeekShift(payload)
                     .then(() => {
                         message.success('Shift created successfully')
@@ -402,7 +402,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                         resetForm()
                         setIsModalOpen(false)
                         refetch()
-                    }) */
+                    })
                 }}
             >
                 {props => (
@@ -411,17 +411,19 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                             title={
                                 <Space direction="vertical">
                                     <Title level={5} style={{ marginTop: 4 }}>{`New Shift: ${dayjs(shift.day).format(' MMM, dddd DD - YYYY')}`}</Title>
-                                    <Space>
-                                        <Text>Hide shift?</Text>
-                                        <Switch
-                                            checkedChildren={<CheckOutlined />}
-                                            unCheckedChildren={<CloseOutlined />}
-                                            checked={props.values.status}
-                                            onChange={(value) => {
-                                                props.setFieldValue('status', value)
-                                            }}
-                                        />
-                                    </Space>
+                                    {!edit && (
+                                        <Space>
+                                            <Text>Hide shift?</Text>
+                                            <Switch
+                                                checkedChildren={<CheckOutlined />}
+                                                unCheckedChildren={<CloseOutlined />}
+                                                checked={props.values.status}
+                                                onChange={(value) => {
+                                                    props.setFieldValue('status', value)
+                                                }}
+                                            />
+                                        </Space>
+                                    )}
                                 </Space>
                             }
                             open={isModalOpen} 
