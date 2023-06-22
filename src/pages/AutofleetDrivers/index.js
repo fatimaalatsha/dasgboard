@@ -83,52 +83,64 @@ const AutofleetDrivers = () => {
     })}`
   );
 
-  /**
-   * const { city_id, ...restFilter } = filter;
-const updatedCityIdFilter = city_id ? [...city_id] : undefined;
+ 
+//  const handleTableChange = (pagination, filter, sorter) => {
+//    // Handle table change
+//    Object.keys(filter).forEach((key) => {
+//      if (filter[key]) {
+//        if (key !== "city_id") {
+//          filter[key].unshift("in|" + filter[key][0]);
+//          filter[key].splice(1, 1);
+//        }
+//      }
+//    });
 
-// ...
+//    console.log("filter", filter);
 
-setAutofleetFilter({
-  // Set filter to store
-  pagination: {
-    ...autofleetFilter.pagination,
-    ...pagination,
-  },
-  filter: {
-    ...restFilter,
-    ...(filter.status === null && {
-      status: ["in|online", "stand-by", "activating", "offline", "active"],
-    }),
-  },
-  order: updatedCityIdSorter,
-  city_id: updatedCityIdFilter,
-});
- */
+//    // Remove [0] from city_id
+//    const { city_id, ...restFilter } = filter;
+
+//    console.log("city_id", city_id);
+//    // Check if city_id is not null or undefined
+//    const updatedCityIdFilter =
+//      city_id !== null && city_id !== undefined ? [...city_id] : undefined;
+
+//    // Remove [0] from city_id sorter
+//    const { city_id: cityIdSorter, ...restSorter } = sorter;
+
+//    // Set default city filter and save it to store
+//    const { savedCityFilter, ...restSavedFilter } = autofleetFilter.filter;
+//    console.log("savedCityFilter", savedCityFilter);
+
+//    setAutofleetFilter({
+//      // Set filter to store
+//      pagination: {
+//        ...autofleetFilter.pagination,
+//        ...pagination,
+//      },
+//      filter: {
+//        ...restFilter,
+//        ...(filter.status === null && {
+//          status: ["in|online", "stand-by", "activating", "offline", "active"],
+//        }),
+//      },
+//      city_id: updatedCityIdFilter, // Use updatedCityIdFilter if it exists, otherwise use savedCityFilter
+//    });
+//  };
 
   const handleTableChange = (pagination, filter, sorter) => {
     // Handle table change
     Object.keys(filter).forEach((key) => {
-      if (filter[key]) {
-        if (key !== "city_id") {
-          filter[key].unshift("in|" + filter[key][0]);
-          filter[key].splice(1, 1);
-        }
+      if (filter[key] && key !== "city_id") {
+        filter[key].unshift("in|" + filter[key][0]);
+        filter[key].splice(1, 1);
       }
     });
 
-    console.log("filter", filter);
-    // Remove [0] from city_id
-    const { city_id, ...restFilter } = filter;
-    const updatedCityIdFilter = city_id ? [...city_id] : undefined;
 
-    // Remove [0] from city_id sorter
-    const { city_id: cityIdSorter, ...restSorter } = sorter;
-    const updatedCityIdSorter = cityIdSorter ? [...cityIdSorter] : undefined;
-    //set default city filter and save it to store
-    const { savedCityFilter, ...restSavedFilter } = autofleetFilter.filter;
-    console.log("savedCityFilter", savedCityFilter);
-
+    //remove city_id from filter
+    console.log("Filter", filter);
+    console.log("Sorter", sorter);
     setAutofleetFilter({
       // Set filter to store
       pagination: {
@@ -136,16 +148,18 @@ setAutofleetFilter({
         ...pagination,
       },
       filter: {
-        ...restFilter,
-        ...(filter.status === null && {
-          status: ["in|online", "stand-by", "activating", "offline", "active"],
-        }),
+        ...filter,
+        ...(filter.status === null && { status: ["in|onboard", "pending"] }),
+        ...(filter.application_status &&
+          filter.application_status[0] === "in|null" && {
+            application_status: ["is|null"],
+          }),
+        city_id: null,
       },
-      order: updatedCityIdSorter,
-      city_id: updatedCityIdFilter? updatedCityIdFilter : null,
+      city_id: filter.city_id,
+      order: sorter.order === "ascend" ? "ASC" : "DESC",
     });
   };
-
   const handleSearch = (selectedKeys) => {
     const regex = /^(?:\s|[\d]|\W)+$/g;
     const found = selectedKeys ? selectedKeys[0]?.match(regex) : null; // Check if search value is a number or space
@@ -194,16 +208,18 @@ setAutofleetFilter({
       filters: cities,
       filterSearch: true,
       filteredValue: null,
-      ...(autofleetFilter.filter?.city_id && {
-        defaultFilteredValue: autofleetFilter.updatedCityIdFilter,
-      }),
-      ...(autofleetFilter.sort?.city_id && {
-        defaultSort:
-          autofleetFilter.sort?.city_id === "ascend" ? "desc" : "asc",
-      }),
-      ...(autofleetFilter.filter?.city_id && {
-        filteredValue: autofleetFilter.updatedCityIdFilter,
-      }),
+      // ...(autofleetFilter.filter?.status && {
+      //   defaultFilteredValue: autofleetFilter.filter?.status.map((status) =>
+      //     status.replace("in|", "")
+      //   ),
+      // }),
+      // ...(autofleetFilter.order && {
+      //   defaultSort:
+      //     autofleetFilter.order === "ascend" ? "desc" : "asc",
+      // }),
+      ...(autofleetFilter.order && { defaultSortOrder: autofleetFilter.order === 'asc' ? 'ASC' : 'DESC' }),
+      ...( autofleetFilter.city_id && { filteredValue: autofleetFilter.city_id.map((city, index) => city.toString()) }),
+
 
     },
     {
