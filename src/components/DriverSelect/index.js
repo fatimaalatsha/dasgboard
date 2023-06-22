@@ -47,6 +47,22 @@ const DriverSelect = forwardRef((props, ref) => {
             onMouseDown: onPreventMouseDown
         }
 
+        const handleSwitchChange = (checked) => {
+            const result = values.drivers.map((driver) => { // updates is_permanent value in formik values
+                if (driver.driver_id === value) {
+                    driver.is_permanent = checked
+                }
+                return driver
+            })
+
+            const updatedDrivers = drivers.map((driver) => { // updates is_permanent value in dropdown
+                return driver.value === value ? { ...driver, is_permanent: checked } : driver
+            })
+
+            setFieldValue('drivers', result)
+            setDrivers(updatedDrivers)
+        }
+
         return (
             <Tag {...tagConfig}>
                 <Space style={{ marginRight: 8 }}>
@@ -55,16 +71,7 @@ const DriverSelect = forwardRef((props, ref) => {
                     <Switch 
                         size="small" 
                         checked={values.drivers.find((driver) => driver.driver_id === value)?.is_permanent}
-                        onChange={(checked) => {
-                            const result = values.drivers.map((driver) => {
-                                if (driver.driver_id === value) {
-                                    driver.is_permanent = checked
-                                }
-                                return driver
-                            })
-                            setFieldValue('drivers', result)
-                            setDrivers(prevState => [...prevState, ...result])
-                        }}
+                        onChange={handleSwitchChange}
                     />
                 </Tooltip>
                 </Space>
