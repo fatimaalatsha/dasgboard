@@ -385,7 +385,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                             }),
                         }),
                     }
-                    console.log(payload)
                     !edit ? // If edit mode is true, update shift
                     await createWeekShift(payload)
                     .then(() => {
