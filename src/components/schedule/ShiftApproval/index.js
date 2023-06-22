@@ -1,4 +1,5 @@
-import { Space, Table, Tag, Button, Popconfirm, message } from 'antd'
+import { useState } from 'react'
+import { Space, Typography, Switch, Table, Tag, Button, Popconfirm, message } from 'antd'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 
 import dayjs from 'dayjs' // Import dayjs
@@ -14,6 +15,8 @@ import { confirmApplication } from '../../../utils/schedule-status'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
+const { Text } = Typography
+
 //get the papams that will be passed to filters through qs
 const queryHandler = (params) => ({ // Get table params
     city_id: params.city_id,
@@ -25,6 +28,7 @@ const queryHandler = (params) => ({ // Get table params
 const ShiftApproval = ({ selectedDate, tz, view }) => {
   dayjs.tz.setDefault(tz)
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+  const [permanent, setPermanent] = useState(false) // Set permanent state
 
   const filters = {
       city_id: Number(scheduleFilter.filter.city_id.replace('in|', '')),
@@ -34,8 +38,12 @@ const ShiftApproval = ({ selectedDate, tz, view }) => {
 
   const { data, isLoading, error, refetch } = useFetch(`/v1/shifts/applications?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`)
 
-  const handleApplication = async (shiftId, driverId, status) => {
-    const payload = { "action": status, "driver_id": driverId }
+  const handleApplication = async (shiftId, driverId, status, is_permanent = false) => {
+    const payload = { 
+      "action": status, 
+      "driver_id": driverId,
+      "is_permanent": is_permanent
+    }
     await confirmApplication(payload, shiftId).then(() => {
       status === 'approved' ? message.success('Application Approved') : message.success('Application Rejected')
       refetch()
@@ -103,8 +111,16 @@ const ShiftApproval = ({ selectedDate, tz, view }) => {
           </Popconfirm>
           <Popconfirm
             title="Approve Application"
-            description="Are you sure to approve this application?"
-            onConfirm={() => handleApplication(record.shift_id, record.user_id, 'approved')}
+            description={
+              <Space direction="vertical" size={8} style={{ marginBottom: 16 }}>
+                <Text>Are you sure to approve this application?</Text>
+                <Space>
+                  <Text strong>Permanent Driver?</Text>
+                  <Switch size="small" onChange={checked => setPermanent(checked)} />
+                </Space>
+              </Space>
+            }
+            onConfirm={() => handleApplication(record.shift_id, record.user_id, 'approved', permanent)}
             okText="Yes, approve it"
             cancelText="No"
           >
