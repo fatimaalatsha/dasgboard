@@ -14,6 +14,7 @@ const DriverSelect = forwardRef((props, ref) => {
     const city = Number(scheduleFilter.filter.city_id.replace('in|', ''))
     const { data, error, isLoading } = useFetch('/v1/drivers?paginated=false&filter[status]=in|active&filter[city_id]=in|' + city) // Fetches active drivers in selected city
     const [drivers, setDrivers] = useState([])
+    const { values, setFieldValue, initialValues } = useFormikContext()
 
     useEffect(() => {
         if (data) {
@@ -24,16 +25,9 @@ const DriverSelect = forwardRef((props, ref) => {
             })))
         }
     }, [data])
-    
-    /* const drivers = data?.data?.map((driver) => ({ // transforms data into format for select dropdown
-        label: `${driver.first_name} ${driver.last_name}`,
-        value: driver.user_id,
-        is_permanent: false,
-    })) */
-
+console.log('DRIVERS: ',initialValues.drivers)
     const Tags = (props) => {
         const { label, value, closable, onClose } = props
-        const { values, setFieldValue } = useFormikContext()
 
         const onPreventMouseDown = (event) => {
         event.preventDefault();
@@ -85,6 +79,7 @@ const DriverSelect = forwardRef((props, ref) => {
         style: { width: '100%' },
         options: drivers,
         tagRender: Tags,
+        defaultValue: initialValues.drivers,
         ref,
         ...props
     }
