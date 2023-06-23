@@ -61,12 +61,12 @@ const SideMenu = ({collapsed}) => {
   const menuItems = [
     {
       key: "/",
-      label: 'Drivers',
+      label: "Drivers",
       icon: <CarOutlined />,
     },
     {
       key: "/applicants",
-      label: 'Applicants',
+      label: "Applicants",
       icon: <RocketOutlined />,
     },
     {
@@ -75,36 +75,36 @@ const SideMenu = ({collapsed}) => {
       icon: <FileOutlined />,
     },
     {
-      key: "/autofleet_drivers",
-      label: 'Autofleet Drivers',
-      icon: <TeamOutlined />,
-    },
-    {
       key: "/schedule",
       label: 'Schedule',
       icon: <CalendarOutlined />,
     },
     {
       key: "/cities",
-      label: 'Cities',
+      label: "Cities",
       icon: <EnvironmentOutlined />,
     },
     {
       key: "/trainings",
-      label: 'Trainings',
+      label: "Trainings",
       icon: <AuditOutlined />,
     },
     {
+      key: "/autofleet_drivers",
+      label: "Autofleet Drivers",
+      icon: <TeamOutlined />,
+    },
+    {
       key: "/reports",
-      label: 'Reports',
+      label: "Reports",
       icon: <ProjectOutlined />,
     },
     {
       key: "/settings",
-      label: 'Settings',
+      label: "Settings",
       disabled: true,
       icon: <SettingOutlined />,
-    }
+    },
   ];
   
 
