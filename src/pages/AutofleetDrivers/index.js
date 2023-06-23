@@ -152,7 +152,7 @@ const AutofleetDrivers = () => {
     },
     {
       title: "City",
-      dataIndex: "city_id",
+      dataIndex: "city",
       key: "city_id",
       sorter: true,
       align: "center",
