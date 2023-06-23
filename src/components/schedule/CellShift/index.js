@@ -663,7 +663,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     start_time: shift.start,
                     end_time: shift.end,
                     capacity: shift.drivers,
-                    city_id: !edit ? [Number(city)] : Number(city),
+                    city_id: [Number(city)],
                     guarantee: shift.guarantee,
                     guarantee_specs: shift.guarantee_specs,
                     hasGuarantee: shift.hasGuarantee,
@@ -684,7 +684,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                         'start_time': converToUTC( shift.day, values.start_time, scheduleFilter.tz),
                         'end_time': converToUTC(shift.day, values.end_time, scheduleFilter.tz),
                         'capacity': Number(values.capacity),
-                        'city_id': !edit ? [Number(city)] : Number(city),
+                        'city_id': [Number(city)],
                         'is_recurring': values.is_recurring,
                         ...(values.status && {
                             'status': 'inactive',
@@ -747,7 +747,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                     Cancel
                                 </Button>,
                                 <Submit key="submit" type="primary">
-                                    {!edit ? 'Create Shift' : 'Update Shift'}
+                                    Create Shift
                                 </Submit>,
                             ]}
                         >
