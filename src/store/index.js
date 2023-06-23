@@ -84,12 +84,11 @@ let filterStore = (set) => ({
       pageSizeOptions: pageSize,
       position: ["bottomRight", "topRight"],
     },
-    sort: {
-      created_at: "desc",
-    },
     filter: {
       status: ["in|online", "stand-by", "activating", "offline", "active"],
     },
+    city_id: null, 
+    order: "ASC",
   },
   setAutofleetFilter: (filter) =>
     set((state) => ({
