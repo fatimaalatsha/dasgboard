@@ -133,7 +133,6 @@ const getAutoFleetCities = async () => { // Get Cities List for dropdown
     }
     const response = await NewAPI.get("/v1/cities/af?paginated=false", options); // set paginated to false to get all cities without pagination and active cities only
    const data = await response.data
-   console.log(response.data);
     const cities = data.data.map((city) => {
       city.text = city.name
       city.value = city.city_id;

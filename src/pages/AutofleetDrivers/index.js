@@ -71,7 +71,6 @@ const AutofleetDrivers = () => {
   // load cities from API
   const loadCities = async () => {
     await getAutoFleetCities().then((response) => {
-      console.log(response);
       setCities(response);
     });
   };
@@ -83,50 +82,6 @@ const AutofleetDrivers = () => {
     })}`
   );
 
- 
-//  const handleTableChange = (pagination, filter, sorter) => {
-//    // Handle table change
-//    Object.keys(filter).forEach((key) => {
-//      if (filter[key]) {
-//        if (key !== "city_id") {
-//          filter[key].unshift("in|" + filter[key][0]);
-//          filter[key].splice(1, 1);
-//        }
-//      }
-//    });
-
-//    console.log("filter", filter);
-
-//    // Remove [0] from city_id
-//    const { city_id, ...restFilter } = filter;
-
-//    console.log("city_id", city_id);
-//    // Check if city_id is not null or undefined
-//    const updatedCityIdFilter =
-//      city_id !== null && city_id !== undefined ? [...city_id] : undefined;
-
-//    // Remove [0] from city_id sorter
-//    const { city_id: cityIdSorter, ...restSorter } = sorter;
-
-//    // Set default city filter and save it to store
-//    const { savedCityFilter, ...restSavedFilter } = autofleetFilter.filter;
-//    console.log("savedCityFilter", savedCityFilter);
-
-//    setAutofleetFilter({
-//      // Set filter to store
-//      pagination: {
-//        ...autofleetFilter.pagination,
-//        ...pagination,
-//      },
-//      filter: {
-//        ...restFilter,
-//        ...(filter.status === null && {
-//          status: ["in|online", "stand-by", "activating", "offline", "active"],
-//        }),
-//      },
-//      city_id: updatedCityIdFilter, // Use updatedCityIdFilter if it exists, otherwise use savedCityFilter
-//    });
-//  };
 
   const handleTableChange = (pagination, filter, sorter) => {
     // Handle table change
@@ -137,10 +92,6 @@ const AutofleetDrivers = () => {
       }
     });
 
-
-    //remove city_id from filter
-    console.log("Filter", filter);
-    console.log("Sorter", sorter);
     setAutofleetFilter({
       // Set filter to store
       pagination: {
@@ -208,19 +159,8 @@ const AutofleetDrivers = () => {
       filters: cities,
       filterSearch: true,
       filteredValue: null,
-      // ...(autofleetFilter.filter?.status && {
-      //   defaultFilteredValue: autofleetFilter.filter?.status.map((status) =>
-      //     status.replace("in|", "")
-      //   ),
-      // }),
-      // ...(autofleetFilter.order && {
-      //   defaultSort:
-      //     autofleetFilter.order === "ascend" ? "desc" : "asc",
-      // }),
       ...(autofleetFilter.order && { defaultSortOrder: autofleetFilter.order === 'asc' ? 'ASC' : 'DESC' }),
       ...( autofleetFilter.city_id && { filteredValue: autofleetFilter.city_id.map((city, index) => city.toString()) }),
-
-
     },
     {
       title: "Driver Licence",
@@ -277,7 +217,7 @@ const AutofleetDrivers = () => {
         ...autofleetFilter.pagination,
         total: data?.meta?.pagination?.total,
         showTotal: (total, range) =>
-          `${range[0]}-${range[1]} of ${total} Applicants`,
+          `${range[0]}-${range[1]} of ${total} Drivers`,
       },
     });
     if (isMounted) {
