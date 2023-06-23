@@ -123,8 +123,8 @@ const weeklyDaysReccurence = [
     }
 ]
 
-const EditShiftModal = ({shift_id, open, tz}) => {
-    const { data, isLoading, error, refetch } = useFetch(`v1/shifts/${shift_id}`)
+const EditShiftModal = ({shift_id, open, tz, refetch}) => {
+    const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}`)
     const DEFAULT_DAY = dayjs(data.start_time).tz(tz).utc().day()
     const [isModalOpen, setIsModalOpen] = useState(open)
 
@@ -133,7 +133,7 @@ const EditShiftModal = ({shift_id, open, tz}) => {
         /* if (!edit) {
             setIsHovering(!isHovering)
         } */
-        //refetch()
+        refetch()
     }
 
     if (isLoading) { return <>Loading...</> }
@@ -212,7 +212,7 @@ const EditShiftModal = ({shift_id, open, tz}) => {
                                 {`Edit Shift: ${dayjs(data.start_time).utc().format(' MMM, dddd DD - YYYY')}`}
                             </Title>
                         }
-                        open={open} 
+                        open={isModalOpen} 
                         onCancel={handleCancel}
                         destroyOnClose
                         footer={[
@@ -976,7 +976,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
             </Formik>
             {/* Shift Modal for Edit Mode */}
             { edit.editMode && (
-                <EditShiftModal shift_id={edit.editRecord} open={edit.editMode} tz={scheduleFilter.tz}/>
+                <EditShiftModal shift_id={edit.editRecord} open={edit.editMode} tz={scheduleFilter.tz} refetch={refetch}/>
             )}
         </>
     )
