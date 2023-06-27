@@ -1,5 +1,5 @@
 /* Driver Select Dropdown 
-* This component is a standalone select dropdown that is used to select a driver.
+* This component is a standalone select dropdown that is used to select drivers in formik forms.
 * It leaves onChange and value up to the parent component.
 */
 import { forwardRef, useState, useEffect } from 'react'
