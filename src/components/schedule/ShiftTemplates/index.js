@@ -130,7 +130,7 @@ const ShiftTemplates = () => {
                     okText="Yes, Publish it"
                     cancelText="Cancel"
                     >
-                        <Button icon={<SendOutlined />} type="primary"> Publish </Button>
+                        <Button disabled icon={<SendOutlined />} type="primary"> Publish </Button>
                     </Popconfirm>
                 </Space>
             )
@@ -157,7 +157,7 @@ const ShiftTemplates = () => {
 
     if (error) {return <>Error...</>}
 
-    console.log(data)
+    //console.log(data)
 
     return (
         <>
@@ -189,7 +189,7 @@ const ShiftTemplates = () => {
                                 okText="Yes, Publish it"
                                 cancelText="Cancel"
                                 >
-                                    <Button icon={<SendOutlined />} type="primary"> Publish </Button>
+                                    <Button disabled icon={<SendOutlined />} type="primary"> Publish </Button>
                                 </Popconfirm>,
                             ]}
                             bordered={false}
