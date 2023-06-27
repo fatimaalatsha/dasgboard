@@ -139,8 +139,6 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
     if (isLoading) { return <>Loading...</> }
     if (error) {return <>Error...</>}
 
-    console.log(data)
-
     return (
         <>
         <Formik
@@ -203,7 +201,6 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
             }}
         >
             {props => {
-                console.log(props.values)
                 return (
                 <FormikForm>
                     <Modal 
