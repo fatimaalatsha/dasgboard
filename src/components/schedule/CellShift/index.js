@@ -147,16 +147,16 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                 end_time: convertToHourTz(data.end_time, tz),
                 capacity: data.capacity,
                 city_id: Number(data?.city_id),
-                guarantee: data.guarantee,
-                guarantee_specs: data.guarantee_specs,
+                guarantee: data.guarantee || 0,
+                guarantee_specs: data.guarantee_specs || '',
                 hasGuarantee: Boolean(data.guarantee),
                 'drivers': data.drivers,
                 is_recurring: data.is_recurring,
-                template: data.recurrence?.pattern,
+                template: Boolean(data.recurrence?.max_occurrences) || Boolean(data.recurrence?.end_date) ? 'custom' : 'weekly',
                 pattern: data.recurrence?.pattern,
                 ends: data.never_ends ? 'never' : data.recurrence?.end_date ? 'on' : 'after',
-                end_date: data.recurrence?.end_date,
-                max_occurrences: data.recurrence?.max_occurrences,
+                end_date: data.recurrence?.end_date || dayjs(data.start_time).tz(tz).utc().format('YYYY-MM-DD'),
+                max_occurrences: data.recurrence?.max_occurrences || 0,
                 'days_of_week': data.recurrence?.days_of_week,
                 status: false,
             }}
@@ -200,8 +200,7 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                 })
             }}
         >
-            {props => {
-                return (
+            {props => (
                 <FormikForm>
                     <Modal 
                         title={
@@ -432,7 +431,7 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                         </Space>
                     </Modal>
                 </FormikForm>
-            )}}
+            )}
         </Formik>
         </>
     )
