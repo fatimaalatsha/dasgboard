@@ -11,6 +11,7 @@ import {
   EnvironmentOutlined,
   AuditOutlined,
   RocketOutlined,
+  TeamOutlined,
 } from '@ant-design/icons'; // import antd navigation icons
 
 import { Auth } from 'aws-amplify' // import aws-amplify auth module
@@ -59,40 +60,45 @@ const SideMenu = ({collapsed}) => {
   const menuItems = [
     {
       key: "/",
-      label: 'Drivers',
+      label: "Drivers",
       icon: <CarOutlined />,
     },
     {
       key: "/applicants",
-      label: 'Applicants',
+      label: "Applicants",
       icon: <RocketOutlined />,
     },
     {
       key: "/documents",
-      label: 'Documents',
+      label: "Documents",
       icon: <FileOutlined />,
     },
     {
       key: "/cities",
-      label: 'Cities',
+      label: "Cities",
       icon: <EnvironmentOutlined />,
     },
     {
       key: "/trainings",
-      label: 'Trainings',
+      label: "Trainings",
       icon: <AuditOutlined />,
     },
     {
+      key: "/autofleet_drivers",
+      label: "Autofleet Drivers",
+      icon: <TeamOutlined />,
+    },
+    {
       key: "/reports",
-      label: 'Reports',
+      label: "Reports",
       icon: <ProjectOutlined />,
     },
     {
       key: "/settings",
-      label: 'Settings',
+      label: "Settings",
       disabled: true,
       icon: <SettingOutlined />,
-    }
+    },
   ];
   
 

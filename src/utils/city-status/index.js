@@ -117,5 +117,34 @@ const getCities = async () => { // Get Cities List for dropdown
   }  
 }
 
+// get af cities 
+
+
+const getAutoFleetCities = async () => { // Get Cities List for dropdown
+ try { 
+    const auth = await Auth.currentSession()// Get current session
+    const token = auth.getAccessToken().getJwtToken()// Get token from session
+    const options = { // Set options for fetch
+      headers: {
+        Authorization: token,
+        ...(process.env.REACT_APP_NEW_ENV && { 'env': process.env.REACT_APP_NEW_ENV }),
+      }
+    
+    }
+    const response = await NewAPI.get("/v1/cities/af?paginated=false", options); // set paginated to false to get all cities without pagination and active cities only
+   const data = await response.data
+    const cities = data.data.map((city) => {
+      city.text = city.name
+      city.value = city.city_id;
+      delete city.name
+      return city
+    })
+    return cities
+  }
+  catch (error) {
+    console.log(error)
+  }  
+}
+
   
-export { createCity, getProvince, updateCityProfile, updateEmailTemplate, getCities }
+export { createCity, getProvince, updateCityProfile, updateEmailTemplate, getCities , getAutoFleetCities}

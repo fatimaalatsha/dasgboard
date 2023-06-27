@@ -71,6 +71,27 @@ let filterStore = (set) => ({
     city_label: "",
     paginated: false,
   },
+  autofleetFilter: {
+    pagination: {
+      current: 1,
+      pageSize: 50,
+      showSizeChanger: true,
+      pageSizeOptions: pageSize,
+      position: ["bottomRight", "topRight"],
+    },
+    filter: {
+      status: ["in|online", "stand-by", "activating", "offline", "active"],
+    },
+    city_id: null, 
+    order: "ASC",
+  },
+  setAutofleetFilter: (filter) =>
+    set((state) => ({
+      autofleetFilter: {
+        ...state.autofleetFilter,
+        ...filter,
+      },
+    })),
   setScheduleFilter: (filter) =>
     set((state) => ({
       scheduleFilter: { ...state.scheduleFilter, ...filter },
