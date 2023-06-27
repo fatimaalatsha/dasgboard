@@ -11,6 +11,7 @@ import { useFilterStore } from '../../../store' // Import useFilterStore to acce
 import { CitySelect } from '../../CitySelect' // Import CitySelect component
 import DriverSelect from '../../DriverSelect' // Import DriverSelect component
 import SubmitWrapper from '../../forms/SubmitWrapper'
+import useFetch from '../../../hooks/use-new-fetch'
 
 dayjs.extend(utc)
 
@@ -19,7 +20,7 @@ const { Text } = Typography
 const publishSchema = object().shape({
     city_id: number().required('Required'),
     day: string().required('Required'),
-    driver_ids: array().of(number().nullable()).notRequired(),
+    drivers: array().of(number().nullable()).notRequired(),
 })
 
 const ShiftTemplates = () => {
@@ -225,66 +226,66 @@ const ShiftTemplates = () => {
         }
         
         <Formik
-                initialValues={{
-                    day: DEFAULT_DAY,
-                    city_id: null,
-                    driver_ids: [],
-                }}
-                validationSchema={publishSchema}
-                onSubmit={ async (values, { setSubmitting }) => {
-                    console.table(values)
-                }}
-            >
-                {props => (
-                    <FormikForm>
-                        <Modal 
-                            title="Publish Template"
-                            open={open} 
-                            onOk={handleModalOk} 
-                            onCancel={ () => {
-                                handleModalCancel()
-                                props.resetForm()
-                            }}
-                            destroyOnClose
-                            footer={[
-                                <Button 
-                                    key="back" 
-                                    onClick={() => {
-                                        handleModalCancel()
-                                        props.resetForm()
-                                    }}
-                                >
-                                    Cancel
-                                </Button>,
-                                <SubmitWrapper key="submit" type="primary" htmlType="submit" loading={props.isSubmitting}>
-                                    Publish
-                                </SubmitWrapper>,
-                            ]}
-                         >
-                        <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                            
-                            <CitySelect
-                                onChange={(value) => {
-                                    props.setFieldValue('city', Number(value))
-                                }}   
-                                style={{ width: '100%' }}
-                            />
-                            <DatePicker 
-                                style={{ width: '100%' }}
-                                format="ddd D MMM" 
-                                allowClear={false}
-                                onChange={(date) => props.setFieldValue('day', date ) } 
-                            />
-                            <DriverSelect 
-                                onChange={(value) => {
-                                    props.setFieldValue('driver_ids', value)
+            initialValues={{
+                day: DEFAULT_DAY,
+                city_id: null,
+                drivers: [],
+            }}
+            validationSchema={publishSchema}
+            onSubmit={ async (values, { setSubmitting }) => {
+                console.table(values)
+            }}
+        >
+            {props => (
+                <FormikForm>
+                    <Modal 
+                        title="Publish Template"
+                        open={open} 
+                        onOk={handleModalOk} 
+                        onCancel={ () => {
+                            handleModalCancel()
+                            props.resetForm()
+                        }}
+                        destroyOnClose
+                        footer={[
+                            <Button 
+                                key="back" 
+                                onClick={() => {
+                                    handleModalCancel()
+                                    props.resetForm()
                                 }}
-                            />
-                        </Space>
-                        </Modal>
-                    </FormikForm>
-                )}
-            </Formik>
+                            >
+                                Cancel
+                            </Button>,
+                            <SubmitWrapper key="submit" type="primary" htmlType="submit" loading={props.isSubmitting}>
+                                Publish
+                            </SubmitWrapper>,
+                        ]}
+                        >
+                    <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                        
+                        <CitySelect
+                            onChange={(value) => {
+                                props.setFieldValue('city', Number(value))
+                            }}   
+                            style={{ width: '100%' }}
+                        />
+                        <DatePicker 
+                            style={{ width: '100%' }}
+                            format="ddd D MMM" 
+                            allowClear={false}
+                            onChange={(date) => props.setFieldValue('day', date ) } 
+                        />
+                        <DriverSelect 
+                            onChange={(value) => {
+                                props.setFieldValue('drivers', value)
+                            }}
+                        />
+                    </Space>
+                    </Modal>
+                </FormikForm>
+            )}
+        </Formik>
         </>
     )
 }
