@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Modal, Input, TimePicker, Checkbox, Space, DatePicker, Divider, Radio, InputNumber } from "antd"
+import { Button, Modal, Input, TimePicker, Checkbox, Space, DatePicker, Divider, Radio, InputNumber, message } from "antd"
 import { UserOutlined } from '@ant-design/icons'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string, number, boolean, array } from 'yup' // Import Yup for form validation
@@ -7,7 +7,7 @@ import { object, string, number, boolean, array } from 'yup' // Import Yup for f
 import { useFilterStore } from '../../../store'
 import InputWrapper from '../../forms/InputWrapper'
 import SubmitWrapper from '../../forms/SubmitWrapper'
-import { converToUTC } from '../../../utils/schedule-status'
+import { converToUTC, createShiftTemplate } from '../../../utils/schedule-status'
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -120,15 +120,15 @@ const CreateTemplate = () => {
                     template: 'weekly',
                     pattern: 'weekly',
                     max_occurrences: 0,
-                    ends: '',
+                    ends: 'never',
                     end_date: DEFAULT_DAY,
                 }}
                 validationSchema={templateSchema}
-                onSubmit={ async (values, { setSubmitting }) => {
+                onSubmit={ async (values, { setSubmitting, resetForm }) => {
                     const payload = {
                         'title': values.title,
-                        'start_time': converToUTC( values.day.format('YYYY-MM-DD'), values.start_time, scheduleFilter.tz),
-                        'end_time': converToUTC( values.day.format('YYYY-MM-DD'), values.end_time, scheduleFilter.tz),
+                        'start_time': values.start_time,
+                        'end_time': values.end_time,
                         'capacity': Number(values.capacity),
                         'is_recurring': values.is_recurring,
                         ...(values.hasGuarantee && {
@@ -149,7 +149,14 @@ const CreateTemplate = () => {
                             }),
                         }),
                     }
-                    console.table(payload)
+                    //console.table(payload)
+                    await createShiftTemplate(payload)
+                    .then(() => {
+                        message.success('Shift template created successfully!')
+                        setSubmitting(false)
+                        resetForm()
+                        handleModalCancel()
+                    })
                 }}
             >
                 {props => (
