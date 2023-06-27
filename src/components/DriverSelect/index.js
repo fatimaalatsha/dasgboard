@@ -25,7 +25,12 @@ const DriverSelect = forwardRef((props, ref) => {
             })))
         }
     }, [data])
-console.log('DRIVERS: ',initialValues.drivers)
+
+    const defaultDrivers = initialValues.drivers.map((driver) => ({ // transforms data into format for select dropdown
+        value: driver.user_id,
+        is_permanent: driver.is_permanent,
+    }))
+
     const Tags = (props) => {
         const { label, value, closable, onClose } = props
 
@@ -79,7 +84,8 @@ console.log('DRIVERS: ',initialValues.drivers)
         style: { width: '100%' },
         options: drivers,
         tagRender: Tags,
-        defaultValue: initialValues.drivers,
+        defaultValue: defaultDrivers,
+        disabled: values.drivers.length >= values.capacity ,
         ref,
         ...props
     }
