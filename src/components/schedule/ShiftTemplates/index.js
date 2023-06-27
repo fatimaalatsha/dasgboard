@@ -26,6 +26,7 @@ const publishSchema = object().shape({
 const ShiftTemplates = () => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const DEFAULT_DAY = dayjs()
+    const { data, isLoading, error, refetch } = useFetch(`v1/shifts-templates`)
     const [open, setOpen] = useState(false)
     const [dummy, setDummy] = useState([
         { id: 1, title: 'Shift 1', guarantee: null, guarantee_specs: '', capacity: 10, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 05:00:00', is_recurring: true, end_date: null, never_ends: true, pattern: 'weekly', days_of_week: [0, 1, 2, 3, 4, 5, 6], max_occurrences: 0 },
@@ -152,24 +153,30 @@ const ShiftTemplates = () => {
         setOpen(true)
     }
 
+    if (isLoading) { return <>Loading...</> }
+
+    if (error) {return <>Error...</>}
+
+    console.log(data)
+
     return (
         <>
         {   scheduleFilter.navigation.template === 0 ? (
             <Row gutter={[16, 16]}>
             {
-                dummy.map((item, index) => (
+                data.data.map((item, index) => (
                     <Col {...colConfig} key={index}>
                         <Card
                             title={item.title}
                             actions={[
                                 <Popconfirm
-                                title="Delete template"
-                                description="Are you sure to delete this template?"
-                                icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                                onConfirm={() => console.log('delete', item)}
-                                onCancel={() => console.log('cancel')}
-                                okText="Yes, Delete it"
-                                cancelText="Cancel"
+                                    title="Delete template"
+                                    description="Are you sure to delete this template?"
+                                    icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
+                                    onConfirm={() => console.log('delete', item)}
+                                    onCancel={() => console.log('cancel')}
+                                    okText="Yes, Delete it"
+                                    cancelText="Cancel"
                                 >
                                     <Button danger type="text" key="delete" icon={<DeleteOutlined />} />
                                 </Popconfirm>,
@@ -189,7 +196,7 @@ const ShiftTemplates = () => {
                         >
                             <Descriptions column={1} bordered>
                                 <Descriptions.Item label="Capacity">{item.capacity}</Descriptions.Item>
-                                <Descriptions.Item label="Time">{dayjs(item.start_time).format('HH:mm') + ` ➡ ` + dayjs(item.end_time).format('HH:mm')}</Descriptions.Item>
+                                <Descriptions.Item label="Time">{dayjs(item.start_time, 'HH:mm').format('HH:mm') + ` ➡ ` + dayjs(item.end_time, 'HH:mm').format('HH:mm')}</Descriptions.Item>
                                 {item.guarantee && <Descriptions.Item label="Guarantee">{`$ ` + item.guarantee}</Descriptions.Item>}
                                 {item.guarantee_specs && <Descriptions.Item label="Guarantee Description">{item.guarantee_specs}</Descriptions.Item>}
                                 <Descriptions.Item label="Type">
@@ -217,8 +224,9 @@ const ShiftTemplates = () => {
             ) : (
                 <Table
                     columns={columns}
-                    dataSource={dummy}
+                    dataSource={data.data}
                     pagination={false}
+                    loading={isLoading}
                     bordered
                     rowKey="id"
                 />
