@@ -72,7 +72,7 @@ const ShiftTemplates = () => {
             dataIndex: 'time',
             key: 'time',
             render: (text, record) => (
-                <Text>{dayjs(record.start_time).format('HH:mm') + ` ➡ ` + dayjs(record.end_time).format('HH:mm')}</Text>
+                <Text>{dayjs(record.start_time, 'HH:mm').format('HH:mm') + ` ➡ ` + dayjs(record.end_time, 'HH:mm').format('HH:mm')}</Text>
             )
         },
         {
@@ -104,7 +104,14 @@ const ShiftTemplates = () => {
             dataIndex: 'days_of_week',
             key: 'days_of_week',
             render: (text, record) => (
-                record.is_recurring && <>{text.map((day, idx) => <Text strong key={idx} color="blue">{dayjs().day(day).format('ddd') + `, `}</Text>)}</>
+                record.is_recurring && 
+                <>
+                    {   text.map((day, idx) => 
+                        <Text strong key={idx} color="blue">
+                            {dayjs().day(day).format( text.length === 1 ? 'dddd' : 'ddd') + (text.length - 1 === idx ? '' : `, `)}
+                        </Text>
+                    )}
+                </>
             )
         },
         {
@@ -243,7 +250,9 @@ const ShiftTemplates = () => {
                                     {item.is_recurring && <Descriptions.Item label="Pattern" style={{ textTransform: 'capitalize' }}>{item.pattern}</Descriptions.Item>}
                                     {item.is_recurring && <Descriptions.Item label="Repeats on">
                                         { item.days_of_week.map((day, idx) => (
-                                            <Text strong key={idx} color="blue">{dayjs().day(day).format('ddd') + `, `}</Text>
+                                            <Text strong key={idx} color="blue">
+                                                {dayjs().day(day).format( item.days_of_week.length === 1 ? 'dddd' : 'ddd') + (item.days_of_week.length - 1 === idx ? '' : `, `)}
+                                            </Text>
                                         ))}
                                     </Descriptions.Item>}
                                     {item.is_recurring && <Descriptions.Item label="Ends">
