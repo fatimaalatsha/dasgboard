@@ -160,7 +160,7 @@ const ShiftTemplates = () => {
                     description="Are you sure to delete this template?"
                     icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
                     onConfirm={() => handleDelete(record.id)}
-                    onCancel={() => console.log('cancel')}
+                    onCancel={() => refetch()}
                     okText="Yes, Delete it"
                     cancelText="Cancel"
                     >
@@ -171,7 +171,7 @@ const ShiftTemplates = () => {
                     title="Publish template"
                     description="Are you sure to publish this template?"
                     onConfirm={handleModalOpen}
-                    onCancel={() => console.log('cancel')}
+                    onCancel={() => refetch()}
                     okText="Yes, Publish it"
                     cancelText="Cancel"
                     >
@@ -228,7 +228,7 @@ const ShiftTemplates = () => {
                                         description="Are you sure to delete this template?"
                                         icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
                                         onConfirm={() => handleDelete(item.id)}
-                                        onCancel={() => console.log('cancel')}
+                                        onCancel={() => refetch()}
                                         okText="Yes, Delete it"
                                         cancelText="Cancel"
                                     >
@@ -239,7 +239,7 @@ const ShiftTemplates = () => {
                                     title="Publish template"
                                     description="Are you sure to publish this template?"
                                     onConfirm={handleModalOpen}
-                                    onCancel={() => console.log('cancel')}
+                                    onCancel={() => refetch()}
                                     okText="Yes, Publish it"
                                     cancelText="Cancel"
                                     >
