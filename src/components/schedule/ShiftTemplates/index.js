@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Row, Col, Card, Descriptions, Button, Badge, Typography, Table, Space, Popconfirm, Modal, DatePicker, Radio, Tooltip } from 'antd'
+import { Row, Col, Card, Descriptions, Button, Badge, Typography, Table, Space, Popconfirm, Modal, DatePicker, Radio, Tooltip, message } from 'antd'
 import { DeleteOutlined, EditOutlined, SendOutlined, QuestionCircleOutlined, TableOutlined, AppstoreOutlined } from '@ant-design/icons'
 
 import dayjs from 'dayjs' // Import date handlers
@@ -12,6 +12,7 @@ import { CitySelect } from '../../CitySelect' // Import CitySelect component
 import DriverSelect from '../../DriverSelect' // Import DriverSelect component
 import CreateTemplate from '../CreateTemplate'
 import SubmitWrapper from '../../forms/SubmitWrapper'
+import { deleteShiftTemplate } from '../../../utils/schedule-status'
 import useFetch from '../../../hooks/use-new-fetch'
 
 dayjs.extend(utc)
@@ -55,6 +56,26 @@ const ShiftTemplates = () => {
             value: 1,
         },
     ]
+    
+    const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
+        setOpen(false)
+    }
+
+    const handleModalCancel = () => {
+        setOpen(false)
+    }
+
+    const handleModalOpen = () => {
+        setOpen(true)
+    }
+
+    const handleDelete = async (id) => {
+        await deleteShiftTemplate(id)
+        .then(() => {
+            message.success('Shift deleted successfully')
+            refetch()
+        })
+    }
 
     const columns = [
         {
@@ -138,7 +159,7 @@ const ShiftTemplates = () => {
                     title="Delete template"
                     description="Are you sure to delete this template?"
                     icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                    onConfirm={() => console.log('delete', record)}
+                    onConfirm={() => handleDelete(record.id)}
                     onCancel={() => console.log('cancel')}
                     okText="Yes, Delete it"
                     cancelText="Cancel"
@@ -163,18 +184,6 @@ const ShiftTemplates = () => {
     
     const colConfig = {
         span: 6,
-    }
-    
-    const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
-        setOpen(false)
-    }
-
-    const handleModalCancel = () => {
-        setOpen(false)
-    }
-
-    const handleModalOpen = () => {
-        setOpen(true)
     }
 
     if (isLoading) { return <>Loading...</> }
@@ -218,7 +227,7 @@ const ShiftTemplates = () => {
                                         title="Delete template"
                                         description="Are you sure to delete this template?"
                                         icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                                        onConfirm={() => console.log('delete', item)}
+                                        onConfirm={() => handleDelete(item.id)}
                                         onCancel={() => console.log('cancel')}
                                         okText="Yes, Delete it"
                                         cancelText="Cancel"
