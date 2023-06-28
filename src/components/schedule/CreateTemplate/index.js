@@ -89,7 +89,7 @@ const templateSchema = object().shape({
     }),
 })
 
-const CreateTemplate = () => {
+const CreateTemplate = ({refetch}) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const DEFAULT_DAY = dayjs()
     const [open, setOpen] = useState(false)
@@ -100,6 +100,7 @@ const CreateTemplate = () => {
 
     const handleModalCancel = () => {
         setOpen(false)
+        refetch()
     }
  
     return (
@@ -127,8 +128,8 @@ const CreateTemplate = () => {
                 onSubmit={ async (values, { setSubmitting, resetForm }) => {
                     const payload = {
                         'title': values.title,
-                        'start_time': values.start_time,
-                        'end_time': values.end_time,
+                        'start_time': values.start_time + ':00',
+                        'end_time': values.end_time + ':00',
                         'capacity': Number(values.capacity),
                         'is_recurring': values.is_recurring,
                         ...(values.hasGuarantee && {
@@ -203,7 +204,22 @@ const CreateTemplate = () => {
                                 onChange={(time, timeString) => {
                                     props.setFieldValue('start_time', timeString[0])
                                     props.setFieldValue('end_time', timeString[1])
-                                }} 
+                                }}
+                                hideDisabledOptions
+                                disabledTime={() => {
+                                    return {
+                                        disabledMinutes: () => {
+                                            const minuteSteps = [0, 30, 59]
+                                            const minutes = []
+                                            for (let i = 0; i < 60; i++) {
+                                                if (!minuteSteps.includes(i)) {
+                                                    minutes.push(i)
+                                                }
+                                            }
+                                            return minutes
+                                        },
+                                    }
+                                }}
                             />
                             </Input.Group>
                             <InputWrapper 
