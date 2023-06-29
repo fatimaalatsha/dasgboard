@@ -165,7 +165,7 @@ const ShiftTemplates = () => {
                     okText="Yes, Publish it"
                     cancelText="Cancel"
                     >
-                        <Button disabled icon={<SendOutlined />} type="primary"> Publish </Button>
+                        <Button icon={<SendOutlined />} type="primary"> Publish </Button>
                     </Popconfirm>
                 </Space>
             )
@@ -231,7 +231,7 @@ const ShiftTemplates = () => {
                                     okText="Yes, Publish it"
                                     cancelText="Cancel"
                                     >
-                                        <Button disabled icon={<SendOutlined />} type="primary"> Publish </Button>
+                                        <Button icon={<SendOutlined />} type="primary"> Publish </Button>
                                     </Popconfirm>,
                                 ]}
                                 bordered={false}
