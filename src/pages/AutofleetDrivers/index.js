@@ -89,6 +89,17 @@ const AutofleetDrivers = () => {
         filter[key].splice(1, 1);
       }
     });
+    Object.keys(filter).forEach((key) => {
+      if (filter[key] && key === "city_id") {
+        filter[key] = filter[key].map((value) => `"${value}"`);
+        filter[key] = [`[${filter[key].join(",")}]`];
+      }
+    });
+
+
+    
+    console.log("filter", filter);
+
     setAutofleetFilter({
       // Set filter to store
       pagination: {
@@ -97,15 +108,22 @@ const AutofleetDrivers = () => {
       },
       filter: {
         ...filter,
-        ...(filter.status === null && { status: ["in|online", "stand-by", "activating", "offline", "active"] }),
+        ...(filter.status === null && {
+          status: ["in|online", "stand-by", "activating", "offline", "active"],
+        }),
         ...(filter.application_status &&
           filter.application_status[0] === "in|null" && {
             application_status: ["is|null"],
           }),
         city_id: null,
       },
-      city_id: filter.city_id ? [filter.city_id.toString()] : null,
-      order: sorter.order === "ascend" ? "ASC" : "DESC",
+      city_id: filter.city_id ? filter.city_id : null,
+      ...(Object.keys(sorter).length !== 0 && {
+        sort: {
+          [`${sorter.columnKey === "city_id" ? "name" : sorter.columnKey}`]:
+            sorter.order === "ascend" ? "asc" : "desc",
+        },
+      }),
     });
   };
   const handleSearch = (selectedKeys) => {
