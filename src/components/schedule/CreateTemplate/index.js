@@ -4,10 +4,9 @@ import { UserOutlined } from '@ant-design/icons'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string, number, boolean, array } from 'yup' // Import Yup for form validation
 
-import { useFilterStore } from '../../../store'
 import InputWrapper from '../../forms/InputWrapper'
 import SubmitWrapper from '../../forms/SubmitWrapper'
-import { converToUTC, createShiftTemplate } from '../../../utils/schedule-status'
+import { createShiftTemplate } from '../../../utils/schedule-status'
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -90,7 +89,6 @@ const templateSchema = object().shape({
 })
 
 const CreateTemplate = ({refetch}) => {
-    const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const DEFAULT_DAY = dayjs()
     const [open, setOpen] = useState(false)
     
@@ -163,7 +161,7 @@ const CreateTemplate = ({refetch}) => {
                 {props => (
                     <FormikForm>
                         <Modal 
-                            title={`New ${scheduleFilter.navigation.tab === 'active' ? 'Shift' : 'Template'}`}
+                            title="New Template"
                             open={open} 
                             onOk={handleModalOk} 
                             onCancel={ () => {
