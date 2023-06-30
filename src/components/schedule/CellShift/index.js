@@ -486,7 +486,7 @@ const ShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatus, r
                 <Row style={{ display: 'flex', height: '100%'}}>
                     <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
                         <Space style={{ display: 'flex', columnGap: 2, alignItems: 'baseline' }}>
-                            <Title level={1} style={{ margin: 0 }}>0</Title>
+                            <Title level={1} style={{ margin: 0 }}>{record.count}</Title>
                                  <Title level={4}>/</Title>
                                 <EditableText
                                     value={record?.drivers}
@@ -539,6 +539,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     const DEFAULT_DAY = dayjs(selectedDay).tz(scheduleFilter.tz).utc().day()
     const [shift, setShift] = useState({
         status: record.status,
+        count: record.count,
         drivers: record.capacity || 0,
         start: record.start_time ? convertToHourTz(record.start_time, scheduleFilter.tz) : record.time,
         end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : null,
