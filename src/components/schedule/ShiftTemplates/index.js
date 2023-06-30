@@ -10,7 +10,7 @@ import { object, string, number, boolean, array, mixed } from 'yup' // Import Yu
 import { useFilterStore } from '../../../store' // Import useFilterStore to access filter store state
 import { CitySelect } from '../../CitySelect' // Import CitySelect component
 import DriverSelect from '../../DriverSelect' // Import DriverSelect component
-import CreateTemplate from '../CreateTemplate'
+import { CreateTemplate, EditTemplate } from '../CreateTemplate'
 import SubmitWrapper from '../../forms/SubmitWrapper'
 import { deleteShiftTemplate } from '../../../utils/schedule-status'
 import useFetch from '../../../hooks/use-new-fetch'
@@ -156,7 +156,7 @@ const ShiftTemplates = () => {
                     >
                         <Button danger type="text" icon={<DeleteOutlined />} />
                     </Popconfirm>
-                    <Button ghost type="primary" icon={<EditOutlined />} />
+                    <EditTemplate template_id={record.id} refetch={refetch}/>
                     <Popconfirm
                     title="Publish template"
                     description="Are you sure to publish this template?"
@@ -222,7 +222,7 @@ const ShiftTemplates = () => {
                                     >
                                         <Button danger type="text" key="delete" icon={<DeleteOutlined />} />
                                     </Popconfirm>,
-                                    <Button ghost type="primary" key="edit" icon={<EditOutlined />} />,
+                                    <EditTemplate template_id={item.id} refetch={refetch}/>,
                                     <Popconfirm
                                     title="Publish template"
                                     description="Are you sure to publish this template?"
