@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Space, Typography, Switch, Table, Tag, Button, Popconfirm, message } from 'antd'
+import { Space, Typography, Switch, Table, Tag, Button, Popconfirm, message, Result } from 'antd'
 import { QuestionCircleOutlined } from '@ant-design/icons'
 
 import dayjs from 'dayjs' // Import dayjs
@@ -11,6 +11,7 @@ import qs from 'qs' // Import qs library
 import useFetch from '../../../hooks/use-new-fetch'
 import { useFilterStore } from '../../../store'
 import { confirmApplication } from '../../../utils/schedule-status'
+import { CitySelect } from '../../CitySelect'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -28,6 +29,7 @@ const queryHandler = (params) => ({ // Get table params
 const ShiftApproval = ({ selectedDate, tz, view }) => {
   dayjs.tz.setDefault(tz)
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+  const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
   const [permanent, setPermanent] = useState(false) // Set permanent state
 
   const filters = {
@@ -134,12 +136,29 @@ const ShiftApproval = ({ selectedDate, tz, view }) => {
   error && <>Something went wrong...</>
 
   return (
-    <Table 
-      columns={columns} 
-      dataSource={data.data} 
-      loading={isLoading}
-      rowKey="id"
-    />
+    <>
+      { scheduleFilter.filter.city_id?.split('|')[1] ?
+        <Table 
+          columns={columns} 
+          dataSource={data.data} 
+          loading={isLoading}
+          rowKey="id"
+        />
+        :
+        <Result
+            status="error"
+            title="You have not selected a city"
+            subTitle="Please select a city to view the schedule"
+            extra={
+                <CitySelect
+                    value={scheduleFilter.filter.city_id ? Number(scheduleFilter.filter.city_id.replace('in|', '')) : null}
+                    onChange={(value, label) => setScheduleFilter({ ...scheduleFilter, filter: { ...scheduleFilter.filter, city_id: `in|${value}`}, tz: label.timezone, city_label: label.label })}   
+                    style={{ width: 200 }}
+                />
+            }
+        />
+      }
+    </>
   )
 }
 

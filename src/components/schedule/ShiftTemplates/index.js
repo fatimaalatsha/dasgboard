@@ -31,16 +31,6 @@ const ShiftTemplates = () => {
     const DEFAULT_DAY = dayjs()
     const { data, isLoading, error, refetch } = useFetch(`v1/shifts-templates`)
     const [open, setOpen] = useState(false)
-    const [dummy, setDummy] = useState([
-        { id: 1, title: 'Shift 1', guarantee: null, guarantee_specs: '', capacity: 10, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 05:00:00', is_recurring: true, end_date: null, never_ends: true, pattern: 'weekly', days_of_week: [0, 1, 2, 3, 4, 5, 6], max_occurrences: 0 },
-        { id: 2, title: 'Shift 2', guarantee: null, guarantee_specs: '', capacity: 5, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 05:00:00', is_recurring: false, end_date: null, never_ends: false, pattern: 'weekly', days_of_week: [ 2, 4, 6], max_occurrences: 0 },
-        { id: 3, title: 'Shift 3', guarantee: 300, guarantee_specs: 'After completing at least 20 rides in a 4h shift.', capacity: 0, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 04:00:00', is_recurring: true, end_date: null, never_ends: false, pattern: 'weekly', days_of_week: [ 2, 4, 6], max_occurrences: 8 },
-        { id: 4, title: 'Shift 4', guarantee: null, guarantee_specs: '', capacity: 23, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 07:00:00', is_recurring: true, end_date: '2021-01-01', never_ends: false, pattern: 'daily', days_of_week: [ 5 ], max_occurrences: 0 },
-        { id: 5, title: 'Shift 5', guarantee: null, guarantee_specs: '', capacity: 100, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 22:00:00', is_recurring: true, end_date: null, never_ends: true, pattern: 'weekly', days_of_week: [0, 6], max_occurrences: 0 },
-        { id: 6, title: 'Shift 6', guarantee: null, guarantee_specs: '', capacity: 200, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 18:00:00', is_recurring: true, end_date: null, never_ends: false, pattern: 'once', days_of_week: [5], max_occurrences: 1 },
-        { id: 7, title: 'Shift 7', guarantee: null, guarantee_specs: '', capacity: 2, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 15:00:00', is_recurring: true, end_date: '2021-01-01', never_ends: false, pattern: 'weekly', days_of_week: [1, 3, 5], max_occurrences: 0 },
-        { id: 8, title: 'Shift 8', guarantee: null, guarantee_specs: '', capacity: 33, start_time: '2021-01-01 00:00:00', end_time: '2021-01-01 13:00:00', is_recurring: true, end_date: null, never_ends: false, pattern: 'daily', days_of_week: [2, 4, 6], max_occurrences: 3 },
-    ])
 
     const templateViewOptions = [
         {
@@ -160,7 +150,7 @@ const ShiftTemplates = () => {
                     description="Are you sure to delete this template?"
                     icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
                     onConfirm={() => handleDelete(record.id)}
-                    onCancel={() => console.log('cancel')}
+                    onCancel={() => refetch()}
                     okText="Yes, Delete it"
                     cancelText="Cancel"
                     >
@@ -171,11 +161,11 @@ const ShiftTemplates = () => {
                     title="Publish template"
                     description="Are you sure to publish this template?"
                     onConfirm={handleModalOpen}
-                    onCancel={() => console.log('cancel')}
+                    onCancel={() => refetch()}
                     okText="Yes, Publish it"
                     cancelText="Cancel"
                     >
-                        <Button disabled icon={<SendOutlined />} type="primary"> Publish </Button>
+                        <Button icon={<SendOutlined />} type="primary"> Publish </Button>
                     </Popconfirm>
                 </Space>
             )
@@ -189,8 +179,6 @@ const ShiftTemplates = () => {
     if (isLoading) { return <>Loading...</> }
 
     if (error) {return <>Error...</>}
-
-    //console.log(data)
 
     return (
         <>
@@ -228,7 +216,7 @@ const ShiftTemplates = () => {
                                         description="Are you sure to delete this template?"
                                         icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
                                         onConfirm={() => handleDelete(item.id)}
-                                        onCancel={() => console.log('cancel')}
+                                        onCancel={() => refetch()}
                                         okText="Yes, Delete it"
                                         cancelText="Cancel"
                                     >
@@ -239,11 +227,11 @@ const ShiftTemplates = () => {
                                     title="Publish template"
                                     description="Are you sure to publish this template?"
                                     onConfirm={handleModalOpen}
-                                    onCancel={() => console.log('cancel')}
+                                    onCancel={() => refetch()}
                                     okText="Yes, Publish it"
                                     cancelText="Cancel"
                                     >
-                                        <Button disabled icon={<SendOutlined />} type="primary"> Publish </Button>
+                                        <Button icon={<SendOutlined />} type="primary"> Publish </Button>
                                     </Popconfirm>,
                                 ]}
                                 bordered={false}
@@ -325,7 +313,7 @@ const ShiftTemplates = () => {
                                     Publish
                                 </SubmitWrapper>,
                             ]}
-                            >
+                        >
                         <Space direction="vertical" size={16} style={{ width: '100%' }}>
                             
                             <CitySelect
