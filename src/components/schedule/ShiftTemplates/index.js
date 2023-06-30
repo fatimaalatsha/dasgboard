@@ -1,17 +1,11 @@
-import { useState } from 'react'
-import { Row, Col, Card, Descriptions, Button, Badge, Typography, Table, Space, Popconfirm, Modal, DatePicker, Radio, Tooltip, message } from 'antd'
-import { DeleteOutlined, EditOutlined, SendOutlined, QuestionCircleOutlined, TableOutlined, AppstoreOutlined } from '@ant-design/icons'
+import { Row, Col, Card, Descriptions, Button, Badge, Typography, Table, Space, Popconfirm, Radio, Tooltip, message } from 'antd'
+import { DeleteOutlined, QuestionCircleOutlined, TableOutlined, AppstoreOutlined } from '@ant-design/icons'
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
-import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../../store' // Import useFilterStore to access filter store state
-import { CitySelect } from '../../CitySelect' // Import CitySelect component
-import DriverSelect from '../../DriverSelect' // Import DriverSelect component
-import { CreateTemplate, EditTemplate } from '../CreateTemplate'
-import SubmitWrapper from '../../forms/SubmitWrapper'
+import { CreateTemplate, EditTemplate, PublishTemplate } from '../CreateTemplate'
 import { deleteShiftTemplate } from '../../../utils/schedule-status'
 import useFetch from '../../../hooks/use-new-fetch'
 
@@ -19,18 +13,10 @@ dayjs.extend(utc)
 
 const { Text } = Typography
 
-const publishSchema = object().shape({
-    city_id: number().required('Required'),
-    day: string().required('Required'),
-    drivers: array().of(number().nullable()).notRequired(),
-})
-
 const ShiftTemplates = () => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
-    const DEFAULT_DAY = dayjs()
     const { data, isLoading, error, refetch } = useFetch(`v1/shifts-templates`)
-    const [open, setOpen] = useState(false)
 
     const templateViewOptions = [
         {
@@ -46,18 +32,6 @@ const ShiftTemplates = () => {
             value: 1,
         },
     ]
-    
-    const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
-        setOpen(false)
-    }
-
-    const handleModalCancel = () => {
-        setOpen(false)
-    }
-
-    const handleModalOpen = () => {
-        setOpen(true)
-    }
 
     const handleDelete = async (id) => {
         await deleteShiftTemplate(id)
@@ -157,16 +131,7 @@ const ShiftTemplates = () => {
                         <Button danger type="text" icon={<DeleteOutlined />} />
                     </Popconfirm>
                     <EditTemplate template_id={record.id} refetch={refetch}/>
-                    <Popconfirm
-                    title="Publish template"
-                    description="Are you sure to publish this template?"
-                    onConfirm={handleModalOpen}
-                    onCancel={() => refetch()}
-                    okText="Yes, Publish it"
-                    cancelText="Cancel"
-                    >
-                        <Button icon={<SendOutlined />} type="primary"> Publish </Button>
-                    </Popconfirm>
+                    <PublishTemplate template_id={record.id} refetch={refetch}/>
                 </Space>
             )
         }
@@ -223,16 +188,7 @@ const ShiftTemplates = () => {
                                         <Button danger type="text" key="delete" icon={<DeleteOutlined />} />
                                     </Popconfirm>,
                                     <EditTemplate template_id={item.id} refetch={refetch}/>,
-                                    <Popconfirm
-                                    title="Publish template"
-                                    description="Are you sure to publish this template?"
-                                    onConfirm={handleModalOpen}
-                                    onCancel={() => refetch()}
-                                    okText="Yes, Publish it"
-                                    cancelText="Cancel"
-                                    >
-                                        <Button icon={<SendOutlined />} type="primary"> Publish </Button>
-                                    </Popconfirm>,
+                                    <PublishTemplate template_id={item.id} refetch={refetch}/>,
                                 ]}
                                 bordered={false}
                             >
@@ -276,68 +232,6 @@ const ShiftTemplates = () => {
                     />
                 )
             }
-            
-            <Formik
-                initialValues={{
-                    day: DEFAULT_DAY,
-                    city_id: null,
-                    drivers: [],
-                }}
-                validationSchema={publishSchema}
-                onSubmit={ async (values, { setSubmitting }) => {
-                    console.table(values)
-                }}
-            >
-                {props => (
-                    <FormikForm>
-                        <Modal 
-                            title="Publish Template"
-                            open={open} 
-                            onOk={handleModalOk} 
-                            onCancel={ () => {
-                                handleModalCancel()
-                                props.resetForm()
-                            }}
-                            destroyOnClose
-                            footer={[
-                                <Button 
-                                    key="back" 
-                                    onClick={() => {
-                                        handleModalCancel()
-                                        props.resetForm()
-                                    }}
-                                >
-                                    Cancel
-                                </Button>,
-                                <SubmitWrapper key="submit" type="primary" htmlType="submit" loading={props.isSubmitting}>
-                                    Publish
-                                </SubmitWrapper>,
-                            ]}
-                        >
-                        <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                            
-                            <CitySelect
-                                onChange={(value) => {
-                                    props.setFieldValue('city', Number(value))
-                                }}   
-                                style={{ width: '100%' }}
-                            />
-                            <DatePicker 
-                                style={{ width: '100%' }}
-                                format="ddd D MMM" 
-                                allowClear={false}
-                                onChange={(date) => props.setFieldValue('day', date ) } 
-                            />
-                            <DriverSelect 
-                                onChange={(value) => {
-                                    props.setFieldValue('drivers', value)
-                                }}
-                            />
-                        </Space>
-                        </Modal>
-                    </FormikForm>
-                )}
-            </Formik>
         </>
     )
 }
