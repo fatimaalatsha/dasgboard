@@ -1,12 +1,14 @@
 import { useState } from 'react'
-import { Button, Modal, Input, TimePicker, Checkbox, Space, DatePicker, Divider, Radio, InputNumber, message } from "antd"
-import { UserOutlined, EditOutlined } from '@ant-design/icons'
+import { Button, Modal, Input, TimePicker, Checkbox, Space, DatePicker, Divider, Radio, InputNumber, message, Popconfirm } from "antd"
+import { UserOutlined, EditOutlined, SendOutlined } from '@ant-design/icons'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string, number, boolean, array } from 'yup' // Import Yup for form validation
 
 import InputWrapper from '../../forms/InputWrapper'
 import SubmitWrapper from '../../forms/SubmitWrapper'
 import { createShiftTemplate } from '../../../utils/schedule-status'
+import { CitySelect } from '../../CitySelect'
+import DriverSelect from '../../DriverSelect'
 import useFetch from '../../../hooks/use-new-fetch'
 
 import dayjs from 'dayjs' // Import date handlers
@@ -87,6 +89,12 @@ const templateSchema = object().shape({
         then: number().min(1, 'Shift max occurrences must be greater than or equal to 1.').required('Required'),
         otherwise: number().notRequired(),
     }),
+})
+
+const publishSchema = object().shape({
+    city_id: number().required('Required'),
+    day: string().required('Required'),
+    drivers: array().of(number().nullable()).notRequired(),
 })
 
 const EditTemplate = ({refetch, template_id }) => {
@@ -678,4 +686,97 @@ const CreateTemplate = ({refetch}) => {
     )
 }
 
-export { CreateTemplate, EditTemplate }
+const PublishTemplate = ({refetch, template_id }) => {
+    const DEFAULT_DAY = dayjs()
+    const [open, setOpen] = useState(false)
+    
+    const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
+        setOpen(false)
+    }
+
+    const handleModalCancel = () => {
+        setOpen(false)
+    }
+
+    const handleModalOpen = () => {
+        setOpen(true)
+    }
+
+    return (
+        <>
+            <Popconfirm
+            title="Publish template"
+            description="Are you sure to publish this template?"
+            onConfirm={handleModalOpen}
+            onCancel={() => refetch()}
+            okText="Yes, Publish it"
+            cancelText="Cancel"
+            >
+                <Button icon={<SendOutlined />} type="primary"> Publish </Button>
+            </Popconfirm>
+            <Formik
+                initialValues={{
+                    day: DEFAULT_DAY,
+                    city_id: null,
+                    drivers: [],
+                }}
+                validationSchema={publishSchema}
+                onSubmit={ async (values, { setSubmitting }) => {
+                    console.table(values)
+                }}
+            >
+                {props => (
+                    <FormikForm>
+                        <Modal 
+                            title="Publish Template"
+                            open={open} 
+                            onOk={handleModalOk} 
+                            onCancel={ () => {
+                                handleModalCancel()
+                                props.resetForm()
+                            }}
+                            destroyOnClose
+                            footer={[
+                                <Button 
+                                    key="back" 
+                                    onClick={() => {
+                                        handleModalCancel()
+                                        props.resetForm()
+                                    }}
+                                >
+                                    Cancel
+                                </Button>,
+                                <SubmitWrapper key="submit" type="primary" htmlType="submit" loading={props.isSubmitting}>
+                                    Publish
+                                </SubmitWrapper>,
+                            ]}
+                        >
+                        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                            
+                            <CitySelect
+                                onChange={(value) => {
+                                    props.setFieldValue('city', Number(value))
+                                }}   
+                                style={{ width: '100%' }}
+                            />
+                            <DatePicker 
+                                style={{ width: '100%' }}
+                                format="ddd D MMM" 
+                                allowClear={false}
+                                onChange={(date) => props.setFieldValue('day', date ) } 
+                            />
+                            <DriverSelect 
+                                onChange={(value) => {
+                                    props.setFieldValue('drivers', value)
+                                }}
+                            />
+                        </Space>
+                        </Modal>
+                    </FormikForm>
+                )}
+            </Formik>
+        </>
+    )
+}
+
+export { CreateTemplate, EditTemplate, PublishTemplate }
