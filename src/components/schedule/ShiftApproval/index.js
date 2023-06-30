@@ -116,10 +116,12 @@ const ShiftApproval = ({ selectedDate, tz, view }) => {
             description={
               <Space direction="vertical" size={8} style={{ marginBottom: 16 }}>
                 <Text>Are you sure to approve this application?</Text>
-                <Space>
-                  <Text strong>Permanent Driver?</Text>
-                  <Switch size="small" onChange={checked => setPermanent(checked)} />
-                </Space>
+                { record.is_recurring && (
+                  <Space>
+                    <Text strong>Permanent Driver?</Text>
+                    <Switch size="small" onChange={checked => setPermanent(checked)} />
+                  </Space>
+                )}
               </Space>
             }
             onConfirm={() => handleApplication(record.shift_id, record.user_id, 'approved', permanent)}
