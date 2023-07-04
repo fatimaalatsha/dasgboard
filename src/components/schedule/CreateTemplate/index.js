@@ -6,7 +6,7 @@ import { object, string, number, boolean, array } from 'yup' // Import Yup for f
 
 import InputWrapper from '../../forms/InputWrapper'
 import SubmitWrapper from '../../forms/SubmitWrapper'
-import { createShiftTemplate } from '../../../utils/schedule-status'
+import { createShiftTemplate, updateShiftTemplate } from '../../../utils/schedule-status'
 import { CitySelect } from '../../CitySelect'
 import DriverSelect from '../../DriverSelect'
 import useFetch from '../../../hooks/use-new-fetch'
@@ -98,9 +98,6 @@ const publishSchema = object().shape({
 })
 
 const EditTemplate = ({refetch, template_id }) => {
-    //const { data, isLoading, error } = useFetch(`v1/shifts-templates/${template_id}`)
-    const data = {}
-    const DEFAULT_DAY = dayjs()
     const [open, setOpen] = useState(false)
     
     const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
@@ -112,42 +109,38 @@ const EditTemplate = ({refetch, template_id }) => {
         refetch()
     }
 
-    //if (isLoading) { return <>Loading...</> }
-    //if (error) {return <>Error...</>}
- 
-    return (
-        <>
-            <Button 
-                ghost 
-                type="primary" 
-                key="edit" 
-                icon={<EditOutlined />} 
-                onClick={() => setOpen(true)}
-            />
+    const EditForm = () => {
+        const { data, isLoading, error } = useFetch(`v1/shifts-templates/${template_id}`)
+        const DEFAULT_DAY = dayjs()
+
+        if (isLoading) { return <>Loading...</> }
+        if (error) {return <>Error...</>}
+
+        return (
             <Formik
                 initialValues={{
-                    title: data.title || '',
+                    title: data.title,
                     day: DEFAULT_DAY,
-                    start_time: data.start_time || '',
-                    end_time: data.end_time || '',
-                    capacity: data.capacity || 0,
-                    guarantee: data.capacity || 0,
-                    guarantee_specs: data.guarantee_spec || '',
+                    start_time: data.start_time,
+                    end_time: data.end_time,
+                    capacity: data.capacity ,
+                    guarantee: data.guarantee,
+                    guarantee_specs: data.guarantee_specs || '',
                     hasGuarantee: Boolean(data.guarantee),
                     is_recurring: data.is_recurring,
-                    days_of_week: [DEFAULT_DAY.day()],
-                    template: Boolean(data.recurrence?.max_occurrences) || Boolean(data.recurrence?.end_date) ? 'custom' : 'weekly',
-                    pattern: data.recurrence?.pattern || 'weekly',
-                    max_occurrences: data.recurrence?.max_occurrences || 0,
-                    ends: data.never_ends ? 'never' : data.recurrence?.end_date ? 'on' : 'after',
-                    end_date: data.recurrence?.end_date || DEFAULT_DAY,
+                    days_of_week: data.days_of_week,
+                    template: Boolean(data.max_occurrences) || Boolean(data.end_date) ? 'custom' : 'weekly',
+                    pattern: data.pattern,
+                    max_occurrences: data.max_occurrences,
+                    ends: data.never_ends ? 'never' : data.end_date ? 'on' : 'after',
+                    end_date: data.end_date || DEFAULT_DAY,
                 }}
                 validationSchema={templateSchema}
                 onSubmit={ async (values, { setSubmitting, resetForm }) => {
                     const payload = {
                         'title': values.title,
-                        'start_time': values.start_time + ':00',
-                        'end_time': values.end_time + ':00',
+                        'start_time': values.start_time,
+                        'end_time': values.end_time,
                         'capacity': Number(values.capacity),
                         'is_recurring': values.is_recurring,
                         ...(values.hasGuarantee && {
@@ -169,14 +162,13 @@ const EditTemplate = ({refetch, template_id }) => {
                         }),
                     }
                     console.table(payload)
-                    handleModalOk()
-                   /*  await createShiftTemplate(payload)
+                    await updateShiftTemplate(payload, data.id)
                     .then(() => {
-                        message.success('Shift template created successfully!')
+                        message.success('Shift template updated successfully!')
                         setSubmitting(false)
                         resetForm()
                         handleModalCancel()
-                    }) */
+                    })
                 }}
             >
                 {props => (
@@ -218,6 +210,7 @@ const EditTemplate = ({refetch, template_id }) => {
                             <TimePicker.RangePicker 
                                 style={{ width: '100%' }} 
                                 format="HH:mm" 
+                                defaultValue={[dayjs(props.values.start_time, 'HH:mm'), dayjs(props.values.end_time, 'HH:mm')]} 
                                 allowClear={false}
                                 onChange={(time, timeString) => {
                                     props.setFieldValue('start_time', timeString[0])
@@ -253,6 +246,7 @@ const EditTemplate = ({refetch, template_id }) => {
                             />
                             <Divider>
                             <Checkbox
+                                checked={props.values.hasGuarantee}
                                 onChange={(e) => {
                                     props.setFieldValue('hasGuarantee', e.target.checked)
                                 }}
@@ -288,6 +282,7 @@ const EditTemplate = ({refetch, template_id }) => {
                                 )}
                             <Divider>
                             <Checkbox
+                                checked={props.values.is_recurring}
                                 onChange={(e) => {
                                     props.setFieldValue('is_recurring', e.target.checked)
                                 }}
@@ -377,7 +372,7 @@ const EditTemplate = ({refetch, template_id }) => {
                                                             style={{ width: 180, marginLeft: 8 }} 
                                                             addonAfter="occurrences" 
                                                             min={1} 
-                                                            value={props.values.ends === 'on' ? 0 : props.values.max_occurrences} 
+                                                            value={props.values.ends !== 'after' ? 0 : props.values.max_occurrences} 
                                                             onChange={(value) => props.setFieldValue('max_occurrences', Number(value))} 
                                                         />
                                                     </Radio>
@@ -393,6 +388,19 @@ const EditTemplate = ({refetch, template_id }) => {
                     </FormikForm>
                 )}
             </Formik>
+        )
+    }
+ 
+    return (
+        <>
+            <Button 
+                ghost 
+                type="primary" 
+                key="edit" 
+                icon={<EditOutlined />} 
+                onClick={() => setOpen(true)}
+            />
+            { open && ( <EditForm /> )}
         </>
     )
 }
@@ -615,7 +623,10 @@ const CreateTemplate = ({refetch}) => {
                                                 buttonStyle="solid" 
                                                 onChange={(e) => {
                                                     props.setFieldValue('pattern', e.target.value)
-                                                    e.target.value === 'once' && props.setFieldValue('max_occurrences', 1)
+                                                    if (e.target.value === 'once') {
+                                                        props.setFieldValue('ends', 'after')
+                                                        props.setFieldValue('max_occurrences', 1)
+                                                    }
                                                 }}
                                             >
                                                 <Radio.Button value="once">Once</Radio.Button>
@@ -666,7 +677,7 @@ const CreateTemplate = ({refetch}) => {
                                                             style={{ width: 180, marginLeft: 8 }} 
                                                             addonAfter="occurrences" 
                                                             min={1} 
-                                                            value={props.values.ends === 'on' ? 0 : props.values.max_occurrences} 
+                                                            value={props.values.ends !== 'after' ? 0 : props.values.max_occurrences} 
                                                             onChange={(value) => props.setFieldValue('max_occurrences', Number(value))} 
                                                         />
                                                     </Radio>
