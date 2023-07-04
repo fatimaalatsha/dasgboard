@@ -2,11 +2,11 @@ import { useState } from 'react'
 import { Button, Modal, Input, TimePicker, Checkbox, Space, DatePicker, Divider, Radio, InputNumber, message, Popconfirm } from "antd"
 import { UserOutlined, EditOutlined, SendOutlined } from '@ant-design/icons'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean, array } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
 
 import InputWrapper from '../../forms/InputWrapper'
 import SubmitWrapper from '../../forms/SubmitWrapper'
-import { createShiftTemplate, updateShiftTemplate } from '../../../utils/schedule-status'
+import { createWeekShift, createShiftTemplate, updateShiftTemplate } from '../../../utils/schedule-status'
 import { CitySelect } from '../../CitySelect'
 import DriverSelect from '../../DriverSelect'
 import useFetch from '../../../hooks/use-new-fetch'
@@ -94,7 +94,7 @@ const templateSchema = object().shape({
 const publishSchema = object().shape({
     city_id: number().required('Required'),
     day: string().required('Required'),
-    drivers: array().of(number().nullable()).notRequired(),
+    drivers: array().of(mixed().nullable()).notRequired(),
 })
 
 const EditTemplate = ({refetch, template_id }) => {
@@ -190,7 +190,7 @@ const EditTemplate = ({refetch, template_id }) => {
                                     Cancel
                                 </Button>,
                                 <SubmitWrapper key="submit" type="primary" htmlType="submit" loading={props.isSubmitting}>
-                                    Submit
+                                    Update
                                 </SubmitWrapper>,
                             ]}
                          >
@@ -694,7 +694,6 @@ const CreateTemplate = ({refetch}) => {
 }
 
 const PublishTemplate = ({refetch, template_id }) => {
-    const DEFAULT_DAY = dayjs()
     const [open, setOpen] = useState(false)
     
     const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
@@ -703,24 +702,21 @@ const PublishTemplate = ({refetch, template_id }) => {
 
     const handleModalCancel = () => {
         setOpen(false)
+        refetch()
     }
 
     const handleModalOpen = () => {
         setOpen(true)
     }
 
-    return (
-        <>
-            <Popconfirm
-            title="Publish template"
-            description="Are you sure to publish this template?"
-            onConfirm={handleModalOpen}
-            onCancel={() => refetch()}
-            okText="Yes, Publish it"
-            cancelText="Cancel"
-            >
-                <Button icon={<SendOutlined />} type="primary"> Publish </Button>
-            </Popconfirm>
+    const PublishForm = () => {
+        const { data, isLoading, error } = useFetch(`v1/shifts-templates/${template_id}`)
+        const DEFAULT_DAY = dayjs()
+
+        if (isLoading) { return <>Loading...</> }
+        if (error) {return <>Error...</>}
+
+        return (
             <Formik
                 initialValues={{
                     day: DEFAULT_DAY,
@@ -728,8 +724,41 @@ const PublishTemplate = ({refetch, template_id }) => {
                     drivers: [],
                 }}
                 validationSchema={publishSchema}
-                onSubmit={ async (values, { setSubmitting }) => {
-                    console.table(values)
+                onSubmit={ async (values, { setSubmitting, resetForm }) => {
+                    const payload = {
+                        'start_time':  values.day.utc().format('YYYY-MM-DD') + 'T' + data.start_time + '.00Z',
+                        'end_time': values.day.utc().format('YYYY-MM-DD') + 'T' + data.end_time + '.00Z',
+                        'capacity': data.capacity,
+                        'city_id': [Number(values.city_id)],
+                        'is_recurring': data.is_recurring,
+                        'status': data.status,
+                        ...(values.drivers.length > 0 && {
+                            'drivers': values.drivers,
+                            }),
+                        ...(Boolean(data.guarantee) && {
+                            'guarantee': Number(values.guarantee),
+                            'guarantee_specs': values.guarantee_specs,
+                        }),
+                        ...(data.is_recurring && {
+                            'pattern': data.pattern,
+                            'days_of_week': data.days_of_week,
+                            'never_ends': data.never_ends,
+                            ...(Boolean(data.max_occurrences) && {
+                                'max_occurrences': data.max_occurrences,
+                            }),
+                            ...(Boolean(data.end_date) && {
+                                'end_date': data.end_date,
+                            }),
+                        }),
+                    }
+                    await createWeekShift(payload)
+                    .then(() => {
+                        message.success('Shift created successfully')
+                        setSubmitting(false)
+                        resetForm()
+                        setOpen(false)
+                        refetch()
+                    })
                 }}
             >
                 {props => (
@@ -737,7 +766,6 @@ const PublishTemplate = ({refetch, template_id }) => {
                         <Modal 
                             title="Publish Template"
                             open={open} 
-                            onOk={handleModalOk} 
                             onCancel={ () => {
                                 handleModalCancel()
                                 props.resetForm()
@@ -762,7 +790,7 @@ const PublishTemplate = ({refetch, template_id }) => {
                             
                             <CitySelect
                                 onChange={(value) => {
-                                    props.setFieldValue('city', Number(value))
+                                    props.setFieldValue('city_id', Number(value))
                                 }}   
                                 style={{ width: '100%' }}
                             />
@@ -773,8 +801,13 @@ const PublishTemplate = ({refetch, template_id }) => {
                                 onChange={(date) => props.setFieldValue('day', date ) } 
                             />
                             <DriverSelect 
-                                onChange={(value) => {
-                                    props.setFieldValue('drivers', value)
+                                onChange={(value, label) => {
+                                    const driverFormatted = label.map((item) => { // format driver object to match payload
+                                        const { label, value, ...rest } = item
+                                        return {...rest, driver_id: value}
+                                      
+                                    })
+                                    props.setFieldValue('drivers', driverFormatted)
                                 }}
                             />
                         </Space>
@@ -782,6 +815,22 @@ const PublishTemplate = ({refetch, template_id }) => {
                     </FormikForm>
                 )}
             </Formik>
+        )
+    }
+
+    return (
+        <>
+            <Popconfirm
+            title="Publish template"
+            description="Are you sure to publish this template?"
+            onConfirm={handleModalOpen}
+            onCancel={() => refetch()}
+            okText="Yes, Publish it"
+            cancelText="Cancel"
+            >
+                <Button icon={<SendOutlined />} type="primary"> Publish </Button>
+            </Popconfirm>
+            {open && <PublishForm />}
         </>
     )
 }
