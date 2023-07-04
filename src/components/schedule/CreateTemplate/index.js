@@ -150,9 +150,7 @@ const EditTemplate = ({refetch, template_id }) => {
                         ...(values.is_recurring && {
                             'pattern': values.pattern,
                             'days_of_week': values.days_of_week,
-                            ...(values.ends === 'never' && {
-                                'never_ends': true,
-                            }),
+                            'never_ends': Boolean(values.ends === 'never'),
                             ...((values.pattern === 'once' || values.ends === 'after') && {
                                 'max_occurrences': values.max_occurrences,
                             }),
@@ -454,9 +452,7 @@ const CreateTemplate = ({refetch}) => {
                         ...(values.is_recurring && {
                             'pattern': values.pattern,
                             'days_of_week': values.days_of_week,
-                            ...(values.ends === 'never' && {
-                                'never_ends': true,
-                            }),
+                            'never_ends': values.ends === 'never',
                             ...((values.pattern === 'once' || values.ends === 'after') && {
                                 'max_occurrences': values.max_occurrences,
                             }),
