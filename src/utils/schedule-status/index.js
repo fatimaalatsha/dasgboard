@@ -176,6 +176,27 @@ const deleteShiftTemplate = async (id) => {
     }
 }
 
+const updateShiftTemplate = async (payload, id) => {
+    try {
+        const auth = await Auth.currentSession()// Get current session
+        const token = auth.getAccessToken().getJwtToken()// Get token from session
+        const options = { // Set options for fetch
+            headers: {
+                'Authorization': token,
+                ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            }
+        }
+        const response = await API.put(`/v1/shifts-templates/${id}`, payload, options)
+        const data = await response.data
+        return data
+    } catch (error) {
+        throw new Error(error)
+    }
+}
+
 export { 
     createWeekShift, 
     updateWeekShift, 
@@ -186,5 +207,6 @@ export {
     unassignFromShift, 
     confirmApplication,
     createShiftTemplate,
-    deleteShiftTemplate
+    updateShiftTemplate,
+    deleteShiftTemplate,
 }
