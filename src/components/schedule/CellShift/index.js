@@ -130,9 +130,6 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
 
     const handleCancel = () => {
         setIsModalOpen(false)
-        /* if (!edit) {
-            setIsHovering(!isHovering)
-        } */
         refetch()
     }
 
