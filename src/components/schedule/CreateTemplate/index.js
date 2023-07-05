@@ -303,9 +303,9 @@ const EditTemplate = ({refetch, template_id }) => {
                                         value={props.values.template}
                                     >
                                         <Space direction="vertical" style={{ width: '100%' }}>
-                                            <Radio value={'daily'}>{`Daily (Mon to Sun)`}</Radio>
-                                            <Radio value={'weekly'}>{`Weekly on: ${dayjs().format('dddd')}`}</Radio>
-                                            <Radio value={'custom'}>Custom</Radio>
+                                            <Radio value="daily">{`Daily (Mon to Sun)`}</Radio>
+                                            <Radio value="weekly">{`Weekly on: ${dayjs().format('dddd')}`}</Radio>
+                                            <Radio value="custom">Custom</Radio>
                                         { props.values.template === 'custom' && (
                                             <>
                                             <Divider orientation="left" plain>Custom Recurrence</Divider>
