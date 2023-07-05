@@ -202,7 +202,7 @@ const ShiftTemplates = () => {
                                     </Descriptions.Item>
                                     {item.is_recurring && <Descriptions.Item label="Pattern" style={{ textTransform: 'capitalize' }}>{item.pattern}</Descriptions.Item>}
                                     {item.is_recurring && <Descriptions.Item label="Repeats on">
-                                        { item.days_of_week.map((day, idx) => (
+                                        { item.days_of_week?.map((day, idx) => (
                                             <Text strong key={idx} color="blue">
                                                 {dayjs().day(day).format( item.days_of_week.length === 1 ? 'dddd' : 'ddd') + (item.days_of_week.length - 1 === idx ? '' : `, `)}
                                             </Text>

@@ -99,10 +99,6 @@ const publishSchema = object().shape({
 
 const EditTemplate = ({refetch, template_id }) => {
     const [open, setOpen] = useState(false)
-    
-    const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
-        setOpen(false)
-    }
 
     const handleModalCancel = () => {
         setOpen(false)
@@ -159,7 +155,6 @@ const EditTemplate = ({refetch, template_id }) => {
                             }),
                         }),
                     }
-                    console.table(payload)
                     await updateShiftTemplate(payload, data.id)
                     .then(() => {
                         message.success('Shift template updated successfully!')
@@ -406,10 +401,6 @@ const EditTemplate = ({refetch, template_id }) => {
 const CreateTemplate = ({refetch}) => {
     const DEFAULT_DAY = dayjs()
     const [open, setOpen] = useState(false)
-    
-    const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
-        setOpen(false)
-    }
 
     const handleModalCancel = () => {
         setOpen(false)
@@ -461,7 +452,6 @@ const CreateTemplate = ({refetch}) => {
                             }),
                         }),
                     }
-                    //console.table(payload)
                     await createShiftTemplate(payload)
                     .then(() => {
                         message.success('Shift template created successfully!')
@@ -476,7 +466,6 @@ const CreateTemplate = ({refetch}) => {
                         <Modal 
                             title="New Template"
                             open={open} 
-                            onOk={handleModalOk} 
                             onCancel={ () => {
                                 handleModalCancel()
                                 props.resetForm()
@@ -493,7 +482,7 @@ const CreateTemplate = ({refetch}) => {
                                     Cancel
                                 </Button>,
                                 <SubmitWrapper key="submit" type="primary" htmlType="submit" loading={props.isSubmitting}>
-                                    Submit
+                                    Create
                                 </SubmitWrapper>,
                             ]}
                          >
@@ -695,10 +684,6 @@ const CreateTemplate = ({refetch}) => {
 
 const PublishTemplate = ({refetch, template_id }) => {
     const [open, setOpen] = useState(false)
-    
-    const handleModalOk = () => { // Asynchronous function to handle feeding DB with new shift data
-        setOpen(false)
-    }
 
     const handleModalCancel = () => {
         setOpen(false)
