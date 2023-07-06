@@ -89,7 +89,7 @@ const ShiftTemplates = () => {
             dataIndex: 'days_of_week',
             key: 'days_of_week',
             render: (text, record) => (
-                record.is_recurring && 
+                record.is_recurring && text && 
                 <>
                     {   text.map((day, idx) => 
                         <Text strong key={idx} color="blue">
@@ -201,8 +201,8 @@ const ShiftTemplates = () => {
                                         <Badge status={ item.is_recurring ? 'processing' : 'success'} text={ item.is_recurring ? 'Recurrent' : 'Single'} />
                                     </Descriptions.Item>
                                     {item.is_recurring && <Descriptions.Item label="Pattern" style={{ textTransform: 'capitalize' }}>{item.pattern}</Descriptions.Item>}
-                                    {item.is_recurring && <Descriptions.Item label="Repeats on">
-                                        { item.days_of_week?.map((day, idx) => (
+                                    {item.is_recurring && item.days_of_week && <Descriptions.Item label="Repeats on">
+                                        { item.days_of_week.map((day, idx) => (
                                             <Text strong key={idx} color="blue">
                                                 {dayjs().day(day).format( item.days_of_week.length === 1 ? 'dddd' : 'ddd') + (item.days_of_week.length - 1 === idx ? '' : `, `)}
                                             </Text>
