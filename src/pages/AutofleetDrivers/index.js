@@ -43,6 +43,7 @@ const getUserParams = (params) => ({
   limit: params.pagination?.pageSize,
   page: params.pagination?.current,
   ...params,
+  
 });
 
 const AutofleetDrivers = () => {
@@ -89,17 +90,8 @@ const AutofleetDrivers = () => {
         filter[key].splice(1, 1);
       }
     });
-    Object.keys(filter).forEach((key) => {
-      if (filter[key] && key === "city_id") {
-        filter[key] = filter[key].map((value) => `"${value}"`);
-        filter[key] = [`[${filter[key].join(",")}]`];
-      }
-    });
 
-
-    
-    console.log("filter", filter);
-
+    console.log("filter", filter.city_id);
     setAutofleetFilter({
       // Set filter to store
       pagination: {
@@ -117,7 +109,8 @@ const AutofleetDrivers = () => {
           }),
         city_id: null,
       },
-      city_id: filter.city_id ? filter.city_id : null,
+      city_id: filter.city_id ,
+      
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
           [`${sorter.columnKey === "city_id" ? "name" : sorter.columnKey}`]:
@@ -167,15 +160,16 @@ const AutofleetDrivers = () => {
     },
     {
       title: "City",
-      dataIndex: "city",
+      dataIndex: ["city"],
       key: "city_id",
       // sorter: true,
       align: "center",
       filters: cities,
       filterSearch: true,
-      filteredValue: null,
+      // filteredValue: null,
       // ...(autofleetFilter.order && { defaultSortOrder: autofleetFilter.order === 'asc' ? 'ASC' : 'DESC' }),
-      ...(autofleetFilter.city_id && { filteredValue: [autofleetFilter.city_id.toString()] }),
+     filteredValue: autofleetFilter.city_id ? [autofleetFilter.city_id.toString()] : null,
+      ...(autofleetFilter.city_id && {filteredValue: [autofleetFilter?.city_id.toString()],}),
     },
     {
       title: "Driver Licence",
@@ -199,7 +193,7 @@ const AutofleetDrivers = () => {
         { text: "Offline", value: "offline" },
         { text: "Active", value: "active" },
       ],
-      defaultFilteredValue: autofleetFilter.filter?.status || null,
+      defaultFilteredValue: autofleetFilter.filter?.status ,
       ...(autofleetFilter.filter?.status && {
         filteredValue: autofleetFilter.filter?.status.map((status) =>
           status.replace("in|", "")
@@ -211,14 +205,14 @@ const AutofleetDrivers = () => {
             status === "online"
               ? "green"
               : status === "stand-by"
-                ? "gold"
-                : status === "activating"
-                  ? "blue"
-                  : status === "offline"
-                    ? "volcano"
-                    : status === "active"
-                      ? "green"
-                      : "default"  
+              ? "gold"
+              : status === "activating"
+              ? "blue"
+              : status === "offline"
+              ? "volcano"
+              : status === "active"
+              ? "green"
+              : "default"
           }
         >
           {status}
