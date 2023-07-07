@@ -124,11 +124,11 @@ const EditTemplate = ({refetch, template_id }) => {
                     guarantee_specs: data.guarantee_specs || '',
                     hasGuarantee: Boolean(data.guarantee),
                     is_recurring: data.is_recurring,
-                    days_of_week: data.days_of_week,
-                    template: Boolean(data.max_occurrences) || Boolean(data.end_date) ? 'custom' : 'weekly',
+                    days_of_week: data.days_of_week || [],
+                    template: Boolean(data.max_occurrences) || Boolean(data.end_date) ? 'custom' : data.pattern,
                     pattern: data.pattern,
-                    max_occurrences: data.max_occurrences,
-                    ends: data.never_ends ? 'never' : data.end_date ? 'on' : 'after',
+                    max_occurrences: data.max_occurrences || 0,
+                    ends: data.never_ends ? 'never' : data.end_date ? 'on' : data.max_occurrences ? 'after' : 'never',
                     end_date: data.end_date || DEFAULT_DAY,
                 }}
                 validationSchema={templateSchema}
@@ -275,6 +275,7 @@ const EditTemplate = ({refetch, template_id }) => {
                                 )}
                             <Divider>
                             <Checkbox
+                                disabled={props.values.is_recurring}
                                 checked={props.values.is_recurring}
                                 onChange={(e) => {
                                     props.setFieldValue('is_recurring', e.target.checked)
