@@ -43,6 +43,7 @@ const getUserParams = (params) => ({
   limit: params.pagination?.pageSize,
   page: params.pagination?.current,
   ...params,
+  
 });
 
 const AutofleetDrivers = () => {
@@ -89,6 +90,7 @@ const AutofleetDrivers = () => {
         filter[key].splice(1, 1);
       }
     });
+  
     setAutofleetFilter({
       // Set filter to store
       pagination: {
@@ -97,15 +99,22 @@ const AutofleetDrivers = () => {
       },
       filter: {
         ...filter,
-        ...(filter.status === null && { status: ["in|online", "stand-by", "activating", "offline", "active"] }),
+        ...(filter.status === null && {
+          status: ["in|online", "stand-by", "activating", "offline", "active"],
+        }),
         ...(filter.application_status &&
           filter.application_status[0] === "in|null" && {
             application_status: ["is|null"],
           }),
         city_id: null,
       },
-      city_id: filter.city_id ? [filter.city_id.toString()] : null,
-      order: sorter.order === "ascend" ? "ASC" : "DESC",
+      city_id: filter.city_id,
+      ...(Object.keys(sorter).length !== 0 && {
+        sort: {
+          [`${sorter.columnKey === "city_id" ? "city.name" : sorter.columnKey}`]:
+            sorter.order === "ascend" ? "asc" : "desc",
+        },
+      }),
     });
   };
   const handleSearch = (selectedKeys) => {
@@ -149,15 +158,16 @@ const AutofleetDrivers = () => {
     },
     {
       title: "City",
-      dataIndex: "city",
+      dataIndex: ["city"],
       key: "city_id",
-      // sorter: true,
+      sorter: true,
       align: "center",
       filters: cities,
       filterSearch: true,
-      filteredValue: null,
-      // ...(autofleetFilter.order && { defaultSortOrder: autofleetFilter.order === 'asc' ? 'ASC' : 'DESC' }),
-      ...(autofleetFilter.city_id && { filteredValue: [autofleetFilter.city_id.toString()] }),
+      // filteredValue: null,
+      ...(autofleetFilter.order && { defaultSortOrder: autofleetFilter.order === 'asc' ? 'ASC' : 'DESC' }),
+      filteredValue: autofleetFilter.city_id ? [autofleetFilter.city_id.toString()] : null,
+      ...(autofleetFilter.city_id && {filteredValue: [autofleetFilter?.city_id.toString()],}),
     },
     {
       title: "Driver Licence",
@@ -181,7 +191,7 @@ const AutofleetDrivers = () => {
         { text: "Offline", value: "offline" },
         { text: "Active", value: "active" },
       ],
-      defaultFilteredValue: autofleetFilter.filter?.status || null,
+      defaultFilteredValue: autofleetFilter.filter?.status ,
       ...(autofleetFilter.filter?.status && {
         filteredValue: autofleetFilter.filter?.status.map((status) =>
           status.replace("in|", "")
@@ -193,14 +203,14 @@ const AutofleetDrivers = () => {
             status === "online"
               ? "green"
               : status === "stand-by"
-                ? "gold"
-                : status === "activating"
-                  ? "blue"
-                  : status === "offline"
-                    ? "volcano"
-                    : status === "active"
-                      ? "green"
-                      : "default"  
+              ? "gold"
+              : status === "activating"
+              ? "blue"
+              : status === "offline"
+              ? "volcano"
+              : status === "active"
+              ? "green"
+              : "default"
           }
         >
           {status}
