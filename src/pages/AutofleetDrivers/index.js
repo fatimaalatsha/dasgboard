@@ -90,8 +90,7 @@ const AutofleetDrivers = () => {
         filter[key].splice(1, 1);
       }
     });
-
-    console.log("filter", filter.city_id);
+  
     setAutofleetFilter({
       // Set filter to store
       pagination: {
@@ -109,11 +108,10 @@ const AutofleetDrivers = () => {
           }),
         city_id: null,
       },
-      city_id: filter.city_id ,
-      
+      city_id: filter.city_id,
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
-          [`${sorter.columnKey === "city_id" ? "name" : sorter.columnKey}`]:
+          [`${sorter.columnKey === "city_id" ? "city.name" : sorter.columnKey}`]:
             sorter.order === "ascend" ? "asc" : "desc",
         },
       }),
@@ -162,13 +160,13 @@ const AutofleetDrivers = () => {
       title: "City",
       dataIndex: ["city"],
       key: "city_id",
-      // sorter: true,
+      sorter: true,
       align: "center",
       filters: cities,
       filterSearch: true,
       // filteredValue: null,
-      // ...(autofleetFilter.order && { defaultSortOrder: autofleetFilter.order === 'asc' ? 'ASC' : 'DESC' }),
-     filteredValue: autofleetFilter.city_id ? [autofleetFilter.city_id.toString()] : null,
+      ...(autofleetFilter.order && { defaultSortOrder: autofleetFilter.order === 'asc' ? 'ASC' : 'DESC' }),
+      filteredValue: autofleetFilter.city_id ? [autofleetFilter.city_id.toString()] : null,
       ...(autofleetFilter.city_id && {filteredValue: [autofleetFilter?.city_id.toString()],}),
     },
     {
