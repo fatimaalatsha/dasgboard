@@ -97,12 +97,33 @@ const publishSchema = object().shape({
     drivers: array().of(mixed().nullable()).notRequired(),
 })
 
+const WEEK_PATTERNS = {
+    work_week: [1, 2, 3, 4, 5],
+    weekend: [6, 0],
+    full_week: [...Array(7)].map((_,idx) => idx),
+}
+
 const EditTemplate = ({refetch, template_id }) => {
     const [open, setOpen] = useState(false)
 
     const handleModalCancel = () => {
         setOpen(false)
         refetch()
+    }
+
+    const selectedTemplate = (days_arr) => {
+        switch(true) {
+            case days_arr.length === 1:
+                return 'weekly'
+            case days_arr.every(day => WEEK_PATTERNS.weekend.includes(day)):
+                return '3'
+            case days_arr.every(day => WEEK_PATTERNS.work_week.includes(day)):
+                return '2'
+            case days_arr.every(day => WEEK_PATTERNS.full_week.includes(day)):
+                return '1'
+            default:
+                return 'custom'
+        }
     }
 
     const EditForm = () => {
@@ -125,7 +146,7 @@ const EditTemplate = ({refetch, template_id }) => {
                     hasGuarantee: Boolean(data.guarantee),
                     is_recurring: data.is_recurring,
                     days_of_week: data.days_of_week || [],
-                    template: Boolean(data.max_occurrences) || Boolean(data.end_date) ? 'custom' : data.pattern,
+                    template: Boolean(data.max_occurrences) || Boolean(data.end_date) || (data.days_of_week.length === 1 && dayjs().day(data.days_of_week.length) !== DEFAULT_DAY.day())  ? 'custom' : selectedTemplate(data.days_of_week),
                     pattern: data.pattern,
                     max_occurrences: data.max_occurrences || 0,
                     ends: data.never_ends ? 'never' : data.end_date ? 'on' : data.max_occurrences ? 'after' : 'never',
@@ -145,7 +166,7 @@ const EditTemplate = ({refetch, template_id }) => {
                         }),
                         ...(values.is_recurring && {
                             'pattern': values.pattern,
-                            'days_of_week': values.days_of_week,
+                            ...(values.pattern !== 'once' && {'days_of_week': values.days_of_week}),
                             'never_ends': Boolean(values.ends === 'never'),
                             ...((values.pattern === 'once' || values.ends === 'after') && {
                                 'max_occurrences': values.max_occurrences,
@@ -289,22 +310,36 @@ const EditTemplate = ({refetch, template_id }) => {
                                         style={{ width: '100%' }} 
                                         onChange={ (e) => {
                                             props.setFieldValue('template', e.target.value)
-                                            props.setFieldValue('pattern', e.target.value)
-                                            e.target.value === 'daily' ? 
-                                                props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
-                                            : e.target.value === 'weekly' ?
-                                                props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
-                                            : props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
-                                            
-                                            if (e.target.value === 'custom') {
-                                                props.setFieldValue('pattern', 'weekly')
+                                            props.setFieldValue('pattern', 'weekly')
+
+                                            switch (e.target.value) {
+                                                case '1':
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.full_week)
+                                                    break
+                                                case '2':
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.work_week)
+                                                    break
+                                                case '3':
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
+                                                    break
+                                                case 'weekly':
+                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                    break
+                                                case 'custom':
+                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                    break
+                                                default:
+                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                    break
                                             }
                                             } 
                                         } 
                                         value={props.values.template}
                                     >
                                         <Space direction="vertical" style={{ width: '100%' }}>
-                                            <Radio value="daily">{`Daily (Mon to Sun)`}</Radio>
+                                            <Radio value="1">{`Monday to Sunday`}</Radio>
+                                            <Radio value="2">{`Monday to Friday`}</Radio>
+                                            <Radio value="3">{`Saturday and Sunday`}</Radio>
                                             <Radio value="weekly">{`Weekly on: ${dayjs().format('dddd')}`}</Radio>
                                             <Radio value="custom">Custom</Radio>
                                         { props.values.template === 'custom' && (
@@ -315,27 +350,19 @@ const EditTemplate = ({refetch, template_id }) => {
                                                 buttonStyle="solid" 
                                                 onChange={(e) => {
                                                     props.setFieldValue('pattern', e.target.value)
-                                                    e.target.value === 'once' && props.setFieldValue('max_occurrences', 1)
+                                                    if (e.target.value === 'once') { 
+                                                        props.setFieldValue('ends', 'after')
+                                                        props.setFieldValue('max_occurrences', 1)
+                                                    }
                                                 }}
                                             >
                                                 <Radio.Button value="once">Once</Radio.Button>
-                                                <Radio.Button value="daily">Daily</Radio.Button>
                                                 <Radio.Button value="weekly">Weekly</Radio.Button>
                                             </Radio.Group>
                                             { props.values.pattern === 'weekly' && (
                                                 <>
                                                 <Divider orientation="left" plain>Repeat On</Divider>
-                                                <Radio.Group name='days_of_week' value={props.values.days_of_week[0]} defaultValue={props.values.days_of_week[0]} onChange={e => props.setFieldValue('days_of_week', [Number(e.target.value)])}>
-                                                    { weeklyDaysReccurence.map((day, index) => (
-                                                        <Radio key={index} value={index}>{day.label}</Radio>
-                                                    ))}
-                                                </Radio.Group>
-                                                </>
-                                            )}
-                                            { props.values.pattern === 'daily'  && (
-                                                <>
-                                                <Divider orientation="left" plain>Repeat On</Divider>
-                                                <Checkbox.Group options={weeklyDaysReccurence} defaultValue={dayjs().format('d')} onChange={(value) => props.setFieldValue('days_of_week', value)} />
+                                                <Checkbox.Group options={weeklyDaysReccurence} defaultValue={props.values.days_of_week} onChange={(value) => props.setFieldValue('days_of_week', value)} />
                                                 </>
                                             )}
                                             <Divider orientation="left" plain>Ends</Divider>
@@ -443,8 +470,8 @@ const CreateTemplate = ({refetch}) => {
                         }),
                         ...(values.is_recurring && {
                             'pattern': values.pattern,
-                            'days_of_week': values.days_of_week,
-                            'never_ends': values.ends === 'never',
+                            ...(values.pattern !== 'once' && {'days_of_week': values.days_of_week}),
+                            'never_ends': Boolean(values.ends === 'never'),
                             ...((values.pattern === 'once' || values.ends === 'after') && {
                                 'max_occurrences': values.max_occurrences,
                             }),
@@ -583,22 +610,36 @@ const CreateTemplate = ({refetch}) => {
                                         style={{ width: '100%' }} 
                                         onChange={ (e) => {
                                             props.setFieldValue('template', e.target.value)
-                                            props.setFieldValue('pattern', e.target.value)
-                                            e.target.value === 'daily' ? 
-                                                props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
-                                            : e.target.value === 'weekly' ?
-                                                props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
-                                            : props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
-                                            
-                                            if (e.target.value === 'custom') {
-                                                props.setFieldValue('pattern', 'weekly')
+                                            props.setFieldValue('pattern', 'weekly')
+
+                                            switch (e.target.value) {
+                                                case '1':
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.full_week)
+                                                    break
+                                                case '2':
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.work_week)
+                                                    break
+                                                case '3':
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
+                                                    break
+                                                case 'weekly':
+                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                    break
+                                                case 'custom':
+                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                    break
+                                                default:
+                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                    break
                                             }
                                             } 
                                         } 
                                         value={props.values.template}
                                     >
                                         <Space direction="vertical" style={{ width: '100%' }}>
-                                            <Radio value={'daily'}>{`Daily (Mon to Sun)`}</Radio>
+                                            <Radio value="1">{`Monday to Sunday`}</Radio>
+                                            <Radio value="2">{`Monday to Friday`}</Radio>
+                                            <Radio value="3">{`Saturday and Sunday`}</Radio>
                                             <Radio value={'weekly'}>{`Weekly on: ${dayjs().format('dddd')}`}</Radio>
                                             <Radio value={'custom'}>Custom</Radio>
                                         { props.values.template === 'custom' && (
@@ -616,20 +657,9 @@ const CreateTemplate = ({refetch}) => {
                                                 }}
                                             >
                                                 <Radio.Button value="once">Once</Radio.Button>
-                                                <Radio.Button value="daily">Daily</Radio.Button>
                                                 <Radio.Button value="weekly">Weekly</Radio.Button>
                                             </Radio.Group>
                                             { props.values.pattern === 'weekly' && (
-                                                <>
-                                                <Divider orientation="left" plain>Repeat On</Divider>
-                                                <Radio.Group name='days_of_week' value={props.values.days_of_week[0]} defaultValue={props.values.days_of_week[0]} onChange={e => props.setFieldValue('days_of_week', [Number(e.target.value)])}>
-                                                    { weeklyDaysReccurence.map((day, index) => (
-                                                        <Radio key={index} value={index}>{day.label}</Radio>
-                                                    ))}
-                                                </Radio.Group>
-                                                </>
-                                            )}
-                                            { props.values.pattern === 'daily'  && (
                                                 <>
                                                 <Divider orientation="left" plain>Repeat On</Divider>
                                                 <Checkbox.Group options={weeklyDaysReccurence} defaultValue={dayjs().format('d')} onChange={(value) => props.setFieldValue('days_of_week', value)} />
