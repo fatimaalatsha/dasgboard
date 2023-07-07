@@ -97,12 +97,33 @@ const publishSchema = object().shape({
     drivers: array().of(mixed().nullable()).notRequired(),
 })
 
+const WEEK_PATTERNS = {
+    work_week: [1, 2, 3, 4, 5],
+    weekend: [6, 0],
+    full_week: [...Array(7)].map((_,idx) => idx),
+}
+
 const EditTemplate = ({refetch, template_id }) => {
     const [open, setOpen] = useState(false)
 
     const handleModalCancel = () => {
         setOpen(false)
         refetch()
+    }
+
+    const selectedTemplate = (days_arr) => {
+        switch(true) {
+            case days_arr.length === 1:
+                return 'weekly'
+            case days_arr.every(day => WEEK_PATTERNS.weekend.includes(day)):
+                return '3'
+            case days_arr.every(day => WEEK_PATTERNS.work_week.includes(day)):
+                return '2'
+            case days_arr.every(day => WEEK_PATTERNS.full_week.includes(day)):
+                return '1'
+            default:
+                return 'custom'
+        }
     }
 
     const EditForm = () => {
@@ -125,7 +146,7 @@ const EditTemplate = ({refetch, template_id }) => {
                     hasGuarantee: Boolean(data.guarantee),
                     is_recurring: data.is_recurring,
                     days_of_week: data.days_of_week || [],
-                    template: Boolean(data.max_occurrences) || Boolean(data.end_date) ? 'custom' : data.pattern,
+                    template: Boolean(data.max_occurrences) || Boolean(data.end_date) || (data.days_of_week.length === 1 && dayjs().day(data.days_of_week.length) !== DEFAULT_DAY.day())  ? 'custom' : selectedTemplate(data.days_of_week),
                     pattern: data.pattern,
                     max_occurrences: data.max_occurrences || 0,
                     ends: data.never_ends ? 'never' : data.end_date ? 'on' : data.max_occurrences ? 'after' : 'never',
@@ -293,13 +314,13 @@ const EditTemplate = ({refetch, template_id }) => {
 
                                             switch (e.target.value) {
                                                 case '1':
-                                                    props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.full_week)
                                                     break
                                                 case '2':
-                                                    props.setFieldValue('days_of_week', [1, 2, 3, 4, 5])
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.work_week)
                                                     break
                                                 case '3':
-                                                    props.setFieldValue('days_of_week', [6, 0])
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
                                                     break
                                                 case 'weekly':
                                                     props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
@@ -341,7 +362,7 @@ const EditTemplate = ({refetch, template_id }) => {
                                             { props.values.pattern === 'weekly' && (
                                                 <>
                                                 <Divider orientation="left" plain>Repeat On</Divider>
-                                                <Checkbox.Group options={weeklyDaysReccurence} defaultValue={dayjs().format('d')} onChange={(value) => props.setFieldValue('days_of_week', value)} />
+                                                <Checkbox.Group options={weeklyDaysReccurence} defaultValue={props.values.days_of_week} onChange={(value) => props.setFieldValue('days_of_week', value)} />
                                                 </>
                                             )}
                                             <Divider orientation="left" plain>Ends</Divider>
@@ -593,13 +614,13 @@ const CreateTemplate = ({refetch}) => {
 
                                             switch (e.target.value) {
                                                 case '1':
-                                                    props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.full_week)
                                                     break
                                                 case '2':
-                                                    props.setFieldValue('days_of_week', [1, 2, 3, 4, 5])
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.work_week)
                                                     break
                                                 case '3':
-                                                    props.setFieldValue('days_of_week', [6, 0])
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
                                                     break
                                                 case 'weekly':
                                                     props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
