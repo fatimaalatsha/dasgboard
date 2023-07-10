@@ -85,9 +85,10 @@ let filterStore = (set) => ({
       position: ["bottomRight", "topRight"],
     },
     filter: {
-      status: ["in|online", "stand-by", "activating", "offline", "active"],
+      status: null,
+      //["in|online", "stand-by", "activating", "offline", "active"]
     },
-    city_id: null, 
+    city_id: null,
     // sort: "ASC",
   },
   setAutofleetFilter: (filter) =>

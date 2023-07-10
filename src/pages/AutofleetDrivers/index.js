@@ -99,13 +99,9 @@ const AutofleetDrivers = () => {
       },
       filter: {
         ...filter,
-        ...(filter.status === null && {
-          status: ["in|online", "stand-by", "activating", "offline", "active"],
-        }),
-        ...(filter.application_status &&
-          filter.application_status[0] === "in|null" && {
-            application_status: ["is|null"],
-          }),
+        // ...(filter.status === null && {
+        //   status: null,
+        // }),
         city_id: null,
       },
       city_id: filter.city_id,
@@ -164,10 +160,14 @@ const AutofleetDrivers = () => {
       align: "center",
       filters: cities,
       filterSearch: true,
-      // filteredValue: null,
-      ...(autofleetFilter.order && { defaultSortOrder: autofleetFilter.order === 'asc' ? 'ASC' : 'DESC' }),
-      filteredValue: autofleetFilter.city_id ? [autofleetFilter.city_id.toString()] : null,
-      ...(autofleetFilter.city_id && {filteredValue: [autofleetFilter?.city_id.toString()],}),
+      // filteredValue: autofleetFilter.city_id ? autofleetFilter.city_id.toString() : null,
+      ...(autofleetFilter.order && {
+        defaultSortOrder: autofleetFilter.order === "asc" ? "ASC" : "DESC",
+      }),
+      filteredValue: autofleetFilter.city_id ? autofleetFilter.city_id : null,
+      ...(autofleetFilter.city_id && {
+        filteredValue: autofleetFilter?.city_id,
+      }),
     },
     {
       title: "Driver Licence",
@@ -191,7 +191,7 @@ const AutofleetDrivers = () => {
         { text: "Offline", value: "offline" },
         { text: "Active", value: "active" },
       ],
-      defaultFilteredValue: autofleetFilter.filter?.status ,
+      defaultFilteredValue: autofleetFilter.filter?.status,
       ...(autofleetFilter.filter?.status && {
         filteredValue: autofleetFilter.filter?.status.map((status) =>
           status.replace("in|", "")
