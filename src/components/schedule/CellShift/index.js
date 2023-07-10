@@ -92,6 +92,10 @@ const shiftSchema = object().shape({
     }),
 })
 
+const editRecurringSchema = object().shape({
+    affects_to: string().required('Required'),
+})
+
 const weeklyDaysReccurence = [
     {
         label: 'Sun',
@@ -133,6 +137,8 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
     const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}`)
     const DEFAULT_DAY = dayjs().tz(tz).utc().day()
     const [isModalOpen, setIsModalOpen] = useState(open)
+    const [isAffected, setIsAffected] = useState(false)
+    const [editPayload, setEditPayload] = useState({})
 
     const handleCancel = () => {
         setIsModalOpen(false)
@@ -180,7 +186,6 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
             }}
             validationSchema={shiftSchema}
             onSubmit={async (values, { setSubmitting, resetForm }) => {
-                
                 const payload = {
                     'start_time': converToUTC( dayjs(data.start_time).tz(tz).utc().format('YYYY-MM-DD'), values.start_time, tz),
                     'end_time': converToUTC( dayjs(data.start_time).tz(tz).utc().format('YYYY-MM-DD'), values.end_time, tz),
@@ -206,16 +211,24 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                         ...(values.ends === 'on' && {
                             'end_date': values.end_date,
                         }),
+                        affects_to: values.affects_to,
                     }),
                 }
-                await updateWeekShift(payload, shift_id)
-                .then(() => {
-                    message.success('Shift updated successfully')
+                if (data.is_recurring) {
                     setSubmitting(false)
                     resetForm()
-                    //setIsModalOpen(false)
-                    refetch()
-                })
+                    setIsModalOpen(false)
+                    setEditPayload(payload)
+                    setIsAffected(true)
+                } else {
+                    await updateWeekShift(payload, shift_id)
+                    .then(() => {
+                        message.success('Shift updated successfully')
+                        setSubmitting(false)
+                        resetForm()
+                        handleCancel()
+                    })
+                }
             }}
         >
             {props => (
@@ -454,6 +467,58 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                                     </Space>
                                 </Radio.Group>
                             )}
+                        </Space>
+                    </Modal>
+                </FormikForm>
+            )}
+        </Formik>
+        <Formik
+            initialValues={{
+                affects_to: 'current',
+            }}
+            validationSchema={editRecurringSchema}
+            onSubmit={async (values, { setSubmitting, resetForm }) => {
+                await updateWeekShift({...editPayload, affects_to: values.affects_to}, shift_id)
+                .then(() => {
+                    message.success('Shift updated successfully')
+                    setSubmitting(false)
+                    resetForm()
+                    handleCancel()
+                })
+            }}
+        >
+            {props => (
+                <FormikForm>
+                    <Modal
+                        title="Edit recurring shift"
+                        open={isAffected}
+                        destroyOnClose
+                        onCancel={() => {
+                            setIsAffected(false)
+                            props.resetForm()
+                            refetch()
+                        }}
+                        footer={[
+                            <Button key="back" onClick={handleCancel}>
+                                Cancel
+                            </Button>,
+                            <Submit key="submit" type="primary">
+                                OK
+                            </Submit>,
+                        ]}
+                    >
+                        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                            <Radio.Group
+                                style={{ width: '100%' }} 
+                                value={props.values.affects_to}
+                                onChange={(e) => props.setFieldValue('affects_to', e.target.value)}
+                            >
+                            <Space direction="vertical" style={{ width: '100%' }}>
+                                <Radio value="current">{`This shift`}</Radio>
+                                <Radio value="future">{`This and following shifts`}</Radio>
+                                <Radio value="all">{`All Shifts`}</Radio>
+                            </Space>
+                        </Radio.Group>
                         </Space>
                     </Modal>
                 </FormikForm>
