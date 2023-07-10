@@ -160,7 +160,6 @@ const AutofleetDrivers = () => {
       align: "center",
       filters: cities,
       filterSearch: true,
-      // filteredValue: autofleetFilter.city_id ? autofleetFilter.city_id.toString() : null,
       ...(autofleetFilter.order && {
         defaultSortOrder: autofleetFilter.order === "asc" ? "ASC" : "DESC",
       }),
