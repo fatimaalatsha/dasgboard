@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { useNavigate } from "react-router-dom";
 
 import {
   Input,
@@ -57,6 +58,7 @@ const AutofleetDrivers = () => {
   const [searchText, setSearchText] = useState(autofleetFilter.full_name || "");
   const [cities, setCities] = useState([]);
 
+  const navigate = useNavigate();
   // fetch vendor id list from API
   const getVendorIdList = async () => {
     const vendorIdList = await getVendorId();
@@ -208,6 +210,23 @@ const AutofleetDrivers = () => {
         </Tag>
       ),
     },
+    {
+      title: "View Details",
+      dataIndex: "view",
+      key: "view",
+      render: (text, record) => (
+        // <Link to={`/autofleet/driver/${record.id}`}>
+        <Button type="primary" ghost
+          onClick={() => {
+           navigate(`/autofleet_drivers/${record.id}`);
+          }}
+      >
+            View
+          </Button>
+        // </Link>
+      ),
+
+    }
   ];
   //get vendor id list from api
   useEffect(() => {
