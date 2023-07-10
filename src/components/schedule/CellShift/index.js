@@ -131,12 +131,27 @@ const WEEK_PATTERNS = {
 
 const EditShiftModal = ({shift_id, open, tz, refetch}) => {
     const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}`)
-    const DEFAULT_DAY = dayjs(data.start_time).tz(tz).utc().day()
+    const DEFAULT_DAY = dayjs().tz(tz).utc().day()
     const [isModalOpen, setIsModalOpen] = useState(open)
 
     const handleCancel = () => {
         setIsModalOpen(false)
         refetch()
+    }
+
+    const selectedTemplate = (days_arr) => {
+        switch(true) {
+            case days_arr.length === 1:
+                return 'weekly'
+            case days_arr.every(day => WEEK_PATTERNS.weekend.includes(day)):
+                return '3'
+            case days_arr.every(day => WEEK_PATTERNS.work_week.includes(day)):
+                return '2'
+            case days_arr.every(day => WEEK_PATTERNS.full_week.includes(day)):
+                return '1'
+            default:
+                return 'custom'
+        }
     }
 
     if (isLoading) { return <>Loading...</> }
@@ -153,14 +168,14 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                 guarantee: data.guarantee || 0,
                 guarantee_specs: data.guarantee_specs || '',
                 hasGuarantee: Boolean(data.guarantee),
-                'drivers': data.drivers,
+                'drivers': data.drivers || [],
                 is_recurring: data.is_recurring,
-                template: Boolean(data.recurrence?.max_occurrences) || Boolean(data.recurrence?.end_date) ? 'custom' : 'weekly',
+                template: data.is_recurring ? Boolean(data.recurrence?.max_occurrences) || Boolean(data.recurrence?.end_date) || (data.recurrence?.days_of_week?.length === 1 && dayjs().day(data.recurrence?.days_of_week?.length) !== DEFAULT_DAY) ? 'custom' : selectedTemplate(data.recurrence?.days_of_week) : 'weekly',
                 pattern: data.recurrence?.pattern,
                 ends: data.never_ends ? 'never' : data.recurrence?.end_date ? 'on' : 'after',
                 end_date: data.recurrence?.end_date || dayjs(data.start_time).tz(tz).utc().format('YYYY-MM-DD'),
                 max_occurrences: data.recurrence?.max_occurrences || 0,
-                'days_of_week': data.recurrence?.days_of_week,
+                'days_of_week': data.recurrence?.days_of_week || [],
                 status: false,
             }}
             validationSchema={shiftSchema}
@@ -193,14 +208,15 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                         }),
                     }),
                 }
-                await updateWeekShift(payload, shift_id)
+                console.log(payload)
+                /* await updateWeekShift(payload, shift_id)
                 .then(() => {
                     message.success('Shift updated successfully')
                     setSubmitting(false)
                     resetForm()
                     //setIsModalOpen(false)
                     refetch()
-                })
+                }) */
             }}
         >
             {props => (
@@ -242,7 +258,7 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                                         disabledHours: () => {
                                             const hours = []
                                             for (let i = 0; i < 24; i++) {
-                                                if (i < (dayjs(data.start_time, 'HH:mm').hour()) + 1) {
+                                                if (i < (dayjs(data.start_time).tz(tz).utc().hour()) + 1) {
                                                     hours.push(i)
                                                 }
                                             }
@@ -327,6 +343,7 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                             <Divider>
                             <Checkbox
                                 name="is_recurring"
+                                disabled={props.values.is_recurring}
                                 checked={props.values.is_recurring}
                                 onChange={(e) => {
                                     props.setFieldValue('is_recurring', e.target.checked)
@@ -340,23 +357,38 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                                     style={{ width: '100%' }} 
                                     onChange={ (e) => {
                                             props.setFieldValue('template', e.target.value)
-                                            props.setFieldValue('pattern', e.target.value)
-                                            e.target.value === 'daily' ? 
-                                                props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
-                                            : e.target.value === 'weekly' ?
-                                                props.setFieldValue('days_of_week', [DEFAULT_DAY])
-                                            : props.setFieldValue('days_of_week', [DEFAULT_DAY])
-                                            
-                                            if (e.target.value === 'custom') {
-                                                props.setFieldValue('pattern', 'weekly')
+                                            props.setFieldValue('pattern', 'weekly')
+                                            props.setFieldValue('ends', 'never')
+
+                                            switch (e.target.value) {
+                                                case '1':
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.full_week)
+                                                    break
+                                                case '2':
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.work_week)
+                                                    break
+                                                case '3':
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
+                                                    break
+                                                case 'weekly':
+                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY])
+                                                    break
+                                                case 'custom':
+                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY])
+                                                    break
+                                                default:
+                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY])
+                                                    break
                                             }
                                         } 
                                     } 
                                     value={props.values.template}
                                 >
                                     <Space direction="vertical" style={{ width: '100%' }}>
-                                        <Radio value={'daily'}>{`Daily (Mon to Sun)`}</Radio>
-                                        <Radio value={'weekly'}>{`Weekly on: ${dayjs(data.start_time).format('dddd')}`}</Radio>
+                                        <Radio value="1">{`Monday to Sunday`}</Radio>
+                                        <Radio value="2">{`Monday to Friday`}</Radio>
+                                        <Radio value="3">{`Saturday and Sunday`}</Radio>
+                                        <Radio value={'weekly'}>{`Weekly on: ${dayjs().format('dddd')}`}</Radio>
                                         <Radio value={'custom'}>Custom</Radio>
                                     { props.values.template === 'custom' && (
                                         <>
@@ -366,27 +398,19 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                                             buttonStyle="solid" 
                                             onChange={(e) => {
                                                 props.setFieldValue('pattern', e.target.value)
-                                                e.target.value === 'once' && props.setFieldValue('max_occurrences', 1)
+                                                if (e.target.value === 'once') { 
+                                                    props.setFieldValue('ends', 'after')
+                                                    props.setFieldValue('max_occurrences', 1)
+                                                }
                                             }}
                                         >
                                             <Radio.Button value="once">Once</Radio.Button>
-                                            <Radio.Button value="daily">Daily</Radio.Button>
                                             <Radio.Button value="weekly">Weekly</Radio.Button>
                                         </Radio.Group>
                                         { props.values.pattern === 'weekly' && (
                                             <>
                                             <Divider orientation="left" plain>Repeat On</Divider>
-                                            <Radio.Group name='days_of_week' value={props.values.days_of_week[0]} onChange={e =>props.setFieldValue('days_of_week', [Number(e.target.value)])}>
-                                                { weeklyDaysReccurence.map((day, index) => (
-                                                    <Radio key={index} value={index}>{day.label}</Radio>
-                                                ))}
-                                            </Radio.Group>
-                                            </>
-                                        )}
-                                        { props.values.pattern === 'daily' && (
-                                            <>
-                                            <Divider orientation="left" plain>Repeat On</Divider>
-                                            <Checkbox.Group options={weeklyDaysReccurence} defaultValue={dayjs(data.start_time).format('d')} onChange={(value) => props.setFieldValue('days_of_week', value)} />
+                                            <Checkbox.Group options={weeklyDaysReccurence} defaultValue={props.values.days_of_week} onChange={(value) => props.setFieldValue('days_of_week', value)} />
                                             </>
                                         )}
                                         <Divider orientation="left" plain>Ends</Divider>
@@ -398,8 +422,8 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                                             }}
                                         >
                                             <Space direction="vertical">
-                                                <Radio disabled={props.values.ends === 'once'} value="never">Never</Radio>
-                                                <Radio disabled={props.values.ends === 'once'} value="on">
+                                                <Radio disabled={props.values.pattern === 'once'} value="never">Never</Radio>
+                                                <Radio disabled={props.values.pattern === 'once'} value="on">
                                                     On
                                                     <DatePicker 
                                                         disabled={props.values.ends !== 'on' } 
@@ -417,7 +441,7 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                                                         style={{ width: 180, marginLeft: 8 }} 
                                                         addonAfter="occurrences" 
                                                         min={1} 
-                                                        value={props.values.ends === 'on' ? 0 : props.values.max_occurrences} 
+                                                        value={props.values.ends !== 'after' ? 0 : props.values.max_occurrences} 
                                                         onChange={(value) => {
                                                             props.setFieldValue('max_occurrences', Number(value))
                                                             }
@@ -889,13 +913,13 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                         props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
                                                         break
                                                     case 'weekly':
-                                                        props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                        props.setFieldValue('days_of_week', [DEFAULT_DAY])
                                                         break
                                                     case 'custom':
-                                                        props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                        props.setFieldValue('days_of_week', [DEFAULT_DAY])
                                                         break
                                                     default:
-                                                        props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                        props.setFieldValue('days_of_week', [DEFAULT_DAY])
                                                         break
                                                 }
                                             } 

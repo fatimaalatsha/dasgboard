@@ -146,7 +146,7 @@ const EditTemplate = ({refetch, template_id }) => {
                     hasGuarantee: Boolean(data.guarantee),
                     is_recurring: data.is_recurring,
                     days_of_week: data.days_of_week || [],
-                    template: Boolean(data.max_occurrences) || Boolean(data.end_date) || (data.days_of_week.length === 1 && dayjs().day(data.days_of_week.length) !== DEFAULT_DAY.day())  ? 'custom' : selectedTemplate(data.days_of_week),
+                    template: data.is_recurring ? Boolean(data.max_occurrences) || Boolean(data.end_date) || (data.days_of_week.length === 1 && dayjs().day(data.days_of_week.length) !== DEFAULT_DAY.day())  ? 'custom' : selectedTemplate(data.days_of_week) : 'weekly',
                     pattern: data.pattern,
                     max_occurrences: data.max_occurrences || 0,
                     ends: data.never_ends ? 'never' : data.end_date ? 'on' : data.max_occurrences ? 'after' : 'never',
