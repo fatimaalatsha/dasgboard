@@ -164,10 +164,14 @@ const AutofleetDrivers = () => {
       align: "center",
       filters: cities,
       filterSearch: true,
-      // filteredValue: null,
-      ...(autofleetFilter.order && { defaultSortOrder: autofleetFilter.order === 'asc' ? 'ASC' : 'DESC' }),
-      filteredValue: autofleetFilter.city_id ? [autofleetFilter.city_id.toString()] : null,
-      ...(autofleetFilter.city_id && {filteredValue: [autofleetFilter?.city_id.toString()],}),
+      // filteredValue: autofleetFilter.city_id ? autofleetFilter.city_id.toString() : null,
+      ...(autofleetFilter.order && {
+        defaultSortOrder: autofleetFilter.order === "asc" ? "ASC" : "DESC",
+      }),
+      filteredValue: autofleetFilter.city_id ? autofleetFilter.city_id.toString(): null,
+      ...(autofleetFilter.city_id && {
+        filteredValue: autofleetFilter?.city_id,
+      }),
     },
     {
       title: "Driver Licence",
