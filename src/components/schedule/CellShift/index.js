@@ -208,15 +208,14 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                         }),
                     }),
                 }
-                console.log(payload)
-                /* await updateWeekShift(payload, shift_id)
+                await updateWeekShift(payload, shift_id)
                 .then(() => {
                     message.success('Shift updated successfully')
                     setSubmitting(false)
                     resetForm()
                     //setIsModalOpen(false)
                     refetch()
-                }) */
+                })
             }}
         >
             {props => (
