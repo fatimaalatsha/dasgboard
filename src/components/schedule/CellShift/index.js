@@ -123,6 +123,12 @@ const weeklyDaysReccurence = [
     }
 ]
 
+const WEEK_PATTERNS = {
+    work_week: [1, 2, 3, 4, 5],
+    weekend: [6, 0],
+    full_week: [...Array(7)].map((_,idx) => idx),
+}
+
 const EditShiftModal = ({shift_id, open, tz, refetch}) => {
     const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}`)
     const DEFAULT_DAY = dayjs(data.start_time).tz(tz).utc().day()
@@ -692,10 +698,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                         }),
                         ...(values.is_recurring && {
                             'pattern': values.pattern,
-                            'days_of_week': values.days_of_week,
-                            ...(values.ends === 'never' && {
-                                'never_ends': true,
-                            }),
+                            ...(values.pattern !== 'once' && {'days_of_week': values.days_of_week}),
+                            'never_ends': Boolean(values.ends === 'never'),
                             ...((values.pattern === 'once' || values.ends === 'after') && {
                                 'max_occurrences': values.max_occurrences,
                             }),
@@ -872,22 +876,36 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                         style={{ width: '100%' }} 
                                         onChange={ (e) => {
                                                 props.setFieldValue('template', e.target.value)
-                                                props.setFieldValue('pattern', e.target.value)
-                                                e.target.value === 'daily' ? 
-                                                    props.setFieldValue('days_of_week', [...Array(7)].map((_,idx) => idx))
-                                                : e.target.value === 'weekly' ?
-                                                    props.setFieldValue('days_of_week', [DEFAULT_DAY])
-                                                : props.setFieldValue('days_of_week', [DEFAULT_DAY])
-                                                
-                                                if (e.target.value === 'custom') {
-                                                    props.setFieldValue('pattern', 'weekly')
+                                                props.setFieldValue('pattern', 'weekly')
+
+                                                switch (e.target.value) {
+                                                    case '1':
+                                                        props.setFieldValue('days_of_week', WEEK_PATTERNS.full_week)
+                                                        break
+                                                    case '2':
+                                                        props.setFieldValue('days_of_week', WEEK_PATTERNS.work_week)
+                                                        break
+                                                    case '3':
+                                                        props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
+                                                        break
+                                                    case 'weekly':
+                                                        props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                        break
+                                                    case 'custom':
+                                                        props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                        break
+                                                    default:
+                                                        props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
+                                                        break
                                                 }
                                             } 
                                         } 
                                         value={props.values.template}
                                     >
                                         <Space direction="vertical" style={{ width: '100%' }}>
-                                            <Radio value={'daily'}>{`Daily (Mon to Sun)`}</Radio>
+                                            <Radio value="1">{`Monday to Sunday`}</Radio>
+                                            <Radio value="2">{`Monday to Friday`}</Radio>
+                                            <Radio value="3">{`Saturday and Sunday`}</Radio>
                                             <Radio value={'weekly'}>{`Weekly on: ${dayjs(shift.day).format('dddd')}`}</Radio>
                                             <Radio value={'custom'}>Custom</Radio>
                                         { props.values.template === 'custom' && (
@@ -898,24 +916,16 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                 buttonStyle="solid" 
                                                 onChange={(e) => {
                                                     props.setFieldValue('pattern', e.target.value)
-                                                    e.target.value === 'once' && props.setFieldValue('max_occurrences', 1)
+                                                    if (e.target.value === 'once') {
+                                                        props.setFieldValue('ends', 'after')
+                                                        props.setFieldValue('max_occurrences', 1)
+                                                    }
                                                 }}
                                             >
                                                 <Radio.Button value="once">Once</Radio.Button>
-                                                <Radio.Button value="daily">Daily</Radio.Button>
                                                 <Radio.Button value="weekly">Weekly</Radio.Button>
                                             </Radio.Group>
                                             { props.values.pattern === 'weekly' && (
-                                                <>
-                                                <Divider orientation="left" plain>Repeat On</Divider>
-                                                <Radio.Group name='days_of_week' value={props.values.days_of_week[0]} onChange={e =>props.setFieldValue('days_of_week', [Number(e.target.value)])}>
-                                                    { weeklyDaysReccurence.map((day, index) => (
-                                                        <Radio key={index} value={index}>{day.label}</Radio>
-                                                    ))}
-                                                </Radio.Group>
-                                                </>
-                                            )}
-                                            { props.values.pattern === 'daily' && (
                                                 <>
                                                 <Divider orientation="left" plain>Repeat On</Divider>
                                                 <Checkbox.Group options={weeklyDaysReccurence} defaultValue={dayjs(shift.day).format('d')} onChange={(value) => props.setFieldValue('days_of_week', value)} />
@@ -930,8 +940,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                 }}
                                             >
                                                 <Space direction="vertical">
-                                                    <Radio disabled={props.values.ends === 'once'} value="never">Never</Radio>
-                                                    <Radio disabled={props.values.ends === 'once'} value="on">
+                                                    <Radio disabled={props.values.pattern === 'once'} value="never">Never</Radio>
+                                                    <Radio disabled={props.values.pattern === 'once'} value="on">
                                                         On
                                                         <DatePicker 
                                                             disabled={props.values.ends !== 'on' } 
@@ -949,7 +959,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                             style={{ width: 180, marginLeft: 8 }} 
                                                             addonAfter="occurrences" 
                                                             min={1} 
-                                                            value={props.values.ends === 'on' ? 0 : props.values.max_occurrences} 
+                                                            value={props.values.ends !== 'after' ? 0 : props.values.max_occurrences} 
                                                             onChange={(value) => {
                                                                 props.setFieldValue('max_occurrences', Number(value))
                                                                 }
