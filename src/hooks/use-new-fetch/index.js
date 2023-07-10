@@ -18,6 +18,9 @@ const useNewFetch = (url, applicants = false) => {
                 headers: {
                     'Authorization': token,
                     ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
+                    'Cache-Control': 'no-cache',
+                    'Pragma': 'no-cache',
+                    'Expires': '0',
                 }
             }
             const response = await API.get(url, options)// Fetch data from API
