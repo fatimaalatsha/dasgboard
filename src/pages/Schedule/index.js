@@ -98,7 +98,7 @@ const Schedule = () => {
         draft: <ShiftTemplates />,
         approval: <ShiftApproval selectedDate={selectedDate} tz={scheduleFilter.tz} view={view}/>,
     }
-console.log('USER BRANCH: ', process.env.AWS_BRANCH )
+console.log('USER BRANC: ', process.env.REACT_APP_NEW_URL.includes('uride') )
     return (
         <>
             <Card 
