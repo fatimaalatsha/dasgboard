@@ -98,7 +98,7 @@ const Schedule = () => {
         draft: <ShiftTemplates />,
         approval: <ShiftApproval selectedDate={selectedDate} tz={scheduleFilter.tz} view={view}/>,
     }
-
+console.log('USER BRANCH: ', process.env.AWS_BRANCH )
     return (
         <>
             <Card 
