@@ -73,7 +73,7 @@ const SideMenu = ({collapsed}) => {
       label: 'Documents',
       icon: <FileOutlined />,
     },
-    ...( process.env.REACT_APP_NEW_URL.includes('uride') ? [{
+    ...( !process.env.REACT_APP_NEW_URL.includes('uridetech') ? [{
       key: "/schedule",
       label: 'Schedule',
       icon: <CalendarOutlined />,
