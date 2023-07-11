@@ -99,9 +99,11 @@ const AutofleetDrivers = () => {
       },
       filter: {
         ...filter,
-        // ...(filter.status === null && {
-        //   status: null,
-        // }),
+        // ...(filter.status === null && { status: ["in|onboard", "pending"] }),
+        ...(filter.application_status &&
+          filter.application_status[0] === "in|null" && {
+            application_status: ["is|null"],
+          }),
         city_id: null,
       },
       city_id: filter.city_id,
@@ -154,7 +156,7 @@ const AutofleetDrivers = () => {
     },
     {
       title: "City",
-      dataIndex: ["city"],
+      dataIndex: "city",
       key: "city_id",
       sorter: true,
       align: "center",
@@ -190,7 +192,13 @@ const AutofleetDrivers = () => {
         { text: "Offline", value: "offline" },
         { text: "Active", value: "active" },
       ],
-      defaultFilteredValue: autofleetFilter.filter?.status,
+      //      defaultFilteredValue: autofleetFilter.filter?.status,
+
+      ...(autofleetFilter.filter?.status && {
+        defaultFilteredValue: autofleetFilter.filter?.status.map((status) =>
+          status.replace("in|", "")
+        ),
+      }),
       ...(autofleetFilter.filter?.status && {
         filteredValue: autofleetFilter.filter?.status.map((status) =>
           status.replace("in|", "")
@@ -298,8 +306,8 @@ const AutofleetDrivers = () => {
           </Button>
         </Input.Group>
         <Table
-          dataSource={data?.data}
           columns={columns}
+          dataSource={data.data}
           loading={isLoading}
           rowKey="id"
           pagination={autofleetFilter.pagination}
