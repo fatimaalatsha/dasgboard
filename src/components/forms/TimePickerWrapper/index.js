@@ -13,7 +13,8 @@ const TimePickerWrapper = forwardRef((props, ref) => {
         ...field,
         ...props,
         onSelect: (value) => setFieldValue(props.name, dayjs(value).format('HH:mm')),
-        onChange: (value) => setFieldValue(props.name, dayjs(value).format('HH:mm'))
+        onChange: (value) => setFieldValue(props.name, dayjs(value).format('HH:mm')), 
+        placeholder: `Select ${props.name.replace('_', ' ')}`,
     }
 
     if (meta && meta.touched && meta.error) { // Display error status if field doesn't meet requirements
