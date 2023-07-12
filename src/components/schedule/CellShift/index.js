@@ -30,6 +30,7 @@ import { object, string, number, boolean, array, mixed } from 'yup' // Import Yu
 import { useFilterStore } from '../../../store'
 
 import InputWrapper from '../../forms/InputWrapper' // Import InputWrapper component
+import TimePickerWrapper from '../../forms/TimePickerWrapper'
 import Submit from '../../forms/SubmitWrapper' // Import SubmitWrapper component
 import EditableText from '../../EditableText' // EditableText component for inline editing capacity
 import { CitySelect } from '../../CitySelect' // Import CitySelect component
@@ -51,8 +52,8 @@ const { Text, Title, Link } = Typography
 
 const shiftSchema = object().shape({
     capacity: number().min(1, 'Shift driver capacity must be greater than or equal to 1.').required('Required'),
-    start_time: string().required('Required'),
-    end_time: string().required('Required'),
+    start_time: string().required('A start time is required to create a shift.'),
+    end_time: string().required('An end time is required to create a shift.'),
     city_id: mixed().required('Required'),
     hasGuarantee: boolean().notRequired(),
     status: boolean().notRequired(),
@@ -252,43 +253,65 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                         ]}
                     >
                         <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                            <TimePicker.RangePicker 
-                                name="end"
-                                style={{ width: '100%' }} 
-                                format="HH:mm" 
-                                defaultValue={[dayjs(props.values.start_time, 'HH:mm'), dayjs(props.values.end_time, 'HH:mm')]} 
-                                allowClear={false}
-                                disabled={[true, false]} 
-                                onChange={(time, timeString) => {
-                                    props.setFieldValue('start_time', timeString[0])
-                                    props.setFieldValue('end_time', timeString[1])
-                                    //handleHoursChange(timeString)
-                                }}
-                                hideDisabledOptions
-                                disabledTime={(current) => {
-                                    return {
-                                        disabledHours: () => {
-                                            const hours = []
-                                            for (let i = 0; i < 24; i++) {
-                                                if (i < (dayjs(data.start_time).tz(tz).utc().hour()) + 1) {
-                                                    hours.push(i)
+                            <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                <TimePickerWrapper 
+                                    name="start_time"
+                                    style={{ width: '100%' }} 
+                                    value={dayjs(props.values.start_time, 'HH:mm')}
+                                    defaultValue={dayjs(props.values.start_time, 'HH:mm')}
+                                    format="HH:mm" 
+                                    allowClear={false}
+                                    showNow={false}
+                                    disabled
+                                    hideDisabledOptions
+                                    disabledTime={(current) => {
+                                        return {
+                                            disabledMinutes: () => {
+                                                const minuteSteps = [0, 30, 59]
+                                                const minutes = []
+                                                for (let i = 0; i < 60; i++) {
+                                                    if (!minuteSteps.includes(i)) {
+                                                        minutes.push(i)
+                                                    }
                                                 }
-                                            }
-                                            return hours
-                                        },
-                                        disabledMinutes: () => {
-                                            const minuteSteps = [0, 30, 59]
-                                            const minutes = []
-                                            for (let i = 0; i < 60; i++) {
-                                                if (!minuteSteps.includes(i)) {
-                                                    minutes.push(i)
+                                                return minutes
+                                            },
+                                        }
+                                    }}
+                                />
+                                <TimePickerWrapper 
+                                    name="end_time"
+                                    style={{ width: '100%' }} 
+                                    value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                    format="HH:mm" 
+                                    allowClear={false}
+                                    showNow={false}
+                                    hideDisabledOptions
+                                    disabledTime={(current) => {
+                                        return {
+                                            disabledHours: () => {
+                                                const hours = []
+                                                for (let i = 0; i < 24; i++) {
+                                                    if (i < (dayjs(data.start_time).tz(tz).utc().hour()) + 1) {
+                                                        hours.push(i)
+                                                    }
                                                 }
-                                            }
-                                            return minutes
-                                        },
-                                    }
-                                }}
-                            />
+                                                return hours
+                                            },
+                                            disabledMinutes: () => {
+                                                const minuteSteps = [0, 30, 59]
+                                                const minutes = []
+                                                for (let i = 0; i < 60; i++) {
+                                                    if (!minuteSteps.includes(i)) {
+                                                        minutes.push(i)
+                                                    }
+                                                }
+                                                return minutes
+                                            },
+                                        }
+                                    }}
+                                />
+                            </div>
                             <CitySelect 
                                 defaultValue={props.values.city_id}    
                                 style={{ width: '100%' }}
@@ -633,7 +656,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         count: record.count,
         drivers: record.capacity || 0,
         start: record.start_time ? convertToHourTz(record.start_time, scheduleFilter.tz) : record.time,
-        end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : null,
+        end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : '',
         day: record.start_time ? dayjs(record.start_time).tz(scheduleFilter.tz).utc().format('YYYY-MM-DD') : selectedDay,
         shift_id: record.id || null,
         hasGuarantee: Boolean(record.guarantee),
@@ -848,18 +871,39 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 >
                                     All Day
                                 </Checkbox> */}
-                                <TimePicker.RangePicker 
-                                    name="end"
+                                <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                <TimePickerWrapper 
+                                    name="start_time"
                                     style={{ width: '100%' }} 
+                                    value={dayjs(props.values.start_time, 'HH:mm')}
+                                    defaultValue={dayjs(props.values.start_time, 'HH:mm')}
                                     format="HH:mm" 
-                                    defaultValue={[dayjs(props.values.start_time, 'HH:mm'), props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : null]} 
                                     allowClear={false}
-                                    disabled={[true, false]} 
-                                    onChange={(time, timeString) => {
-                                        props.setFieldValue('start_time', timeString[0])
-                                        props.setFieldValue('end_time', timeString[1])
-                                        handleHoursChange(timeString)
+                                    showNow={false}
+                                    disabled
+                                    hideDisabledOptions
+                                    disabledTime={(current) => {
+                                        return {
+                                            disabledMinutes: () => {
+                                                const minuteSteps = [0, 30, 59]
+                                                const minutes = []
+                                                for (let i = 0; i < 60; i++) {
+                                                    if (!minuteSteps.includes(i)) {
+                                                        minutes.push(i)
+                                                    }
+                                                }
+                                                return minutes
+                                            },
+                                        }
                                     }}
+                                />
+                                <TimePickerWrapper 
+                                    name="end_time"
+                                    style={{ width: '100%' }} 
+                                    value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                    format="HH:mm" 
+                                    allowClear={false}
+                                    showNow={false}
                                     hideDisabledOptions
                                     disabledTime={(current) => {
                                         return {
@@ -885,6 +929,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                         }
                                     }}
                                 />
+                                </div>
                                 <CitySelect 
                                     defaultValue={props.values.city_id}    
                                     style={{ width: '100%' }}
