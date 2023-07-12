@@ -34,7 +34,6 @@ import { getAutoFleetCities } from "../../utils/city-status";
 import { updateVendorId, getVendorId } from "../../utils/driver-status";
 
 import { useFilterStore } from "../../store"; // Import filter store
-import { fill } from "pdf-lib";
 
 const { Text } = Typography;
 
@@ -44,6 +43,7 @@ const getUserParams = (params) => ({
   limit: params.pagination?.pageSize,
   page: params.pagination?.current,
   ...params,
+  
 });
 
 const AutofleetDrivers = () => {
@@ -82,7 +82,6 @@ const AutofleetDrivers = () => {
     })}`
   );
 
-
   const handleTableChange = (pagination, filter, sorter) => {
     // Handle table change
     Object.keys(filter).forEach((key) => {
@@ -91,7 +90,7 @@ const AutofleetDrivers = () => {
         filter[key].splice(1, 1);
       }
     });
-
+  
     setAutofleetFilter({
       // Set filter to store
       pagination: {
@@ -100,7 +99,7 @@ const AutofleetDrivers = () => {
       },
       filter: {
         ...filter,
-        ...(filter.status === null && { status: ["in|onboard", "pending"] }),
+        // ...(filter.status === null && { status: ["in|onboard", "pending"] }),
         ...(filter.application_status &&
           filter.application_status[0] === "in|null" && {
             application_status: ["is|null"],
@@ -108,7 +107,12 @@ const AutofleetDrivers = () => {
         city_id: null,
       },
       city_id: filter.city_id,
-      order: sorter.order === "ascend" ? "ASC" : "DESC",
+      ...(Object.keys(sorter).length !== 0 && {
+        sort: {
+          [`${sorter.columnKey === "city_id" ? "city.name" : sorter.columnKey}`]:
+            sorter.order === "ascend" ? "asc" : "desc",
+        },
+      }),
     });
   };
   const handleSearch = (selectedKeys) => {
@@ -158,9 +162,13 @@ const AutofleetDrivers = () => {
       align: "center",
       filters: cities,
       filterSearch: true,
-      filteredValue: null,
-      ...(autofleetFilter.order && { defaultSortOrder: autofleetFilter.order === 'asc' ? 'ASC' : 'DESC' }),
-      ...( autofleetFilter.city_id && { filteredValue: autofleetFilter.city_id.map((city, index) => city.toString()) }),
+      ...(autofleetFilter.order && {
+        defaultSortOrder: autofleetFilter.order === "asc" ? "ASC" : "DESC",
+      }),
+      filteredValue: autofleetFilter.city_id ? autofleetFilter.city_id : null,
+      ...(autofleetFilter.city_id && {
+        filteredValue: autofleetFilter?.city_id,
+      }),
     },
     {
       title: "Driver Licence",
@@ -184,6 +192,8 @@ const AutofleetDrivers = () => {
         { text: "Offline", value: "offline" },
         { text: "Active", value: "active" },
       ],
+      //      defaultFilteredValue: autofleetFilter.filter?.status,
+
       ...(autofleetFilter.filter?.status && {
         defaultFilteredValue: autofleetFilter.filter?.status.map((status) =>
           status.replace("in|", "")
@@ -201,7 +211,13 @@ const AutofleetDrivers = () => {
               ? "green"
               : status === "stand-by"
               ? "gold"
-              : "red"
+              : status === "activating"
+              ? "blue"
+              : status === "offline"
+              ? "volcano"
+              : status === "active"
+              ? "green"
+              : "default"
           }
         >
           {status}
@@ -215,7 +231,7 @@ const AutofleetDrivers = () => {
     setAutofleetFilter({
       pagination: {
         ...autofleetFilter.pagination,
-        total: data?.meta?.pagination?.total,
+        total: data?.meta?.total_items,
         showTotal: (total, range) =>
           `${range[0]}-${range[1]} of ${total} Drivers`,
       },
