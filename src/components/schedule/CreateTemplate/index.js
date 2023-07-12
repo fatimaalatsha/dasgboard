@@ -6,6 +6,7 @@ import { object, string, number, boolean, array, mixed } from 'yup' // Import Yu
 
 import InputWrapper from '../../forms/InputWrapper'
 import SubmitWrapper from '../../forms/SubmitWrapper'
+import TimePickerWrapper from '../../forms/TimePickerWrapper'
 import { createWeekShift, createShiftTemplate, updateShiftTemplate } from '../../../utils/schedule-status'
 import { CitySelect } from '../../CitySelect'
 import DriverSelect from '../../DriverSelect'
@@ -53,8 +54,8 @@ const templateSchema = object().shape({
     title: string().required('Required'),
     capacity: number().min(1, 'Shift driver capacity must be greater than or equal to 1.').required('Required'),
     day: string().required('Required'),
-    start_time: string().required('Required'),
-    end_time: string().required('Required'),
+    start_time: string().required('A start time is required to create a shift.'),
+    end_time: string().required('An end time is required to create a shift.'),
     hasGuarantee: boolean().notRequired(),
     guarantee: number().when('hasGuarantee', {
         is: true,
@@ -138,8 +139,8 @@ const EditTemplate = ({refetch, template_id }) => {
                 initialValues={{
                     title: data.title,
                     day: DEFAULT_DAY,
-                    start_time: data.start_time,
-                    end_time: data.end_time,
+                    start_time: data.start_time.substring(0, 5),
+                    end_time: data.end_time.substring(0, 5),
                     capacity: data.capacity ,
                     guarantee: data.guarantee,
                     guarantee_specs: data.guarantee_specs || '',
@@ -156,8 +157,8 @@ const EditTemplate = ({refetch, template_id }) => {
                 onSubmit={ async (values, { setSubmitting, resetForm }) => {
                     const payload = {
                         'title': values.title,
-                        'start_time': values.start_time,
-                        'end_time': values.end_time,
+                        'start_time': values.start_time + ':00',
+                        'end_time': values.end_time + ':00',
                         'capacity': Number(values.capacity),
                         'is_recurring': values.is_recurring,
                         ...(values.hasGuarantee && {
@@ -220,33 +221,64 @@ const EditTemplate = ({refetch, template_id }) => {
                                     props.setFieldValue('title', e.target.value)
                                 }}
                             />
-                            <Input.Group compact>
-                            <TimePicker.RangePicker 
-                                style={{ width: '100%' }} 
-                                format="HH:mm" 
-                                defaultValue={[dayjs(props.values.start_time, 'HH:mm'), dayjs(props.values.end_time, 'HH:mm')]} 
-                                allowClear={false}
-                                onChange={(time, timeString) => {
-                                    props.setFieldValue('start_time', timeString[0])
-                                    props.setFieldValue('end_time', timeString[1])
-                                }}
-                                hideDisabledOptions
-                                disabledTime={() => {
-                                    return {
-                                        disabledMinutes: () => {
-                                            const minuteSteps = [0, 30, 59]
-                                            const minutes = []
-                                            for (let i = 0; i < 60; i++) {
-                                                if (!minuteSteps.includes(i)) {
-                                                    minutes.push(i)
+                            <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                <TimePickerWrapper 
+                                    name="start_time"
+                                    style={{ width: '100%' }} 
+                                    value={dayjs(props.values.start_time, 'HH:mm')}
+                                    defaultValue={dayjs(props.values.start_time, 'HH:mm')}
+                                    format="HH:mm" 
+                                    allowClear={false}
+                                    showNow={false}
+                                    hideDisabledOptions
+                                    disabledTime={(current) => {
+                                        return {
+                                            disabledMinutes: () => {
+                                                const minuteSteps = [0, 30, 59]
+                                                const minutes = []
+                                                for (let i = 0; i < 60; i++) {
+                                                    if (!minuteSteps.includes(i)) {
+                                                        minutes.push(i)
+                                                    }
                                                 }
-                                            }
-                                            return minutes
-                                        },
-                                    }
-                                }}
-                            />
-                            </Input.Group>
+                                                return minutes
+                                            },
+                                        }
+                                    }}
+                                />
+                                <TimePickerWrapper 
+                                    name="end_time"
+                                    style={{ width: '100%' }} 
+                                    value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                    format="HH:mm" 
+                                    allowClear={false}
+                                    showNow={false}
+                                    hideDisabledOptions
+                                    disabledTime={(current) => {
+                                        return {
+                                            disabledHours: () => {
+                                                const hours = []
+                                                for (let i = 0; i < 24; i++) {
+                                                    if (i < (dayjs(props.values.start_time, 'HH:mm').hour()) + 1) {
+                                                        hours.push(i)
+                                                    }
+                                                }
+                                                return hours
+                                            },
+                                            disabledMinutes: () => {
+                                                const minuteSteps = [0, 30, 59]
+                                                const minutes = []
+                                                for (let i = 0; i < 60; i++) {
+                                                    if (!minuteSteps.includes(i)) {
+                                                        minutes.push(i)
+                                                    }
+                                                }
+                                                return minutes
+                                            },
+                                        }
+                                    }}
+                                />
+                            </div>
                             <InputWrapper 
                                 name="capacity" 
                                 prefix={<UserOutlined />} 
