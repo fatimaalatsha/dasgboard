@@ -556,32 +556,64 @@ const CreateTemplate = ({refetch}) => {
                                     props.setFieldValue('title', e.target.value)
                                 }}
                             />
-                            <Input.Group compact>
-                            <TimePicker.RangePicker 
-                                style={{ width: '100%' }} 
-                                format="HH:mm" 
-                                allowClear={false}
-                                onChange={(time, timeString) => {
-                                    props.setFieldValue('start_time', timeString[0])
-                                    props.setFieldValue('end_time', timeString[1])
-                                }}
-                                hideDisabledOptions
-                                disabledTime={() => {
-                                    return {
-                                        disabledMinutes: () => {
-                                            const minuteSteps = [0, 30, 59]
-                                            const minutes = []
-                                            for (let i = 0; i < 60; i++) {
-                                                if (!minuteSteps.includes(i)) {
-                                                    minutes.push(i)
+                            <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                <TimePickerWrapper 
+                                    name="start_time"
+                                    style={{ width: '100%' }} 
+                                    value={props.values.start_time ? dayjs(props.values.start_time, 'HH:mm') : ''}
+                                    defaultValue={dayjs(props.values.start_time, 'HH:mm')}
+                                    format="HH:mm" 
+                                    allowClear={false}
+                                    showNow={false}
+                                    hideDisabledOptions
+                                    disabledTime={(current) => {
+                                        return {
+                                            disabledMinutes: () => {
+                                                const minuteSteps = [0, 30, 59]
+                                                const minutes = []
+                                                for (let i = 0; i < 60; i++) {
+                                                    if (!minuteSteps.includes(i)) {
+                                                        minutes.push(i)
+                                                    }
                                                 }
-                                            }
-                                            return minutes
-                                        },
-                                    }
-                                }}
-                            />
-                            </Input.Group>
+                                                return minutes
+                                            },
+                                        }
+                                    }}
+                                />
+                                <TimePickerWrapper 
+                                    name="end_time"
+                                    style={{ width: '100%' }} 
+                                    value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                    format="HH:mm" 
+                                    allowClear={false}
+                                    showNow={false}
+                                    hideDisabledOptions
+                                    disabledTime={(current) => {
+                                        return {
+                                            disabledHours: () => {
+                                                const hours = []
+                                                for (let i = 0; i < 24; i++) {
+                                                    if (i < (dayjs(props.values.start_time, 'HH:mm').hour()) + 1) {
+                                                        hours.push(i)
+                                                    }
+                                                }
+                                                return hours
+                                            },
+                                            disabledMinutes: () => {
+                                                const minuteSteps = [0, 30, 59]
+                                                const minutes = []
+                                                for (let i = 0; i < 60; i++) {
+                                                    if (!minuteSteps.includes(i)) {
+                                                        minutes.push(i)
+                                                    }
+                                                }
+                                                return minutes
+                                            },
+                                        }
+                                    }}
+                                />
+                            </div>
                             <InputWrapper 
                                 name="capacity" 
                                 prefix={<UserOutlined />} 
