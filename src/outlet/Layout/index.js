@@ -21,6 +21,7 @@ import ReportDetails from '../../pages/ReportDetails'
 import NumberOfleads from '../../pages/NumberOfLeads' 
 import CityComparison from "../../pages/CityComparison";
 import ConversionRatesByApplication from '../../pages/ConversionRatesByApplication'
+import Schedule from '../../pages/Schedule'
 import IneligibleApplicants from '../../pages/IneligibleApplicants'
 import AutofleetDrivers from '../../pages/AutofleetDrivers'
 
@@ -50,6 +51,7 @@ const Layout = () => {
                     <Route path="/trainings" element={<Trainings />} />
                     <Route path="/training/:id" element={<TrainingDetails />} />
                     <Route path="/applicants" element={<Applicants />} />
+                    <Route path="/schedule" element={<Schedule />} />
                     <Route path="/autofleet_drivers" element={<AutofleetDrivers />} />
                     <Route path="/reports" element={<Reports />} />
                     <Route path="/reports/conversion_rates" element={<NumberOfleads />} />

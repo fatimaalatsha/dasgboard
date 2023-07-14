@@ -11,6 +11,7 @@ import {
   EnvironmentOutlined,
   AuditOutlined,
   RocketOutlined,
+  CalendarOutlined,
   TeamOutlined,
 } from '@ant-design/icons'; // import antd navigation icons
 
@@ -73,6 +74,11 @@ const SideMenu = ({collapsed}) => {
       label: "Documents",
       icon: <FileOutlined />,
     },
+    ...( !process.env.REACT_APP_NEW_URL.includes('uridetech') ? [{
+      key: "/schedule",
+      label: 'Schedule',
+      icon: <CalendarOutlined />,
+    }] : []),
     {
       key: "/cities",
       label: "Cities",
