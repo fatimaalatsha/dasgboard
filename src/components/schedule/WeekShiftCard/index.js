@@ -1,7 +1,8 @@
-import { Card, Space, Row, Typography, Tag, Dropdown, Tooltip, Popover } from 'antd'
-import { SwapRightOutlined, MoreOutlined, DeleteOutlined, CloseOutlined  } from '@ant-design/icons'
+import { Card, Space, Row, Col, Typography, Tag, Dropdown, Tooltip, Popover, Button } from 'antd'
+import { SwapRightOutlined, MoreOutlined, DeleteOutlined, EditOutlined, StopOutlined, LikeOutlined, DislikeOutlined, CalendarOutlined  } from '@ant-design/icons'
 import EditableText from '../../EditableText' // EditableText component for inline editing capacity
 import { updateWeekShift } from '../../../utils/schedule-status'
+import dayjs from 'dayjs'
 
 const { Text, Title, Link } = Typography
 
@@ -38,9 +39,48 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
 
     const content = (
         <Card 
-            style={cardStyle}
-            bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100%)', padding: 8 }}
+            title={<Title level={4} style={{ marginTop: 10 }}>Shift Details</Title>}
+            size="small"
+            bordered={false} 
+            extra={
+                <Space>
+                    <Tooltip title="Edit">
+                        <Button type="text" icon={<EditOutlined />} />
+                    </Tooltip>
+                    <Tooltip title={record.status === 'active' ? 'Deactivate' : 'Activate'}>
+                        <Button type="text" icon={record.status === 'active' ? <DislikeOutlined /> : <LikeOutlined />} />
+                    </Tooltip>
+                    <Tooltip title="Delete">
+                        <Button type="text" danger icon={<DeleteOutlined />} />
+                    </Tooltip>
+                </Space>
+            }
+            headStyle={{ borderBottom: 'none' }}
         >
+            <Space direction="vertical">
+                <Row gutter={[16, 0]}>
+                    <Col span={2}>
+                        <CalendarOutlined />
+                    </Col>
+                    <Col span={22}>
+                        <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(record.day).format('dddd, MMMM DD')} ⋅ ${record.start} ➡ ${record.end}`}</Text>
+                    </Col>
+                </Row>
+                
+                <Space style={{ display: 'flex', columnGap: 2, alignItems: 'baseline' }}>
+                    <Title level={1} style={{ margin: 0 }}>{record.count}</Title>
+                    <Title level={4}>/</Title>
+                    <EditableText
+                        value={record?.drivers}
+                        heading={true}
+                        name="capacity"
+                        updateCallback={ async (values) => {
+                            await updateWeekShift(values, record.shift_id)
+                            refetch()
+                        }}
+                    />
+                </Space>
+            </Space>
             <Row justify="end">
                 <Dropdown menu={{items}} >
                     <Link onClick={(e) => e.preventDefault()}>
