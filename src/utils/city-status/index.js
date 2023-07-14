@@ -1,5 +1,6 @@
 import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
 import NewAPI from '../../api/NewUrl' // Import new API base URL
+import city_timezones from '../../assets/data/city_timezones'
 
 const createCity = async (values) => { // Create New City
     try {
@@ -146,5 +147,10 @@ const getAutoFleetCities = async () => { // Get Cities List for dropdown
   }  
 }
 
+const getCityTimezone = (id) => {
+  const city = city_timezones.find((city) => city.city_id === id)
+  return city.tz
+}
+
   
-export { createCity, getProvince, updateCityProfile, updateEmailTemplate, getCities , getAutoFleetCities}
+export { createCity, getProvince, updateCityProfile, updateEmailTemplate, getCityTimezone, getCities , getAutoFleetCities}
