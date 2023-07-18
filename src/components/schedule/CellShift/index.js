@@ -1,15 +1,11 @@
 import { useState } from 'react'
 import { 
-    Card, 
     theme, 
     Space, 
-    Row, 
     Typography, 
-    Tag, 
     Modal, 
     Button, 
     Checkbox, 
-    Dropdown,
     Tooltip,
     message,
     Divider,
@@ -19,7 +15,7 @@ import {
     Input,
     Switch,
 } from 'antd'
-import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined, DeleteOutlined, CheckOutlined, CloseOutlined  } from '@ant-design/icons'
+import { UserOutlined, PlusOutlined, CheckOutlined, CloseOutlined  } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
@@ -31,7 +27,6 @@ import { useFilterStore } from '../../../store'
 import InputWrapper from '../../forms/InputWrapper' // Import InputWrapper component
 import TimePickerWrapper from '../../forms/TimePickerWrapper'
 import Submit from '../../forms/SubmitWrapper' // Import SubmitWrapper component
-import EditableText from '../../EditableText' // EditableText component for inline editing capacity
 import { CitySelect } from '../../CitySelect' // Import CitySelect component
 import DriverSelect from '../../DriverSelect' // Import DriverSelect component
 import { 
@@ -42,12 +37,13 @@ import {
     deleteWeekShift 
 } from '../../../utils/schedule-status'
 import useFetch from '../../../hooks/use-new-fetch'
+import WeekShiftCard from '../WeekShiftCard'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const { useToken } = theme
-const { Text, Title, Link } = Typography
+const { Text, Title } = Typography
 
 const shiftSchema = object().shape({
     capacity: number().min(1, 'Shift driver capacity must be greater than or equal to 1.').required('Required'),
@@ -550,91 +546,6 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
     )
 }
 
-const ShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatus, refetch }) => {
-
-    const items = [
-        {
-            key: 1,
-            onClick: () => {
-                handleEdit(true)
-            },
-            label: 'Edit',
-        },
-        {
-            key: 2,
-            label: record.status === 'active' ? 'Deactivate' : 'Activate',
-            onClick: () => {
-                handleStatus(record.status === 'active' ? 'inactive' : 'active')
-            },
-        },
-        {
-            type: 'divider',
-        },
-        {
-            key: 3,
-            danger: true,
-            onClick: () => {
-                handleDelete()
-            },
-            icon: (<DeleteOutlined />),
-            label: 'Delete',
-        },
-    ]
-
-    return (
-        <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, width: 'calc(100% + 2px)' }}>
-            <Card 
-                style={cardStyle}
-                bodyStyle={{ display: 'flex', flexDirection: 'column', justifyContent: 'flex-end', height: 'calc(100%)', padding: 8 }}
-            >
-                <Row justify="end">
-                    <Dropdown menu={{items}} >
-                        <Link onClick={(e) => e.preventDefault()}>
-                        <Space>
-                            <MoreOutlined />
-                        </Space>
-                        </Link>
-                    </Dropdown>
-                </Row>
-                <Row style={{ display: 'flex', height: '100%'}}>
-                    <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'center' }}>
-                        <Space style={{ display: 'flex', columnGap: 2, alignItems: 'baseline' }}>
-                            <Title level={1} style={{ margin: 0 }}>{record.count}</Title>
-                                 <Title level={4}>/</Title>
-                                <EditableText
-                                    value={record?.drivers}
-                                    heading={true}
-                                    name="capacity"
-                                    updateCallback={ async (values) => {
-                                        await updateWeekShift(values, record.shift_id)
-                                        refetch()
-                                    }}
-                                />
-                        </Space>
-                        { record.guarantee !== 0 && <Text>${record.guarantee}</Text>}
-                        <Space>
-                            <Text strong style={{ color: 'inherit', fontSize: 12 }}>{record?.start}</Text>
-                            <SwapRightOutlined />
-                            <Text strong style={{ color: 'inherit', fontSize: 12 }}>{record?.end}</Text>
-                        </Space>
-                        <Space>
-                            <Tooltip title="Present">
-                                <Tag color="cyan">0</Tag>
-                            </Tooltip>
-                            <Tooltip title="Absent">
-                                <Tag color="magenta">0</Tag>
-                            </Tooltip>
-                            <Tooltip title="Late">
-                                <Tag color="gold">0</Tag>
-                            </Tooltip>
-                        </Space>
-                    </Space>
-                </Row>
-            </Card>
-        </div>
-    )
-}
-
 const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch, city}) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [edit, setEdit] = useState({ // State to hold edit mode
@@ -647,6 +558,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         end: record.end,
         diff: record.duration ? record.duration : 4
     });
+    
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const DEFAULT_DAY = dayjs(selectedDay).tz(scheduleFilter.tz).utc().day()
@@ -661,7 +573,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         hasGuarantee: Boolean(record.guarantee),
         guarantee: record.guarantee || 0,
         guarantee_specs: record.guarantee_specs || '',
-        hasRecurrency: record.is_recurring || false,
+        hasRecurrency: record.is_recurring,
         pattern: 'weekly', // once, daily, weekly
         ends: 'never', // never, after, on
         recurrency: {
@@ -678,6 +590,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         backgroundColor: shift.status === 'active' ? token.colorSuccessBg : token.colorWarningBg,
         borderColor: shift.status === 'active' ? token.colorSuccessBorder : token.colorWarningBorder,
         height: floatingComponentHeight,
+        cursor: 'pointer',
     }
 
     /* const errorStyleConfig = {
@@ -754,7 +667,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         <>
             <div className="container" style={{ minHeight: 24}}>
                 { isCellFilled ? (
-                    <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
+                    <WeekShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
                 ) : (
                 <>
                     {  display && (
@@ -763,7 +676,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     </Tooltip> 
                     )}
                         { isHovering && (
-                            <ShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
+                            <WeekShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
                         )}
                 </>
                 )}
