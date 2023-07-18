@@ -1,15 +1,11 @@
 import { useState } from 'react'
 import { 
-    Card, 
     theme, 
     Space, 
-    Row, 
     Typography, 
-    Tag, 
     Modal, 
     Button, 
     Checkbox, 
-    Dropdown,
     Tooltip,
     message,
     Divider,
@@ -18,9 +14,8 @@ import {
     InputNumber,
     Input,
     Switch,
-    Popover,
 } from 'antd'
-import { SwapRightOutlined, UserOutlined, MoreOutlined, PlusOutlined, DeleteOutlined, CheckOutlined, CloseOutlined  } from '@ant-design/icons'
+import { UserOutlined, PlusOutlined, CheckOutlined, CloseOutlined  } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
@@ -32,7 +27,6 @@ import { useFilterStore } from '../../../store'
 import InputWrapper from '../../forms/InputWrapper' // Import InputWrapper component
 import TimePickerWrapper from '../../forms/TimePickerWrapper'
 import Submit from '../../forms/SubmitWrapper' // Import SubmitWrapper component
-import EditableText from '../../EditableText' // EditableText component for inline editing capacity
 import { CitySelect } from '../../CitySelect' // Import CitySelect component
 import DriverSelect from '../../DriverSelect' // Import DriverSelect component
 import { 
@@ -49,7 +43,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const { useToken } = theme
-const { Text, Title, Link } = Typography
+const { Text, Title } = Typography
 
 const shiftSchema = object().shape({
     capacity: number().min(1, 'Shift driver capacity must be greater than or equal to 1.').required('Required'),
@@ -564,6 +558,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         end: record.end,
         diff: record.duration ? record.duration : 4
     });
+    
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const DEFAULT_DAY = dayjs(selectedDay).tz(scheduleFilter.tz).utc().day()
@@ -578,7 +573,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         hasGuarantee: Boolean(record.guarantee),
         guarantee: record.guarantee || 0,
         guarantee_specs: record.guarantee_specs || '',
-        hasRecurrency: record.is_recurring || false,
+        hasRecurrency: record.is_recurring,
         pattern: 'weekly', // once, daily, weekly
         ends: 'never', // never, after, on
         recurrency: {
