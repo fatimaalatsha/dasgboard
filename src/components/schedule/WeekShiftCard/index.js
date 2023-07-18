@@ -8,9 +8,10 @@ import dayjs from 'dayjs'
 const { Text, Title } = Typography
 const { useToken } = theme
 
-const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatus, refetch }) => {
+const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatus, refetch, overlap }) => {
     const { token } = useToken()
     const [open, setOpen] = useState(false)
+    const itemZIndex = parseInt(record.start.split(":")[0], 10)
 
     const handleOpenChange = (newOpen) => {
       setOpen(newOpen);
@@ -127,7 +128,7 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
     )
 
     return (
-        <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, width: 'calc(100% + 2px)' }}>
+        <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: itemZIndex || 1, width: `calc(${(100 / overlap)}% + 2px)` }}>
             <Popover open={open} onOpenChange={handleOpenChange} content={content} trigger="click">
                 <Card 
                     style={cardStyle}
