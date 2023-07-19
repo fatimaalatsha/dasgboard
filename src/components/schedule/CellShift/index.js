@@ -546,7 +546,7 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
     )
 }
 
-const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch, city, overlap}) => {
+const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch, city, overlap, index}) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [edit, setEdit] = useState({ // State to hold edit mode
         editMode: false,
@@ -622,7 +622,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
             ...edit,
             editMode: value,
         })
-        //handleClick()
     }
 
     const handleHoursChange = (timeString) => {
@@ -651,23 +650,15 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
       setIsModalOpen(true)
     }
 
-    /* const handleOk = () => {
-      setIsModalOpen(false)
-    } */
-
     const handleCancel = () => {
         setIsModalOpen(false)
-        /* if (!edit) {
-            setIsHovering(!isHovering)
-        } */
         refetch()
     }
 
     return (
         <>
-            <div className="container" style={{ minHeight: 24}}>
                 { isCellFilled ? (
-                    <WeekShiftCard overlap={overlap} cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
+                    <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
                 ) : (
                 <>
                     {  display && (
@@ -676,11 +667,10 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     </Tooltip> 
                     )}
                         { isHovering && (
-                            <WeekShiftCard overlap={overlap} cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
+                            <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
                         )}
                 </>
                 )}
-            </div>
             <Formik
                 initialValues={{
                     start_time: shift.start,

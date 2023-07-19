@@ -99,37 +99,34 @@ const WeekView = ({selectedWeek, days, tz, city }) => {
             }
         },
         render: (text, record ) => {
-            //console.log(record[day])
-            for ( let item = 0; item < record[day].length; item++ ) {
-                if (dayjs(record[day][item]?.start_time).tz().utc().format('dddd').toLowerCase() === day && dayjs(record[day][item]?.start_time).tz().utc().format('HH:mm') === record.time) {
-                    return (
-                        <CellShift 
-                            key={item} 
-                            isCellFilled={dayjs(record[day][item]?.start_time).tz().utc().format('dddd').toLowerCase() === day && dayjs(record[day][item]?.start_time).tz().utc().format('HH:mm') === record.time} 
-                            record={record[day][item]} 
+            return record[day].length > 0 ? record[day].map((item, index) =>  {
+                return (
+                        <CellShift
+                            key={index}
+                            isCellFilled={dayjs(item.start_time).tz().utc().format('dddd').toLowerCase() === day && dayjs(item.start_time).tz().utc().format('HH:mm') === record.time} 
+                            record={item} 
                             setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
                             selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
                             refetch={refetch}
                             city={city}
                             overlap={record[day].length}
+                            index={index}
                         />
                     )
-                } 
-            }
-
-            return (
-                <CellShift
-                    display={hoveredCell?.time === record.time && hoveredCell?.day === day}
-                    record={record}
-                    dayWeek={day}
-                    day={selectedWeek.day(idx).date()}
-                    setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
-                    selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
-                    refetch={refetch}
-                    city={city}
-                    overlap={1}
-                />
-            )
+                }) : (
+                    <CellShift
+                        display={hoveredCell?.time === record.time && hoveredCell?.day === day}
+                        record={record}
+                        dayWeek={day}
+                        day={selectedWeek.day(idx).date()}
+                        setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
+                        selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
+                        refetch={refetch}
+                        city={city}
+                        overlap={1}
+                        index={0}
+                    />
+                )
         },
         })),
     ]
