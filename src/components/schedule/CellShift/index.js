@@ -546,7 +546,7 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
     )
 }
 
-const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch, city}) => {
+const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch, city, overlap}) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [edit, setEdit] = useState({ // State to hold edit mode
         editMode: false,
@@ -573,7 +573,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         hasGuarantee: Boolean(record.guarantee),
         guarantee: record.guarantee || 0,
         guarantee_specs: record.guarantee_specs || '',
-        hasRecurrency: record.is_recurring,
+        hasRecurrency: record.is_recurring || false,
         pattern: 'weekly', // once, daily, weekly
         ends: 'never', // never, after, on
         recurrency: {
@@ -667,7 +667,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         <>
             <div className="container" style={{ minHeight: 24}}>
                 { isCellFilled ? (
-                    <WeekShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
+                    <WeekShiftCard overlap={overlap} cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
                 ) : (
                 <>
                     {  display && (
@@ -676,7 +676,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     </Tooltip> 
                     )}
                         { isHovering && (
-                            <WeekShiftCard cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
+                            <WeekShiftCard overlap={overlap} cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
                         )}
                 </>
                 )}
