@@ -99,7 +99,7 @@ const WeekView = ({selectedWeek, days, tz, city }) => {
             }
         },
         render: (text, record ) => {
-            console.log(record)
+            //console.log(record[day])
             for ( let item = 0; item < record[day].length; item++ ) {
                 if (dayjs(record[day][item]?.start_time).tz().utc().format('dddd').toLowerCase() === day && dayjs(record[day][item]?.start_time).tz().utc().format('HH:mm') === record.time) {
                     return (

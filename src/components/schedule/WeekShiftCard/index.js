@@ -12,6 +12,7 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
     const { token } = useToken()
     const [open, setOpen] = useState(false)
     const itemZIndex = parseInt(record.start.split(":")[0], 10)
+    const calcWidth = 100 / overlap
 
     const handleOpenChange = (newOpen) => {
       setOpen(newOpen);
@@ -19,6 +20,11 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
 
     const iconStyle = { 
         style: { color: token.colorTextDisabled, fontSize: 16 }
+    }
+
+    const ellipsisStyle = {
+        style: calcWidth < 100 ? {width: calcWidth, textAlign: 'left'} : {},
+        ellipsis: { tooltip: true, suffix: '' }
     }
 
     const content = (
@@ -128,7 +134,7 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
     )
 
     return (
-        <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: itemZIndex || 1, width: `calc(${(100 / overlap)}% + 2px)` }}>
+        <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: itemZIndex || 1, width: `calc(${calcWidth}% + 2px)` }}>
             <Popover open={open} onOpenChange={handleOpenChange} content={content} trigger="click">
                 <Card 
                     style={cardStyle}
@@ -136,9 +142,9 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
                     onClick={() => setOpen(true)}
                 >
                     <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-start', rowGap: 2 }}>
-                        <Text strong style={{ fontSize: 16 }}>{`${record.count || 0} \/ ${record.drivers}`}</Text>
-                        { record.guarantee !== 0 && <Text>${record.guarantee}</Text>}
-                        <Text>{`${record.start} ➡ ${record.end}`}</Text>
+                        <Text strong style={{ fontSize: 16, textAlign: 'left', ...(calcWidth < 100 ? {width: calcWidth} : {}) }} ellipsis={{ tooltip: true, suffix: '' }}>{`${record.count || 0} \/ ${record.drivers}`}</Text>
+                        { record.guarantee !== 0 && <Text {...ellipsisStyle}>${record.guarantee}</Text>}
+                        <Text {...ellipsisStyle}>{`${record.start} ➡ ${record.end}`}</Text>
                     </Space>
                 </Card>
             </Popover>
