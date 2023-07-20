@@ -143,7 +143,7 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
     )
     
     return (
-        <div className="floating-component" style={{ position: 'absolute', top: -1, left: calcLeft, zIndex: itemZIndex || 1, width: `calc(${calcWidth}% + 2px)` }}>
+        <div className="floating-component" style={{ position: 'absolute', top: -1, left: calcLeft, zIndex: itemZIndex || 1, width: `calc(${calcWidth}% )`, ...(calcWidth === 100 && {padding: '2px 3px'}) }}>
             <Popover open={open} onOpenChange={handleOpenChange} content={content} trigger="click">
                 <Card 
                     style={cardStyle}
