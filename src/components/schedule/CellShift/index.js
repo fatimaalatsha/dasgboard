@@ -588,7 +588,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
 
     const cardStyleConfig = {
         backgroundColor: shift.status === 'active' ? token.colorSuccessBg : token.colorWarningBg,
-        borderColor: shift.status === 'active' ? token.colorSuccessBorder : token.colorWarningBorder,
+        borderColor: shift.status === 'active' ? token['green-4'] : token['gold-4'],
         height: floatingComponentHeight,
         cursor: 'pointer',
     }
