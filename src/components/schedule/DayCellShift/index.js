@@ -14,6 +14,7 @@ import {
     Checkbox, 
     Input,
     message,
+    Spin,
 } from 'antd'
 import { 
     SwapRightOutlined, 
@@ -31,11 +32,13 @@ import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean, mixed } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../../store'
 
 import Submit from '../../forms/SubmitWrapper'
+import TimePickerWrapper from '../../forms/TimePickerWrapper'
+
 import { 
     convertToHourTz, 
     converToUTC, 
@@ -44,6 +47,7 @@ import {
     deleteWeekShift as deleteDayShift,
     unassignFromShift
 } from '../../../utils/schedule-status'
+import useFetch from '../../../hooks/use-new-fetch'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -68,6 +72,17 @@ const timeslotSchema = object().shape({
                 }),
     guarantee_specs: string().notRequired(),
 })
+
+const EditShiftModal = ({shift_id, open, tz, refetch}) => {
+    const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}`)
+
+    if (isLoading) { return <Spin /> }
+    if (error) {return <>Error...</>}
+
+    return (
+        <>Edit</>
+    )
+}
 
 const CardStatus = ({ status, guarantee }) => {
     return (
@@ -240,7 +255,10 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
     })
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [edit, setEdit] = useState(false) // State to hold edit mode
+    const [edit, setEdit] = useState({ // State to hold edit mode
+        editMode: false,
+        editRecord: record.id,
+    })
 
     const floatingComponentWidth = hours.diff * 60.9936  // 60.9936 is the average width of each hour in the calendar
 
@@ -389,19 +407,39 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                             ]}
                         >
                             <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                                <TimePicker.RangePicker 
+                                <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                <TimePickerWrapper 
+                                    name="start_time"
                                     style={{ width: '100%' }} 
+                                    value={dayjs(props.values.start_time, 'HH:mm')}
+                                    defaultValue={dayjs(props.values.start_time, 'HH:mm')}
                                     format="HH:mm" 
-                                    //defaultValue={[dayjs(hour, 'HH:mm'), null]} 
-                                    defaultValue={[dayjs(props.values.start_time, 'HH:mm'), props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : null]} 
                                     allowClear={false}
-                                    disabled={[true, false]} 
-                                    //onChange={handleHoursChange}
-                                    onChange={(time, timeString) => {
-                                        props.setFieldValue('start_time', timeString[0])
-                                        props.setFieldValue('end_time', timeString[1])
-                                        handleHoursChange(timeString)
+                                    showNow={false}
+                                    disabled
+                                    hideDisabledOptions
+                                    disabledTime={(current) => {
+                                        return {
+                                            disabledMinutes: () => {
+                                                const minuteSteps = [0, 30, 59]
+                                                const minutes = []
+                                                for (let i = 0; i < 60; i++) {
+                                                    if (!minuteSteps.includes(i)) {
+                                                        minutes.push(i)
+                                                    }
+                                                }
+                                                return minutes
+                                            },
+                                        }
                                     }}
+                                />
+                                <TimePickerWrapper 
+                                    name="end_time"
+                                    style={{ width: '100%' }} 
+                                    value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                    format="HH:mm" 
+                                    allowClear={false}
+                                    showNow={false}
                                     hideDisabledOptions
                                     disabledTime={(current) => {
                                         return {
@@ -427,6 +465,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                                         }
                                     }}
                                 />
+                                </div>
                                 <Checkbox 
                                     name="checked"
                                     checked={props.values.checked}
