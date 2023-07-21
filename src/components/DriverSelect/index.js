@@ -38,7 +38,7 @@ const DriverSelect = forwardRef((props, ref) => {
         event.preventDefault();
         event.stopPropagation();
         }
-
+        
         const tagConfig = {
             closable,
             onClose,
@@ -69,7 +69,7 @@ const DriverSelect = forwardRef((props, ref) => {
                 <Tooltip title="Permanent Driver?">
                     <Switch 
                         size="small" 
-                        checked={values.drivers.find((driver) => driver.driver_id === value)?.is_permanent}
+                        checked={values.drivers.find((driver) => driver.user_id === value)?.is_permanent}
                         onChange={handleSwitchChange}
                     />
                 </Tooltip>
