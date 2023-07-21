@@ -14,6 +14,7 @@ import {
     Checkbox, 
     Input,
     message,
+    Spin,
 } from 'antd'
 import { 
     SwapRightOutlined, 
@@ -31,11 +32,13 @@ import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean, mixed } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../../store'
 
 import Submit from '../../forms/SubmitWrapper'
+import TimePickerWrapper from '../../forms/TimePickerWrapper'
+
 import { 
     convertToHourTz, 
     converToUTC, 
@@ -44,6 +47,7 @@ import {
     deleteWeekShift as deleteDayShift,
     unassignFromShift
 } from '../../../utils/schedule-status'
+import useFetch from '../../../hooks/use-new-fetch'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -54,7 +58,7 @@ const { Text, Link } = Typography
 const timeslotSchema = object().shape({
     start_time: string().required('Start time is required'),
     end_time: string().required('End time is required'),
-    driver_ids: array().of(string()).required('Driver is required'),
+    driver_ids: number().required('Driver is required'),
     city_id: mixed().required('Required'),
     is_individual: boolean().required('Required'),
     is_recurring: boolean().required('Required'),
@@ -68,6 +72,17 @@ const timeslotSchema = object().shape({
                 }),
     guarantee_specs: string().notRequired(),
 })
+
+const EditShiftModal = ({shift_id, open, tz, refetch}) => {
+    const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}`)
+
+    if (isLoading) { return <Spin /> }
+    if (error) {return <>Error...</>}
+
+    return (
+        <>Edit</>
+    )
+}
 
 const CardStatus = ({ status, guarantee }) => {
     return (
@@ -240,7 +255,10 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
     })
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
-    const [edit, setEdit] = useState(false) // State to hold edit mode
+    const [edit, setEdit] = useState({ // State to hold edit mode
+        editMode: false,
+        editRecord: record.id,
+    })
 
     const floatingComponentWidth = hours.diff * 60.9936  // 60.9936 is the average width of each hour in the calendar
 
@@ -285,182 +303,217 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
 
     return (
         <>
-        <div className="container" style={{ minHeight: 24}}>
-            { isCellFilled ? (
-                    <ShiftCard 
-                        cardStyle={cardStyleConfig} 
-                        record={hours} 
-                        handleEdit={handleClick} 
-                        setEdit={setEdit} 
-                        setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
-                        refetch={refetch}
-                    />
-            ) : (
-            <>
-                { display && (
-                    <Tooltip title="Add shift">
-                        <Button type="text" style={{ width: '100%', height: '100%', padding: 8 }} size="small" onClick={handleClick} icon={<PlusOutlined />} />
-                    </Tooltip>
-                )}
-                { isHovering && (
-                    <ShiftCard 
-                        cardStyle={cardStyleConfig} 
-                        record={hours} 
-                        handleEdit={handleClick} 
-                        setEdit={setEdit} 
-                        setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
-                        refetch={refetch}
-                    />
-                )}
-            </>
-            )}
-                </div>
-            {isModalOpen && (
-                <Formik
-                    initialValues={{
-                        start_time: hours.start,
-                        end_time: hours.end,
-                        checked: hours.guarantee.active,
-                        guarantee: hours.guarantee.amount,
-                        guarantee_specs: hours.guarantee.description,
-                        driver_ids: [hours.driver_id],
-                        city_id: !edit ? [Number(city)] : Number(city),
-                        is_recurring: false,
-                        capacity: 1,
-                        is_individual: true,
-                    }}
-                    validationSchema={timeslotSchema}
-                    onSubmit={async (values, { setSubmitting, resetForm }) => {
-                        values.start_time = converToUTC( hours.current_day, values.start_time, scheduleFilter.tz)
-                        values.end_time = converToUTC( hours.current_day, values.end_time, scheduleFilter.tz)
-                        values.guarantee = Number(values.guarantee)
-                        !values.checked && delete values.guarantee
-                        delete values.checked
-                        edit && delete values.driver_ids
-                        !edit ?
-                        await createDayShift(values)
-                        .then(() => {
-                            message.success('Shift created successfully')
-                            setSubmitting(false)
-                            resetForm()
-                            setIsModalOpen(false)
-                            refetch()
-                        })
-                        :
-                        await updateDayShift(values, hours.id)
-                        .then(() => {
-                            message.success('Shift updated successfully')
-                            setSubmitting(false)
-                            resetForm()
-                            setIsModalOpen(false)
-                            refetch()
-                        })
-                    }}
-                >
-                    { props => (
-                    <FormikForm>
-                        <Modal 
-                            title="New Timeslot" 
-                            open={isModalOpen} 
-                            onCancel={handleCancel}
-                            destroyOnClose
-                            footer={[
-                                <Button key="back" onClick={handleCancel}>
-                                    Cancel
-                                </Button>,
-                                <Submit key="submit" type="primary">
-                                    Create Timeslot
-                                </Submit>,
-                            ]}
-                        >
-                            <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                                <TimePicker.RangePicker 
-                                    style={{ width: '100%' }} 
-                                    format="HH:mm" 
-                                    //defaultValue={[dayjs(hour, 'HH:mm'), null]} 
-                                    defaultValue={[dayjs(props.values.start_time, 'HH:mm'), props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : null]} 
-                                    allowClear={false}
-                                    disabled={[true, false]} 
-                                    //onChange={handleHoursChange}
-                                    onChange={(time, timeString) => {
-                                        props.setFieldValue('start_time', timeString[0])
-                                        props.setFieldValue('end_time', timeString[1])
-                                        handleHoursChange(timeString)
-                                    }}
-                                    hideDisabledOptions
-                                    disabledTime={(current) => {
-                                        return {
-                                            disabledHours: () => {
-                                                const hours = []
-                                                for (let i = 0; i < 24; i++) {
-                                                    if (i < dayjs(hour, 'HH:mm').hour() + 1) {
-                                                        hours.push(i)
-                                                    }
-                                                }
-                                                return hours
-                                            },
-                                            disabledMinutes: () => {
-                                                const minuteSteps = [0, 30, 59]
-                                                const minutes = []
-                                                for (let i = 0; i < 60; i++) {
-                                                    if (!minuteSteps.includes(i)) {
-                                                        minutes.push(i)
-                                                    }
-                                                }
-                                                return minutes
-                                            },
-                                        }
-                                    }}
-                                />
-                                <Checkbox 
-                                    name="checked"
-                                    checked={props.values.checked}
-                                    onChange={(e) => {
-                                        props.setFieldValue('checked', e.target.checked)
-                                        setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, active: e.target.checked } }))
-                                        if (!e.target.checked) {
-                                            props.setFieldValue('guarantee', 0)
-                                            setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, amount: 0 } }))
-                                        }
-                                    }}>
-                                    Guarantee?
-                                </Checkbox>
-                                { hours.guarantee.active && (
-                                    <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                                        <Input 
-                                            name="guarantee"
-                                            placeholder="Guarantee amount"
-                                            type="number"
-                                            min={0}
-                                            max={1000}
-                                            prefix="$" 
-                                            suffix="CAD" 
-                                            defaultValue={props.values.guarantee}
-                                            onChange={(e) => {
-                                                const value = Number(e.target.value)
-                                                props.setFieldValue('guarantee', value)
-                                                setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, amount: value } }))
-                                            }}
-                                        />
-                                        <Input.TextArea 
-                                            name="guarantee_specs"
-                                            defaultValue={props.values.guarantee_specs}
-                                            rows={4} 
-                                            placeholder="Guarantee description (optional)"
-                                            onChange={(e) => {
-                                                const value = e.target.value
-                                                props.setFieldValue('guarantee_specs', value)
-                                                setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, description: value } }))
-                                            }}
-                                        />
-                                    </Space>
-                                )}
-                            </Space>
-                        </Modal>
-                    </FormikForm>
+            <div className="container" style={{ minHeight: 24}}>
+                { isCellFilled ? (
+                        <ShiftCard 
+                            cardStyle={cardStyleConfig} 
+                            record={hours} 
+                            handleEdit={handleClick} 
+                            setEdit={setEdit} 
+                            setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
+                            refetch={refetch}
+                        />
+                ) : (
+                <>
+                    { display && (
+                        <Tooltip title="Add shift">
+                            <Button type="text" style={{ width: '100%', height: '100%', padding: 8 }} size="small" onClick={handleClick} icon={<PlusOutlined />} />
+                        </Tooltip>
                     )}
-                </Formik>
-            )}
+                    { isHovering && (
+                        <ShiftCard 
+                            cardStyle={cardStyleConfig} 
+                            record={hours} 
+                            handleEdit={handleClick} 
+                            setEdit={setEdit} 
+                            setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
+                            refetch={refetch}
+                        />
+                    )}
+                </>
+                )}
+            </div>
+            <Formik
+                initialValues={{
+                    start_time: hours.start,
+                    end_time: hours.end,
+                    checked: hours.guarantee.active,
+                    guarantee: hours.guarantee.amount,
+                    guarantee_specs: hours.guarantee.description,
+                    driver_ids: Number(hours.driver_id),
+                    city_id: [Number(city)],
+                    is_recurring: false,
+                    capacity: 1,
+                    is_individual: true,
+                }}
+                validationSchema={timeslotSchema}
+                onSubmit={async (values, { setSubmitting, resetForm }) => {
+                    const payload ={
+                        'start_time': converToUTC( hours.current_day, values.start_time, scheduleFilter.tz),
+                        'end_time': converToUTC( hours.current_day, values.end_time, scheduleFilter.tz),
+                        'drivers': [{'driver_id': values.driver_ids, 'is_permanent': false}],
+                        'city_id': values.city_id,
+                        'is_recurring': values.is_recurring,
+                        'is_individual': values.is_individual,
+                        'capacity': values.capacity,
+                        ...(values.checked && { 
+                            'guarantee': Number(values.guarantee),
+                            'guarantee_specs': values.guarantee_specs,
+                        }),
+                    }
+                    await createDayShift(payload)
+                    .then(() => {
+                        message.success('Shift created successfully')
+                        setSubmitting(false)
+                        resetForm()
+                        setIsModalOpen(false)
+                        refetch()
+                    })
+                    /* !edit ?
+                    await createDayShift(payload)
+                    .then(() => {
+                        message.success('Shift created successfully')
+                        setSubmitting(false)
+                        resetForm()
+                        setIsModalOpen(false)
+                        refetch()
+                    })
+                    :
+                    await updateDayShift(values, hours.id)
+                    .then(() => {
+                        message.success('Shift updated successfully')
+                        setSubmitting(false)
+                        resetForm()
+                        setIsModalOpen(false)
+                        refetch()
+                    }) */
+                }}
+            >
+                { props => (
+                <FormikForm>
+                    <Modal 
+                        title="New Timeslot" 
+                        open={isModalOpen} 
+                        onCancel={handleCancel}
+                        destroyOnClose
+                        footer={[
+                            <Button key="back" onClick={handleCancel}>
+                                Cancel
+                            </Button>,
+                            <Submit key="submit" type="primary">
+                                Create Timeslot
+                            </Submit>,
+                        ]}
+                    >
+                        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                            <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                            <TimePickerWrapper 
+                                name="start_time"
+                                style={{ width: '100%' }} 
+                                value={dayjs(props.values.start_time, 'HH:mm')}
+                                defaultValue={dayjs(props.values.start_time, 'HH:mm')}
+                                format="HH:mm" 
+                                allowClear={false}
+                                showNow={false}
+                                disabled
+                                hideDisabledOptions
+                                disabledTime={(current) => {
+                                    return {
+                                        disabledMinutes: () => {
+                                            const minuteSteps = [0, 30, 59]
+                                            const minutes = []
+                                            for (let i = 0; i < 60; i++) {
+                                                if (!minuteSteps.includes(i)) {
+                                                    minutes.push(i)
+                                                }
+                                            }
+                                            return minutes
+                                        },
+                                    }
+                                }}
+                            />
+                            <TimePickerWrapper 
+                                name="end_time"
+                                style={{ width: '100%' }} 
+                                value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                format="HH:mm" 
+                                allowClear={false}
+                                showNow={false}
+                                hideDisabledOptions
+                                disabledTime={(current) => {
+                                    return {
+                                        disabledHours: () => {
+                                            const hours = []
+                                            for (let i = 0; i < 24; i++) {
+                                                if (i < dayjs(hour, 'HH:mm').hour() + 1) {
+                                                    hours.push(i)
+                                                }
+                                            }
+                                            return hours
+                                        },
+                                        disabledMinutes: () => {
+                                            const minuteSteps = [0, 30, 59]
+                                            const minutes = []
+                                            for (let i = 0; i < 60; i++) {
+                                                if (!minuteSteps.includes(i)) {
+                                                    minutes.push(i)
+                                                }
+                                            }
+                                            return minutes
+                                        },
+                                    }
+                                }}
+                            />
+                            </div>
+                            <Checkbox 
+                                name="checked"
+                                checked={props.values.checked}
+                                onChange={(e) => {
+                                    props.setFieldValue('checked', e.target.checked)
+                                    setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, active: e.target.checked } }))
+                                    if (!e.target.checked) {
+                                        props.setFieldValue('guarantee', 0)
+                                        setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, amount: 0 } }))
+                                    }
+                                }}>
+                                Guarantee?
+                            </Checkbox>
+                            { hours.guarantee.active && (
+                                <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                    <Input 
+                                        name="guarantee"
+                                        placeholder="Guarantee amount"
+                                        type="number"
+                                        min={0}
+                                        max={1000}
+                                        prefix="$" 
+                                        suffix="CAD" 
+                                        defaultValue={props.values.guarantee}
+                                        onChange={(e) => {
+                                            const value = Number(e.target.value)
+                                            props.setFieldValue('guarantee', value)
+                                            setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, amount: value } }))
+                                        }}
+                                    />
+                                    <Input.TextArea 
+                                        name="guarantee_specs"
+                                        defaultValue={props.values.guarantee_specs}
+                                        rows={4} 
+                                        placeholder="Guarantee description (optional)"
+                                        onChange={(e) => {
+                                            const value = e.target.value
+                                            props.setFieldValue('guarantee_specs', value)
+                                            setHours(prevHours => ({...prevHours, guarantee: { ...prevHours.guarantee, description: value } }))
+                                        }}
+                                    />
+                                </Space>
+                            )}
+                        </Space>
+                    </Modal>
+                </FormikForm>
+                )}
+            </Formik>
+            
         </>
     )
 }
