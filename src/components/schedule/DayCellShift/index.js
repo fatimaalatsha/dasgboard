@@ -54,7 +54,7 @@ const { Text, Link } = Typography
 const timeslotSchema = object().shape({
     start_time: string().required('Start time is required'),
     end_time: string().required('End time is required'),
-    driver_ids: array().of(string()).required('Driver is required'),
+    driver_ids: number().required('Driver is required'),
     city_id: mixed().required('Required'),
     is_individual: boolean().required('Required'),
     is_recurring: boolean().required('Required'),
@@ -323,22 +323,37 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                         checked: hours.guarantee.active,
                         guarantee: hours.guarantee.amount,
                         guarantee_specs: hours.guarantee.description,
-                        driver_ids: [hours.driver_id],
-                        city_id: !edit ? [Number(city)] : Number(city),
+                        driver_ids: Number(hours.driver_id),
+                        city_id: [Number(city)],
                         is_recurring: false,
                         capacity: 1,
                         is_individual: true,
                     }}
                     validationSchema={timeslotSchema}
                     onSubmit={async (values, { setSubmitting, resetForm }) => {
-                        values.start_time = converToUTC( hours.current_day, values.start_time, scheduleFilter.tz)
-                        values.end_time = converToUTC( hours.current_day, values.end_time, scheduleFilter.tz)
-                        values.guarantee = Number(values.guarantee)
-                        !values.checked && delete values.guarantee
-                        delete values.checked
-                        edit && delete values.driver_ids
-                        !edit ?
-                        await createDayShift(values)
+                        const payload ={
+                            'start_time': converToUTC( hours.current_day, values.start_time, scheduleFilter.tz),
+                            'end_time': converToUTC( hours.current_day, values.end_time, scheduleFilter.tz),
+                            'drivers': [{'driver_id': values.driver_ids, 'is_permanent': false}],
+                            'city_id': values.city_id,
+                            'is_recurring': values.is_recurring,
+                            'is_individual': values.is_individual,
+                            'capacity': values.capacity,
+                            ...(values.checked && { 
+                                'guarantee': Number(values.guarantee),
+                                'guarantee_specs': values.guarantee_specs,
+                            }),
+                        }
+                        await createDayShift(payload)
+                        .then(() => {
+                            message.success('Shift created successfully')
+                            setSubmitting(false)
+                            resetForm()
+                            setIsModalOpen(false)
+                            refetch()
+                        })
+                        /* !edit ?
+                        await createDayShift(payload)
                         .then(() => {
                             message.success('Shift created successfully')
                             setSubmitting(false)
@@ -354,7 +369,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                             resetForm()
                             setIsModalOpen(false)
                             refetch()
-                        })
+                        }) */
                     }}
                 >
                     { props => (
