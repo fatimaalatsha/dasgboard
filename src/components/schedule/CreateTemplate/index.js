@@ -63,6 +63,12 @@ const templateSchema = object().shape({
         otherwise: number().notRequired(),
     }),
     guarantee_specs: string().notRequired(),
+    hasEarlyAccess: boolean().notRequired(),
+    early_access: number().when('hasEarlyAccess', {
+        is: true,
+        then: number().min(1, 'Shift driver early access must be greater than or equal to 1.').required('Required'),
+        otherwise: number().notRequired(),
+    }),
     is_recurring: boolean().notRequired(),
     pattern: string().when('is_recurring', {
         is: true,
@@ -146,6 +152,8 @@ const EditTemplate = ({refetch, template_id }) => {
                     guarantee_specs: data.guarantee_specs || '',
                     hasGuarantee: Boolean(data.guarantee),
                     is_recurring: data.is_recurring,
+                    hasEarlyAccess: false,
+                    early_access: 0,
                     days_of_week: data.days_of_week || [],
                     template: data.is_recurring ? Boolean(data.max_occurrences) || Boolean(data.end_date) || (data.days_of_week.length === 1 && dayjs().day(data.days_of_week.length) !== DEFAULT_DAY.day())  ? 'custom' : selectedTemplate(data.days_of_week) : 'weekly',
                     pattern: data.pattern,
@@ -165,7 +173,10 @@ const EditTemplate = ({refetch, template_id }) => {
                             'guarantee': Number(values.guarantee),
                             'guarantee_specs': values.guarantee_specs,
                         }),
-                        ...(values.is_recurring && {
+                        ...(values.hasEarlyAccess && !values.is_recurring && {
+                            'early_access': Number(values.early_access),
+                        }),
+                        ...(values.is_recurring && !values.hasEarlyAccess && {
                             'pattern': values.pattern,
                             ...(values.pattern !== 'once' && {'days_of_week': values.days_of_week}),
                             'never_ends': Boolean(values.ends === 'never'),
@@ -329,6 +340,33 @@ const EditTemplate = ({refetch, template_id }) => {
                             <Divider>
                             <Checkbox
                                 disabled={props.values.is_recurring}
+                                checked={props.values.hasEarlyAccess}
+                                onChange={(e) => {
+                                    props.setFieldValue('hasEarlyAccess', e.target.checked)
+                                }}
+                            >
+                                Early Access?
+                            </Checkbox>
+                            </Divider>
+                            { props.values.hasEarlyAccess && (
+                                <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                    <InputWrapper 
+                                        name="early_access"
+                                        placeholder="Early Access amount"
+                                        type="number"
+                                        min={0}
+                                        max={1000}
+                                        suffix="Days" 
+                                        value={props.values.guarantee}
+                                        onChange={(e) => {
+                                            props.setFieldValue('early_access', Number(e.target.value))
+                                        }}
+                                    />
+                                </Space>
+                            )}
+                            <Divider>
+                            <Checkbox
+                                disabled={props.values.is_recurring || props.values.hasEarlyAccess}
                                 checked={props.values.is_recurring}
                                 onChange={(e) => {
                                     props.setFieldValue('is_recurring', e.target.checked)
@@ -481,6 +519,8 @@ const CreateTemplate = ({refetch}) => {
                     guarantee_specs: '',
                     hasGuarantee: false,
                     is_recurring: false,
+                    hasEarlyAccess: false,
+                    early_access: 0,
                     days_of_week: [DEFAULT_DAY.day()],
                     template: 'weekly',
                     pattern: 'weekly',
@@ -500,7 +540,10 @@ const CreateTemplate = ({refetch}) => {
                             'guarantee': Number(values.guarantee),
                             'guarantee_specs': values.guarantee_specs,
                         }),
-                        ...(values.is_recurring && {
+                        ...(values.hasEarlyAccess && !values.is_recurring && {
+                            'early_access': Number(values.early_access),
+                        }),
+                        ...(values.is_recurring && !values.hasEarlyAccess && {
                             'pattern': values.pattern,
                             ...(values.pattern !== 'once' && {'days_of_week': values.days_of_week}),
                             'never_ends': Boolean(values.ends === 'never'),
@@ -662,6 +705,33 @@ const CreateTemplate = ({refetch}) => {
                                 )}
                             <Divider>
                             <Checkbox
+                                disabled={props.values.is_recurring}
+                                onChange={(e) => {
+                                    props.setFieldValue('hasEarlyAccess', e.target.checked)
+                                }}
+                            >
+                                Early Access?
+                            </Checkbox>
+                            </Divider>
+                                { props.values.hasEarlyAccess && (
+                                    <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                        <InputWrapper 
+                                            name="early_access"
+                                            placeholder="Early Access amount"
+                                            type="number"
+                                            min={0}
+                                            max={1000}
+                                            suffix="Days" 
+                                            value={props.values.guarantee}
+                                            onChange={(e) => {
+                                                props.setFieldValue('early_access', Number(e.target.value))
+                                            }}
+                                        />
+                                    </Space>
+                                )}
+                            <Divider>
+                            <Checkbox
+                                disabled={props.values.hasEarlyAccess}
                                 onChange={(e) => {
                                     props.setFieldValue('is_recurring', e.target.checked)
                                 }}
