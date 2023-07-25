@@ -174,7 +174,7 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                 is_recurring: data.is_recurring,
                 template: data.is_recurring ? Boolean(data.recurrence?.max_occurrences) || Boolean(data.recurrence?.end_date) || (data.recurrence?.days_of_week?.length === 1 && dayjs().day(data.recurrence?.days_of_week?.length) !== DEFAULT_DAY) ? 'custom' : selectedTemplate(data.recurrence?.days_of_week) : 'weekly',
                 pattern: data.recurrence?.pattern,
-                ends: data.never_ends ? 'never' : data.recurrence?.end_date ? 'on' : 'after',
+                ends: data.recurrence?.never_ends ? 'never' : data.recurrence?.end_date ? 'on' : 'after',
                 end_date: data.recurrence?.end_date || dayjs(data.start_time).tz(tz).utc().format('YYYY-MM-DD'),
                 max_occurrences: data.recurrence?.max_occurrences || 0,
                 'days_of_week': data.recurrence?.days_of_week || [],
