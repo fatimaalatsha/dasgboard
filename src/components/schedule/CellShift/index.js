@@ -59,6 +59,12 @@ const shiftSchema = object().shape({
     }),
     guarantee_specs: string().notRequired(),
     drivers: array().of(mixed().nullable()).notRequired(),
+    hasEarlyAccess: boolean().notRequired(),
+    early_access: number().when('hasEarlyAccess', {
+        is: true,
+        then: number().min(1, 'Shift driver early access must be greater than or equal to 1.').required('Required'),
+        otherwise: number().notRequired(),
+    }),
     is_recurring: boolean().notRequired(),
     pattern: string().when('is_recurring', {
         is: true,
@@ -171,6 +177,8 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                 guarantee_specs: data.guarantee_specs || '',
                 hasGuarantee: Boolean(data.guarantee),
                 'drivers': data.drivers || [],
+                hasEarlyAccess: false,
+                early_access: 0,
                 is_recurring: data.is_recurring,
                 template: data.is_recurring ? Boolean(data.recurrence?.max_occurrences) || Boolean(data.recurrence?.end_date) || (data.recurrence?.days_of_week?.length === 1 && dayjs().day(data.recurrence?.days_of_week?.length) !== DEFAULT_DAY) ? 'custom' : selectedTemplate(data.recurrence?.days_of_week) : 'weekly',
                 pattern: data.recurrence?.pattern,
@@ -194,6 +202,9 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                     ...(values.hasGuarantee && {
                         'guarantee': Number(values.guarantee),
                         'guarantee_specs': values.guarantee_specs,
+                    }),
+                    ...(values.hasEarlyAccess && !values.is_recurring && {
+                        'early_access': Number(values.early_access),
                     }),
                     ...(values.is_recurring && {
                         'pattern': values.pattern,
@@ -366,6 +377,33 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                                         placeholder="Guarantee description (optional)"
                                         onChange={(e) => {
                                             props.setFieldValue('guarantee_specs', e.target.value)
+                                        }}
+                                    />
+                                </Space>
+                            )}
+                            <Divider>
+                            <Checkbox
+                                disabled={props.values.is_recurring}
+                                checked={props.values.hasEarlyAccess}
+                                onChange={(e) => {
+                                    props.setFieldValue('hasEarlyAccess', e.target.checked)
+                                }}
+                            >
+                                Early Access?
+                            </Checkbox>
+                            </Divider>
+                            { props.values.hasEarlyAccess && (
+                                <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                    <InputWrapper 
+                                        name="early_access"
+                                        placeholder="Early Access amount"
+                                        type="number"
+                                        min={0}
+                                        max={1000}
+                                        suffix="Days" 
+                                        value={props.values.guarantee}
+                                        onChange={(e) => {
+                                            props.setFieldValue('early_access', Number(e.target.value))
                                         }}
                                     />
                                 </Space>
@@ -681,6 +719,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     guarantee_specs: shift.guarantee_specs,
                     hasGuarantee: shift.hasGuarantee,
                     'drivers': [],
+                    hasEarlyAccess: false,
+                    early_access: 0,
                     is_recurring: shift.hasRecurrency,
                     template: 'weekly',
                     pattern: shift.pattern,
@@ -709,7 +749,10 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                             'guarantee': Number(values.guarantee),
                             'guarantee_specs': values.guarantee_specs,
                         }),
-                        ...(values.is_recurring && {
+                        ...(values.hasEarlyAccess && !values.is_recurring && {
+                            'early_access': Number(values.early_access),
+                        }),
+                        ...(values.is_recurring && !values.hasEarlyAccess && {
                             'pattern': values.pattern,
                             ...(values.pattern !== 'once' && {'days_of_week': values.days_of_week}),
                             'never_ends': Boolean(values.ends === 'never'),
@@ -897,8 +940,36 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 )}
                                 <Divider>
                                 <Checkbox
+                                    disabled={props.values.is_recurring}
+                                    checked={props.values.hasEarlyAccess}
+                                    onChange={(e) => {
+                                        props.setFieldValue('hasEarlyAccess', e.target.checked)
+                                    }}
+                                >
+                                    Early Access?
+                                </Checkbox>
+                                </Divider>
+                                    { props.values.hasEarlyAccess && (
+                                        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                            <InputWrapper 
+                                                name="early_access"
+                                                placeholder="Early Access amount"
+                                                type="number"
+                                                min={0}
+                                                max={1000}
+                                                suffix="Days" 
+                                                value={props.values.guarantee}
+                                                onChange={(e) => {
+                                                    props.setFieldValue('early_access', Number(e.target.value))
+                                                }}
+                                            />
+                                        </Space>
+                                    )}
+                                <Divider>
+                                <Checkbox
                                     name="is_recurring"
                                     checked={props.values.is_recurring}
+                                    disabled={props.values.hasEarlyAccess}
                                     onChange={(e) => {
                                         props.setFieldValue('is_recurring', e.target.checked)
                                     }}
