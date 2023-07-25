@@ -1,23 +1,177 @@
 import useNewFetch from "../../hooks/use-new-fetch";
-
-import { Card, Space, Typography, Avatar, Tag, Descriptions, Row, Col } from "antd";
+import React, { useState, useEffect } from "react";
+import {
+  Card,
+  Space,
+  Typography,
+  Avatar,
+  Tag,
+  Descriptions,
+  Divider,
+  Rate,
+  Table,
+  Progress,
+} from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import EditableText from "../../components/EditableText";
+import CardStatistic from "../../components/CardStatistic";
+
+const { Title, Text } = Typography;
+
+const DriverReviews = ({ name, value, updateCallback }) => {
+  const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
+
+  const { data, loading, error } = useNewFetch(
+    `/v1/active-drivers/30c2cf46-a92c-4de6-8138-3913d70cb185/reviews`
+  );
+  console.log(data, loading, error);
+
+  const reviewToWords = (review) => {
+    switch (review) {
+      case 1:
+        return "Very Bad";
+      case 2:
+        return "Bad";
+      case 3:
+        return "Average";
+      case 4:
+        return "Good";
+      case 5:
+        return "Excellent";
+      default:
+        return "No Rating";
+    }
+  };
+
+  const columns = [
+    {
+      title: "Passenger",
+      dataIndex: "passenger",
+      key: "passenger",
+    },
+    // {
+    //   title: "Ride Id",
+    //   dataIndex: "ride_id",
+    //   key: "ride_id",
+    // },
+    {
+      title: "Rating",
+      dataIndex: "rating",
+      key: "rating",
+      render: (rating) => <Rate disabled defaultValue={rating} />,
+    },
+    {
+      title: "Feedback",
+      dataIndex: "feedback",
+      key: "feedback",
+      render: (feedback) => (
+        <Text
+          style={{
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-all",
+            ellipsis: true,
+          }}
+        >
+          {feedback}
+        </Text>
+      ),
+    },
+  ];
+  const handleRowExpand = (record) => {
+    // Toggle the expanded row when a row is clicked
+    setExpandedRowKey((prevExpandedKey) =>
+      prevExpandedKey === record.ride_id ? null : record.ride_id
+    );
+  console.log("record", record);
+  };
+
+  return (
+    <>
+      <Table
+        columns={columns}
+        dataSource={data?.data}
+        loading={loading}
+        pagination={false}
+        rowKey="ride_id"
+        expandable={{
+          expandedRowKeys: [expandedRowKey], // Specify the currently expanded row key
+          onExpand: (expanded, record) => handleRowExpand(record), // Handle row expansion
+          expandedRowRender: (record) => (
+            <>
+              <Space direction="horizontal" size="large">
+                <Space direction="vertical">
+                  <Progress
+                    type="circle"
+                    percent={record.rating * 20}
+                    format={() =>
+                      record.rating == null ? `0` : `${record.rating}`
+                    }
+                    color={record.rating < 3 ? "red" : "green"}
+                  />
+                  <Rate disabled defaultValue={record.rating} />
+                  <Tag
+                    color={record.rating < 3 ? "red" : "green"}
+                    style={{ marginLeft: 10 }}
+                    className="large-badge"
+                  >
+                    {reviewToWords(record.rating)}
+                  </Tag>
+                </Space>
+
+                <Space direction="vertical">
+                  {/* <Descriptions labelStyle={{ fontWeight: "bold" }}>
+              <Descriptions.Item label="First Name"> */}
+                  <Descriptions labelStyle={{ fontWeight: "bold" }} column={1}>
+                    <Descriptions.Item label="Feedback">
+                      <Text
+                        style={{
+                          whiteSpace: "pre-wrap",
+                          wordBreak: "break-all",
+                          ellipsis: true,
+                        }}
+                      >
+                        {record.feedback}{" "}
+                      </Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Ride Id ">
+                      <Text>{record.ride_id}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Passenger Id ">
+                      <Text>{record.passenger_id}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Drop Off ">
+                      <Text> {record.dropoff_completed_at}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Creation Date ">
+                      <Text> {record.creation_date}</Text>
+                    </Descriptions.Item>
+
+                    <Descriptions.Item label="Last Updated ">
+                      <Text> {record.updated_at}</Text>
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Space>
+              </Space>
+            </>
+          ),
+          rowExpandable: () => true,
+        }}
+      />
+    </>
+  );
+};
 
 const AutofleetDriversDetails = () => {
+  const { data, loading, error } = useNewFetch(
+    `/v1/active-drivers/30c2cf46-a92c-4de6-8138-3913d70cb185`
+  );
+  console.log(data, loading, error);
 
-  const { Title, Text } = Typography;
-  const { data, loading, error } = useNewFetch(`/v1/active-drivers/30c2cf46-a92c-4de6-8138-3913d70cb185`)
-  console.log(data, loading, error)
-   
   const isLoading = loading || !data;
-
-
-
   return (
     <Card title="Autofleet Drivers Details" style={{ width: "100%" }}>
       <Card.Meta
-        ghost={false}
+        // ghost={false}
         // onBack={() => navigate(parentUrl)}
         title={
           <Space direction="vertical">
@@ -30,58 +184,61 @@ const AutofleetDriversDetails = () => {
                 {data.status}
               </Tag>
             </Space>
-            <Space direction="horizontal" size={0}></Space>
             <Descriptions labelStyle={{ fontWeight: "bold" }}>
               <Descriptions.Item label="First Name">
-                <EditableText
-                  name="first_name"
-                  value={data.first_name}
+                <Text>{data.first_name}</Text>
+                {/* name="first_name"
+                  value=
                   // updateCallback={updateText}
-                />
+                /> */}
               </Descriptions.Item>
               <Descriptions.Item label="Last Name">
-                <EditableText
+                {/* <EditableText
                   name="last_name"
                   value={data.last_name}
                   // updateCallback={updateText}
-                />
+                /> */}
+                <Text>{data.last_name}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Email">
-                <EditableText
+                {/* <EditableText
                   name="email"
                   value={data.email}
                   // updateCallback={updateText}
-                />
+                /> */}
+                <Text>{data.email}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Phone Number">
-                <EditableText name="phone" value={data.phone} copyable />
+                {/* <EditableText name="phone" value={data.phone} copyable /> */}
+                <Text>{data.phone}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Licence Number">
-                <EditableText
+                {/* <EditableText
                   name="license_number"
                   value={data.license_number}
-                />
+                /> */}
+                <Text>{data.license_number}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Licence Type">
                 {/* <LicenseTypeFeeder name='license_type_id' province={data.city?.province_id} value={data.license?.name}  /> */}
-                <EditableText
+                {/* <EditableText
                   name="license_type_id"
                   value={data.license_type_id}
-                />
+                /> */}
+                <Text>{data.license_type_id}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="City">
                 {/* <SelectFeeder value={data.city?.name}  /> */}
-                <EditableText name="city_id" value={data.city_id} />
+                {/* <EditableText name="city_id" value={data.city_id} /> */}
+                <Text>{data.city_id}</Text>
               </Descriptions.Item>
-              <Descriptions.Item label="Address">
-                <EditableText name="address" value={data.address} />
-              </Descriptions.Item>
+
               <Descriptions.Item label="Date of Birth">
                 {/* <EditableDate name='birth_date' value={data.birth_date}  /> */}
                 <Text name="birth_date">{data.birth_date?.split("T")[0]}</Text>
               </Descriptions.Item>
-              <Descriptions.Item label="HST Number">
-                <EditableText name="hst_number" value={data.hst_number} />
+              <Descriptions.Item label="Vender">
+                <Text name="vendor">{data.vendor?.name}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Last Updated">
                 {/* <EditableDate name='reviewed_at' value={data.reviewed_at.split('T')[0]} updateCallback={updateText} /> */}
@@ -90,7 +247,13 @@ const AutofleetDriversDetails = () => {
               <Descriptions.Item label="Application Date">
                 <Text name="created_at">{data.created_at?.split("T")[0]}</Text>
               </Descriptions.Item>
+              <Descriptions.Item label="Address">
+                {/* <EditableText name="address" value={data.address} /> */}
+                <Text>{data.address}</Text>
+              </Descriptions.Item>
             </Descriptions>
+            <Divider orientation="left"> Reviews </Divider>
+            <DriverReviews name="Review" value={data.review} />
           </Space>
         }
       />
