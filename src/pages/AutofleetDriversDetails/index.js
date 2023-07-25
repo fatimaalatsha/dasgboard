@@ -13,6 +13,8 @@ import {
   Progress,
 } from "antd";
 import { UserOutlined } from "@ant-design/icons";
+import dayjs from "dayjs"// Import date handlers
+
 import EditableText from "../../components/EditableText";
 import CardStatistic from "../../components/CardStatistic";
 
@@ -133,21 +135,21 @@ const DriverReviews = ({ name, value, updateCallback }) => {
                         {record.feedback}{" "}
                       </Text>
                     </Descriptions.Item>
-                    <Descriptions.Item label="Ride Id ">
+                    <Descriptions.Item label="Ride ID ">
                       <Text>{record.ride_id}</Text>
                     </Descriptions.Item>
-                    <Descriptions.Item label="Passenger Id ">
+                    <Descriptions.Item label="Passenger ID ">
                       <Text>{record.passenger_id}</Text>
                     </Descriptions.Item>
                     <Descriptions.Item label="Drop Off ">
-                      <Text> {record.dropoff_completed_at}</Text>
+                      <Text> {record.dropoff_completed_at?.split("T")[0]}</Text>
                     </Descriptions.Item>
                     <Descriptions.Item label="Creation Date ">
-                      <Text> {record.creation_date}</Text>
+                      <Text> {record.creation_date?.split("T")[0]}</Text>
                     </Descriptions.Item>
-
                     <Descriptions.Item label="Last Updated ">
-                      <Text> {record.updated_at}</Text>
+                      {/* make date more readable */}
+                      <Text> {record.updated_at?.split("T")[0]}</Text>
                     </Descriptions.Item>
                   </Descriptions>
                 </Space>

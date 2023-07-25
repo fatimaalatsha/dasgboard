@@ -35,7 +35,6 @@ import { getAutoFleetCities } from "../../utils/city-status";
 import { updateVendorId, getVendorId } from "../../utils/driver-status";
 
 import { useFilterStore } from "../../store"; // Import filter store
-import { fill } from "pdf-lib";
 
 const { Text } = Typography;
 
