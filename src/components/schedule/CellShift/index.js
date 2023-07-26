@@ -653,15 +653,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
 
     const handleDelete = async () => {
         setDeleteModal({ ...deleteModal, open: true })
-        /* await deleteWeekShift(shift.shift_id)
-        .then((res) => {
-            if(res.status === 400) {
-                message.error(res.message)
-            } else {
-                message.success(res.message)
-            }
-            refetch()
-        }) */
     }
 
     const handleEdit = (value) => {
@@ -685,8 +676,10 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     const handleStatusChange = async (value) => {
         const payload = {
             status: value,
+            affects_to: 'current',
+            exists: false,
         }
-        await updateWeekShift(payload, shift.shift_id)
+        await updateWeekShift(payload, shift.shift_id || record.parent_id)
         .then(() => {
             message.success('Shift status updated')
             refetch()
