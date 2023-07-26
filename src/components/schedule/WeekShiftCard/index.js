@@ -63,7 +63,10 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
                     </Tooltip>
                     <Tooltip title="Delete">
                         <Button 
-                            onClick={() => handleDelete()} 
+                            onClick={() => {
+                                setOpen(false)
+                                handleDelete()
+                            }} 
                             type="text" 
                             danger 
                             icon={<DeleteOutlined />} 

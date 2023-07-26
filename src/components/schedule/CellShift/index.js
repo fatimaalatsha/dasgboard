@@ -594,6 +594,10 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         editMode: false,
         editRecord: record.id,
     })
+    const [deleteModal, setDeleteModal] = useState({ // State to hold delete modal
+        open: false,
+        shift_id: record.id || record.parent_id,
+    })
     const { token } = useToken()
     const [hours, setHours] = useState({
         start: record.start,
@@ -648,7 +652,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     }
 
     const handleDelete = async () => {
-        await deleteWeekShift(shift.shift_id)
+        setDeleteModal({ ...deleteModal, open: true })
+        /* await deleteWeekShift(shift.shift_id)
         .then((res) => {
             if(res.status === 400) {
                 message.error(res.message)
@@ -656,7 +661,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                 message.success(res.message)
             }
             refetch()
-        })
+        }) */
     }
 
     const handleEdit = (value) => {
@@ -1092,6 +1097,70 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
             { edit.editMode &&  (
                 <EditShiftModal shift_id={edit.editRecord} parent_id={record.parent_id} open={edit.editMode} tz={scheduleFilter.tz} refetch={refetch} record={record}/>
             )}
+            
+        { deleteModal.open && (
+        <Formik
+            initialValues={{
+                affects_to: 'current',
+            }}
+            validationSchema={editRecurringSchema}
+            onSubmit={async (values, { setSubmitting, resetForm }) => {
+                await deleteWeekShift({'affects_to': values.affects_to}, deleteModal.shift_id)
+                .then((res) => {
+                    if(res.status === 400) {
+                        message.error(res.message)
+                    } else {
+                        message.success(res.message)
+                    }
+                    setSubmitting(false)
+                    resetForm()
+                    setDeleteModal({ ...deleteModal, open: false})
+                    refetch()
+                })
+            }}
+        >
+            {props => (
+                <FormikForm>
+                    <Modal
+                        title="Delete recurring shift"
+                        open={deleteModal.open}
+                        destroyOnClose
+                        onCancel={() => {
+                            setDeleteModal({ ...deleteModal, open: false})
+                            props.resetForm()
+                            refetch()
+                        }}
+                        footer={[
+                            <Button key="back" onClick={() => {
+                                setDeleteModal({ ...deleteModal, open: false})
+                                props.resetForm()
+                                refetch()
+                            }}>
+                                Cancel
+                            </Button>,
+                            <Submit key="submit" type="primary">
+                                OK
+                            </Submit>,
+                        ]}
+                    >
+                        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                            <Radio.Group
+                                style={{ width: '100%' }} 
+                                value={props.values.affects_to}
+                                onChange={(e) => props.setFieldValue('affects_to', e.target.value)}
+                            >
+                            <Space direction="vertical" style={{ width: '100%' }}>
+                                <Radio value="current">{`This shift`}</Radio>
+                                <Radio value="future">{`This and following shifts`}</Radio>
+                                <Radio value="all">{`All Shifts`}</Radio>
+                            </Space>
+                        </Radio.Group>
+                        </Space>
+                    </Modal>
+                </FormikForm>
+            )}
+        </Formik>
+        )}
         </>
     )
 }
