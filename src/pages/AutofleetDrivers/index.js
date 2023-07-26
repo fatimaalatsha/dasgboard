@@ -214,10 +214,9 @@ const AutofleetDrivers = () => {
       dataIndex: "view",
       key: "view",
       render: (text, record) => (
-        // <Link to={`/autofleet/driver/${record.id}`}>
         <Button type="primary" ghost
           onClick={() => {
-           navigate(`/autofleet_drivers/${record.id}`);
+           navigate(`/autofleet_drivers/${record.driver_id}`);
           }}
       >
             View

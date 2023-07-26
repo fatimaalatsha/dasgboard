@@ -13,21 +13,17 @@ import {
   Progress,
 } from "antd";
 import { UserOutlined } from "@ant-design/icons";
-import dayjs from "dayjs"// Import date handlers
-
-import EditableText from "../../components/EditableText";
-import CardStatistic from "../../components/CardStatistic";
+import { useParams, useLocation, useNavigate } from "react-router-dom";
 
 const { Title, Text } = Typography;
 
-const DriverReviews = ({ name, value, updateCallback }) => {
+const DriverReviews = ({ driverId }) => {
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
 
   const { data, loading, error } = useNewFetch(
-    `/v1/active-drivers/30c2cf46-a92c-4de6-8138-3913d70cb185/reviews`
+    `/v1/active-drivers/${driverId}/reviews`
   );
-  console.log(data, loading, error);
-
+   
   const reviewToWords = (review) => {
     switch (review) {
       case 1:
@@ -84,7 +80,6 @@ const DriverReviews = ({ name, value, updateCallback }) => {
     setExpandedRowKey((prevExpandedKey) =>
       prevExpandedKey === record.ride_id ? null : record.ride_id
     );
-  console.log("record", record);
   };
 
   return (
@@ -164,17 +159,22 @@ const DriverReviews = ({ name, value, updateCallback }) => {
 };
 
 const AutofleetDriversDetails = () => {
-  const { data, loading, error } = useNewFetch(
-    `/v1/active-drivers/30c2cf46-a92c-4de6-8138-3913d70cb185`
-  );
-  console.log(data, loading, error);
+  //get the driver id from the url
+  const { id } = useParams();
+  const location = useLocation(); // Get current location
+  const pathArray = location.pathname.split("/");
+  pathArray.pop();
+  const parentUrl = pathArray.join("/");
+  
 
+
+  const { data, loading, error } = useNewFetch(
+    `/v1/active-drivers/${id}`
+  );
   const isLoading = loading || !data;
   return (
     <Card title="Autofleet Drivers Details" style={{ width: "100%" }}>
       <Card.Meta
-        // ghost={false}
-        // onBack={() => navigate(parentUrl)}
         title={
           <Space direction="vertical">
             <Space direction="horizontal">
@@ -182,7 +182,8 @@ const AutofleetDriversDetails = () => {
               <Title level={4} style={{ marginTop: 0 }}>
                 {`${data.first_name} ${data.last_name}`}
               </Title>
-              <Tag color="green" style={{ marginLeft: 10 }}>
+              <Tag color={data.status === "active" ? "green" : "red"}
+                style={{ marginLeft: 10 }}>
                 {data.status}
               </Tag>
             </Space>
@@ -255,7 +256,7 @@ const AutofleetDriversDetails = () => {
               </Descriptions.Item>
             </Descriptions>
             <Divider orientation="left"> Reviews </Divider>
-            <DriverReviews name="Review" value={data.review} />
+            <DriverReviews name="Review" driverId={id} />
           </Space>
         }
       />
