@@ -93,15 +93,7 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
                         <Space style={{ display: 'flex', columnGap: 2, alignItems: 'baseline' }}>
                             <Text style={{ margin: 0 }}>{record.count}</Text>
                             <Text>/</Text>
-                            <EditableText
-                                value={record?.drivers}
-                                name="capacity"
-                                strong
-                                updateCallback={ async (values) => {
-                                    await updateWeekShift(values, record.shift_id)
-                                    refetch()
-                                }}
-                            />
+                            <Text strong >{record?.drivers}</Text>
                         </Space>
                     </Col>
                 </Row>
