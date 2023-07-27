@@ -99,6 +99,7 @@ const WeekView = ({selectedWeek, days, tz, city }) => {
             }
         },
         render: (text, record ) => {
+            console.log(`${day}: `, record)
             return record[day].length > 0 ? record[day].map((item, index) =>  {
                 return (
                         <CellShift
