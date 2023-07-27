@@ -60,7 +60,7 @@ const updateWeekShift = async (payload, id) => {
     }
 }
 
-const deleteWeekShift = async (id) => {
+const deleteWeekShift = async (payload, id) => {
     try {
         const auth = await Auth.currentSession()// Get current session
         const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -71,7 +71,8 @@ const deleteWeekShift = async (id) => {
                 'Cache-Control': 'no-cache',
                 'Pragma': 'no-cache',
                 'Expires': '0',
-            }
+            },
+            data: payload
         }
         const response = await API.delete(`/v1/shifts/${id}`, options)
         const data = await response.data
