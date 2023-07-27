@@ -146,7 +146,7 @@ const EditShiftModal = ({shift_id, parent_id ,open, tz, refetch, record}) => {
         setIsModalOpen(false)
         refetch()
     }
-//console.log(record)
+
     const selectedTemplate = (days_arr) => {
         switch(true) {
             case days_arr.length === 1:
@@ -659,17 +659,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
             ...edit,
             editMode: value,
         })
-    }
-
-    const handleHoursChange = (timeString) => {
-        setShift({
-            ...shift,
-            start: timeString[0],
-            end: timeString[1],
-        })
-        const hoursDiff = dayjs(timeString[1], 'HH:mm').diff(dayjs(timeString[0], 'HH:mm'), 'hour', true)
-        setHours({start: timeString[0], end: timeString[1], diff: hoursDiff})
-        setHoveredCell({ time: timeString[0], day: day })
     }
 
     const handleStatusChange = async (value) => {
