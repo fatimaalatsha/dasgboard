@@ -1,27 +1,17 @@
 import { useState } from 'react'
 import { Card, Space, Row, Col, Typography, Tag, Tooltip, Popover, Button, theme } from 'antd'
 import { DeleteOutlined, EditOutlined, FlagOutlined, LikeOutlined, DislikeOutlined, CalendarOutlined, ExceptionOutlined, DollarOutlined, UserOutlined } from '@ant-design/icons'
-import EditableText from '../../EditableText' // EditableText component for inline editing capacity
-import { updateWeekShift } from '../../../utils/schedule-status'
 import dayjs from 'dayjs'
 
 const { Text, Title } = Typography
 const { useToken } = theme
 
-const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatus, refetch, overlap, index }) => {
+const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatus, refetch, overlap, index, status }) => {
     const { token } = useToken()
     const [open, setOpen] = useState(false)
     const itemZIndex = parseInt(record.start.split(":")[0], 10)
     const calcWidth = 100 / overlap
     const calcLeft = (calcWidth / 100) * 197 * index
-
-    const leftSequence = (n) => {
-        const sequence = [0, 1]
-        for (let i = 2; i < n; i++) {
-            sequence.push(sequence[i - 2] + sequence[i - 1])
-        }
-        return sequence
-    }
 
     const handleOpenChange = (newOpen) => {
       setOpen(newOpen);
@@ -54,11 +44,11 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
                             icon={<EditOutlined />} 
                         />
                     </Tooltip>
-                    <Tooltip title={record.status === 'active' ? 'Deactivate' : 'Activate'}>
+                    <Tooltip title={status === 'active' ? 'Deactivate' : 'Activate'}>
                         <Button 
-                            onClick={() => handleStatus(record.status === 'active' ? 'inactive' : 'active')} 
+                            onClick={() => handleStatus(status === 'active' ? 'inactive' : 'active')} 
                             type="link" 
-                            icon={record.status === 'active' ? <DislikeOutlined /> : <LikeOutlined />} 
+                            icon={status === 'active' ? <DislikeOutlined /> : <LikeOutlined />} 
                         />
                     </Tooltip>
                     <Tooltip title="Delete">

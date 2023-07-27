@@ -604,7 +604,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         end: record.end,
         diff: record.duration ? record.duration : 4
     });
-    
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const DEFAULT_DAY = dayjs(selectedDay).tz(scheduleFilter.tz).utc().day()
@@ -633,8 +632,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     const floatingComponentHeight = hours.diff * 57 + 2
 
     const cardStyleConfig = {
-        backgroundColor: shift.status === 'active' ? token.colorSuccessBg : token.colorWarningBg,
-        borderColor: shift.status === 'active' ? token['green-4'] : token['gold-4'],
+        backgroundColor: record.status === 'active' ? token.colorSuccessBg : token.colorWarningBg,
+        borderColor: record.status === 'active' ? token['green-4'] : token['gold-4'],
         height: floatingComponentHeight,
         cursor: 'pointer',
     }
@@ -677,9 +676,13 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         const payload = {
             status: value,
             affects_to: 'current',
-            exists: false,
+            ...( !record.exists && {
+                exists: false,
+                start_time: record.start_time,
+                end_time: record.end_time,
+            })
         }
-        await updateWeekShift(payload, shift.shift_id || record.parent_id)
+        await updateWeekShift(payload, record.id || record.parent_id)
         .then(() => {
             message.success('Shift status updated')
             refetch()
@@ -698,7 +701,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     return (
         <>
                 { isCellFilled ? (
-                    <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
+                    <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} status={record.status} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} day={selectedDay} />
                 ) : (
                 <>
                     {  display && (
@@ -707,7 +710,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     </Tooltip> 
                     )}
                         { isHovering && (
-                            <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
+                            <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} status={record.status} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} day={selectedDay} />
                         )}
                 </>
                 )}
