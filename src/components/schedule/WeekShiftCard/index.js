@@ -136,7 +136,7 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
                     onClick={() => setOpen(true)}
                 >
                     <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-start', rowGap: 2 }}>
-                        <Text strong style={{ fontSize: 16, textAlign: 'left', ...(calcWidth < 100 ? {width: calcWidth} : {}) }} ellipsis={{ tooltip: true, suffix: '' }}>{`${record.count || 0} \/ ${record.drivers}`}</Text>
+                        <Text strong style={{ fontSize: 16, textAlign: 'left', ...(calcWidth < 100 ? {width: calcWidth} : {}) }} ellipsis={{ tooltip: true, suffix: '' }}>{`${record.count || 0} / ${record.drivers}`}</Text>
                         { record.guarantee !== 0 && <Text {...ellipsisStyle}>${record.guarantee}</Text>}
                         <Text {...ellipsisStyle}>{`${record.start} ➡ ${record.end}`}</Text>
                     </Space>
