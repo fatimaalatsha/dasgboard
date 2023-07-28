@@ -651,7 +651,19 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     }
 
     const handleDelete = async () => {
-        setDeleteModal({ ...deleteModal, open: true })
+        if(record.is_recurring) {
+            setDeleteModal({ ...deleteModal, open: true })
+        } else {
+            await deleteWeekShift({'affects_to': 'current'}, shift.shift_id)
+            .then((res) => {
+                if(res.status === 400) {
+                    message.error(res.message)
+                } else {
+                    message.success(res.message)
+                }
+                refetch()
+            })
+        }
     }
 
     const handleEdit = (value) => {
