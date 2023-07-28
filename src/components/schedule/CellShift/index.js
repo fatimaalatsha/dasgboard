@@ -829,7 +829,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                             format="HH:mm" 
                                             allowClear={false}
                                             showNow={false}
-                                            disabled
                                             hideDisabledOptions
                                             disabledTime={(current) => {
                                                 return {
@@ -859,7 +858,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                     disabledHours: () => {
                                                         const hours = []
                                                         for (let i = 0; i < 24; i++) {
-                                                            if (i < (record.start_time ? dayjs(shift.start, 'HH:mm').hour() : dayjs(record.time, 'HH:mm').hour()) + 1) {
+                                                            if (i < (dayjs(props.values.start_time, 'HH:mm').hour()) + 1) {
                                                                 hours.push(i)
                                                             }
                                                         }
