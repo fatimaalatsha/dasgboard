@@ -20,10 +20,7 @@ const { Title, Text } = Typography;
 const DriverReviews = ({ driverId }) => {
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
 
-  const { data, loading, error } = useNewFetch(
-    `/v1/active-drivers/${driverId}/reviews`
-  );
-   
+  const { data, loading, error } = useNewFetch(`/v1/active-drivers/${driverId}/reviews`);
   const reviewToWords = (review) => {
     switch (review) {
       case 1:
@@ -97,14 +94,6 @@ const DriverReviews = ({ driverId }) => {
             <>
               <Space direction="horizontal" size="large">
                 <Space direction="vertical">
-                  <Progress
-                    type="circle"
-                    percent={record.rating * 20}
-                    format={() =>
-                      record.rating == null ? `0` : `${record.rating}`
-                    }
-                    color={record.rating < 3 ? "red" : "green"}
-                  />
                   <Rate disabled defaultValue={record.rating} />
                   <Tag
                     color={record.rating < 3 ? "red" : "green"}
@@ -168,9 +157,9 @@ const AutofleetDriversDetails = () => {
   
 
 
-  const { data, loading, error } = useNewFetch(
-    `/v1/active-drivers/${id}`
-  );
+  const { data, loading, error } = useNewFetch(`/v1/active-drivers/${id}`);
+    console.log(data);
+
   const isLoading = loading || !data;
   return (
     <Card title="Autofleet Drivers Details" style={{ width: "100%" }}>
