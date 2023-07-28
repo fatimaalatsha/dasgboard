@@ -20,7 +20,10 @@ const { Title, Text } = Typography;
 const DriverReviews = ({ driverId }) => {
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
 
-  const { data, loading, error } = useNewFetch(`/v1/active-drivers/${driverId}/reviews`);
+  const { data, loading, error } = useNewFetch(
+    `/v1/active-drivers/${driverId}/reviews`
+  );
+
   const reviewToWords = (review) => {
     switch (review) {
       case 1:
@@ -147,6 +150,102 @@ const DriverReviews = ({ driverId }) => {
   );
 };
 
+const LastRides = ({ driverId }) => {
+  const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
+
+  const { data, loading, error } = useNewFetch(`/v1/rides/drivers/${driverId}`);
+
+  const columns = [
+    {
+      title: "Ride Id",
+      dataIndex: "ride_id",
+      key: "ride_id",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => (
+        <Tag color={status === "completed" ? "green" : "red"}>{status}</Tag>
+      ),
+    },
+    {
+      title: "Passenger ID",
+      dataIndex: "passenger_id",
+      key: "passenger_id",
+    },
+    {
+      title: "Total Price",
+      dataIndex: "total_price",
+      key: "total_price",
+      render: (total_price) => (
+        <Text>{total_price ? `${total_price} CD` : ""}</Text>
+      ),
+    },
+    {
+      title: "Driver Earnings",
+      dataIndex: "driver_earnings",
+      key: "driver_earnings",
+      render: (driver_earnings) => (
+        <Text>{driver_earnings ? `${driver_earnings} CD` : ""}</Text>
+      ),
+    },
+    {
+      title: "Pickup",
+      dataIndex: "pickup_description",
+      key: "pickup_description",
+      render: (pickup_description) => <Text>{pickup_description}</Text>,
+    },
+    {
+      title: "Drop Off",
+      dataIndex: "dropoff_description",
+      key: "dropoff_description",
+      render: (dropoff_description) => <Text>{dropoff_description}</Text>,
+    },
+    {
+      title: "Pickup",
+      dataIndex: "pickup_completed_at",
+      key: "pickup_completed_at",
+      //make date more readable and making the hour more clear
+      render: (pickup_completed_at) => (
+        <Text>
+          {pickup_completed_at
+            ? `${pickup_completed_at.split("T")[0]} ${
+                pickup_completed_at.split("T")[1].split(".")[0]
+              }`
+            : ""}
+        </Text>
+      ),
+    },
+    {
+      title: "Drop Off",
+      dataIndex: "dropoff_completed_at",
+      key: "dropoff_completed_at",
+      //make date more readable and making the hour more clear
+      render: (dropoff_completed_at) => (
+        <Text>
+          {dropoff_completed_at
+            ? `${dropoff_completed_at.split("T")[0]} ${
+                dropoff_completed_at.split("T")[1].split(".")[0]
+              }`
+            : ""}
+        </Text>
+      ),
+    },
+  ];
+  return (
+    <>
+      <Table
+        columns={columns}
+        dataSource={data?.data}
+        loading={loading}
+        pagination={false}
+        rowKey="ride_id"
+      />
+    </>
+  );
+};
+
 const AutofleetDriversDetails = () => {
   //get the driver id from the url
   const { id } = useParams();
@@ -154,12 +253,8 @@ const AutofleetDriversDetails = () => {
   const pathArray = location.pathname.split("/");
   pathArray.pop();
   const parentUrl = pathArray.join("/");
-  
-
 
   const { data, loading, error } = useNewFetch(`/v1/active-drivers/${id}`);
-    console.log(data);
-
   const isLoading = loading || !data;
   return (
     <Card title="Autofleet Drivers Details" style={{ width: "100%" }}>
@@ -171,8 +266,10 @@ const AutofleetDriversDetails = () => {
               <Title level={4} style={{ marginTop: 0 }}>
                 {`${data.first_name} ${data.last_name}`}
               </Title>
-              <Tag color={data.status === "active" ? "green" : "red"}
-                style={{ marginLeft: 10 }}>
+              <Tag
+                color={data.status === "active" ? "green" : "red"}
+                style={{ marginLeft: 10 }}
+              >
                 {data.status}
               </Tag>
             </Space>
@@ -244,8 +341,11 @@ const AutofleetDriversDetails = () => {
                 <Text>{data.address}</Text>
               </Descriptions.Item>
             </Descriptions>
+           
             <Divider orientation="left"> Reviews </Divider>
             <DriverReviews name="Review" driverId={id} />
+            <Divider orientation="left"> Last 10 Rides </Divider>
+            <LastRides name="Last Rides" driverId={id} />
           </Space>
         }
       />
