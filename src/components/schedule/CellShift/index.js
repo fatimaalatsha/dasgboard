@@ -588,7 +588,7 @@ const EditShiftModal = ({shift_id, parent_id ,open, tz, refetch, record}) => {
     )
 }
 
-const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch, city, overlap, index}) => {
+const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selectedDay, refetch, city, overlap, index, isContained}) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [edit, setEdit] = useState({ // State to hold edit mode
         editMode: false,
@@ -604,7 +604,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         end: record.end,
         diff: record.duration ? record.duration : 4
     });
-    const [isHovering, setIsHovering] = useState( false)
+    const [isHovering, setIsHovering] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const DEFAULT_DAY = dayjs(selectedDay).tz(scheduleFilter.tz).utc().day()
     const [shift, setShift] = useState({
@@ -630,12 +630,20 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     })
 
     const floatingComponentHeight = hours.diff * 57 + 2
+    const itemZIndex = record.start_time ? parseInt(record.start_time.split(":")[0], 10) : 1
+    const calcWidth = (isContained ? 90 : 100) / overlap
+    const calcLeft = (calcWidth / 100) * 197 * index
 
     const cardStyleConfig = {
         backgroundColor: record.status === 'active' ? token.colorSuccessBg : token.colorWarningBg,
         borderColor: record.status === 'active' ? token['green-4'] : token['gold-4'],
         height: floatingComponentHeight,
         cursor: 'pointer',
+        position: 'absolute',
+        left: calcLeft + (isContained ? 5 : 0),
+        zIndex: itemZIndex,
+        width: `calc(${calcWidth}% )`,
+        ...(calcWidth === 100 && {padding: '2px 3px'}),
     }
 
     /* const errorStyleConfig = {
