@@ -398,7 +398,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [hours, setHours] = useState({
         start: record.start_time ? convertToHourTz(record.start_time, scheduleFilter.tz) : hour,
-        end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : null,
+        end: record.end_time ? convertToHourTz(record.end_time, scheduleFilter.tz) : '',
         diff: record.duration ? record.duration : 4,
         status: {},
         guarantee: {
@@ -532,24 +532,6 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                         setIsModalOpen(false)
                         refetch()
                     })
-                    /* !edit ?
-                    await createDayShift(payload)
-                    .then(() => {
-                        message.success('Shift created successfully')
-                        setSubmitting(false)
-                        resetForm()
-                        setIsModalOpen(false)
-                        refetch()
-                    })
-                    :
-                    await updateDayShift(values, hours.id)
-                    .then(() => {
-                        message.success('Shift updated successfully')
-                        setSubmitting(false)
-                        resetForm()
-                        setIsModalOpen(false)
-                        refetch()
-                    }) */
                 }}
             >
                 { props => (
@@ -578,7 +560,6 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                                 format="HH:mm" 
                                 allowClear={false}
                                 showNow={false}
-                                disabled
                                 hideDisabledOptions
                                 disabledTime={(current) => {
                                     return {
@@ -608,7 +589,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                                         disabledHours: () => {
                                             const hours = []
                                             for (let i = 0; i < 24; i++) {
-                                                if (i < dayjs(hour, 'HH:mm').hour() + 1) {
+                                                if (i < dayjs(props.values.start_time, 'HH:mm').hour() + 1) {
                                                     hours.push(i)
                                                 }
                                             }
