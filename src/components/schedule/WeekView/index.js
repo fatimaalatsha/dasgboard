@@ -134,7 +134,7 @@ const WeekView = ({selectedWeek, days, tz, city }) => {
                                 city={city}
                                 overlap={record[day].length}
                                 index={index}
-                                isContained={dayjs(item.start_time).isBetween(groupedData[day][0]?.start_time, groupedData[day][0]?.end_time)}
+                                isContained={Boolean(groupedData[day].find((element) => dayjs(item.start_time).isBetween(element.start_time, element.end_time)))}
                             />
                         )
                     }) : (
