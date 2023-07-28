@@ -106,19 +106,19 @@ const WeekView = ({selectedWeek, days, tz, city }) => {
             const groupedData = data.reduce((acc, row) => {
               row[day].forEach((item) => {
                 // Get the day of the week from the "start_time" property
-                const dayOfWeek = dayjs(item.start_time).tz().utc().format('dddd').toLowerCase();
+                const dayOfWeek = dayjs(item.start_time).tz().utc().format('dddd').toLowerCase()
           
                 // If day is not present,set it with an empty array
                 if (!acc[dayOfWeek]) {
-                  acc[dayOfWeek] = [];
+                  acc[dayOfWeek] = []
                 }
           
                 // Push item object into the corresponding day
-                acc[dayOfWeek].push(item);
-              });
+                acc[dayOfWeek].push(item)
+              })
           
-              return acc;
-            }, {});
+              return acc
+            }, {})
 
             return (
                 <div className="floating-component" style={{ position: 'absolute', top: -1, left: 0, zIndex: 1, width: '100%', padding: '2px 3px' }}>
