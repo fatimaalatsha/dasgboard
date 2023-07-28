@@ -651,19 +651,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     }
 
     const handleDelete = async () => {
-        if(record.is_recurring) {
-            setDeleteModal({ ...deleteModal, open: true })
-        } else {
-            await deleteWeekShift({'affects_to': 'current'}, shift.shift_id)
-            .then((res) => {
-                if(res.status === 400) {
-                    message.error(res.message)
-                } else {
-                    message.success(res.message)
-                }
-                refetch()
-            })
-        }
+        setDeleteModal({ ...deleteModal, open: true })
     }
 
     const handleEdit = (value) => {
@@ -1119,7 +1107,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
             {props => (
                 <FormikForm>
                     <Modal
-                        title="Delete recurring shift"
+                        title={`Delete ${record.is_recurring ? 'recurring' : ''} shift`}
                         open={deleteModal.open}
                         destroyOnClose
                         onCancel={() => {
@@ -1141,6 +1129,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                         ]}
                     >
                         <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                            {record.is_recurring ? (
                             <Radio.Group
                                 style={{ width: '100%' }} 
                                 value={props.values.affects_to}
@@ -1151,7 +1140,9 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 <Radio value="future">{`This and following shifts`}</Radio>
                                 <Radio value="all">{`All Shifts`}</Radio>
                             </Space>
-                        </Radio.Group>
+                        </Radio.Group>) : (
+                        <Text>{`Are you sure you want to delete this shift?`}</Text>)
+                        }
                         </Space>
                     </Modal>
                 </FormikForm>
