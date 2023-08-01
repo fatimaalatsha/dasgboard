@@ -958,7 +958,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                 min={0}
                                                 max={1000}
                                                 suffix="Days" 
-                                                value={props.values.guarantee}
+                                                value={props.values.early_access}
                                                 onChange={(e) => {
                                                     props.setFieldValue('early_access', Number(e.target.value))
                                                 }}
