@@ -177,8 +177,8 @@ const EditShiftModal = ({shift_id, parent_id ,open, tz, refetch, record}) => {
                 guarantee_specs: data.guarantee_specs || '',
                 hasGuarantee: Boolean(data.guarantee),
                 'drivers': data.drivers || [],
-                hasEarlyAccess: false,
-                early_access: 0,
+                hasEarlyAccess: Boolean(data.early_access),
+                early_access: data.early_access || 0,
                 is_recurring: data.is_recurring,
                 template: data.is_recurring ? Boolean(data.recurrence?.max_occurrences) || Boolean(data.recurrence?.end_date) || (data.recurrence?.days_of_week?.length === 1 && dayjs().day(data.recurrence?.days_of_week?.length) !== DEFAULT_DAY) ? 'custom' : selectedTemplate(data.recurrence?.days_of_week) : 'weekly',
                 pattern: data.recurrence?.pattern,
@@ -404,7 +404,7 @@ const EditShiftModal = ({shift_id, parent_id ,open, tz, refetch, record}) => {
                                         min={0}
                                         max={1000}
                                         suffix="Days" 
-                                        value={props.values.guarantee}
+                                        value={props.values.early_access}
                                         onChange={(e) => {
                                             props.setFieldValue('early_access', Number(e.target.value))
                                         }}
@@ -414,7 +414,7 @@ const EditShiftModal = ({shift_id, parent_id ,open, tz, refetch, record}) => {
                             <Divider>
                             <Checkbox
                                 name="is_recurring"
-                                disabled={props.values.is_recurring}
+                                disabled={props.values.is_recurring || props.values.hasEarlyAccess}
                                 checked={props.values.is_recurring}
                                 onChange={(e) => {
                                     props.setFieldValue('is_recurring', e.target.checked)
@@ -961,7 +961,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                         min={0}
                                                         max={1000}
                                                         suffix="Days" 
-                                                        value={props.values.guarantee}
+                                                        value={props.values.early_access}
                                                         onChange={(e) => {
                                                             props.setFieldValue('early_access', Number(e.target.value))
                                                         }}
