@@ -14,14 +14,29 @@ import {
 } from "antd";
 import { UserOutlined } from "@ant-design/icons";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
+import qs from "qs"; // Import qs library
+
 
 const { Title, Text } = Typography;
 
+//get the papams that will be passed to filters through qs
+  const getUserParams = (params) => ({ // Get table params
+    limit: params.pagination?.pageSize,
+    page: params.pagination?.current,
+    ...params,
+})
+
 const DriverReviews = ({ driverId }) => {
+
+const [params, setParams] = useState({}); // Set params state
+
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
 
   const { data, loading, error } = useNewFetch(
-    `/v1/active-drivers/${driverId}/reviews`
+    `/v1/active-drivers/${driverId}/reviews?${qs.stringify(
+      // Pass the params to the query string
+      getUserParams(params)
+    )}` 
   );
 
   const reviewToWords = (review) => {
@@ -88,7 +103,28 @@ const DriverReviews = ({ driverId }) => {
         columns={columns}
         dataSource={data?.data}
         loading={loading}
-        pagination={false}
+        pagination={{
+          total: data?.meta?.total_items,
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "50"],
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} reviews`,
+          
+        }}
+        onChange={(pagination, filters, sorter) => {
+          // Update the params when the table state changes
+          setParams({
+            ...params,
+            pagination: {
+              current: pagination.current,
+              pageSize: pagination.pageSize,
+              limit: pagination.pageSize,
+            },
+            sortField: sorter.field,
+            sortOrder: sorter.order,
+            ...filters,
+          });
+        }}
         rowKey="ride_id"
         expandable={{
           expandedRowKeys: [expandedRowKey], // Specify the currently expanded row key
@@ -154,7 +190,6 @@ const LastRides = ({ driverId }) => {
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
 
   const { data, loading, error } = useNewFetch(`/v1/rides/drivers/${driverId}`);
-  console.log(data);
 
   const columns = [
     {
@@ -298,8 +333,6 @@ const AutofleetDriversDetails = () => {
 
   const { data, loading, error } = useNewFetch(`/v1/active-drivers/${id}`);
   const isLoading = loading || !data;
-
-
 
   return (
     <Card title="Autofleet Drivers Details" style={{ width: "100%" }}>
