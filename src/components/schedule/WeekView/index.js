@@ -28,7 +28,7 @@ const queryHandler = (params) => ({ // Get table params
     paginated: false,
 })
 
-const WeekView = ({selectedWeek, days, tz, city }) => {
+const WeekView = ({selectedWeek, days, tz, city, loadTimeline }) => {
     dayjs.tz.setDefault(tz)
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
@@ -171,7 +171,7 @@ const WeekView = ({selectedWeek, days, tz, city }) => {
                 className="schedule-week-table"
                 bordered
             />
-            <CurrentTimeLine tz={tz} />
+            {loadTimeline && <CurrentTimeLine tz={tz} />}
         </div>
         :
         <Result
