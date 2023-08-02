@@ -79,12 +79,24 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
                   }
               },
               render: (text, record ) => {
-                for ( let item = 0; item < record[hour].length; item++ ) {
-                  if ( dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour ) {
-                    return (
+                return (
+                  <>
+                    { record[hour].length > 0 ? record[hour].map((item, idx) => (
+                        <DayCellShift 
+                          key={idx}
+                          isCellFilled={dayjs(item.start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour}
+                          record={item}
+                          hour={hour}
+                          day={selectedDay}
+                          setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                          refetch={refetch}
+                          city={city}
+                          user_id={record.key}
+                        />
+                    )) : (
                       <DayCellShift 
-                        isCellFilled={dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour}
-                        record={record[hour][item]}
+                        display={hoveredCell?.key === record.key && hoveredCell?.hour === hour} 
+                        record={record} 
                         hour={hour}
                         day={selectedDay}
                         setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
@@ -92,21 +104,8 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
                         city={city}
                         user_id={record.key}
                       />
-                    )
-                  }
-                }
-    
-                return (
-                  <DayCellShift 
-                    display={hoveredCell?.key === record.key && hoveredCell?.hour === hour} 
-                    record={record} 
-                    hour={hour}
-                    day={selectedDay}
-                    setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
-                    refetch={refetch}
-                    city={city}
-                    user_id={record.key}
-                  />
+                    )}
+                  </>
                 )
               },
             }
