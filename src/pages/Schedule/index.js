@@ -49,6 +49,7 @@ const Schedule = () => {
             tab: 'Pending Approval',
         }
     ]
+
     const options = [
       {
         label: 'Day',
@@ -64,20 +65,10 @@ const Schedule = () => {
       },
     ]
 
-    const templateViewOptions = [
-        {
-            label:  <Tooltip title="Grid">
-                        <AppstoreOutlined />
-                    </Tooltip>,
-            value: 0,
-        },
-        {
-            label:  <Tooltip title="Table">
-                        <TableOutlined />
-                    </Tooltip>,
-            value: 1,
-        },
-    ]
+    const TODAY = {
+        week: dayjs().startOf('week'),
+        day: dayjs().startOf('day'),
+    }
 
     const handleWeekChange = (date) => { // Handle week change
         setSelectedDate({ 
@@ -90,10 +81,17 @@ const Schedule = () => {
       setSelectedDate({week: dayjs().startOf('week'), day: dayjs().startOf('day')})
     } 
 
+    const checkDisabled = () => { // Disable dates before today
+        if (view === 1) {
+            return  TODAY.week.format('DD/MM/YYYY') === selectedDate.week.format('DD/MM/YYYY')
+        } 
+        return TODAY.day.format('DD/MM/YYYY') === selectedDate.day.format('DD/MM/YYYY')
+    }
+
     const scheduleTabContent = {
-        active:   view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={scheduleFilter.tz} city={selectedCity}/>
+        active:   view === 1 ? <WeekView selectedWeek={selectedDate.week} days={days} tz={scheduleFilter.tz} city={selectedCity} loadTimeline={checkDisabled()} />
                 : view === 2 ? <div>Month View 👀</div>
-                : <DayView selectedDay={selectedDate.day} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity}/>
+                : <DayView selectedDay={selectedDate.day} hours={dayHours} tz={scheduleFilter.tz} city={selectedCity} loadTimeline={checkDisabled()} />
         ,
         draft: <ShiftTemplates />,
         approval: <ShiftApproval selectedDate={selectedDate} tz={scheduleFilter.tz} view={view}/>,
@@ -138,7 +136,7 @@ const Schedule = () => {
                                 />
                             </Space>
                             <Space style={{ display: 'flex', width: '100%'}}>
-                                <Button onClick={handleTodayClick}>Today</Button>
+                                <Button type="primary" disabled={checkDisabled()} onClick={handleTodayClick}>Today</Button>
                                 <Button icon={<LeftOutlined />} onClick={() => setSelectedDate({...selectedDate, ...(view === 1 ? { week: selectedDate.week.subtract(1, 'week') } : { day: selectedDate.day.subtract(1, 'day') })})} />
                                 <Button icon={<RightOutlined />} onClick={() => setSelectedDate({...selectedDate, ...(view === 1 ? { week: selectedDate.week.add(1, 'week') } : { day: selectedDate.day.add(1, 'day') })})} />
                                 <DatePicker 
