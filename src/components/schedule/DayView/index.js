@@ -24,7 +24,12 @@ const queryHandler = (params) => ({ // Get table params
 const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
-  const { data, isLoading, error, refetch } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler(selectedDay), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, ) // Call useSchedule hook
+  const { 
+    data, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler(selectedDay), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, ) // Call useSchedule hook
   const controller = new AbortController()// Create a new AbortController
   
   useEffect(() => {
@@ -44,13 +49,13 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           placement="topLeft"
           title={
             <Space direction="vertical">
-              <Text>{text}</Text>
-              <Text>{`DL# ${record.license_number}`}</Text>
-              <Text>{`Tel. ${record.phone}`}</Text>
+              <Text>{record.driver.name}</Text>
+              <Text>{`DL# ${record.driver.license_number}`}</Text>
+              <Text>{`Tel. ${record.driver.phone}`}</Text>
             </Space>
           } 
         >
-          <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '' }} >{text}</Text>
+          <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '' }} >{record.driver.name}</Text>
         </Tooltip>
       )
     },
