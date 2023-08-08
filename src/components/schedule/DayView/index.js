@@ -24,7 +24,12 @@ const queryHandler = (params) => ({ // Get table params
 const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
-  const { data, isLoading, error, refetch } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler(selectedDay), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, ) // Call useSchedule hook
+  const { 
+    data, 
+    isLoading, 
+    error, 
+    refetch 
+  } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler(selectedDay), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, ) // Call useSchedule hook
   const controller = new AbortController()// Create a new AbortController
   
   useEffect(() => {
@@ -44,13 +49,13 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           placement="topLeft"
           title={
             <Space direction="vertical">
-              <Text>{text}</Text>
-              <Text>{`DL# ${record.license_number}`}</Text>
-              <Text>{`Tel. ${record.phone}`}</Text>
+              <Text>{record.driver.name}</Text>
+              <Text>{`DL# ${record.driver.license_number}`}</Text>
+              <Text>{`Tel. ${record.driver.phone}`}</Text>
             </Space>
           } 
         >
-          <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '' }} >{text}</Text>
+          <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '' }} >{record.driver.name}</Text>
         </Tooltip>
       )
     },
@@ -79,12 +84,24 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
                   }
               },
               render: (text, record ) => {
-                for ( let item = 0; item < record[hour].length; item++ ) {
-                  if ( dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour ) {
-                    return (
+                return (
+                  <>
+                    { record[hour].length > 0 ? record[hour].map((item, idx) => (
+                        <DayCellShift 
+                          key={idx}
+                          isCellFilled={dayjs(item.start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour}
+                          record={item}
+                          hour={hour}
+                          day={selectedDay}
+                          setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
+                          refetch={refetch}
+                          city={city}
+                          user_id={record.key}
+                        />
+                    )) : (
                       <DayCellShift 
-                        isCellFilled={dayjs(record[hour][item].start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour}
-                        record={record[hour][item]}
+                        display={hoveredCell?.key === record.key && hoveredCell?.hour === hour} 
+                        record={record} 
                         hour={hour}
                         day={selectedDay}
                         setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
@@ -92,21 +109,8 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
                         city={city}
                         user_id={record.key}
                       />
-                    )
-                  }
-                }
-    
-                return (
-                  <DayCellShift 
-                    display={hoveredCell?.key === record.key && hoveredCell?.hour === hour} 
-                    record={record} 
-                    hour={hour}
-                    day={selectedDay}
-                    setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
-                    refetch={refetch}
-                    city={city}
-                    user_id={record.key}
-                  />
+                    )}
+                  </>
                 )
               },
             }
