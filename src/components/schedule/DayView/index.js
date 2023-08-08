@@ -69,7 +69,14 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           align: 'center',
           children: [
             {
-              title: (<Text type="secondary" code >{`${hour.substring(1,2) + idx}`}</Text>),
+              title: () => {
+                return data.filter(item => item[hour].length > 0).map((item, idx) => {
+                  //console.log(item)
+                  return (
+                    <Text key={idx} type="secondary" code >{`${item[hour].length}`}</Text>
+                )})
+                
+              },
               dataIndex: hour,
               key: idx,
               align: 'center',
@@ -85,7 +92,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
               },
               render: (text, record ) => {
                 return (
-                  <>
+                  <div className="container" style={{ minHeight: 24, height: '100%' }}>
                     { record[hour].length > 0 ? record[hour].map((item, idx) => (
                         <DayCellShift 
                           key={idx}
@@ -110,7 +117,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
                         user_id={record.key}
                       />
                     )}
-                  </>
+                  </div>
                 )
               },
             }
@@ -121,7 +128,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
   ]
 
   error && <>Something went wrong...</>
-  
+  //console.log(data)
   return (
     <div style={{ position: 'relative'}}>
       <Table 

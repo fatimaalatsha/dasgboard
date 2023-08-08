@@ -453,34 +453,32 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
 
     return (
         <>
-            <div className="container" style={{ minHeight: 24}}>
-                { isCellFilled ? (
-                        <ShiftCard 
-                            cardStyle={cardStyleConfig} 
-                            record={hours} 
-                            handleEdit={(value) => handleEdit(value)} 
-                            setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
-                            refetch={refetch}
-                        />
-                ) : (
-                <>
-                    { display && (
-                        <Tooltip title="Add shift">
-                            <Button type="text" style={{ width: '100%', height: '100%', padding: 8 }} size="small" onClick={handleClick} icon={<PlusOutlined />} />
-                        </Tooltip>
-                    )}
-                    { isHovering && (
-                        <ShiftCard 
-                            cardStyle={cardStyleConfig} 
-                            record={hours} 
-                            handleEdit={(value) => handleEdit(value)} 
-                            setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
-                            refetch={refetch}
-                        />
-                    )}
-                </>
+            { isCellFilled ? (
+                <ShiftCard 
+                    cardStyle={cardStyleConfig} 
+                    record={hours} 
+                    handleEdit={(value) => handleEdit(value)} 
+                    setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
+                    refetch={refetch}
+                />
+            ) : (
+            <>
+                { display && (
+                    <Tooltip title="Add shift">
+                        <Button type="text" style={{ width: '100%', height: '100%', padding: 8 }} size="small" onClick={handleClick} icon={<PlusOutlined />} />
+                    </Tooltip>
                 )}
-            </div>
+                { isHovering && (
+                    <ShiftCard 
+                        cardStyle={cardStyleConfig} 
+                        record={hours} 
+                        handleEdit={(value) => handleEdit(value)} 
+                        setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
+                        refetch={refetch}
+                    />
+                )}
+            </>
+            )}
             {/**Create Shift Modal */}
             { isModalOpen && (
                 <Formik
