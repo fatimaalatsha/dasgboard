@@ -45,9 +45,11 @@ const useDaySchedule = (url, timezone) => {
 
                 acc.push({
                     key: name.user_id,
-                    license_number: name.license_number,
-                    phone: name.phone,
-                    name: keyName,
+                    driver: {
+                        license_number: name.license_number,
+                        phone: name.phone,
+                        name: keyName,
+                    },
                     ...timeObj
                 })
 
