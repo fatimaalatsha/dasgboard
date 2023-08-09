@@ -62,15 +62,6 @@ let filterStore = (set) => ({
     set((state) => ({
       applicantFilter: { ...state.applicantFilter, ...filter },
     })),
-  scheduleFilter: {
-    filter: {
-      city_id: "",
-      status: null,
-    },
-    tz: "America/Thunder_Bay",
-    city_label: "",
-    paginated: false,
-  },
   autofleetFilter: {
     pagination: {
       current: 1,
