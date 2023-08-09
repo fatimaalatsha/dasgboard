@@ -59,6 +59,12 @@ const shiftSchema = object().shape({
     }),
     guarantee_specs: string().notRequired(),
     drivers: array().of(mixed().nullable()).notRequired(),
+    hasEarlyAccess: boolean().notRequired(),
+    early_access: number().when('hasEarlyAccess', {
+        is: true,
+        then: number().min(1, 'Shift driver early access must be greater than or equal to 1.').required('Required'),
+        otherwise: number().notRequired(),
+    }),
     is_recurring: boolean().notRequired(),
     pattern: string().when('is_recurring', {
         is: true,
@@ -129,8 +135,8 @@ const WEEK_PATTERNS = {
     full_week: [...Array(7)].map((_,idx) => idx),
 }
 
-const EditShiftModal = ({shift_id, open, tz, refetch}) => {
-    const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}`)
+const EditShiftModal = ({shift_id, parent_id ,open, tz, refetch, record}) => {
+    const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id || parent_id}`)
     const DEFAULT_DAY = dayjs().tz(tz).utc().day()
     const [isModalOpen, setIsModalOpen] = useState(open)
     const [isAffected, setIsAffected] = useState(false)
@@ -163,18 +169,20 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
         <>
         <Formik
             initialValues={{
-                start_time: convertToHourTz(data.start_time, tz),
-                end_time: convertToHourTz(data.end_time, tz),
+                start_time: convertToHourTz(shift_id ? data.start_time : record.start_time, tz),
+                end_time: convertToHourTz(shift_id ? data.end_time : record.end_time, tz),
                 capacity: data.capacity,
                 city_id: Number(data?.city_id),
                 guarantee: data.guarantee || 0,
                 guarantee_specs: data.guarantee_specs || '',
                 hasGuarantee: Boolean(data.guarantee),
                 'drivers': data.drivers || [],
+                hasEarlyAccess: false,
+                early_access: 0,
                 is_recurring: data.is_recurring,
                 template: data.is_recurring ? Boolean(data.recurrence?.max_occurrences) || Boolean(data.recurrence?.end_date) || (data.recurrence?.days_of_week?.length === 1 && dayjs().day(data.recurrence?.days_of_week?.length) !== DEFAULT_DAY) ? 'custom' : selectedTemplate(data.recurrence?.days_of_week) : 'weekly',
                 pattern: data.recurrence?.pattern,
-                ends: data.never_ends ? 'never' : data.recurrence?.end_date ? 'on' : 'after',
+                ends: data.recurrence?.never_ends ? 'never' : data.recurrence?.end_date ? 'on' : 'after',
                 end_date: data.recurrence?.end_date || dayjs(data.start_time).tz(tz).utc().format('YYYY-MM-DD'),
                 max_occurrences: data.recurrence?.max_occurrences || 0,
                 'days_of_week': data.recurrence?.days_of_week || [],
@@ -183,17 +191,23 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
             validationSchema={shiftSchema}
             onSubmit={async (values, { setSubmitting, resetForm }) => {
                 const payload = {
-                    'start_time': converToUTC( dayjs(data.start_time).tz(tz).utc().format('YYYY-MM-DD'), values.start_time, tz),
-                    'end_time': converToUTC( dayjs(data.start_time).tz(tz).utc().format('YYYY-MM-DD'), values.end_time, tz),
+                    'start_time': converToUTC( dayjs(shift_id ? data.start_time : record.start_time).tz(tz).utc().format('YYYY-MM-DD'), values.start_time, tz),
+                    'end_time': converToUTC( dayjs(shift_id ? data.start_time : record.start_time).tz(tz).utc().format('YYYY-MM-DD'), values.end_time, tz),
                     'capacity': Number(values.capacity),
                     'city_id': Number(values.city_id),
                     'is_recurring': values.is_recurring,
+                    ...(!Boolean(shift_id) && {
+                        'exists': false,
+                    }),
                     ...(values.drivers.length > 0 && {
                         'drivers': values.drivers,
                         }),
                     ...(values.hasGuarantee && {
                         'guarantee': Number(values.guarantee),
                         'guarantee_specs': values.guarantee_specs,
+                    }),
+                    ...(values.hasEarlyAccess && !values.is_recurring && {
+                        'early_access': Number(values.early_access),
                     }),
                     ...(values.is_recurring && {
                         'pattern': values.pattern,
@@ -232,7 +246,7 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                     <Modal 
                         title={
                             <Title level={5} style={{ marginTop: 4 }}>
-                                {`Edit Shift: ${dayjs(data.start_time).utc().format(' MMM, dddd DD - YYYY')}`}
+                                {`Edit Shift: ${dayjs(shift_id ? data.start_time : record.start_time).utc().format(' MMM, dddd DD - YYYY')}`}
                             </Title>
                         }
                         open={isModalOpen} 
@@ -372,6 +386,33 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                             )}
                             <Divider>
                             <Checkbox
+                                disabled={props.values.is_recurring}
+                                checked={props.values.hasEarlyAccess}
+                                onChange={(e) => {
+                                    props.setFieldValue('hasEarlyAccess', e.target.checked)
+                                }}
+                            >
+                                Early Access?
+                            </Checkbox>
+                            </Divider>
+                            { props.values.hasEarlyAccess && (
+                                <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                    <InputWrapper 
+                                        name="early_access"
+                                        placeholder="Early Access amount"
+                                        type="number"
+                                        min={0}
+                                        max={1000}
+                                        suffix="Days" 
+                                        value={props.values.guarantee}
+                                        onChange={(e) => {
+                                            props.setFieldValue('early_access', Number(e.target.value))
+                                        }}
+                                    />
+                                </Space>
+                            )}
+                            <Divider>
+                            <Checkbox
                                 name="is_recurring"
                                 disabled={props.values.is_recurring}
                                 checked={props.values.is_recurring}
@@ -496,7 +537,8 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
             }}
             validationSchema={editRecurringSchema}
             onSubmit={async (values, { setSubmitting, resetForm }) => {
-                await updateWeekShift({...editPayload, affects_to: values.affects_to}, shift_id)
+                console.log({...editPayload, affects_to: values.affects_to}, shift_id || parent_id)
+                await updateWeekShift({...editPayload, affects_to: values.affects_to}, shift_id || parent_id)
                 .then(() => {
                     message.success('Shift updated successfully')
                     setSubmitting(false)
@@ -550,7 +592,11 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const [edit, setEdit] = useState({ // State to hold edit mode
         editMode: false,
-        editRecord: record.id
+        editRecord: record.id,
+    })
+    const [deleteModal, setDeleteModal] = useState({ // State to hold delete modal
+        open: false,
+        shift_id: record.id || record.parent_id,
     })
     const { token } = useToken()
     const [hours, setHours] = useState({
@@ -558,7 +604,6 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         end: record.end,
         diff: record.duration ? record.duration : 4
     });
-    
     const [isHovering, setIsHovering] = useState( false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const DEFAULT_DAY = dayjs(selectedDay).tz(scheduleFilter.tz).utc().day()
@@ -587,8 +632,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     const floatingComponentHeight = hours.diff * 57 + 2
 
     const cardStyleConfig = {
-        backgroundColor: shift.status === 'active' ? token.colorSuccessBg : token.colorWarningBg,
-        borderColor: shift.status === 'active' ? token['green-4'] : token['gold-4'],
+        backgroundColor: record.status === 'active' ? token.colorSuccessBg : token.colorWarningBg,
+        borderColor: record.status === 'active' ? token['green-4'] : token['gold-4'],
         height: floatingComponentHeight,
         cursor: 'pointer',
     }
@@ -606,15 +651,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     }
 
     const handleDelete = async () => {
-        await deleteWeekShift(shift.shift_id)
-        .then((res) => {
-            if(res.status === 400) {
-                message.error(res.message)
-            } else {
-                message.success(res.message)
-            }
-            refetch()
-        })
+        setDeleteModal({ ...deleteModal, open: true })
     }
 
     const handleEdit = (value) => {
@@ -624,22 +661,17 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
         })
     }
 
-    const handleHoursChange = (timeString) => {
-        setShift({
-            ...shift,
-            start: timeString[0],
-            end: timeString[1],
-        })
-        const hoursDiff = dayjs(timeString[1], 'HH:mm').diff(dayjs(timeString[0], 'HH:mm'), 'hour', true)
-        setHours({start: timeString[0], end: timeString[1], diff: hoursDiff})
-        setHoveredCell({ time: timeString[0], day: day })
-    }
-
     const handleStatusChange = async (value) => {
         const payload = {
             status: value,
+            affects_to: 'current',
+            ...( !record.exists && {
+                exists: false,
+                start_time: record.start_time,
+                end_time: record.end_time,
+            })
         }
-        await updateWeekShift(payload, shift.shift_id)
+        await updateWeekShift(payload, record.id || record.parent_id)
         .then(() => {
             message.success('Shift status updated')
             refetch()
@@ -658,7 +690,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     return (
         <>
                 { isCellFilled ? (
-                    <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
+                    <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} status={record.status} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} day={selectedDay} />
                 ) : (
                 <>
                     {  display && (
@@ -667,7 +699,7 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     </Tooltip> 
                     )}
                         { isHovering && (
-                            <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} />
+                            <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} status={record.status} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} day={selectedDay} />
                         )}
                 </>
                 )}
@@ -681,6 +713,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                     guarantee_specs: shift.guarantee_specs,
                     hasGuarantee: shift.hasGuarantee,
                     'drivers': [],
+                    hasEarlyAccess: false,
+                    early_access: 0,
                     is_recurring: shift.hasRecurrency,
                     template: 'weekly',
                     pattern: shift.pattern,
@@ -709,7 +743,10 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                             'guarantee': Number(values.guarantee),
                             'guarantee_specs': values.guarantee_specs,
                         }),
-                        ...(values.is_recurring && {
+                        ...(values.hasEarlyAccess && !values.is_recurring && {
+                            'early_access': Number(values.early_access),
+                        }),
+                        ...(values.is_recurring && !values.hasEarlyAccess && {
                             'pattern': values.pattern,
                             ...(values.pattern !== 'once' && {'days_of_week': values.days_of_week}),
                             'never_ends': Boolean(values.ends === 'never'),
@@ -897,8 +934,36 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 )}
                                 <Divider>
                                 <Checkbox
+                                    disabled={props.values.is_recurring}
+                                    checked={props.values.hasEarlyAccess}
+                                    onChange={(e) => {
+                                        props.setFieldValue('hasEarlyAccess', e.target.checked)
+                                    }}
+                                >
+                                    Early Access?
+                                </Checkbox>
+                                </Divider>
+                                    { props.values.hasEarlyAccess && (
+                                        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                            <InputWrapper 
+                                                name="early_access"
+                                                placeholder="Early Access amount"
+                                                type="number"
+                                                min={0}
+                                                max={1000}
+                                                suffix="Days" 
+                                                value={props.values.guarantee}
+                                                onChange={(e) => {
+                                                    props.setFieldValue('early_access', Number(e.target.value))
+                                                }}
+                                            />
+                                        </Space>
+                                    )}
+                                <Divider>
+                                <Checkbox
                                     name="is_recurring"
                                     checked={props.values.is_recurring}
+                                    disabled={props.values.hasEarlyAccess}
                                     onChange={(e) => {
                                         props.setFieldValue('is_recurring', e.target.checked)
                                     }}
@@ -1014,9 +1079,76 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                 )}
             </Formik>
             {/* Shift Modal for Edit Mode */}
-            { edit.editMode && (
-                <EditShiftModal shift_id={edit.editRecord} open={edit.editMode} tz={scheduleFilter.tz} refetch={refetch}/>
+            { edit.editMode &&  (
+                <EditShiftModal shift_id={edit.editRecord} parent_id={record.parent_id} open={edit.editMode} tz={scheduleFilter.tz} refetch={refetch} record={record}/>
             )}
+            
+        { deleteModal.open && (
+        <Formik
+            initialValues={{
+                affects_to: 'current',
+            }}
+            validationSchema={editRecurringSchema}
+            onSubmit={async (values, { setSubmitting, resetForm }) => {
+                await deleteWeekShift({'affects_to': values.affects_to}, deleteModal.shift_id)
+                .then((res) => {
+                    if(res.status === 400) {
+                        message.error(res.message)
+                    } else {
+                        message.success(res.message)
+                    }
+                    setSubmitting(false)
+                    resetForm()
+                    setDeleteModal({ ...deleteModal, open: false})
+                    refetch()
+                })
+            }}
+        >
+            {props => (
+                <FormikForm>
+                    <Modal
+                        title={`Delete ${record.is_recurring ? 'recurring' : ''} shift`}
+                        open={deleteModal.open}
+                        destroyOnClose
+                        onCancel={() => {
+                            setDeleteModal({ ...deleteModal, open: false})
+                            props.resetForm()
+                            refetch()
+                        }}
+                        footer={[
+                            <Button key="back" onClick={() => {
+                                setDeleteModal({ ...deleteModal, open: false})
+                                props.resetForm()
+                                refetch()
+                            }}>
+                                Cancel
+                            </Button>,
+                            <Submit key="submit" type="primary">
+                                OK
+                            </Submit>,
+                        ]}
+                    >
+                        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                            {record.is_recurring ? (
+                            <Radio.Group
+                                style={{ width: '100%' }} 
+                                value={props.values.affects_to}
+                                onChange={(e) => props.setFieldValue('affects_to', e.target.value)}
+                            >
+                            <Space direction="vertical" style={{ width: '100%' }}>
+                                <Radio value="current">{`This shift`}</Radio>
+                                <Radio value="future">{`This and following shifts`}</Radio>
+                                <Radio value="all">{`All Shifts`}</Radio>
+                            </Space>
+                        </Radio.Group>) : (
+                        <Text>{`Are you sure you want to delete this shift?`}</Text>)
+                        }
+                        </Space>
+                    </Modal>
+                </FormikForm>
+            )}
+        </Formik>
+        )}
         </>
     )
 }
