@@ -273,7 +273,6 @@ const DriverDetails = () => {
     payload.city_id && (payload.city_id = Number(payload.city_id))
     payload.birth_date && (payload.birth_date = dayjs(payload.birth_date).format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'))
     payload.reviewed_at && (payload.reviewed_at = dayjs(payload.reviewed_at).format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'))
-    console.log(payload)
     try {
         const auth = await Auth.currentSession()// Get current session
         const token = auth.getAccessToken().getJwtToken()// Get token from session
@@ -785,22 +784,51 @@ const AdditionalDocsDrawer = ({ province, status, open, setOpen, driverid, sub, 
   return (
     <Drawer
       title="Additional Documents"
-      placement="right" 
+      placement="right"
       size="large"
       onClose={() => setOpen(false)}
       destroyOnClose
       open={open}
     >
-      <Space direction="vertical" style={{ width: '100%' }}>
-        {( status === 'active' && province === 1 ) && <Button type="primary" onClick={() => setSlip(true)}>Create Pink Slip</Button> }
-       {( status ==='active' && pinkSlipState && province === 1 ) && <DocViewer key='pink' objectKey={`${sub}/Pinkslip/document.pdf`} />}
+      <Space direction="vertical" style={{ width: "100%" }}>
+        {status === "active" &&
+          ([1, 6].includes(province) ? (
+            pinkSlipState ? (
+              <>
+                <Button type="primary" onClick={() => setSlip(true)}>
+                  Create Pink Slip
+                </Button>
+                <DocViewer
+                  key="pink"
+                  objectKey={`${sub}/Pinkslip/document.pdf`}
+                />
+              </>
+            ) : (
+              <>
+                <Text> Pink Slip not created yet</Text>
+              <Button type="primary" onClick={() => setSlip(true)}>
+                  Create Pink Slip
+                </Button>
+              </>
+            )
+          ) : null)}
+
         <AdditionalDocsFeeder driverid={driverid} sub={sub} />
       </Space>
-    {/* pink slip modal */}
-      {slip && <PinkSlipModal id={driverid} usersub={sub} open={slip} setOpen={setSlip} pinkslipStatus={setPinkSlipState} />}
-    {/* end pink slip modal */}
-  </Drawer>
-  )
+      {/* pink slip modal */}
+      {slip && (
+        <PinkSlipModal
+          id={driverid}
+          provinceId={province}
+          usersub={sub}
+          open={slip}
+          setOpen={setSlip}
+          pinkslipStatus={setPinkSlipState}
+        />
+      )}
+      {/* end pink slip modal */}
+    </Drawer>
+  );
 }
 
 const AdditionalDocsFeeder = ({ driverid, sub }) => {
