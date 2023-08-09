@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react' // Import React hooks
-import { Table, Typography, Tooltip, Space } from 'antd' // Import Ant components
+import { Table, Typography, Tooltip, Space, Switch } from 'antd' // Import Ant components
 import qs from 'qs' // Import qs library
 import dayjs from 'dayjs' // Import dayjs
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -41,8 +41,8 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
   const columns = [
     {
       title: 'Drivers',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: ['driver', 'name'],
+      key: 'key',
       width: 100,
       render: (text, record) => (
         <Tooltip 
@@ -50,13 +50,13 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           placement="topLeft"
           title={
             <Space direction="vertical">
-              <Text>{record.driver.name}</Text>
+              <Text>{text}</Text>
               <Text>{`DL# ${record.driver.license_number}`}</Text>
               <Text>{`Tel. ${record.driver.phone}`}</Text>
             </Space>
           } 
         >
-          <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '' }} >{record.driver.name}</Text>
+          <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '' }} >{text}</Text>
         </Tooltip>
       )
     },
@@ -71,11 +71,12 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           children: [
             {
               title: () => {
-                return data.filter(item => item[hour].length > 0).map((item, idx) => {
+                return ( <Text key={idx} type="secondary" code >{`${hour.substring(0,2)}`}</Text> )
+                /* return data.filter(item => item[hour].length > 0).map((item, idx) => {
                   //console.log(item)
                   return (
                     <Text key={idx} type="secondary" code >{`${item[hour].length}`}</Text>
-                )})
+                )}) */
                 
               },
               dataIndex: hour,
@@ -129,7 +130,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
   ]
 
   error && <>Something went wrong...</>
-  console.log(data)
+  //console.log(data)
   return (
     <div style={{ position: 'relative'}}>
       <Table 
@@ -140,14 +141,13 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           className="schedule-day-table"
           bordered
           size="small"
-          style={{ zIndex: 999 }}
+          summary={pageData => {
+            return (
+              <></>
+            )
+          }}
       />
       {loadTimeline && <CurrentTimeLine axis tz={tz} />}
-      {/* <div style={{ height: 'calc(100% - 75.72px)', position: 'absolute', top: '75.72px', left: 131, width: 'calc(100% - 131px)', zIndex: 1 }}>
-      { hours.map((hour, idx) => (
-        <DayColumnHighlight key={idx} tz={tz} data={data} hour={hour} />
-      ))}
-      </div> */}
     </div>
   )
 }
