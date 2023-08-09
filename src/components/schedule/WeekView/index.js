@@ -6,6 +6,7 @@ import dayjs from 'dayjs' // Import dayjs
 import qs from 'qs' // Import qs library
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
+import isBetween from 'dayjs/plugin/isBetween' // Import dayjs isBetween plugin
 
 import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import CellShift from '../CellShift' // Import CellShift component
@@ -14,6 +15,7 @@ import { useFilterStore } from '../../../store'
 import useWeekSchedule from '../../../hooks/use-week-schedule'
 
 dayjs.extend(utc)
+dayjs.extend(isBetween)
 dayjs.extend(timezone)
 
 const { Text, Title } = Typography
@@ -26,7 +28,7 @@ const queryHandler = (params) => ({ // Get table params
     paginated: false,
 })
 
-const WeekView = ({selectedWeek, days, tz, city }) => {
+const WeekView = ({selectedWeek, days, tz, city, loadTimeline }) => {
     dayjs.tz.setDefault(tz)
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
@@ -99,40 +101,64 @@ const WeekView = ({selectedWeek, days, tz, city }) => {
             }
         },
         render: (text, record ) => {
-            return record[day].length > 0 ? record[day].map((item, index) =>  {
-                return (
+
+            // Create an object to store the grouped data
+            const groupedData = data.reduce((acc, row) => {
+              row[day].forEach((item) => {
+                // Get the day of the week from the "start_time" property
+                const dayOfWeek = dayjs(item.start_time).tz().utc().format('dddd').toLowerCase()
+          
+                // If day is not present,set it with an empty array
+                if (!acc[dayOfWeek]) {
+                  acc[dayOfWeek] = []
+                }
+          
+                // Push item object into the corresponding day
+                acc[dayOfWeek].push(item)
+              })
+          
+              return acc
+            }, {})
+
+            return (
+                <div className="floating-component" style={{ position: 'absolute', top: -1, left: 0, zIndex: 1, width: '100%', padding: '2px 3px' }}>
+                    { record[day].length > 0 ? record[day].map((item, index) =>  {
+                    return (
+                            <CellShift
+                                key={index}
+                                isCellFilled={dayjs(item.start_time).tz().utc().format('dddd').toLowerCase() === day && dayjs(item.start_time).tz().utc().format('HH:mm') === record.time} 
+                                record={item} 
+                                setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
+                                selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
+                                refetch={refetch}
+                                city={city}
+                                overlap={record[day].length}
+                                index={index}
+                                isContained={Boolean(groupedData[day].find((element) => dayjs(item.start_time).isBetween(element.start_time, element.end_time)))}
+                            />
+                        )
+                    }) : (
                         <CellShift
-                            key={index}
-                            isCellFilled={dayjs(item.start_time).tz().utc().format('dddd').toLowerCase() === day && dayjs(item.start_time).tz().utc().format('HH:mm') === record.time} 
-                            record={item} 
+                            display={hoveredCell?.time === record.time && hoveredCell?.day === day}
+                            record={record}
+                            dayWeek={day}
+                            day={selectedWeek.day(idx).date()}
                             setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
                             selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
                             refetch={refetch}
                             city={city}
-                            overlap={record[day].length}
-                            index={index}
+                            overlap={1}
+                            index={0}
                         />
-                    )
-                }) : (
-                    <CellShift
-                        display={hoveredCell?.time === record.time && hoveredCell?.day === day}
-                        record={record}
-                        dayWeek={day}
-                        day={selectedWeek.day(idx).date()}
-                        setHoveredCell={(values) => setHoveredCell({ time: values.time, day: values.day })}
-                        selectedDay={selectedWeek.day(idx).format('YYYY-MM-DD')}
-                        refetch={refetch}
-                        city={city}
-                        overlap={1}
-                        index={0}
-                    />
-                )
+                    )}
+                </div>
+            )
         },
         })),
     ]
 
     error && <>Something went wrong...</>
-
+    
     return (
     <>
         { scheduleFilter.filter.city_id?.split('|')[1] ? 
@@ -145,7 +171,7 @@ const WeekView = ({selectedWeek, days, tz, city }) => {
                 className="schedule-week-table"
                 bordered
             />
-            <CurrentTimeLine tz={tz} />
+            {loadTimeline && <CurrentTimeLine tz={tz} />}
         </div>
         :
         <Result
