@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react' // Import React hooks
-import { Table, Typography, Tooltip, Space } from 'antd' // Import Ant components
+import { Table, Typography, Tooltip, Space, Switch } from 'antd' // Import Ant components
 import qs from 'qs' // Import qs library
 import dayjs from 'dayjs' // Import dayjs
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -9,6 +9,7 @@ import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import DayCellShift from '../DayCellShift' // Import CellShift component
 import { useFilterStore } from '../../../store' // Import useFilterStore hook
 import useDaySchedule from '../../../hooks/use-day-schedule' // Import useDaySchedule hook
+import DayColumnHighlight from '../DayColumnHighlight'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -40,8 +41,8 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
   const columns = [
     {
       title: 'Drivers',
-      dataIndex: 'name',
-      key: 'name',
+      dataIndex: ['driver', 'name'],
+      key: 'key',
       width: 100,
       render: (text, record) => (
         <Tooltip 
@@ -49,13 +50,13 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           placement="topLeft"
           title={
             <Space direction="vertical">
-              <Text>{record.driver.name}</Text>
+              <Text>{text}</Text>
               <Text>{`DL# ${record.driver.license_number}`}</Text>
               <Text>{`Tel. ${record.driver.phone}`}</Text>
             </Space>
           } 
         >
-          <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '' }} >{record.driver.name}</Text>
+          <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '' }} >{text}</Text>
         </Tooltip>
       )
     },
@@ -65,11 +66,19 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
       ),
       children: [
         ...hours.map((hour, idx) => ({ // Loop through the days
-          title: `${hour}`,
+          title: <>{hour}</>,
           align: 'center',
           children: [
             {
-              title: (<Text type="secondary" code >{`${hour.substring(1,2) + idx}`}</Text>),
+              title: () => {
+                return ( <Text key={idx} type="secondary" code >{`${hour.substring(0,2)}`}</Text> )
+                /* return data.filter(item => item[hour].length > 0).map((item, idx) => {
+                  //console.log(item)
+                  return (
+                    <Text key={idx} type="secondary" code >{`${item[hour].length}`}</Text>
+                )}) */
+                
+              },
               dataIndex: hour,
               key: idx,
               align: 'center',
@@ -85,7 +94,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
               },
               render: (text, record ) => {
                 return (
-                  <>
+                  <div className="container" style={{ minHeight: 24, height: '100%', zIndex: 999 }}>
                     { record[hour].length > 0 ? record[hour].map((item, idx) => (
                         <DayCellShift 
                           key={idx}
@@ -110,7 +119,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
                         user_id={record.key}
                       />
                     )}
-                  </>
+                  </div>
                 )
               },
             }
@@ -121,7 +130,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
   ]
 
   error && <>Something went wrong...</>
-  
+  //console.log(data)
   return (
     <div style={{ position: 'relative'}}>
       <Table 
@@ -132,6 +141,11 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           className="schedule-day-table"
           bordered
           size="small"
+          summary={pageData => {
+            return (
+              <></>
+            )
+          }}
       />
       {loadTimeline && <CurrentTimeLine axis tz={tz} />}
     </div>
