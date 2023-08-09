@@ -151,5 +151,6 @@ const getCityTimezone = (id) => {
   const city = city_timezones.find((city) => city.city_id === id)
   return city.tz
 }
+
   
 export { createCity, getProvince, updateCityProfile, updateEmailTemplate, getCityTimezone, getCities , getAutoFleetCities}

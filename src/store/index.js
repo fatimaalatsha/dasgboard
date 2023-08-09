@@ -62,20 +62,6 @@ let filterStore = (set) => ({
     set((state) => ({
       applicantFilter: { ...state.applicantFilter, ...filter },
     })),
-  scheduleFilter: {
-    filter: {
-      city_id: "",
-      status: null,
-    },
-    tz: "America/Thunder_Bay",
-    city_label: "",
-    paginated: false,
-    navigation: {
-      tab: 'active', // active, draft, approval
-      view: 1, // 1 = week, 0 = day, 2 = month (default: 1) 
-      template: 1, // 1 = Table, 0 = Grid (default: 1)
-    }
-  },
   autofleetFilter: {
     pagination: {
       current: 1,
@@ -98,6 +84,20 @@ let filterStore = (set) => ({
         ...filter,
       },
     })),
+  scheduleFilter: {
+    filter: {
+      city_id: "",
+      status: null,
+    },
+    tz: "America/Thunder_Bay",
+    city_label: "",
+    paginated: false,
+    navigation: {
+      tab: 'active', // active, draft, approval
+      view: 1, // 1 = week, 0 = day, 2 = month (default: 1) 
+      template: 1, // 1 = Table, 0 = Grid (default: 1)
+    }
+  },
   setScheduleFilter: (filter) =>
     set((state) => ({
       scheduleFilter: { ...state.scheduleFilter, ...filter },
@@ -115,4 +115,4 @@ let filterStore = (set) => ({
 filterStore = devtools(filterStore, { enabled: process.env.REACT_APP_ENV === "admin_dev" })
 filterStore = persist(filterStore, { name: "filter" })
 
-export const useFilterStore = create(filterStore)
+export const useFilterStore = create(filterStore);
