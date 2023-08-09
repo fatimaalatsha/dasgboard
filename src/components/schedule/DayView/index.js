@@ -9,6 +9,7 @@ import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import DayCellShift from '../DayCellShift' // Import CellShift component
 import { useFilterStore } from '../../../store' // Import useFilterStore hook
 import useDaySchedule from '../../../hooks/use-day-schedule' // Import useDaySchedule hook
+import DayColumnHighlight from '../DayColumnHighlight'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -65,7 +66,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
       ),
       children: [
         ...hours.map((hour, idx) => ({ // Loop through the days
-          title: `${hour}`,
+          title: <>{hour}</>,
           align: 'center',
           children: [
             {
@@ -92,7 +93,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
               },
               render: (text, record ) => {
                 return (
-                  <div className="container" style={{ minHeight: 24, height: '100%' }}>
+                  <div className="container" style={{ minHeight: 24, height: '100%', zIndex: 999 }}>
                     { record[hour].length > 0 ? record[hour].map((item, idx) => (
                         <DayCellShift 
                           key={idx}
@@ -128,7 +129,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
   ]
 
   error && <>Something went wrong...</>
-  //console.log(data)
+  console.log(data)
   return (
     <div style={{ position: 'relative'}}>
       <Table 
@@ -139,8 +140,14 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           className="schedule-day-table"
           bordered
           size="small"
+          style={{ zIndex: 999 }}
       />
       {loadTimeline && <CurrentTimeLine axis tz={tz} />}
+      {/* <div style={{ height: 'calc(100% - 75.72px)', position: 'absolute', top: '75.72px', left: 131, width: 'calc(100% - 131px)', zIndex: 1 }}>
+      { hours.map((hour, idx) => (
+        <DayColumnHighlight key={idx} tz={tz} data={data} hour={hour} />
+      ))}
+      </div> */}
     </div>
   )
 }
