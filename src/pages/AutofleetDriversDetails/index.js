@@ -62,11 +62,6 @@ const [params, setParams] = useState({}); // Set params state
       dataIndex: "passenger",
       key: "passenger",
     },
-    // {
-    //   title: "Ride Id",
-    //   dataIndex: "ride_id",
-    //   key: "ride_id",
-    // },
     {
       title: "Rating",
       dataIndex: "rating",
@@ -354,72 +349,44 @@ const AutofleetDriversDetails = () => {
             <Descriptions labelStyle={{ fontWeight: "bold" }}>
               <Descriptions.Item label="First Name">
                 <Text>{data.first_name}</Text>
-                {/* name="first_name"
-                  value=
-                  // updateCallback={updateText}
-                /> */}
               </Descriptions.Item>
               <Descriptions.Item label="Last Name">
-                {/* <EditableText
-                  name="last_name"
-                  value={data.last_name}
-                  // updateCallback={updateText}
-                /> */}
                 <Text>{data.last_name}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Email">
-                {/* <EditableText
-                  name="email"
-                  value={data.email}
-                  // updateCallback={updateText}
-                /> */}
                 <Text>{data.email}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Phone Number">
-                {/* <EditableText name="phone" value={data.phone} copyable /> */}
                 <Text>{data.phone}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Licence Number">
-                {/* <EditableText
-                  name="license_number"
-                  value={data.license_number}
-                /> */}
                 <Text>{data.license_number}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Licence Type">
-                {/* <LicenseTypeFeeder name='license_type_id' province={data.city?.province_id} value={data.license?.name}  /> */}
-                {/* <EditableText
-                  name="license_type_id"
-                  value={data.license_type_id}
-                /> */}
                 <Text>{data.license_type_id}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="City">
-                {/* <SelectFeeder value={data.city?.name}  /> */}
-                {/* <EditableText name="city_id" value={data.city_id} /> */}
                 <Text>{data.city_id}</Text>
               </Descriptions.Item>
-
               <Descriptions.Item label="Date of Birth">
-                {/* <EditableDate name='birth_date' value={data.birth_date}  /> */}
                 <Text name="birth_date">{data.birth_date?.split("T")[0]}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Vender">
                 <Text name="vendor">{data.vendor?.name}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Last Updated">
-                {/* <EditableDate name='reviewed_at' value={data.reviewed_at.split('T')[0]} updateCallback={updateText} /> */}
                 <Text name="reviewed_at">{data.updated_at?.split("T")[0]}</Text>
               </Descriptions.Item>
-              <Descriptions.Item label="Application Date">
-                <Text name="created_at">{data.created_at?.split("T")[0]}</Text>
+              <Descriptions.Item label="Last Completed Ride">
+                <Text name="created_at">
+                  {data.last_ride_completed_at?.split("T")[0]}
+                </Text>
               </Descriptions.Item>
               <Descriptions.Item label="Address">
-                {/* <EditableText name="address" value={data.address} /> */}
                 <Text>{data.address}</Text>
               </Descriptions.Item>
             </Descriptions>
-           
+
             <Divider orientation="left"> Reviews </Divider>
             <DriverReviews name="Review" driverId={id} />
             <Divider orientation="left"> Last 10 Rides </Divider>
