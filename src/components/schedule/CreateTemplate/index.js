@@ -106,6 +106,7 @@ const publishSchema = object().shape({
 
 const WEEK_PATTERNS = {
     work_week: [1, 2, 3, 4, 5],
+    end_week: [5, 6],
     weekend: [6, 0],
     full_week: [...Array(7)].map((_,idx) => idx),
 }
@@ -122,6 +123,8 @@ const EditTemplate = ({refetch, template_id }) => {
         switch(true) {
             case days_arr.length === 1:
                 return 'weekly'
+            case days_arr.every(day => WEEK_PATTERNS.end_week.includes(day)):
+                return '4'
             case days_arr.every(day => WEEK_PATTERNS.weekend.includes(day)):
                 return '3'
             case days_arr.every(day => WEEK_PATTERNS.work_week.includes(day)):
@@ -392,6 +395,9 @@ const EditTemplate = ({refetch, template_id }) => {
                                                 case '3':
                                                     props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
                                                     break
+                                                case '4':
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.end_week)
+                                                    break
                                                 case 'weekly':
                                                     props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
                                                     break
@@ -409,6 +415,7 @@ const EditTemplate = ({refetch, template_id }) => {
                                         <Space direction="vertical" style={{ width: '100%' }}>
                                             <Radio value="1">{`Monday to Sunday`}</Radio>
                                             <Radio value="2">{`Monday to Friday`}</Radio>
+                                            <Radio value="4">{`Friday and Saturday`}</Radio>
                                             <Radio value="3">{`Saturday and Sunday`}</Radio>
                                             <Radio value="weekly">{`Weekly on: ${dayjs().format('dddd')}`}</Radio>
                                             <Radio value="custom">Custom</Radio>
@@ -756,6 +763,9 @@ const CreateTemplate = ({refetch}) => {
                                                 case '3':
                                                     props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
                                                     break
+                                                case '4':
+                                                    props.setFieldValue('days_of_week', WEEK_PATTERNS.end_week)
+                                                    break
                                                 case 'weekly':
                                                     props.setFieldValue('days_of_week', [DEFAULT_DAY.day()])
                                                     break
@@ -773,6 +783,7 @@ const CreateTemplate = ({refetch}) => {
                                         <Space direction="vertical" style={{ width: '100%' }}>
                                             <Radio value="1">{`Monday to Sunday`}</Radio>
                                             <Radio value="2">{`Monday to Friday`}</Radio>
+                                            <Radio value="4">{`Friday and Saturday`}</Radio>
                                             <Radio value="3">{`Saturday and Sunday`}</Radio>
                                             <Radio value={'weekly'}>{`Weekly on: ${dayjs().format('dddd')}`}</Radio>
                                             <Radio value={'custom'}>Custom</Radio>
