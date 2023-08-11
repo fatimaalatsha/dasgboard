@@ -28,7 +28,7 @@ const { Title, Text } = Typography;
 
 const DriverReviews = ({ driverId }) => {
 
-const [params, setParams] = useState({}); // Set params state
+  const [params, setParams] = useState({}); // Set params state
 
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
 
@@ -182,9 +182,11 @@ const [params, setParams] = useState({}); // Set params state
 };
 
 const LastRides = ({ driverId }) => {
+
+  const [params, setParams] = useState({}); // Set params state
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
 
-  const { data, loading, error } = useNewFetch(`/v1/rides/drivers/${driverId}`);
+  const { data, loading, error } = useNewFetch(`/v1/rides/drivers/${driverId}?${qs.stringify(getUserParams(params))}`);
 
   const columns = [
     {
@@ -235,7 +237,27 @@ const LastRides = ({ driverId }) => {
         columns={columns}
         dataSource={data?.data}
         loading={loading}
-        pagination={false}
+        pagination={{
+          total: data?.meta?.total_items,
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "50"],
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} rides`,
+        }}
+        onChange={(pagination, filters, sorter) => {
+          // Update the params when the table state changes
+          setParams({
+            ...params,
+            pagination: {
+              current: pagination.current,
+              pageSize: pagination.pageSize,
+              limit: pagination.pageSize,
+            },
+            sortField: sorter.field,
+            sortOrder: sorter.order,
+            ...filters,
+          });
+        }}
         rowKey="ride_id"
         expandable={{
           expandedRowKeys: [expandedRowKey], // Specify the currently expanded row key
