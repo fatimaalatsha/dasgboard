@@ -24,6 +24,7 @@ import ConversionRatesByApplication from '../../pages/ConversionRatesByApplicati
 import Schedule from '../../pages/Schedule'
 import IneligibleApplicants from '../../pages/IneligibleApplicants'
 import AutofleetDrivers from '../../pages/AutofleetDrivers'
+import AutofleetDriversDetails from "../../pages/AutofleetDriversDetails";
 
 const { Sider, Content, Header} = Container // Destructuring Layout component
 
@@ -59,7 +60,8 @@ const Layout = () => {
                     <Route path="/reports/driver_application_comparison_by_city"element={<CityComparison/>} />
                     <Route path='/reports/conversion_rates_by_application' element={<ConversionRatesByApplication />} />
                     <Route path='/reports/conversion_rates/:state' element={<IneligibleApplicants />} />
-                    {['/documents/:id', '/drivers/:id', '/applicants/:id'].map(path => <Route key="Details" path={path} element={<DriverDetails />} />)}
+                    <Route path='/autofleet_drivers/:id' element={<AutofleetDriversDetails />} />
+                    {['/documents/:id', '/drivers/:id', '/applicants/:id' ].map(path => <Route key="Details" path={path} element={<DriverDetails />} />)}
                 </Routes>
             </Content>
           </Container>
