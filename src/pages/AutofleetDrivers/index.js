@@ -194,7 +194,6 @@ const AutofleetDrivers = () => {
         { text: "Offline", value: "offline" },
         { text: "Active", value: "active" },
       ],
-      //      defaultFilteredValue: autofleetFilter.filter?.status,
 
       ...(autofleetFilter.filter?.status && {
         defaultFilteredValue: autofleetFilter.filter?.status.map((status) =>
@@ -237,8 +236,22 @@ const AutofleetDrivers = () => {
           }}
       >
             View
-          </Button>
-        // </Link>
+        </Button>
+      ),
+    },
+    {
+      title: "Vendor ID",
+      dataIndex: "vendor_id",
+      key: "vendor_id",
+      render: (text, record) => (
+        <Button type="primary" ghost
+          onClick={() => {
+            setOpen(true);
+            findDriver(record.id);
+          }}
+        >
+          Update
+        </Button>
       ),
 
     }
@@ -330,14 +343,6 @@ const AutofleetDrivers = () => {
           rowKey="id"
           pagination={autofleetFilter.pagination}
           onChange={handleTableChange}
-          onRow={(record, rowIndex) => {
-            return {
-              onClick: (event) => {
-                setOpen(true);
-                findDriver(record.id);
-              },
-            };
-          }}
         />
         <Formik
           initialValues={{ vendor_id: driver.vendor_id || "" }}
@@ -356,9 +361,6 @@ const AutofleetDrivers = () => {
                 top: 200,
                 width: "100%",
                 maxWidth: "500px",
-                margin: "0 auto",
-                left: "0",
-                right: "0",
               }}
               open={open}
               onCancel={() => setOpen(false)}
