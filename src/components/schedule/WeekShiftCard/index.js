@@ -44,7 +44,7 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
                             icon={<EditOutlined />} 
                         />
                     </Tooltip>
-                    <Tooltip title={status === 'active' ? 'Deactivate' : 'Activate'}>
+                    <Tooltip title={status === 'active' ? 'Unpublish' : 'Publish'}>
                         <Button 
                             onClick={() => handleStatus(status === 'active' ? 'inactive' : 'active')} 
                             type="link" 
