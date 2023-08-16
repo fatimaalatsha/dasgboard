@@ -176,6 +176,7 @@ const AutofleetDrivers = () => {
       title: "Driver Licence",
       dataIndex: "external_id",
       key: "external_id",
+      align: "center",
     },
 
     {
@@ -194,7 +195,6 @@ const AutofleetDrivers = () => {
         { text: "Offline", value: "offline" },
         { text: "Active", value: "active" },
       ],
-      //      defaultFilteredValue: autofleetFilter.filter?.status,
 
       ...(autofleetFilter.filter?.status && {
         defaultFilteredValue: autofleetFilter.filter?.status.map((status) =>
@@ -230,18 +230,37 @@ const AutofleetDrivers = () => {
       title: "View Details",
       dataIndex: "view",
       key: "view",
+      align: "center",
       render: (text, record) => (
-        <Button type="primary" ghost
+        <Button
+          type="primary"
+          ghost
           onClick={() => {
-           navigate(`/autofleet_drivers/${record.driver_id}`);
+            navigate(`/autofleet_drivers/${record.driver_id}`);
           }}
-      >
-            View
-          </Button>
-        // </Link>
+        >
+          View
+        </Button>
       ),
-
-    }
+    },
+    {
+      title: "Update Vendor",
+      dataIndex: "vendor_id",
+      key: "vendor_id",
+      align: "center",
+      render: (text, record) => (
+        <Button
+          type="primary"
+          ghost
+          onClick={() => {
+            setOpen(true);
+            findDriver(record.id);
+          }}
+        >
+          Update
+        </Button>
+      ),
+    },
   ];
   //get vendor id list from api
   useEffect(() => {
@@ -330,14 +349,6 @@ const AutofleetDrivers = () => {
           rowKey="id"
           pagination={autofleetFilter.pagination}
           onChange={handleTableChange}
-          onRow={(record, rowIndex) => {
-            return {
-              onClick: (event) => {
-                setOpen(true);
-                findDriver(record.id);
-              },
-            };
-          }}
         />
         <Formik
           initialValues={{ vendor_id: driver.vendor_id || "" }}
@@ -356,9 +367,6 @@ const AutofleetDrivers = () => {
                 top: 200,
                 width: "100%",
                 maxWidth: "500px",
-                margin: "0 auto",
-                left: "0",
-                right: "0",
               }}
               open={open}
               onCancel={() => setOpen(false)}
