@@ -142,6 +142,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           bordered
           size="small"
           summary={pageData => {
+            console.log('page data: ', pageData)
             return (
               <></>
             )
