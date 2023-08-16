@@ -176,6 +176,7 @@ const AutofleetDrivers = () => {
       title: "Driver Licence",
       dataIndex: "external_id",
       key: "external_id",
+      align: "center",
     },
 
     {
@@ -229,22 +230,28 @@ const AutofleetDrivers = () => {
       title: "View Details",
       dataIndex: "view",
       key: "view",
+      align: "center",
       render: (text, record) => (
-        <Button type="primary" ghost
+        <Button
+          type="primary"
+          ghost
           onClick={() => {
-           navigate(`/autofleet_drivers/${record.driver_id}`);
+            navigate(`/autofleet_drivers/${record.driver_id}`);
           }}
-      >
-            View
+        >
+          View
         </Button>
       ),
     },
     {
-      title: "Vendor ID",
+      title: "Update Vendor",
       dataIndex: "vendor_id",
       key: "vendor_id",
+      align: "center",
       render: (text, record) => (
-        <Button type="primary" ghost
+        <Button
+          type="primary"
+          ghost
           onClick={() => {
             setOpen(true);
             findDriver(record.id);
@@ -253,8 +260,7 @@ const AutofleetDrivers = () => {
           Update
         </Button>
       ),
-
-    }
+    },
   ];
   //get vendor id list from api
   useEffect(() => {
