@@ -8,9 +8,8 @@ import {uint8ArrayToS3} from '../../utils/s3-storage'
 import { pinkSlipContent } from '../../assets/data/pinkslipcontent' // Pink skil object content
 import { updatePinkSlipStatus } from '../../utils/doc-status'
 
-const PinkSlipModal = ({ id, usersub , open, setOpen, pinkslipStatus }) => {
+const PinkSlipModal = ({ id, provinceId, usersub, open, setOpen, pinkslipStatus }) => {
   const { data, error, isLoading } = useFetch(`/v1/drivers/cc/${id}/vehicles`)
-  //console.log(data)
     const [pinkslip, setPinkslip] = useState({
         pdfBytes: null, 
         pdfUrl: null
@@ -32,25 +31,54 @@ const PinkSlipModal = ({ id, usersub , open, setOpen, pinkslipStatus }) => {
       if (hasValue) return activeObj
       return false
   }
-    
-
-    
-    const createPdf = async () => {
-      const activeVehicle = data.items && findActiveVehicle(data.items)
-      if (activeVehicle) {
-        for (const key in pinkSlipContent) {
-          if (activeVehicle.hasOwnProperty(key)) {
-            pinkSlipContent[key].value = ['model', 'make'].includes(key) ? activeVehicle[key].name : activeVehicle[key].toString()
-          }
+        
+  const createPdf = async (provinceId) => {
+    // keys to skip according to province
+     const skipKeys = (provinceId) => {
+        if (provinceId === 1) {
+            return [
+                "policy_number_alberta",
+                "effective_date_alberta",
+                "expiry_date_alberta",
+            ];
+        } else if (provinceId === 6) {
+            return [
+                "policy_number_ontario",
+                "effective_date_ontario",
+                "expiry_date_ontario",
+            ];
+        } else {
+            return []; // Return empty array if no condition matches
         }
-        await createPinkSlip(pinkSlipContent)
-        .then((pdfBytes) => {
-            const blob = new Blob([pdfBytes], { type: 'application/pdf' })
-            const url = URL.createObjectURL(blob)
-            setPinkslip({pdfBytes, pdfUrl: url})
-        })
+    };
+
+    const skippedKeys = skipKeys(provinceId);
+
+    const activeVehicle = data.items && findActiveVehicle(data.items);
+    if (activeVehicle) {
+      for (const key in pinkSlipContent) {
+        if (activeVehicle.hasOwnProperty(key) ) {
+          pinkSlipContent[key].value = ["model", "make"].includes(key)
+            ? activeVehicle[key].name
+            : activeVehicle[key].toString();
+        }
       }
+
+      // Remove skipped keys from pinkSlipContent
+      const updatedPinkList = Object.keys(pinkSlipContent).reduce((result, key) => {
+        if (!skippedKeys.includes(key)) {
+          result[key] = pinkSlipContent[key];
+        }
+        return result;
+      }, {});
+
+      await createPinkSlip(updatedPinkList).then((pdfBytes) => {
+        const blob = new Blob([pdfBytes], { type: "application/pdf" });
+        const url = URL.createObjectURL(blob);
+        setPinkslip({ pdfBytes, pdfUrl: url });
+      });
     }
+  };
 
     const uploadPinkSlip = async () => {
       await uint8ArrayToS3(usersub, pinkslip.pdfBytes)
@@ -65,7 +93,7 @@ const PinkSlipModal = ({ id, usersub , open, setOpen, pinkslipStatus }) => {
 
 
   useEffect(() => {
-    data && createPdf()
+    data && createPdf(provinceId);
   }, [data])
 
 
