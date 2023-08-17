@@ -207,7 +207,7 @@ const LastRides = ({ driverId }) => {
       dataIndex: "total_price",
       key: "total_price",
       render: (total_price) => (
-        <Text>{total_price ? `${total_price} CD` : ""}</Text>
+        <Text>{total_price ? `${total_price} CAD` : ""}</Text>
       ),
     },
     {
@@ -290,10 +290,10 @@ const LastRides = ({ driverId }) => {
                       <Text>{record.passenger_id}</Text>
                     </Descriptions.Item>
                     <Descriptions.Item label="Total Price">
-                      <Text>{record.total_price} CD</Text>
+                      <Text>{record.total_price} CAD</Text>
                     </Descriptions.Item>
                     <Descriptions.Item label="Driver Earnings">
-                      <Text>{record.driver_earnings} CD</Text>
+                      <Text>{record.driver_earnings} CAD</Text>
                     </Descriptions.Item>
                     <Descriptions.Item label="Pickup Date ">
                       <Text>
@@ -324,7 +324,6 @@ const LastRides = ({ driverId }) => {
                     <Descriptions.Item label="Drop Off ">
                       <Text>{record.dropoff_description}</Text>
                     </Descriptions.Item>
-                    
                   </Descriptions>
                 </Space>
               </Space>
@@ -382,16 +381,16 @@ const AutofleetDriversDetails = () => {
                 <Text>{data.phone}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Licence Number">
-                <Text>{data.license_number}</Text>
+                <Text>{data.external_id}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Licence Type">
                 <Text>{data.license_type_id}</Text>
               </Descriptions.Item>
+              <Descriptions.Item label="Vehicle Class">
+                <Text>{data.vehicle_class}</Text>
+              </Descriptions.Item>
               <Descriptions.Item label="City">
                 <Text>{data.city_id}</Text>
-              </Descriptions.Item>
-              <Descriptions.Item label="Date of Birth">
-                <Text name="birth_date">{data.birth_date?.split("T")[0]}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Vender">
                 <Text name="vendor">{data.vendor?.name}</Text>
@@ -411,7 +410,7 @@ const AutofleetDriversDetails = () => {
 
             <Divider orientation="left"> Reviews </Divider>
             <DriverReviews name="Review" driverId={id} />
-            <Divider orientation="left"> Last 10 Rides </Divider>
+            <Divider orientation="left"> Rides </Divider>
             <LastRides name="Last Rides" driverId={id} />
           </Space>
         }
