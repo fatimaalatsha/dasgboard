@@ -286,6 +286,7 @@ const CardStatus = ({ status, guarantee }) => {
 }
 
 const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, refetch }) => {
+    console.log('record', record)
     const items = [
         {
             key: 'edit',
