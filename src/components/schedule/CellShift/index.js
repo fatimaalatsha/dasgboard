@@ -1150,20 +1150,21 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                 ]}
                             >
                                 <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                            {record.is_recurring ? (
-                                    <Radio.Group
-                                        style={{ width: '100%' }} 
-                                        value={props.values.affects_to}
-                                        onChange={(e) => props.setFieldValue('affects_to', e.target.value)}
-                                    >
-                                    <Space direction="vertical" style={{ width: '100%' }}>
-                                        <Radio value="current">{`This shift`}</Radio>
-                                        <Radio value="future">{`This and following shifts`}</Radio>
-                                        <Radio value="all">{`All Shifts`}</Radio>
-                                    </Space>
-                                </Radio.Group>) : (
-                        <Text>{`Are you sure you want to delete this shift?`}</Text>)
-                        }
+                                    {record.is_recurring ? (
+                                        <Radio.Group
+                                            style={{ width: '100%' }} 
+                                            value={props.values.affects_to}
+                                            onChange={(e) => props.setFieldValue('affects_to', e.target.value)}
+                                        >
+                                        <Space direction="vertical" style={{ width: '100%' }}>
+                                            <Radio value="current">{`This shift`}</Radio>
+                                            <Radio value="future">{`This and following shifts`}</Radio>
+                                            <Radio value="all">{`All Shifts`}</Radio>
+                                        </Space>
+                                        </Radio.Group>
+                                        ) : (
+                                        <Text>{`Are you sure you want to delete this shift?`}</Text>)
+                                    }
                                 </Space>
                             </Modal>
                         </FormikForm>
