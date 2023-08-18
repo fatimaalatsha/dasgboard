@@ -10,7 +10,7 @@ import WeekView from '../../components/schedule/WeekView'
 import DayView from '../../components/schedule/DayView'
 import ShiftApproval from '../../components/schedule/ShiftApproval'
 import ShiftTemplates from '../../components/schedule/ShiftTemplates'
-import CreateTemplate from '../../components/schedule/CreateTemplate'
+import CreateWeekShift from '../../components/schedule/CreateWeekShift'
 import { CitySelect } from '../../components/CitySelect'
 import { useFilterStore } from '../../store'
 
@@ -136,6 +136,7 @@ const Schedule = () => {
                                 />
                             </Space>
                             <Space style={{ display: 'flex', width: '100%'}}>
+                                { view === 1 && <CreateWeekShift selectedWeek={selectedDate.week} tz={scheduleFilter.tz} city={selectedCity} /> }
                                 <Button type="primary" disabled={checkDisabled()} onClick={handleTodayClick}>Today</Button>
                                 <Button icon={<LeftOutlined />} onClick={() => setSelectedDate({...selectedDate, ...(view === 1 ? { week: selectedDate.week.subtract(1, 'week') } : { day: selectedDate.day.subtract(1, 'day') })})} />
                                 <Button icon={<RightOutlined />} onClick={() => setSelectedDate({...selectedDate, ...(view === 1 ? { week: selectedDate.week.add(1, 'week') } : { day: selectedDate.day.add(1, 'day') })})} />
