@@ -45,7 +45,8 @@ import {
     createWeekShift as createDayShift, 
     updateWeekShift as updateDayShift,
     deleteWeekShift as deleteDayShift,
-    unassignFromShift
+    unassignFromShift,
+    updateShiftByDriverId,
 } from '../../../utils/schedule-status'
 import useFetch from '../../../hooks/use-new-fetch'
 
@@ -53,7 +54,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const { useToken } = theme
-const { Text, Link } = Typography
+const { Text, Link, Title } = Typography
 
 const timeslotSchema = object().shape({
     start_time: string().required('Start time is required'),
@@ -71,6 +72,11 @@ const timeslotSchema = object().shape({
                     otherwise: number().notRequired()
                 }),
     guarantee_specs: string().notRequired(),
+})
+
+const tagsSchema = object().shape({
+    tags: string().required('Required'),
+    internal_comment: string().notRequired(),
 })
 
 const EditShiftModal = ({shift_id, open, tz, refetch}) => {
@@ -286,7 +292,7 @@ const CardStatus = ({ status, guarantee }) => {
 }
 
 const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, refetch }) => {
-    console.log('record', record)
+    //console.log('record', record)
     const items = [
         {
             key: 'edit',
@@ -320,31 +326,31 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, refetch }) => {
             }
         )},
         {
-            key: 'no-show',
+            key: 'No-show',
             label: 'No Show',
             onClick: () => {
-                setStatus('no-show')
+                setStatus('No-show')
             },
         },
         {
-            key: 'early-in',
+            key: 'Early-in',
             label: 'Early In',
             onClick: () => {
-                setStatus('early-in')
+                setStatus('Early-in')
             },
         },
         {
-            key: 'early-out',
+            key: 'Early-out',
             label: 'Early Out',
             onClick: () => {
-                setStatus('early-out')
+                setStatus('Early-out')
             },
         },
         {
-            key: 'late-out',
+            key: 'Late-out',
             label: 'Late Out',
             onClick: () => {
-                setStatus('late-out')
+                setStatus('Late-out')
             },
         },
     ]
@@ -412,11 +418,15 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         is_individual: record.is_individual,
         id: record.id,
     })
-    const [isHovering, setIsHovering] = useState( false)
+    const [isHovering, setIsHovering] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [edit, setEdit] = useState({ // State to hold edit mode
         editMode: false,
         editRecord: record.id,
+    })
+    const [tags, setTags] = useState({ // State to hold tags
+        status: '',
+        open: false
     })
 
     const floatingComponentWidth = hours.diff * 60.9936  // 60.9936 is the average width of each hour in the calendar
@@ -452,6 +462,16 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         refetch()
     }
 
+    const setStatus = (value) => {
+        console.log(value)
+        setTags({
+            ...tags,
+            status: value,
+            open: true
+        })
+        setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))
+    }
+
     return (
         <>
             { isCellFilled ? (
@@ -459,7 +479,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                     cardStyle={cardStyleConfig} 
                     record={hours} 
                     handleEdit={(value) => handleEdit(value)} 
-                    setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
+                    setStatus={(value) => setStatus(value)} 
                     refetch={refetch}
                 />
             ) : (
@@ -652,6 +672,81 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                         tz={scheduleFilter.tz}
                         refetch={refetch}
                     />
+            ) }
+            {/**Status Tags Modal */}
+            { tags.open && (
+                <Formik
+                    initialValues={{
+                        tags: tags.status,
+                        internal_comment: '',
+                    }}
+                    validationSchema={tagsSchema}
+                    onSubmit={async (values, { setSubmitting, resetForm }) => {
+                        const payload = {
+                            'tags': [values.tags],
+                            'internal_comment': values.internal_comment,
+                        }
+                        await updateShiftByDriverId(payload, record.id, user_id)
+                        .then(() => {
+                            message.success('Status updated successfully')
+                            setSubmitting(false)
+                            resetForm()
+                            setTags({
+                                ...tags,
+                                open: false,
+                            })
+                            refetch()
+                        })
+                    }}
+                >
+                    { props => (
+                    <FormikForm>
+                        <Modal
+                            title="Update Status"
+                            open={tags.open}
+                            onCancel={() => {
+                                setTags({
+                                    ...tags,
+                                    open: false,
+                                })
+                            }}
+                            footer={[
+                                <Button key="back" onClick={() => {
+                                    setTags({
+                                        ...tags,
+                                        open: false,
+                                    })
+                                }}>
+                                    Cancel
+                                </Button>,
+                                <Submit key="submit" type="primary">
+                                    Update Status
+                                </Submit>,
+                            ]}
+                            destroyOnClose
+                        >
+                            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                <Space direction="vertical" size={2} style={{ width: '100%' }}>
+                                    <Title level={5} style={{ marginTop: 0 }}>Status:</Title>
+                                    <Text strong mark >{props.values.tags.replace('-', ' ')}</Text>
+                                </Space>
+                                <Space direction="vertical" size={2} style={{ width: '100%' }}>
+                                    <Title level={5} style={{ marginTop: 0 }}>Comment:</Title>
+                                    <Input.TextArea 
+                                        name="internal_comment"
+                                        defaultValue={props.values.internal_comment}
+                                        rows={4} 
+                                        placeholder="Addition comment"
+                                        onChange={(e) => {
+                                            props.setFieldValue('internal_comment', e.target.value)
+                                        }}
+                                    />
+                                </Space>
+                            </Space>
+                        </Modal>
+                    </FormikForm>
+                    )}
+                </Formik>
             ) }
         </>
     )
