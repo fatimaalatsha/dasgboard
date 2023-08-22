@@ -60,6 +60,27 @@ const updateWeekShift = async (payload, id) => {
     }
 }
 
+const updateShiftByDriverId = async (payload, shift_id, driver_id) => {
+    try {
+        const auth = await Auth.currentSession()// Get current session
+        const token = auth.getAccessToken().getJwtToken()// Get token from session
+        const options = { // Set options for fetch
+            headers: {
+                'Authorization': token,
+                ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
+                'Cache-Control': 'no-cache',
+                'Pragma': 'no-cache',
+                'Expires': '0',
+            }
+        }
+        const response = await API.put(`/v1/shifts/${shift_id}/drivers-shift/${driver_id}`, payload, options)
+        const data = await response.data
+        return data
+    } catch (error) {
+        throw new Error(error)
+    }
+}
+
 const deleteWeekShift = async (payload, id) => {
     try {
         const auth = await Auth.currentSession()// Get current session
@@ -210,4 +231,5 @@ export {
     createShiftTemplate,
     updateShiftTemplate,
     deleteShiftTemplate,
+    updateShiftByDriverId,
 }
