@@ -374,9 +374,6 @@ const AutofleetDriversDetails = () => {
               <Descriptions.Item label="Last Name">
                 <Text>{data.last_name}</Text>
               </Descriptions.Item>
-              <Descriptions.Item label="Email">
-                <Text>{data.email}</Text>
-              </Descriptions.Item>
               <Descriptions.Item label="Phone Number">
                 <Text>{data.phone}</Text>
               </Descriptions.Item>
@@ -390,7 +387,7 @@ const AutofleetDriversDetails = () => {
                 <Text>{data.vehicle_class}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="City">
-                <Text>{data.city_id}</Text>
+                <Text>{data.city?.name}</Text>
               </Descriptions.Item>
               <Descriptions.Item label="Vender">
                 <Text name="vendor">{data.vendor?.name}</Text>
