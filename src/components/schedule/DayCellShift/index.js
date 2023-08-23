@@ -7,7 +7,6 @@ import {
     Typography, 
     Modal, 
     Button, 
-    TimePicker, 
     Tooltip, 
     Dropdown,
     Tag,
@@ -15,16 +14,22 @@ import {
     Input,
     message,
     Spin,
+    Popover,
+    Col,
 } from 'antd'
 import { 
     SwapRightOutlined, 
     PlusOutlined, 
     MoreOutlined,
     HistoryOutlined, // Late out Icon
-    FieldTimeOutlined,  // Early outn Icon
+    FieldTimeOutlined,  // Early out Icon
     ClockCircleOutlined, // Early in Icon
     DollarOutlined, // Guarantee Icon
-
+    CalendarOutlined,
+    CommentOutlined, // Internal Comment
+    MessageOutlined, // External Comment
+    ExperimentOutlined, // Status Icon
+    ExceptionOutlined,
 } from '@ant-design/icons'
 
 import dayjs from 'dayjs'
@@ -73,6 +78,14 @@ const timeslotSchema = object().shape({
                 }),
     guarantee_specs: string().notRequired(),
 })
+
+const SHIFT_STATUS = {
+    'No-show': <Tag color="green">No Show</Tag>,
+    'Early-in': <Tag color="green">Early-in</Tag>,
+    'Early-out': <Tag color="red">Early out</Tag>,
+    'Late-out': <Tag color="magenta">Late out</Tag>,
+    'Late-in': <Tag color="volcano">Late in</Tag>,
+}
 
 const tagsSchema = object().shape({
     tags: string().required('Required'),
@@ -291,7 +304,85 @@ const CardStatus = ({ status, guarantee }) => {
     )
 }
 
+const ShiftDetails = ({shift_id, driver_id, start_time, end_time, day, guarantee}) => {
+    const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}/drivers-shift/${driver_id}`)
+    const { token } = useToken()
+    
+    const iconStyle = { 
+        style: { color: token.colorTextDisabled, fontSize: 16 }
+    }
+    
+    if (isLoading) return <Spin />
+    if (error) return <>Error...</>
+    //console.log(data)
+    return (
+        <Card
+            title={<Title level={4} style={{ marginTop: 10 }}>Shift Details</Title>}
+            size="small"
+            style={{ boxShadow: 'none' }}
+            bordered={false}
+            headStyle={{ borderBottom: 'none' }}
+        >
+            <Space direction="vertical">
+                <Row gutter={[16, 0]}>
+                    <Col span={2}>
+                        <CalendarOutlined {...iconStyle} />
+                    </Col>
+                    <Col span={22}>
+                        <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(day).format('dddd, MMMM DD')} ⋅ ${start_time} ➡ ${end_time}`}</Text>
+                    </Col>
+                </Row>
+                <Row gutter={[16, 0]}>
+                    <Col span={2}>
+                        <DollarOutlined  {...iconStyle} />
+                    </Col>
+                    <Col span={22}>
+                        <Text>{guarantee.active ? `$ ${guarantee.amount}` : `No guarantee`}</Text>
+                    </Col>
+                </Row>
+                {guarantee.description && (
+                    <Row gutter={[16, 0]}>
+                        <Col span={2}>
+                            <ExceptionOutlined  {...iconStyle} />
+                        </Col>
+                        <Col span={22}>
+                            <Text style={{ whiteSpace: 'nowrap' }}>{guarantee.description}</Text>
+                        </Col>
+                    </Row>
+                )}
+                {data.tags && (
+                    <>
+                        <Row gutter={[16, 0]}>
+                            <Col span={2}>
+                                <ExperimentOutlined {...iconStyle} />
+                            </Col>
+                            <Col span={22}>
+                                <Space size={0}>
+                                    { data.tags?.map((tag, idx) => (
+                                        <div key={idx}>
+                                            {SHIFT_STATUS[tag]}
+                                        </div>
+                                    )) }
+                                </Space>
+                            </Col>
+                        </Row>
+                        <Row gutter={[16, 0]}>
+                            <Col span={2}>
+                                <CommentOutlined {...iconStyle} />
+                            </Col>
+                            <Col span={22}>
+                                <Text>{data.internal_comment}</Text>
+                            </Col>
+                        </Row>
+                    </>
+                )}
+            </Space>
+        </Card>
+    )
+}
+
 const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, refetch }) => {
+    const [ open, setOpen ] = useState(false)
     //console.log('record', record)
     const items = [
         {
@@ -355,48 +446,68 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, refetch }) => {
         },
     ]
 
+    const handleOpenChange = (newOpen) => {
+        setOpen(newOpen)
+    }
+
     return (
-        <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, height: '100%' }}>
-        <Tooltip 
-            title={`${record?.start} ➡ ${record?.end}`}
-            overlayStyle={{
-                ...(cardStyle.width >= 100 && { display: 'none' })
-            }}
+        <Popover 
+            open={open} 
+            content={
+                <ShiftDetails 
+                    shift_id={record.id} 
+                    driver_id={record.driver_id} 
+                    start_time={record.start} 
+                    end_time={record.end} 
+                    day={record.current_day}
+                    guarantee={record.guarantee}
+                />
+            } 
+            onOpenChange={handleOpenChange} 
+            trigger="click"
         >
-            <Card 
-                style={cardStyle}
-                bodyStyle={{ height: '100%', padding: 4 }}
-            >
-                <Space direction="horizontal" style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'flex-start' }}>
-                    <Dropdown menu={{items}} >
-                        <Link onClick={(e) => e.preventDefault()}>
-                        <Space>
-                            <MoreOutlined />
-                        </Space>
-                        </Link>
-                    </Dropdown>
-                    <Space direction="vertical" size={0}>
-                        <Row>
-                            <Space>
-                                <Space size={3}>
-                                {   cardStyle.width >= 100 && (
-                                    <>
-                                        <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
-                                        <SwapRightOutlined />
-                                        <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
-                                    </>
-                                )}
+            <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, height: '100%' }}>
+                <Tooltip 
+                    title={`${record?.start} ➡ ${record?.end}`}
+                    overlayStyle={{
+                        ...(cardStyle.width >= 100 && { display: 'none' })
+                    }}
+                >
+                    <Card 
+                        style={cardStyle}
+                        bodyStyle={{ height: '100%', padding: 4 }}
+                    >
+                        <Space direction="horizontal" style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'flex-start' }}>
+                            <Dropdown menu={{items}} >
+                                <Link onClick={(e) => e.preventDefault()}>
+                                <Space>
+                                    <MoreOutlined />
                                 </Space>
+                                </Link>
+                            </Dropdown>
+                            <Space direction="vertical" size={0}>
+                                <Row>
+                                    <Space>
+                                        <Space size={3}>
+                                        {   cardStyle.width >= 100 && (
+                                            <>
+                                                <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
+                                                <SwapRightOutlined />
+                                                <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
+                                            </>
+                                        )}
+                                        </Space>
+                                    </Space>
+                                </Row>
+                                <Row>
+                                    <CardStatus status={record?.status} guarantee={record?.guarantee?.amount}/>
+                                </Row>
                             </Space>
-                        </Row>
-                        <Row>
-                            <CardStatus status={record?.status} guarantee={record?.guarantee?.amount}/>
-                        </Row>
-                    </Space>
-                </Space>
-            </Card>
-        </Tooltip>
-        </div>
+                        </Space>
+                    </Card>
+                </Tooltip>
+            </div>
+        </Popover>
     )
 }
 
