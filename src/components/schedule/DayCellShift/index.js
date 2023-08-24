@@ -16,6 +16,7 @@ import {
     Spin,
     Popover,
     Col,
+    Divider,
 } from 'antd'
 import { 
     SwapRightOutlined, 
@@ -30,6 +31,10 @@ import {
     MessageOutlined, // External Comment
     ExperimentOutlined, // Status Icon
     ExceptionOutlined,
+    EditOutlined, // Edit Shift Icon
+    DeleteOutlined,
+    ApiOutlined,
+    InteractionOutlined,
 } from '@ant-design/icons'
 
 import dayjs from 'dayjs'
@@ -80,7 +85,7 @@ const timeslotSchema = object().shape({
 })
 
 const SHIFT_STATUS = {
-    'No-show': <Tag color="green">No Show</Tag>,
+    'No show': <Tag color="red">No Show</Tag>,
     'Early-in': <Tag color="green">Early-in</Tag>,
     'Early-out': <Tag color="red">Early out</Tag>,
     'Late-out': <Tag color="magenta">Late out</Tag>,
@@ -272,21 +277,21 @@ const CardStatus = ({ status, guarantee }) => {
                     </Tag>
                 </Tooltip>
             )}
-            { status.hasOwnProperty('early-in') && (
+            { status === 'Early-in' && (
                 <Tooltip title="Early In">
                     <Tag color="green">
                         <HistoryOutlined style={{ transform: "scaleX(-1)" }} />
                     </Tag>
                 </Tooltip>
             )}
-            { status.hasOwnProperty('early-out') &&(
+            { status === 'Early-out' &&(
                 <Tooltip title="Early Out">
                     <Tag color="red">
                         <HistoryOutlined />
                     </Tag>
                 </Tooltip>
             )}
-            { status.hasOwnProperty('late-out') && (
+            { status === 'Late-out' && (
                 <Tooltip title="Late Out">
                     <Tag color="magenta">
                         <FieldTimeOutlined />
@@ -304,17 +309,33 @@ const CardStatus = ({ status, guarantee }) => {
     )
 }
 
-const ShiftDetails = ({shift_id, driver_id, start_time, end_time, day, guarantee}) => {
+const ShiftDetails = ({
+        shift_id, 
+        driver_id, 
+        start_time, 
+        end_time, 
+        day, 
+        guarantee, 
+        is_individual, 
+        handleEdit, 
+        handleOpen, 
+        handleUnassign, 
+        handleDelete
+    }) => {
     const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}/drivers-shift/${driver_id}`)
     const { token } = useToken()
     
     const iconStyle = { 
         style: { color: token.colorTextDisabled, fontSize: 16 }
     }
+
+    const dividerStyle = {
+        style: { margin: '8px 0'}
+    }
     
     if (isLoading) return <Spin />
     if (error) return <>Error...</>
-    //console.log(data)
+    
     return (
         <Card
             title={<Title level={4} style={{ marginTop: 10 }}>Shift Details</Title>}
@@ -322,6 +343,51 @@ const ShiftDetails = ({shift_id, driver_id, start_time, end_time, day, guarantee
             style={{ boxShadow: 'none' }}
             bordered={false}
             headStyle={{ borderBottom: 'none' }}
+            extra={
+                <Space>
+                    <Tooltip title="Edit">
+                        <Button 
+                            onClick={() => {
+                                handleOpen(false)
+                                handleEdit(true)
+                            }} 
+                            type="link" 
+                            disabled={is_individual}
+                            icon={<EditOutlined />} 
+                        />
+                    </Tooltip>
+                    <Tooltip title="Change Status">
+                        <Button 
+                            onClick={() => {
+                                    //handleStatus(status === 'active' ? 'inactive' : 'active')
+                                }
+                            } 
+                            type="link" 
+                            icon={<InteractionOutlined />} 
+                        />
+                    </Tooltip>
+                    { is_individual ? (
+                            <Tooltip title="Unassign">
+                                <Button 
+                                    onClick={() => handleUnassign()} 
+                                    type="text" 
+                                    danger 
+                                    icon={<ApiOutlined />} 
+                                />
+                            </Tooltip>
+                        ) : (
+                            <Tooltip title="Delete">
+                                <Button 
+                                    onClick={() => handleDelete()} 
+                                    type="text" 
+                                    danger 
+                                    icon={<DeleteOutlined />} 
+                                />
+                            </Tooltip>
+                        )
+                    }
+                </Space>
+            }
         >
             <Space direction="vertical">
                 <Row gutter={[16, 0]}>
@@ -366,14 +432,29 @@ const ShiftDetails = ({shift_id, driver_id, start_time, end_time, day, guarantee
                                 </Space>
                             </Col>
                         </Row>
-                        <Row gutter={[16, 0]}>
-                            <Col span={2}>
-                                <CommentOutlined {...iconStyle} />
-                            </Col>
-                            <Col span={22}>
-                                <Text>{data.internal_comment}</Text>
-                            </Col>
-                        </Row>
+                        {data.internal_comment && (
+                            <Row gutter={[16, 0]}>
+                                <Col span={2}>
+                                    <CommentOutlined {...iconStyle} />
+                                </Col>
+                                <Col span={22}>
+                                    <Text>{data.internal_comment}</Text>
+                                </Col>
+                            </Row>
+                        )}
+                    </>
+                )}
+                {data.comment && (
+                    <>
+                    <Divider {...dividerStyle}/>
+                    <Row gutter={[16, 0]}>
+                        <Col span={2}>
+                            <MessageOutlined  {...iconStyle} />
+                        </Col>
+                        <Col span={22}>
+                            <Text>{data.comment}</Text>
+                        </Col>
+                    </Row>
                     </>
                 )}
             </Space>
@@ -381,9 +462,8 @@ const ShiftDetails = ({shift_id, driver_id, start_time, end_time, day, guarantee
     )
 }
 
-const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, refetch }) => {
+const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, application, refetch }) => {
     const [ open, setOpen ] = useState(false)
-    //console.log('record', record)
     const items = [
         {
             key: 'edit',
@@ -420,7 +500,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, refetch }) => {
             key: 'No-show',
             label: 'No Show',
             onClick: () => {
-                setStatus('No-show')
+                setStatus('No show')
             },
         },
         {
@@ -450,6 +530,22 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, refetch }) => {
         setOpen(newOpen)
     }
 
+    const handleUnassign = async () => {
+        await unassignFromShift({driver_id: record.driver_id}, record.id)
+            .then(() => {
+                message.success('Shift unassigned')
+                refetch()
+            })
+    }
+
+    const handleDelete = async () => {
+        await deleteDayShift({"affects_to": "current"},record.id)
+        .then(() => {
+            message.success('Shift deleted')
+            refetch()
+        })
+    }
+
     return (
         <Popover 
             open={open} 
@@ -461,6 +557,11 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, refetch }) => {
                     end_time={record.end} 
                     day={record.current_day}
                     guarantee={record.guarantee}
+                    is_individual={!record.is_individual}
+                    handleEdit={(value) => handleEdit(value)}
+                    handleOpen={(value) => handleOpenChange(value)}
+                    handleUnassign={handleUnassign}
+                    handleDelete={handleDelete}
                 />
             } 
             onOpenChange={handleOpenChange} 
@@ -500,7 +601,11 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, refetch }) => {
                                     </Space>
                                 </Row>
                                 <Row>
-                                    <CardStatus status={record?.status} guarantee={record?.guarantee?.amount}/>
+                                    <>
+                                    { application?.tags?.map((tag, idx) => (
+                                        <CardStatus key={idx} status={tag} guarantee={record?.guarantee?.amount}/>
+                                    )) }
+                                     </>
                                 </Row>
                             </Space>
                         </Space>
@@ -589,6 +694,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                 <ShiftCard 
                     cardStyle={cardStyleConfig} 
                     record={hours} 
+                    application={record.application}
                     handleEdit={(value) => handleEdit(value)} 
                     setStatus={(value) => setStatus(value)} 
                     refetch={refetch}
@@ -604,6 +710,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                     <ShiftCard 
                         cardStyle={cardStyleConfig} 
                         record={hours} 
+                        application={record.application}
                         handleEdit={(value) => handleEdit(value)} 
                         setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
                         refetch={refetch}
