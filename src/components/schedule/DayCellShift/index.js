@@ -26,7 +26,7 @@ import {
     CalendarOutlined,
     CommentOutlined, // Internal Comment
     MessageOutlined, // External Comment
-    ExperimentOutlined, // Status Icon
+    FlagOutlined, // Status Icon
     ExceptionOutlined,
     EditOutlined, // Edit Shift Icon
     DeleteOutlined,
@@ -272,7 +272,7 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
     )
 }
 
-const CardStatus = ({ status, guarantee }) => {
+const CardStatus = ({ status }) => {
     return (
         <Space size={0}>
             { status.hasOwnProperty('break') && (
@@ -419,7 +419,7 @@ const ShiftDetails = ({
                     <>
                         <Row gutter={[16, 0]}>
                             <Col span={2}>
-                                <ExperimentOutlined {...iconStyle} />
+                                <FlagOutlined {...iconStyle} />
                             </Col>
                             <Col span={22}>
                                 <Space size={0}>
