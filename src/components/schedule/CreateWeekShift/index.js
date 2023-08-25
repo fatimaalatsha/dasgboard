@@ -298,6 +298,40 @@ const CreateWeekShift = ({city, refetch}) => {
                                                     }
                                                 }}
                                             />
+                                            <Space direction="vertical" >
+                                                <Text strong >&nbsp;</Text>
+                                                <Button type="primary" ghost>
+                                                +1
+                                                </Button>
+                                            </Space>
+                                        </div>
+                                        <div size={16} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                            <div style={{ width: '100%', display: 'block' }}>
+                                                <Text >Tomorrow</Text>
+                                            </div>
+                                            <TimePickerWrapper 
+                                                name="end_time"
+                                                style={{ width: '100%' }} 
+                                                value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                                format="HH:mm" 
+                                                allowClear={false}
+                                                showNow={false}
+                                                hideDisabledOptions
+                                                disabledTime={(current) => {
+                                                    return {
+                                                        disabledMinutes: () => {
+                                                            const minuteSteps = [0, 30, 59]
+                                                            const minutes = []
+                                                            for (let i = 0; i < 60; i++) {
+                                                                if (!minuteSteps.includes(i)) {
+                                                                    minutes.push(i)
+                                                                }
+                                                            }
+                                                            return minutes
+                                                        },
+                                                    }
+                                                }}
+                                            />
                                         </div>
                                         <CitySelect 
                                             defaultValue={props.values.city_id}    
