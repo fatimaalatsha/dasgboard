@@ -8,7 +8,6 @@ import {
     Modal, 
     Button, 
     Tooltip, 
-    Dropdown,
     Tag,
     Checkbox, 
     Input,
@@ -19,9 +18,7 @@ import {
     Divider,
 } from 'antd'
 import { 
-    SwapRightOutlined, 
     PlusOutlined, 
-    MoreOutlined,
     HistoryOutlined, // Late out Icon
     FieldTimeOutlined,  // Early out Icon
     ClockCircleOutlined, // Early in Icon
@@ -42,7 +39,7 @@ import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean, mixed } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean, mixed, array } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../../store'
 
@@ -64,7 +61,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const { useToken } = theme
-const { Text, Link, Title } = Typography
+const { Text, Title } = Typography
 
 const timeslotSchema = object().shape({
     start_time: string().required('Start time is required'),
@@ -84,7 +81,15 @@ const timeslotSchema = object().shape({
     guarantee_specs: string().notRequired(),
 })
 
-const SHIFT_STATUS = {
+const SHIFT_STATUS = [
+    { value: 'No show' , label: 'No show'},
+    { value: 'Early-in' , label: 'Early in'},
+    { value: 'Early-out' , label: 'Early out'},
+    { value: 'Late-in' , label: 'Late in'},
+    { value: 'Late-out' , label: 'Late out'},
+]
+
+const SHIFT_STATUS_TAGS = {
     'No show': <Tag color="red">No Show</Tag>,
     'Early-in': <Tag color="green">Early-in</Tag>,
     'Early-out': <Tag color="red">Early out</Tag>,
@@ -93,7 +98,7 @@ const SHIFT_STATUS = {
 }
 
 const tagsSchema = object().shape({
-    tags: string().required('Required'),
+    tags: array().of(string().nullable()).required('Required'),
     internal_comment: string().notRequired(),
 })
 
@@ -298,13 +303,6 @@ const CardStatus = ({ status, guarantee }) => {
                     </Tag>
                 </Tooltip>
             )}
-            { !!guarantee && (
-                <Tooltip title={`Guarantee: $${guarantee}`}>
-                    <Tag color="gold">
-                        <DollarOutlined /> 
-                    </Tag>
-                </Tooltip>
-            )}
         </Space>
     )
 }
@@ -320,7 +318,8 @@ const ShiftDetails = ({
         handleEdit, 
         handleOpen, 
         handleUnassign, 
-        handleDelete
+        handleDelete,
+        handleStatus
     }) => {
     const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}/drivers-shift/${driver_id}`)
     const { token } = useToken()
@@ -359,9 +358,9 @@ const ShiftDetails = ({
                     <Tooltip title="Change Status">
                         <Button 
                             onClick={() => {
-                                    //handleStatus(status === 'active' ? 'inactive' : 'active')
-                                }
-                            } 
+                                handleOpen(false)
+                                handleStatus()
+                            }} 
                             type="link" 
                             icon={<InteractionOutlined />} 
                         />
@@ -369,7 +368,7 @@ const ShiftDetails = ({
                     { is_individual ? (
                             <Tooltip title="Unassign">
                                 <Button 
-                                    onClick={() => handleUnassign()} 
+                                    onClick={() => {handleUnassign()}} 
                                     type="text" 
                                     danger 
                                     icon={<ApiOutlined />} 
@@ -426,7 +425,7 @@ const ShiftDetails = ({
                                 <Space size={0}>
                                     { data.tags?.map((tag, idx) => (
                                         <div key={idx}>
-                                            {SHIFT_STATUS[tag]}
+                                            {SHIFT_STATUS_TAGS[tag]}
                                         </div>
                                     )) }
                                 </Space>
@@ -462,70 +461,14 @@ const ShiftDetails = ({
     )
 }
 
-const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, application, refetch }) => {
+const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, refetch }) => {
     const [ open, setOpen ] = useState(false)
-    const items = [
-        {
-            key: 'edit',
-            label: 'Edit',
-            onClick: () => {
-                handleEdit(true)
-            },
-            disabled: !record?.is_individual,
-        },
-        {...( record.is_individual ? 
-            {
-                key: 'delete',
-                label: 'Delete',
-                danger: true,
-                onClick: async () => {
-                    await deleteDayShift(record.id)
-                    message.success('Shift deleted')
-                    refetch()
-                },
-            }
-            :
-            {
-                key: 'unassign',
-                label: 'Unassign',
-                danger: true,
-                onClick: async () => {
-                    await unassignFromShift({driver_id: record.driver_id}, record.id)
-                    message.success('Shift unassigned')
-                    refetch()
-                },
-            }
-        )},
-        {
-            key: 'No-show',
-            label: 'No Show',
-            onClick: () => {
-                setStatus('No show')
-            },
-        },
-        {
-            key: 'Early-in',
-            label: 'Early In',
-            onClick: () => {
-                setStatus('Early-in')
-            },
-        },
-        {
-            key: 'Early-out',
-            label: 'Early Out',
-            onClick: () => {
-                setStatus('Early-out')
-            },
-        },
-        {
-            key: 'Late-out',
-            label: 'Late Out',
-            onClick: () => {
-                setStatus('Late-out')
-            },
-        },
-    ]
 
+    const ellipsisStyle = {
+        style: cardStyle.width < 100 ? { width: cardStyle.width, textAlign: 'left'} : {},
+        ellipsis: { tooltip: true, suffix: '' },
+        strong: true,
+    }
     const handleOpenChange = (newOpen) => {
         setOpen(newOpen)
     }
@@ -562,55 +505,41 @@ const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, application, refe
                     handleOpen={(value) => handleOpenChange(value)}
                     handleUnassign={handleUnassign}
                     handleDelete={handleDelete}
+                    handleStatus={handleStatus}
                 />
             } 
             onOpenChange={handleOpenChange} 
             trigger="click"
         >
             <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, height: '100%' }}>
-                <Tooltip 
-                    title={`${record?.start} ➡ ${record?.end}`}
-                    overlayStyle={{
-                        ...(cardStyle.width >= 100 && { display: 'none' })
-                    }}
+                <Card 
+                    style={cardStyle}
+                    bodyStyle={{ height: '100%', padding: 4 }}
                 >
-                    <Card 
-                        style={cardStyle}
-                        bodyStyle={{ height: '100%', padding: 4 }}
-                    >
-                        <Space direction="horizontal" style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'flex-start' }}>
-                            <Dropdown menu={{items}} >
-                                <Link onClick={(e) => e.preventDefault()}>
+                    <Space direction="horizontal" style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'flex-start' }}>
+                        <Space direction="vertical" size={0}>
+                            <Row>
                                 <Space>
-                                    <MoreOutlined />
+                                    <Text {...ellipsisStyle} >{`${record?.start} ➡ ${record?.end}`}</Text>
                                 </Space>
-                                </Link>
-                            </Dropdown>
-                            <Space direction="vertical" size={0}>
-                                <Row>
-                                    <Space>
-                                        <Space size={3}>
-                                        {   cardStyle.width >= 100 && (
-                                            <>
-                                                <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
-                                                <SwapRightOutlined />
-                                                <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
-                                            </>
-                                        )}
-                                        </Space>
+                            </Row>
+                            <Row>
+                                <Space size={0}>
+                                { !!record.guarantee?.amount && (
+                                    <Tooltip title={`Guarantee: $${record.guarantee.amount}`}>
+                                        <Tag color="gold">
+                                            <DollarOutlined /> 
+                                        </Tag>
+                                    </Tooltip>
+                                )}
+                                { application?.tags?.map((tag, idx) => (
+                                    <CardStatus key={idx} status={tag} guarantee={record?.guarantee?.amount}/>
+                                )) }
                                     </Space>
-                                </Row>
-                                <Row>
-                                    <>
-                                    { application?.tags?.map((tag, idx) => (
-                                        <CardStatus key={idx} status={tag} guarantee={record?.guarantee?.amount}/>
-                                    )) }
-                                     </>
-                                </Row>
-                            </Space>
+                            </Row>
                         </Space>
-                    </Card>
-                </Tooltip>
+                    </Space>
+                </Card>
             </div>
         </Popover>
     )
@@ -641,7 +570,8 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         editRecord: record.id,
     })
     const [tags, setTags] = useState({ // State to hold tags
-        status: '',
+        status: record.application?.tags,
+        internal_comment: record.application?.internal_comment,
         open: false
     })
 
@@ -678,14 +608,11 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         refetch()
     }
 
-    const setStatus = (value) => {
-        console.log(value)
+    const handleStatus = () => {
         setTags({
             ...tags,
-            status: value,
             open: true
         })
-        setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))
     }
 
     return (
@@ -696,7 +623,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                     record={hours} 
                     application={record.application}
                     handleEdit={(value) => handleEdit(value)} 
-                    setStatus={(value) => setStatus(value)} 
+                    handleStatus={handleStatus} 
                     refetch={refetch}
                 />
             ) : (
@@ -896,12 +823,12 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                 <Formik
                     initialValues={{
                         tags: tags.status,
-                        internal_comment: '',
+                        internal_comment: tags.internal_comment || '',
                     }}
                     validationSchema={tagsSchema}
                     onSubmit={async (values, { setSubmitting, resetForm }) => {
                         const payload = {
-                            'tags': [values.tags],
+                            'tags': values.tags,
                             'internal_comment': values.internal_comment,
                         }
                         await updateShiftByDriverId(payload, record.id, user_id)
@@ -927,6 +854,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                                     ...tags,
                                     open: false,
                                 })
+                                refetch()
                             }}
                             footer={[
                                 <Button key="back" onClick={() => {
@@ -934,6 +862,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                                         ...tags,
                                         open: false,
                                     })
+                                    refetch()
                                 }}>
                                     Cancel
                                 </Button>,
@@ -946,7 +875,13 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                             <Space direction="vertical" size={16} style={{ width: '100%' }}>
                                 <Space direction="vertical" size={2} style={{ width: '100%' }}>
                                     <Title level={5} style={{ marginTop: 0 }}>Status:</Title>
-                                    <Text strong mark >{props.values.tags.replace('-', ' ')}</Text>
+                                    <Checkbox.Group defaultValue={props.values.tags} onChange={(value) => props.setFieldValue('tags', value)}>
+                                        <Space direction="vertical">
+                                                { SHIFT_STATUS.map((status, idx) => (
+                                                    <Checkbox key={idx} value={status.value}>{status.label}</Checkbox>
+                                                ))}
+                                        </Space>
+                                    </Checkbox.Group>
                                 </Space>
                                 <Space direction="vertical" size={2} style={{ width: '100%' }}>
                                     <Title level={5} style={{ marginTop: 0 }}>Comment:</Title>
