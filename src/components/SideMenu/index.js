@@ -100,6 +100,11 @@ const SideMenu = ({collapsed}) => {
       icon: <ProjectOutlined />,
     },
     {
+      key: "/finance",
+      label: "Finance",
+      icon: <ProjectOutlined />,
+    },
+    {
       key: "/settings",
       label: "Settings",
       disabled: true,
