@@ -63,6 +63,12 @@ const [open, setOpen] = useState(false);
 
 const { data, loading, error } = useNewFetch("/v1/bonuses");
     console.log(data, loading, error);
+    
+ //handle closing modal
+    const handleCancel = () => {
+        setOpen(false);
+    };
+
 
     return (
       <Card title={"Drivers"} style={{ margin: 15 }}>
@@ -72,7 +78,11 @@ const { data, loading, error } = useNewFetch("/v1/bonuses");
           </Button>
         </Space>
         <Table dataSource={data?.data} loading={loading} columns={columns} />
-       {open ?  <CreateBounsModal />: null}
+        <CreateBounsModal
+          open={open}
+          onCancel={handleCancel}
+          onOk={handleCancel}
+        />
       </Card>
     );
 }
