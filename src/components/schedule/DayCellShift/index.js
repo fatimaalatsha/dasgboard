@@ -7,24 +7,31 @@ import {
     Typography, 
     Modal, 
     Button, 
-    TimePicker, 
     Tooltip, 
-    Dropdown,
     Tag,
     Checkbox, 
     Input,
     message,
     Spin,
+    Popover,
+    Col,
+    Divider,
 } from 'antd'
 import { 
-    SwapRightOutlined, 
     PlusOutlined, 
-    MoreOutlined,
     HistoryOutlined, // Late out Icon
-    FieldTimeOutlined,  // Early outn Icon
+    FieldTimeOutlined,  // Early out Icon
     ClockCircleOutlined, // Early in Icon
     DollarOutlined, // Guarantee Icon
-
+    CalendarOutlined,
+    CommentOutlined, // Internal Comment
+    MessageOutlined, // External Comment
+    FlagOutlined, // Status Icon
+    ExceptionOutlined,
+    EditOutlined, // Edit Shift Icon
+    DeleteOutlined,
+    ApiOutlined,
+    InteractionOutlined,
 } from '@ant-design/icons'
 
 import dayjs from 'dayjs'
@@ -32,7 +39,7 @@ import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
-import { object, string, number, boolean, mixed } from 'yup' // Import Yup for form validation
+import { object, string, number, boolean, mixed, array } from 'yup' // Import Yup for form validation
 
 import { useFilterStore } from '../../../store'
 
@@ -45,7 +52,8 @@ import {
     createWeekShift as createDayShift, 
     updateWeekShift as updateDayShift,
     deleteWeekShift as deleteDayShift,
-    unassignFromShift
+    unassignFromShift,
+    updateShiftByDriverId,
 } from '../../../utils/schedule-status'
 import useFetch from '../../../hooks/use-new-fetch'
 
@@ -53,7 +61,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const { useToken } = theme
-const { Text, Link } = Typography
+const { Text, Title } = Typography
 
 const timeslotSchema = object().shape({
     start_time: string().required('Start time is required'),
@@ -71,6 +79,27 @@ const timeslotSchema = object().shape({
                     otherwise: number().notRequired()
                 }),
     guarantee_specs: string().notRequired(),
+})
+
+const SHIFT_STATUS = [
+    { value: 'No show' , label: 'No show'},
+    { value: 'Early-in' , label: 'Early in'},
+    { value: 'Early-out' , label: 'Early out'},
+    { value: 'Late-in' , label: 'Late in'},
+    { value: 'Late-out' , label: 'Late out'},
+]
+
+const SHIFT_STATUS_TAGS = {
+    'No show': <Tag color="red">No Show</Tag>,
+    'Early-in': <Tag color="green">Early-in</Tag>,
+    'Early-out': <Tag color="red">Early out</Tag>,
+    'Late-out': <Tag color="magenta">Late out</Tag>,
+    'Late-in': <Tag color="volcano">Late in</Tag>,
+}
+
+const tagsSchema = object().shape({
+    tags: array().of(string().nullable()).required('Required'),
+    internal_comment: string().notRequired(),
 })
 
 const EditShiftModal = ({shift_id, open, tz, refetch}) => {
@@ -243,7 +272,7 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
     )
 }
 
-const CardStatus = ({ status, guarantee }) => {
+const CardStatus = ({ status }) => {
     return (
         <Space size={0}>
             { status.hasOwnProperty('break') && (
@@ -253,31 +282,24 @@ const CardStatus = ({ status, guarantee }) => {
                     </Tag>
                 </Tooltip>
             )}
-            { status.hasOwnProperty('early-in') && (
+            { status === 'Early-in' && (
                 <Tooltip title="Early In">
                     <Tag color="green">
                         <HistoryOutlined style={{ transform: "scaleX(-1)" }} />
                     </Tag>
                 </Tooltip>
             )}
-            { status.hasOwnProperty('early-out') &&(
+            { status === 'Early-out' &&(
                 <Tooltip title="Early Out">
                     <Tag color="red">
                         <HistoryOutlined />
                     </Tag>
                 </Tooltip>
             )}
-            { status.hasOwnProperty('late-out') && (
+            { status === 'Late-out' && (
                 <Tooltip title="Late Out">
                     <Tag color="magenta">
                         <FieldTimeOutlined />
-                    </Tag>
-                </Tooltip>
-            )}
-            { !!guarantee && (
-                <Tooltip title={`Guarantee: $${guarantee}`}>
-                    <Tag color="gold">
-                        <DollarOutlined /> 
                     </Tag>
                 </Tooltip>
             )}
@@ -285,111 +307,241 @@ const CardStatus = ({ status, guarantee }) => {
     )
 }
 
-const ShiftCard = ({ record, cardStyle, handleEdit, setStatus, refetch }) => {
-    const items = [
-        {
-            key: 'edit',
-            label: 'Edit',
-            onClick: () => {
-                handleEdit(true)
-            },
-            disabled: !record?.is_individual,
-        },
-        {...( record.is_individual ? 
-            {
-                key: 'delete',
-                label: 'Delete',
-                danger: true,
-                onClick: async () => {
-                    await deleteDayShift(record.id)
-                    message.success('Shift deleted')
-                    refetch()
-                },
+const ShiftDetails = ({
+        shift_id, 
+        driver_id, 
+        start_time, 
+        end_time, 
+        day, 
+        guarantee, 
+        is_individual, 
+        handleEdit, 
+        handleOpen, 
+        handleUnassign, 
+        handleDelete,
+        handleStatus
+    }) => {
+    const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}/drivers-shift/${driver_id}`)
+    const { token } = useToken()
+    
+    const iconStyle = { 
+        style: { color: token.colorTextDisabled, fontSize: 16 }
+    }
+
+    const dividerStyle = {
+        style: { margin: '8px 0'}
+    }
+    
+    if (isLoading) return <Spin />
+    if (error) return <>Error...</>
+    
+    return (
+        <Card
+            title={<Title level={4} style={{ marginTop: 10 }}>Shift Details</Title>}
+            size="small"
+            style={{ boxShadow: 'none' }}
+            bordered={false}
+            headStyle={{ borderBottom: 'none' }}
+            extra={
+                <Space>
+                    <Tooltip title="Edit">
+                        <Button 
+                            onClick={() => {
+                                handleOpen(false)
+                                handleEdit(true)
+                            }} 
+                            type="link" 
+                            disabled={is_individual}
+                            icon={<EditOutlined />} 
+                        />
+                    </Tooltip>
+                    <Tooltip title="Change Status">
+                        <Button 
+                            onClick={() => {
+                                handleOpen(false)
+                                handleStatus()
+                            }} 
+                            type="link" 
+                            icon={<InteractionOutlined />} 
+                        />
+                    </Tooltip>
+                    { is_individual ? (
+                            <Tooltip title="Unassign">
+                                <Button 
+                                    onClick={() => {handleUnassign()}} 
+                                    type="text" 
+                                    danger 
+                                    icon={<ApiOutlined />} 
+                                />
+                            </Tooltip>
+                        ) : (
+                            <Tooltip title="Delete">
+                                <Button 
+                                    onClick={() => handleDelete()} 
+                                    type="text" 
+                                    danger 
+                                    icon={<DeleteOutlined />} 
+                                />
+                            </Tooltip>
+                        )
+                    }
+                </Space>
             }
-            :
-            {
-                key: 'unassign',
-                label: 'Unassign',
-                danger: true,
-                onClick: async () => {
-                    await unassignFromShift({driver_id: record.driver_id}, record.id)
-                    message.success('Shift unassigned')
-                    refetch()
-                },
-            }
-        )},
-        {
-            key: 'no-show',
-            label: 'No Show',
-            onClick: () => {
-                setStatus('no-show')
-            },
-        },
-        {
-            key: 'early-in',
-            label: 'Early In',
-            onClick: () => {
-                setStatus('early-in')
-            },
-        },
-        {
-            key: 'early-out',
-            label: 'Early Out',
-            onClick: () => {
-                setStatus('early-out')
-            },
-        },
-        {
-            key: 'late-out',
-            label: 'Late Out',
-            onClick: () => {
-                setStatus('late-out')
-            },
-        },
-    ]
+        >
+            <Space direction="vertical">
+                <Row gutter={[16, 0]}>
+                    <Col span={2}>
+                        <CalendarOutlined {...iconStyle} />
+                    </Col>
+                    <Col span={22}>
+                        <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(day).format('dddd, MMMM DD')} ⋅ ${start_time} ➡ ${end_time}`}</Text>
+                    </Col>
+                </Row>
+                <Row gutter={[16, 0]}>
+                    <Col span={2}>
+                        <DollarOutlined  {...iconStyle} />
+                    </Col>
+                    <Col span={22}>
+                        <Text>{guarantee.active ? `$ ${guarantee.amount}` : `No guarantee`}</Text>
+                    </Col>
+                </Row>
+                {guarantee.description && (
+                    <Row gutter={[16, 0]}>
+                        <Col span={2}>
+                            <ExceptionOutlined  {...iconStyle} />
+                        </Col>
+                        <Col span={22}>
+                            <Text style={{ whiteSpace: 'nowrap' }}>{guarantee.description}</Text>
+                        </Col>
+                    </Row>
+                )}
+                {data.tags && (
+                    <>
+                        <Row gutter={[16, 0]}>
+                            <Col span={2}>
+                                <FlagOutlined {...iconStyle} />
+                            </Col>
+                            <Col span={22}>
+                                <Space size={0}>
+                                    { data.tags?.map((tag, idx) => (
+                                        <div key={idx}>
+                                            {SHIFT_STATUS_TAGS[tag]}
+                                        </div>
+                                    )) }
+                                </Space>
+                            </Col>
+                        </Row>
+                        {data.internal_comment && (
+                            <Row gutter={[16, 0]}>
+                                <Col span={2}>
+                                    <CommentOutlined {...iconStyle} />
+                                </Col>
+                                <Col span={22}>
+                                    <Text>{data.internal_comment}</Text>
+                                </Col>
+                            </Row>
+                        )}
+                    </>
+                )}
+                {data.comment && (
+                    <>
+                    <Divider {...dividerStyle}/>
+                    <Row gutter={[16, 0]}>
+                        <Col span={2}>
+                            <MessageOutlined  {...iconStyle} />
+                        </Col>
+                        <Col span={22}>
+                            <Text>{data.comment}</Text>
+                        </Col>
+                    </Row>
+                    </>
+                )}
+            </Space>
+        </Card>
+    )
+}
+
+const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, refetch }) => {
+    const [ open, setOpen ] = useState(false)
+
+    const ellipsisStyle = {
+        style: cardStyle.width < 100 ? { width: cardStyle.width, textAlign: 'left'} : {},
+        ellipsis: { tooltip: true, suffix: '' },
+        strong: true,
+    }
+    const handleOpenChange = (newOpen) => {
+        setOpen(newOpen)
+    }
+
+    const handleUnassign = async () => {
+        await unassignFromShift({driver_id: record.driver_id}, record.id)
+            .then(() => {
+                message.success('Shift unassigned')
+                refetch()
+            })
+    }
+
+    const handleDelete = async () => {
+        await deleteDayShift({"affects_to": "current"},record.id)
+        .then(() => {
+            message.success('Shift deleted')
+            refetch()
+        })
+    }
 
     return (
-        <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, height: '100%' }}>
-        <Tooltip 
-            title={`${record?.start} ➡ ${record?.end}`}
-            overlayStyle={{
-                ...(cardStyle.width >= 100 && { display: 'none' })
-            }}
+        <Popover 
+            open={open} 
+            content={
+                <ShiftDetails 
+                    shift_id={record.id} 
+                    driver_id={record.driver_id} 
+                    start_time={record.start} 
+                    end_time={record.end} 
+                    day={record.current_day}
+                    guarantee={record.guarantee}
+                    is_individual={!record.is_individual}
+                    handleEdit={(value) => handleEdit(value)}
+                    handleOpen={(value) => handleOpenChange(value)}
+                    handleUnassign={handleUnassign}
+                    handleDelete={handleDelete}
+                    handleStatus={handleStatus}
+                />
+            } 
+            onOpenChange={handleOpenChange} 
+            trigger="click"
         >
-            <Card 
-                style={cardStyle}
-                bodyStyle={{ height: '100%', padding: 4 }}
-            >
-                <Space direction="horizontal" style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'flex-start' }}>
-                    <Dropdown menu={{items}} >
-                        <Link onClick={(e) => e.preventDefault()}>
-                        <Space>
-                            <MoreOutlined />
-                        </Space>
-                        </Link>
-                    </Dropdown>
-                    <Space direction="vertical" size={0}>
-                        <Row>
-                            <Space>
-                                <Space size={3}>
-                                {   cardStyle.width >= 100 && (
-                                    <>
-                                        <Text strong style={{ color: 'inherit' }}>{record?.start}</Text>
-                                        <SwapRightOutlined />
-                                        <Text strong style={{ color: 'inherit' }}>{record?.end}</Text>
-                                    </>
-                                )}
+            <div className="floating-component" style={{ position: 'absolute', top: -1, left: -1, zIndex: 999, height: '100%' }}>
+                <Card 
+                    style={cardStyle}
+                    bodyStyle={{ height: '100%', padding: 4 }}
+                >
+                    <Space direction="horizontal" style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'flex-start' }}>
+                        <Space direction="vertical" size={0}>
+                            <Row>
+                                <Space>
+                                    <Text {...ellipsisStyle} >{`${record?.start} ➡ ${record?.end}`}</Text>
                                 </Space>
-                            </Space>
-                        </Row>
-                        <Row>
-                            <CardStatus status={record?.status} guarantee={record?.guarantee?.amount}/>
-                        </Row>
+                            </Row>
+                            <Row>
+                                <Space size={0}>
+                                { !!record.guarantee?.amount && (
+                                    <Tooltip title={`Guarantee: $${record.guarantee.amount}`}>
+                                        <Tag color="gold">
+                                            <DollarOutlined /> 
+                                        </Tag>
+                                    </Tooltip>
+                                )}
+                                { application?.tags?.map((tag, idx) => (
+                                    <CardStatus key={idx} status={tag} guarantee={record?.guarantee?.amount}/>
+                                )) }
+                                    </Space>
+                            </Row>
+                        </Space>
                     </Space>
-                </Space>
-            </Card>
-        </Tooltip>
-        </div>
+                </Card>
+            </div>
+        </Popover>
     )
 }
 
@@ -411,11 +563,16 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         is_individual: record.is_individual,
         id: record.id,
     })
-    const [isHovering, setIsHovering] = useState( false)
+    const [isHovering, setIsHovering] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
     const [edit, setEdit] = useState({ // State to hold edit mode
         editMode: false,
         editRecord: record.id,
+    })
+    const [tags, setTags] = useState({ // State to hold tags
+        status: record.application?.tags,
+        internal_comment: record.application?.internal_comment,
+        open: false
     })
 
     const floatingComponentWidth = hours.diff * 60.9936  // 60.9936 is the average width of each hour in the calendar
@@ -451,14 +608,22 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         refetch()
     }
 
+    const handleStatus = () => {
+        setTags({
+            ...tags,
+            open: true
+        })
+    }
+
     return (
         <>
             { isCellFilled ? (
                 <ShiftCard 
                     cardStyle={cardStyleConfig} 
                     record={hours} 
+                    application={record.application}
                     handleEdit={(value) => handleEdit(value)} 
-                    setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
+                    handleStatus={handleStatus} 
                     refetch={refetch}
                 />
             ) : (
@@ -472,6 +637,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                     <ShiftCard 
                         cardStyle={cardStyleConfig} 
                         record={hours} 
+                        application={record.application}
                         handleEdit={(value) => handleEdit(value)} 
                         setStatus={(value) => setHours(prevHours => ({ ...prevHours, status: { ...prevHours.status, [value]: true } }))} 
                         refetch={refetch}
@@ -651,6 +817,89 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                         tz={scheduleFilter.tz}
                         refetch={refetch}
                     />
+            ) }
+            {/**Status Tags Modal */}
+            { tags.open && (
+                <Formik
+                    initialValues={{
+                        tags: tags.status,
+                        internal_comment: tags.internal_comment || '',
+                    }}
+                    validationSchema={tagsSchema}
+                    onSubmit={async (values, { setSubmitting, resetForm }) => {
+                        const payload = {
+                            'tags': values.tags,
+                            'internal_comment': values.internal_comment,
+                        }
+                        await updateShiftByDriverId(payload, record.id, user_id)
+                        .then(() => {
+                            message.success('Status updated successfully')
+                            setSubmitting(false)
+                            resetForm()
+                            setTags({
+                                ...tags,
+                                open: false,
+                            })
+                            refetch()
+                        })
+                    }}
+                >
+                    { props => (
+                    <FormikForm>
+                        <Modal
+                            title="Update Status"
+                            open={tags.open}
+                            onCancel={() => {
+                                setTags({
+                                    ...tags,
+                                    open: false,
+                                })
+                                refetch()
+                            }}
+                            footer={[
+                                <Button key="back" onClick={() => {
+                                    setTags({
+                                        ...tags,
+                                        open: false,
+                                    })
+                                    refetch()
+                                }}>
+                                    Cancel
+                                </Button>,
+                                <Submit key="submit" type="primary">
+                                    Update Status
+                                </Submit>,
+                            ]}
+                            destroyOnClose
+                        >
+                            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                <Space direction="vertical" size={2} style={{ width: '100%' }}>
+                                    <Title level={5} style={{ marginTop: 0 }}>Status:</Title>
+                                    <Checkbox.Group defaultValue={props.values.tags} onChange={(value) => props.setFieldValue('tags', value)}>
+                                        <Space direction="vertical">
+                                                { SHIFT_STATUS.map((status, idx) => (
+                                                    <Checkbox key={idx} value={status.value}>{status.label}</Checkbox>
+                                                ))}
+                                        </Space>
+                                    </Checkbox.Group>
+                                </Space>
+                                <Space direction="vertical" size={2} style={{ width: '100%' }}>
+                                    <Title level={5} style={{ marginTop: 0 }}>Comment:</Title>
+                                    <Input.TextArea 
+                                        name="internal_comment"
+                                        defaultValue={props.values.internal_comment}
+                                        rows={4} 
+                                        placeholder="Addition comment"
+                                        onChange={(e) => {
+                                            props.setFieldValue('internal_comment', e.target.value)
+                                        }}
+                                    />
+                                </Space>
+                            </Space>
+                        </Modal>
+                    </FormikForm>
+                    )}
+                </Formik>
             ) }
         </>
     )
