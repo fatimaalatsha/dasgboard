@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react' // Import React hooks
-import { Table, Typography, Tooltip, Space, Switch } from 'antd' // Import Ant components
+import { Table, Typography, Tooltip, Space } from 'antd' // Import Ant components
 import qs from 'qs' // Import qs library
 import dayjs from 'dayjs' // Import dayjs
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -9,7 +9,7 @@ import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import DayCellShift from '../DayCellShift' // Import CellShift component
 import { useFilterStore } from '../../../store' // Import useFilterStore hook
 import useDaySchedule from '../../../hooks/use-day-schedule' // Import useDaySchedule hook
-import DayColumnHighlight from '../DayColumnHighlight'
+//import DayColumnHighlight from '../DayColumnHighlight'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -142,7 +142,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           bordered
           size="small"
           summary={pageData => {
-            console.log('page data: ', pageData)
+            //console.log('page data: ', pageData)
             return (
               <></>
             )
