@@ -71,7 +71,7 @@ const { data, loading, error } = useNewFetch("/v1/bonuses");
 
 
     return (
-      <Card title={"Drivers"} style={{ margin: 15 }}>
+      <Card title={"Finance"} style={{ margin: 15 }}>
         <Space style={{ marginBottom: 15 }}>
           <Button type="primary" onClick={() => setOpen(true)}>
             Create Bonus

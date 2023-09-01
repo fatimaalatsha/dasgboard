@@ -13,6 +13,7 @@ import {
   RocketOutlined,
   CalendarOutlined,
   TeamOutlined,
+  DollarOutlined,
 } from '@ant-design/icons'; // import antd navigation icons
 
 import { Auth } from 'aws-amplify' // import aws-amplify auth module
@@ -74,11 +75,15 @@ const SideMenu = ({collapsed}) => {
       label: "Documents",
       icon: <FileOutlined />,
     },
-    ...( !process.env.REACT_APP_NEW_URL.includes('uridetech') ? [{
-      key: "/schedule",
-      label: 'Schedule',
-      icon: <CalendarOutlined />,
-    }] : []),
+    ...(!process.env.REACT_APP_NEW_URL.includes("uridetech")
+      ? [
+          {
+            key: "/schedule",
+            label: "Schedule",
+            icon: <CalendarOutlined />,
+          },
+        ]
+      : []),
     {
       key: "/cities",
       label: "Cities",
@@ -102,7 +107,7 @@ const SideMenu = ({collapsed}) => {
     {
       key: "/finance",
       label: "Finance",
-      icon: <ProjectOutlined />,
+      icon: <DollarOutlined />,
     },
     {
       key: "/settings",
