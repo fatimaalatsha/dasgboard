@@ -575,7 +575,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         internal_comment: record.application?.internal_comment,
         open: false
     })
-
+    
     const floatingComponentWidth = hours.diff * 60.9936  // 60.9936 is the average width of each hour in the calendar
 
     const cardStyleConfig = {
