@@ -601,8 +601,8 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
     const floatingComponentWidth = hours.diff * 60.9936  // 60.9936 is the average width of each hour in the calendar
 
     const cardStyleConfig = {
-        backgroundColor: record.is_overnight ? token['geekblue-8'] : token['geekblue-1'],
-        borderColor: record.is_overnight ? token['geekblue-1'] : token['geekblue-3'],
+        backgroundColor: record.is_overnight ? token['purple-8'] : token['geekblue-1'],
+        borderColor: record.is_overnight ? token['geekblue-10'] : token['geekblue-3'],
         width: floatingComponentWidth,
         height: 'calc(100% + 2px)',
     }
