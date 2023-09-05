@@ -17,7 +17,7 @@ import {
     Col,
     Divider,
 } from 'antd'
-import { 
+import Icon , { 
     PlusOutlined, 
     HistoryOutlined, // Late out Icon
     FieldTimeOutlined,  // Early out Icon
@@ -102,6 +102,14 @@ const tagsSchema = object().shape({
     tags: array().of(string().nullable()).required('Required'),
     internal_comment: string().notRequired(),
 })
+
+const OvernightSvg = () => (
+    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
+        <path d="M680-520v-120H560v-80h120v-120h80v120h120v80H760v120h-80ZM440-200q54 0 100.5-21.5T620-281q-126-8-213-99.5T320-600q0-13 1-25.5t3-24.5q-56 31-90 86.5T200-440q0 100 70 170t170 70Zm0 80q-134 0-227-93t-93-227q0-134 93-227t227-93q5 0 10 .5t10 .5q-29 32-44.5 72.5T400-600q0 100 70 170t170 70q32 0 61-8t55-22q-18 115-106.5 192.5T440-120Zm-33-261Z"/>
+    </svg>
+)
+
+const OvernightIcon = (props) => <Icon component={OvernightSvg} {...props} />
 
 const EditShiftModal = ({shift_id, open, tz, refetch}) => {
     const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}`)
@@ -316,6 +324,7 @@ const ShiftDetails = ({
         day, 
         guarantee, 
         is_individual, 
+        is_overnight,
         handleEdit, 
         handleOpen, 
         handleUnassign, 
@@ -390,6 +399,16 @@ const ShiftDetails = ({
             }
         >
             <Space direction="vertical">
+                { is_overnight && (
+                    <Row gutter={[16, 0]}>
+                        <Col span={2}>
+                            <OvernightIcon />
+                        </Col>
+                        <Col span={22}>
+                            <Text style={{ whiteSpace: 'nowrap' }}>Overnight</Text>
+                        </Col>
+                    </Row>
+                )}
                 <Row gutter={[16, 0]}>
                     <Col span={2}>
                         <CalendarOutlined {...iconStyle} />
@@ -466,7 +485,8 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
     const [ open, setOpen ] = useState(false)
 
     const ellipsisStyle = {
-        style: cardStyle.width < 100 ? { width: cardStyle.width, textAlign: 'left'} : {},
+        style: cardStyle.width < 100 ? { width: cardStyle.width, textAlign: 'left', 
+        ...(record.is_overnight && { color: '#FFFFFF' })} : {...(record.is_overnight && { color: '#FFFFFF' })},
         ellipsis: { tooltip: true, suffix: '' },
         strong: true,
     }
@@ -502,6 +522,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
                     day={record.current_day}
                     guarantee={record.guarantee}
                     is_individual={!record.is_individual}
+                    is_overnight={record.is_overnight}
                     handleEdit={(value) => handleEdit(value)}
                     handleOpen={(value) => handleOpenChange(value)}
                     handleUnassign={handleUnassign}
@@ -563,6 +584,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         current_day: dayjs(day).tz(scheduleFilter.tz).utc().format('YYYY-MM-DD'),
         is_individual: record.is_individual,
         id: record.id,
+        is_overnight: record.is_overnight
     })
     const [isHovering, setIsHovering] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -575,14 +597,14 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         internal_comment: record.application?.internal_comment,
         open: false
     })
-    
+
     const floatingComponentWidth = hours.diff * 60.9936  // 60.9936 is the average width of each hour in the calendar
 
     const cardStyleConfig = {
-        backgroundColor: token['geekblue-1'],
-        borderColor: token['geekblue-3'],
+        backgroundColor: record.is_overnight ? token['geekblue-8'] : token['geekblue-1'],
+        borderColor: record.is_overnight ? token['geekblue-1'] : token['geekblue-3'],
         width: floatingComponentWidth,
-        height: 'calc(100% + 2px)'
+        height: 'calc(100% + 2px)',
     }
   
     const handleClick = () => {
