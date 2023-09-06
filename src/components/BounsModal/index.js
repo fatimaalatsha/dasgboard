@@ -82,10 +82,12 @@ const test = {
   // bounce type options
   const BounceType = [
     {
-      name: "Dollar",
+      text: "Dollar",
+      value: "dollar",
     },
     {
-      name: "Bonus",
+      text: "Bonus",
+      values: "bonus",
     },
   ];
 
@@ -150,10 +152,12 @@ const test = {
                   datasource={
                     [
                       {
-                        name: "Active",
+                        text: "Active",
+                        value: "active",
                       },
                       {
-                        name: "Inactive",
+                        text: "Inactive",
+                        value: "inactive",
                       },
                     ]
                   }
