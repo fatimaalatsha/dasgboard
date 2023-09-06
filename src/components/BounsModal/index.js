@@ -111,10 +111,7 @@ const test = {
         >
           <Modal
             title={
-              <Text
-                strong
-                style={{ fontSize: "1.2rem" }}
-              >
+              <Text strong style={{ fontSize: "1.2rem" }}>
                 {" "}
                 Create New Bounce{" "}
               </Text>
@@ -147,13 +144,27 @@ const test = {
                   datasource={BounceType}
                 />
                 <Text type="secondary">Status</Text>
-                <InputWrapper name="status" placeholder="Status" />
+                <SelectWrapper
+                  name="status"
+                  placeholder="Status"
+                  datasource={
+                    [
+                      {
+                        name: "Active",
+                      },
+                      {
+                        name: "Inactive",
+                      },
+                    ]
+                  }
+                />
                 <Text type="secondary">Goal</Text>
                 <InputWrapper name="goal" placeholder="Goal" />
                 <Text type="secondary"> Date Range </Text>
                 <DateRangePicker
                   value={selectedDateRange}
                   onDateSelect={handleDateSelect}
+                  unpresets={true}
                 />
               </Space>
             </Form>
