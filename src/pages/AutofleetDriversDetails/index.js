@@ -26,6 +26,20 @@ const { Title, Text } = Typography;
     ...params,
 })
 
+const Test = () => {
+  const { data, error, isLoading, refetch } = useNewFetch(`/v1/bonuses`);
+  console.log(data);
+  return (
+    <div>
+      {isLoading && <p>Loading...</p>}
+      {error && <p>{error}</p>}
+      {data && <p>{JSON.stringify(data)}</p>}
+      <button onClick={() => refetch()}>Refetch</button>
+    </div>
+  );
+};
+
+
 const DriverReviews = ({ driverId }) => {
 
   const [params, setParams] = useState({}); // Set params state
@@ -409,6 +423,8 @@ const AutofleetDriversDetails = () => {
             <DriverReviews name="Review" driverId={id} />
             <Divider orientation="left"> Rides </Divider>
             <LastRides name="Last Rides" driverId={id} />
+            <Divider orientation="left"> Bonuses </Divider>
+            <Test />
           </Space>
         }
       />
