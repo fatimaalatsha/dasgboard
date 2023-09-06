@@ -598,7 +598,13 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         open: false
     })
 
-    const floatingComponentWidth = hours.diff * 60.9936  // 60.9936 is the average width of each hour in the calendar
+    const getShiftDuration = () => {
+        const END_TIME = dayjs(record.end_time).tz(scheduleFilter.tz).utc()
+        const START_TIME = dayjs(record.start_time).tz(scheduleFilter.tz).utc()
+        return END_TIME.diff(START_TIME, 'hour', true)
+    }
+
+    const floatingComponentWidth = (record.is_overnight ? getShiftDuration() : hours.diff) * 60.9936  // 60.9936 is the average width of each hour in the calendar
 
     const cardStyleConfig = {
         backgroundColor: record.is_overnight ? token['purple-8'] : token['geekblue-1'],
