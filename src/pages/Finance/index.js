@@ -32,8 +32,12 @@ const Finance = () => {
     },
     {
       title: "Cities",
-      dataIndex: "city_id",
-      key: "city_id",
+      dataIndex: "cities",
+      key: "cities",
+      render: (cities) => {
+        return cities.map((city) => city.name).join(", ");
+      }
+      
     },
     {
       title: "Type",
