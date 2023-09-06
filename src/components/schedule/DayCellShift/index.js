@@ -319,6 +319,7 @@ const ShiftDetails = ({
         is_individual, 
         is_overnight,
         overnight_start,
+        overnight_end,
         handleEdit, 
         handleOpen, 
         handleUnassign, 
@@ -411,7 +412,7 @@ const ShiftDetails = ({
                         { is_overnight && start_time !== overnight_start ? (
                             <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(day).subtract(1, 'day').format('dddd, MMMM DD')} ⋅ ${overnight_start} ➡ ${end_time}`}</Text>
                             ) : (
-                            <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(day).format('dddd, MMMM DD')} ⋅ ${start_time} ➡ ${end_time}`}</Text>
+                            <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(day).format('dddd, MMMM DD')} ⋅ ${start_time} ➡ ${is_overnight && end_time !== overnight_end ? overnight_end : end_time}`}</Text>
                         )}
                     </Col>
                 </Row>
@@ -523,6 +524,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
                     is_individual={!record.is_individual}
                     is_overnight={record.is_overnight}
                     overnight_start={record.overnight_start}
+                    overnight_end={record.overnight_end}
                     handleEdit={(value) => handleEdit(value)}
                     handleOpen={(value) => handleOpenChange(value)}
                     handleUnassign={handleUnassign}
@@ -542,7 +544,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
                         <Space direction="vertical" size={0}>
                             <Row>
                                 <Space>
-                                    <Text {...ellipsisStyle} >{`${record.is_overnight && record.start !== record.overnight_start ? `🌙` + record.overnight_start : record?.start} ➡ ${record?.end}`}</Text>
+                                    <Text {...ellipsisStyle} >{`${record.is_overnight && record.start !== record.overnight_start ? `🌙` + record.overnight_start : record?.start} ➡ ${record.is_overnight && record.end !== record.overnight_end ? record.overnight_end + `🌙` : record?.end}`}</Text>
                                 </Space>
                             </Row>
                             <Row>
@@ -586,7 +588,8 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         id: record.id,
         is_overnight: record.is_overnight,
         ...(record.is_overnight && {
-            overnight_start: convertToHourTz(record.overnight_start, scheduleFilter.tz)
+            overnight_start: convertToHourTz(record.overnight_start, scheduleFilter.tz),
+            overnight_end: convertToHourTz(record.overnight_end, scheduleFilter.tz)
         })
     })
     const [isHovering, setIsHovering] = useState(false)
