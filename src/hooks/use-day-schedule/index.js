@@ -39,14 +39,10 @@ const useDaySchedule = (url, timezone, selectedDay) => {
                 item.shifts?.map((shift, index) => {
                     if(shift.is_overnight) {
                         const isSameDay = selectedDay.tz().utc().isSame(dayjs(shift.end_time).tz().utc(), 'day')
-                        const START_TIME_DIFF = dayjs(selectedDay.endOf('day'), 'HH:mm').diff(dayjs(shift.start_time, 'HH:mm'), 'hour')
-                        const END_TIME_DIFF = dayjs(selectedDay.startOf('day'), 'HH:mm').diff(dayjs(shift.end_time, 'HH:mm'), 'hour')
                         if(!isSameDay) {
                             shift.end_time = selectedDay.tz().utc().endOf('day').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
-                            shift.duration = START_TIME_DIFF
                         } else {
                             shift.start_time = selectedDay.tz().utc().startOf('day').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
-                            shift.duration = END_TIME_DIFF
                         }
                     }
                     return shift
