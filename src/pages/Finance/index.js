@@ -86,7 +86,6 @@ const Finance = () => {
         arrayFormat: "comma",
       })}`
     );
-  console.log(data, loading, error);
 
   //handle closing modal
   const handleCancel = () => {

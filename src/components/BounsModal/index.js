@@ -48,7 +48,6 @@ const [cities, setCities] = useState([]); // Set cities state
   const fetchCities = async () => {
     const cities = await getCities();
     setCities(cities);
-    console.log(cities);
   };
 
   // Fetch cities on component mount
@@ -97,7 +96,6 @@ const test = {
           initialValues={initialValues}
           validationSchema={validationSchema}
           onSubmit={async (values) => {
-            console.log(values, selectedDateRange);
             const body = {
               name: values.name,
               city_id: values.city_id,
@@ -107,7 +105,8 @@ const test = {
               start_time: selectedDateRange.date_from,
               end_time: selectedDateRange.date_to,
             };
-            console.log(body);
+            // close modal after submit
+            props.onCancel();
             await createBonus(body); // Call create bonus function
           }}
         >
@@ -121,7 +120,7 @@ const test = {
             className="modalStyle"
             open={props.open}
             onCancel={props.onCancel}
-            // onOk={props.onOk}
+            destroyOnClose={true}
             footer={[
               <SubmitWrapper key="submit" type="primary">
                 Submit
