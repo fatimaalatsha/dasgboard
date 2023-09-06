@@ -318,6 +318,7 @@ const ShiftDetails = ({
         guarantee, 
         is_individual, 
         is_overnight,
+        overnight_start,
         handleEdit, 
         handleOpen, 
         handleUnassign, 
@@ -407,7 +408,11 @@ const ShiftDetails = ({
                         <CalendarOutlined {...iconStyle} />
                     </Col>
                     <Col span={22}>
-                        <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(day).format('dddd, MMMM DD')} ⋅ ${start_time} ➡ ${end_time}`}</Text>
+                        { is_overnight && start_time !== overnight_start ? (
+                            <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(day).subtract(1, 'day').format('dddd, MMMM DD')} ⋅ ${overnight_start} ➡ ${end_time}`}</Text>
+                            ) : (
+                            <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(day).format('dddd, MMMM DD')} ⋅ ${start_time} ➡ ${end_time}`}</Text>
+                        )}
                     </Col>
                 </Row>
                 <Row gutter={[16, 0]}>
@@ -483,6 +488,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
         ellipsis: { tooltip: true, suffix: '' },
         strong: true,
     }
+
     const handleOpenChange = (newOpen) => {
         setOpen(newOpen)
     }
@@ -516,6 +522,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
                     guarantee={record.guarantee}
                     is_individual={!record.is_individual}
                     is_overnight={record.is_overnight}
+                    overnight_start={record.overnight_start}
                     handleEdit={(value) => handleEdit(value)}
                     handleOpen={(value) => handleOpenChange(value)}
                     handleUnassign={handleUnassign}
@@ -535,7 +542,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
                         <Space direction="vertical" size={0}>
                             <Row>
                                 <Space>
-                                    <Text {...ellipsisStyle} >{`${record?.start} ➡ ${record?.end}`}</Text>
+                                    <Text {...ellipsisStyle} >{`${record.is_overnight && record.start !== record.overnight_start ? `🌙` + record.overnight_start : record?.start} ➡ ${record?.end}`}</Text>
                                 </Space>
                             </Row>
                             <Row>
@@ -577,7 +584,10 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         current_day: dayjs(day).tz(scheduleFilter.tz).utc().format('YYYY-MM-DD'),
         is_individual: record.is_individual,
         id: record.id,
-        is_overnight: record.is_overnight
+        is_overnight: record.is_overnight,
+        ...(record.is_overnight && {
+            overnight_start: convertToHourTz(record.overnight_start, scheduleFilter.tz)
+        })
     })
     const [isHovering, setIsHovering] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)

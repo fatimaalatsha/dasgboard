@@ -41,7 +41,9 @@ const useDaySchedule = (url, timezone, selectedDay) => {
                         const isSameDay = selectedDay.tz().utc().isSame(dayjs(shift.end_time).tz().utc(), 'day')
                         if(!isSameDay) {
                             shift.end_time = selectedDay.tz().utc().endOf('day').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+                            shift.overnight_start = shift.start_time
                         } else {
+                            shift.overnight_start = shift.start_time
                             shift.start_time = selectedDay.tz().utc().startOf('day').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
                         }
                     }
