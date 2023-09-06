@@ -17,7 +17,7 @@ import {
     Col,
     Divider,
 } from 'antd'
-import Icon , { 
+import { 
     PlusOutlined, 
     HistoryOutlined, // Late out Icon
     FieldTimeOutlined,  // Early out Icon
@@ -33,6 +33,7 @@ import Icon , {
     ApiOutlined,
     InteractionOutlined,
 } from '@ant-design/icons'
+import OvernightIcon from '../../icons/OvernightIcon'
 
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -102,14 +103,6 @@ const tagsSchema = object().shape({
     tags: array().of(string().nullable()).required('Required'),
     internal_comment: string().notRequired(),
 })
-
-const OvernightSvg = () => (
-    <svg xmlns="http://www.w3.org/2000/svg" height="24" viewBox="0 -960 960 960" width="24">
-        <path d="M680-520v-120H560v-80h120v-120h80v120h120v80H760v120h-80ZM440-200q54 0 100.5-21.5T620-281q-126-8-213-99.5T320-600q0-13 1-25.5t3-24.5q-56 31-90 86.5T200-440q0 100 70 170t170 70Zm0 80q-134 0-227-93t-93-227q0-134 93-227t227-93q5 0 10 .5t10 .5q-29 32-44.5 72.5T400-600q0 100 70 170t170 70q32 0 61-8t55-22q-18 115-106.5 192.5T440-120Zm-33-261Z"/>
-    </svg>
-)
-
-const OvernightIcon = (props) => <Icon component={OvernightSvg} {...props} />
 
 const EditShiftModal = ({shift_id, open, tz, refetch}) => {
     const { data, isLoading, error } = useFetch(`v1/shifts/${shift_id}`)
