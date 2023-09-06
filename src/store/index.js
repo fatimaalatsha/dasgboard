@@ -84,6 +84,26 @@ let filterStore = (set) => ({
         ...filter,
       },
     })),
+  financeFilter: {
+    pagination: {
+      current: 1,
+      pageSize: 10,
+      showSizeChanger: true,
+      pageSizeOptions: pageSize,
+      position: ["bottomRight", "topRight"],
+    },
+    sort: {
+      // created_at: "desc",
+    },
+    filter: {
+      // status: ["in|active", "inactive"],
+    },
+  },
+  setFinanceFilter: (filter) =>
+    set((state) => ({
+      financeFilter: { ...state.financeFilter, ...filter },
+    })),
+  
   scheduleFilter: {
     filter: {
       city_id: "",
