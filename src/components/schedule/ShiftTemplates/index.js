@@ -1,6 +1,8 @@
-import { Row, Col, Card, Descriptions, Button, Badge, Typography, Table, Space, Popconfirm, Radio, Tooltip, message } from 'antd'
-import { DeleteOutlined, QuestionCircleOutlined, TableOutlined, AppstoreOutlined } from '@ant-design/icons'
+import { useEffect } from 'react'
+import { Button, Badge, Typography, Table, Space, Popconfirm, message } from 'antd'
+import { DeleteOutlined, QuestionCircleOutlined } from '@ant-design/icons'
 
+import qs from 'qs' // Import qs library
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 
@@ -9,6 +11,12 @@ import { CreateTemplate, EditTemplate, PublishTemplate } from '../CreateTemplate
 import { deleteShiftTemplate } from '../../../utils/schedule-status'
 import useFetch from '../../../hooks/use-new-fetch'
 
+//get the papams that will be passed to filters through qs
+const getUserParams = (params) => ({ // Get table params
+  limit: params.pagination?.pageSize,
+  page: params.pagination?.current,
+})
+
 dayjs.extend(utc)
 
 const { Text } = Typography
@@ -16,22 +24,28 @@ const { Text } = Typography
 const ShiftTemplates = () => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
-    const { data, isLoading, error, refetch } = useFetch(`v1/shifts-templates`)
+    const { data, isLoading, error, refetch } = useFetch(`v1/shifts-templates?${qs.stringify(getUserParams(scheduleFilter), { skipNulls: true, arrayFormat: 'comma' })}`)
 
-    const templateViewOptions = [
-        {
-            label:  <Tooltip title="Grid">
-                        <AppstoreOutlined />
-                    </Tooltip>,
-            value: 0,
-        },
-        {
-            label:  <Tooltip title="Table">
-                        <TableOutlined />
-                    </Tooltip>,
-            value: 1,
-        },
-    ]
+    useEffect(() => {
+        setScheduleFilter({
+            ...scheduleFilter,
+            pagination: {
+                ...scheduleFilter.pagination,
+                total: data.meta?.total_items,
+                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Templates`,
+            }
+        })
+    }, [data])
+
+    const handleTableChange = (pagination, filter, sorter) => {
+        setScheduleFilter({
+            ...scheduleFilter,
+            pagination: {
+                ...scheduleFilter.pagination,
+                ...pagination,
+            }
+        })
+    }
 
     const handleDelete = async (id) => {
         await deleteShiftTemplate(id)
@@ -136,10 +150,6 @@ const ShiftTemplates = () => {
             )
         }
     ]
-    
-    const colConfig = {
-        span: 6,
-    }
 
     if (isLoading) { return <>Loading...</> }
 
@@ -147,91 +157,20 @@ const ShiftTemplates = () => {
 
     return (
         <>
-        <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
-            <>
-                <Radio.Group 
-                    size="large" 
-                    options={templateViewOptions} 
-                    value={scheduleFilter.navigation.template} 
-                    defaultValue={scheduleFilter.navigation.template} 
-                    optionType="button" 
-                    onChange={
-                        (e) => setScheduleFilter({
-                            ...scheduleFilter, 
-                            navigation: { 
-                                ...scheduleFilter.navigation, 
-                                template: e.target.value 
-                            }
-                        })
-                    }
-                />
-                <CreateTemplate refetch={refetch}/>
-            </>
-        </Space>
-            {   scheduleFilter.navigation.template === 0 ? (
-                <Row gutter={[16, 16]}>
-                {
-                    data.data.map((item, index) => (
-                        <Col {...colConfig} key={index}>
-                            <Card
-                                title={item.title}
-                                actions={[
-                                    <Popconfirm
-                                        title="Delete template"
-                                        description="Are you sure to delete this template?"
-                                        icon={<QuestionCircleOutlined style={{ color: 'red' }} />}
-                                        onConfirm={() => handleDelete(item.id)}
-                                        onCancel={() => refetch()}
-                                        okText="Yes, Delete it"
-                                        cancelText="Cancel"
-                                    >
-                                        <Button danger type="text" key="delete" icon={<DeleteOutlined />} />
-                                    </Popconfirm>,
-                                    <EditTemplate template_id={item.id} refetch={refetch}/>,
-                                    <PublishTemplate template_id={item.id} refetch={refetch}/>,
-                                ]}
-                                bordered={false}
-                            >
-                                <Descriptions column={1} bordered>
-                                    <Descriptions.Item label="Capacity">{item.capacity}</Descriptions.Item>
-                                    <Descriptions.Item label="Time">{dayjs(item.start_time, 'HH:mm').format('HH:mm') + ` ➡ ` + dayjs(item.end_time, 'HH:mm').format('HH:mm')}</Descriptions.Item>
-                                    {item.guarantee && <Descriptions.Item label="Guarantee">{`$ ` + item.guarantee}</Descriptions.Item>}
-                                    {item.guarantee_specs && <Descriptions.Item label="Guarantee Description">{item.guarantee_specs}</Descriptions.Item>}
-                                    <Descriptions.Item label="Type">
-                                        <Badge status={ item.is_recurring ? 'processing' : 'success'} text={ (item.is_recurring ? 'Recurrent' : 'Single') + (item.is_overnight ? '🌙' : '')} />
-                                    </Descriptions.Item>
-                                    {item.is_recurring && <Descriptions.Item label="Pattern" style={{ textTransform: 'capitalize' }}>{item.pattern}</Descriptions.Item>}
-                                    {item.is_recurring && item.days_of_week && <Descriptions.Item label="Repeats on">
-                                        { item.days_of_week.map((day, idx) => (
-                                            <Text strong key={idx} color="blue">
-                                                {dayjs().day(day).format( item.days_of_week.length === 1 ? 'dddd' : 'ddd') + (item.days_of_week.length - 1 === idx ? '' : `, `)}
-                                            </Text>
-                                        ))}
-                                    </Descriptions.Item>}
-                                    {item.is_recurring && <Descriptions.Item label="Ends">
-                                        <>
-                                            {item.max_occurrences > 0 && <p>After {item.max_occurrences} occurrences</p>}
-                                            {item.never_ends && <p>Never</p>}
-                                            {item.end_date && <p>On {dayjs(item.end_date).format('MMM, dddd DD')}</p>}
-                                        </>
-                                    </Descriptions.Item>}
-                                </Descriptions>
-                            </Card>
-                        </Col>
-                    ))
-                }
-                </Row>
-                ) : (
-                    <Table
-                        columns={columns}
-                        dataSource={data.data}
-                        pagination={false}
-                        loading={isLoading}
-                        bordered
-                        rowKey="id"
-                    />
-                )
-            }
+            <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>
+                <>
+                    <CreateTemplate refetch={refetch}/>
+                </>
+            </Space>
+            <Table
+                columns={columns}
+                dataSource={data.data}
+                pagination={scheduleFilter.pagination}
+                onChange={handleTableChange}
+                loading={isLoading}
+                bordered
+                rowKey="id"
+            />
         </>
     )
 }
