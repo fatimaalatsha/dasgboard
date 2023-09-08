@@ -16,7 +16,21 @@ const getUserParams = (params) => ({
 const { Text } = Typography;
 
 const Rides = ({ driverId }) => {
-  const [params, setParams] = useState({}); // Set params state
+    const [params, setParams] = useState({
+        pagination: {
+            current: 1,
+            pageSize: 10,
+            showSizeChanger: true,
+            pageSizeOptions: ["10", "20", "50"],
+            position: ["bottomRight", "topRight"],
+        },
+        sort: {
+            created_at: "desc",
+        },
+        filter: {
+            status: ["in|completed", "cancelled"],
+        }, 
+  }); // Set params state
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
 
   const { data, loading, error } = useNewFetch(
@@ -60,6 +74,7 @@ const Rides = ({ driverId }) => {
       title: "Completed At",
       dataIndex: "dropoff_completed_at",
       key: "dropoff_completed_at",
+      sorter: true,
       render: (dropoff_completed_at) => (
         <Text>
           {dropoff_completed_at
@@ -70,41 +85,60 @@ const Rides = ({ driverId }) => {
         </Text>
       ),
     },
-  ];
+    ];
+    
+    // handle table change
+    const handleTableChange = (pagination, filters, sorter) => {
+        // Update the params when the table state changes
+        setParams({
+            ...params,
+            pagination: {
+                current: pagination.current,
+                pageSize: pagination.pageSize,
+                limit: pagination.pageSize,
+
+            },
+            
+
+            ...filters,
+        });
+    };
+
   const handleRowExpand = (record) => {
     // Toggle the expanded row when a row is clicked
     setExpandedRowKey((prevExpandedKey) =>
       prevExpandedKey === record.ride_id ? null : record.ride_id
     );
   };
-
+// {
+//           total: data?.meta?.total_items,
+//           showSizeChanger: true,
+//           pageSizeOptions: ["10", "20", "50"],
+//           showTotal: (total, range) =>
+//             `${range[0]}-${range[1]} of ${total} rides`,
+    //         }
+    // (pagination, filters, sorter) => {
+    //       // Update the params when the table state changes
+    //       setParams({
+    //         ...params,
+    //         pagination: {
+    //           current: pagination.current,
+    //           pageSize: pagination.pageSize,
+    //           limit: pagination.pageSize,
+    //         },
+    //         sortField: sorter.field,
+    //         sortOrder: sorter.order,
+    //         ...filters,
+    //       });
+    //     }
   return (
     <>
       <Table
         columns={columns}
         dataSource={data?.data}
         loading={loading}
-        pagination={{
-          total: data?.meta?.total_items,
-          showSizeChanger: true,
-          pageSizeOptions: ["10", "20", "50"],
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} rides`,
-        }}
-        onChange={(pagination, filters, sorter) => {
-          // Update the params when the table state changes
-          setParams({
-            ...params,
-            pagination: {
-              current: pagination.current,
-              pageSize: pagination.pageSize,
-              limit: pagination.pageSize,
-            },
-            sortField: sorter.field,
-            sortOrder: sorter.order,
-            ...filters,
-          });
-        }}
+        pagination={params.pagination}
+        onChange={handleTableChange}
         rowKey="ride_id"
         expandable={{
           expandedRowKeys: [expandedRowKey], // Specify the currently expanded row key
