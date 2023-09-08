@@ -73,7 +73,7 @@ const ShiftTemplates = () => {
             dataIndex: 'type',
             key: 'type',
             render: (text, record) => (
-                <Badge status={ record.is_recurring ? 'processing' : 'success'} text={ (record.is_recurring ? 'Recurrent' : 'Single') + (record.is_overnight && '🌙')} />
+                <Badge status={ record.is_recurring ? 'processing' : 'success'} text={ (record.is_recurring ? 'Recurrent' : 'Single') + (record.is_overnight ? '🌙' : '')} />
             )
         },
         {
@@ -198,7 +198,7 @@ const ShiftTemplates = () => {
                                     {item.guarantee && <Descriptions.Item label="Guarantee">{`$ ` + item.guarantee}</Descriptions.Item>}
                                     {item.guarantee_specs && <Descriptions.Item label="Guarantee Description">{item.guarantee_specs}</Descriptions.Item>}
                                     <Descriptions.Item label="Type">
-                                        <Badge status={ item.is_recurring ? 'processing' : 'success'} text={ (item.is_recurring ? 'Recurrent' : 'Single') + (item.is_overnight && '🌙')} />
+                                        <Badge status={ item.is_recurring ? 'processing' : 'success'} text={ (item.is_recurring ? 'Recurrent' : 'Single') + (item.is_overnight ? '🌙' : '')} />
                                     </Descriptions.Item>
                                     {item.is_recurring && <Descriptions.Item label="Pattern" style={{ textTransform: 'capitalize' }}>{item.pattern}</Descriptions.Item>}
                                     {item.is_recurring && item.days_of_week && <Descriptions.Item label="Repeats on">
