@@ -44,7 +44,6 @@ const getUserParams = (params) => ({
   limit: params.pagination?.pageSize,
   page: params.pagination?.current,
   ...params,
-  
 });
 
 
