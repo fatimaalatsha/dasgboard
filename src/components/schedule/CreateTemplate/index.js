@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Modal, Input, Checkbox, Space, DatePicker, Divider, Radio, InputNumber, message, Popconfirm, Tooltip, Typography } from "antd"
+import { Button, Modal, Input, Checkbox, Space, DatePicker, Divider, Radio, InputNumber, message, Popconfirm, Tooltip, Typography, Spin, Alert } from "antd"
 import { UserOutlined, EditOutlined, SendOutlined } from '@ant-design/icons'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
@@ -11,6 +11,7 @@ import { createWeekShift, createShiftTemplate, updateShiftTemplate } from '../..
 import { CitySelect } from '../../CitySelect'
 import DriverSelect from '../../DriverSelect'
 import useFetch from '../../../hooks/use-new-fetch'
+import OvernightIcon from '../../icons/OvernightIcon' // Custom Overnight Icon
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -969,7 +970,7 @@ const PublishTemplate = ({refetch, template_id }) => {
         const { data, isLoading, error } = useFetch(`v1/shifts-templates/${template_id}`)
         const DEFAULT_DAY = dayjs()
 
-        if (isLoading) { return <>Loading...</> }
+        if (isLoading) { return <Spin /> }
         if (error) {return <>Error...</>}
 
         return (
@@ -983,10 +984,11 @@ const PublishTemplate = ({refetch, template_id }) => {
                 onSubmit={ async (values, { setSubmitting, resetForm }) => {
                     const payload = {
                         'start_time':  values.day.utc().format('YYYY-MM-DD') + 'T' + data.start_time + '.00Z',
-                        'end_time': values.day.utc().format('YYYY-MM-DD') + 'T' + data.end_time + '.00Z',
+                        'end_time': (data.is_overnight ? values.day.add(1,'day').utc().format('YYYY-MM-DD') : values.day.utc().format('YYYY-MM-DD')) + 'T' + data.end_time + '.00Z',
                         'capacity': data.capacity,
                         'city_id': [Number(values.city_id)],
                         'is_recurring': data.is_recurring,
+                        'is_overnight': data.is_overnight,
                         'status': data.status,
                         ...(values.drivers.length > 0 && {
                             'drivers': values.drivers,
@@ -1043,7 +1045,15 @@ const PublishTemplate = ({refetch, template_id }) => {
                             ]}
                         >
                         <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                            
+                            { data.is_overnight && (
+                                <Alert 
+                                    message="Overnight Shift" 
+                                    description="The shift is late-night work and may overlap into the next selected day on the specified end time."
+                                    type="info" 
+                                    showIcon
+                                    icon={<OvernightIcon />}
+                                />
+                            )}
                             <CitySelect
                                 onChange={(value) => {
                                     props.setFieldValue('city_id', Number(value))
@@ -1054,8 +1064,21 @@ const PublishTemplate = ({refetch, template_id }) => {
                                 style={{ width: '100%' }}
                                 format="ddd D MMM" 
                                 allowClear={false}
+                                value={props.values.day}
                                 onChange={(date) => props.setFieldValue('day', date ) } 
                             />
+                            { data.is_overnight && (
+                                <Space direction="vertical" size={2} style={{ width: '100%' }}>
+                                <Text strong>End Date</Text>
+                                <DatePicker 
+                                    style={{ width: '100%' }}
+                                    format="ddd D MMM" 
+                                    allowClear={false}
+                                    value={props.values.day.add(1, 'day')}
+                                    disabled
+                                />
+                                </Space>
+                            )}
                             <DriverSelect 
                                 onChange={(value, label) => {
                                     const driverFormatted = label.map((item) => { // format driver object to match payload
