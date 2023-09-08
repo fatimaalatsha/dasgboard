@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { Table, Tag, Space, Typography, Descriptions, Rate } from "antd";
-import { useNewFetch } from "../../hooks/useNewFetch";
+import useNewFetch from "../../hooks/use-new-fetch";
 import qs from "qs";
 
 
@@ -21,8 +21,7 @@ const Rides = ({ driverId }) => {
 
   const { data, loading, error } = useNewFetch(
     `/v1/rides/drivers/${driverId}?${qs.stringify(getUserParams(params))}`
-  );
-
+    );
   const columns = [
     {
       title: "Ride Id",
@@ -56,6 +55,20 @@ const Rides = ({ driverId }) => {
       dataIndex: "dropoff_description",
       key: "dropoff_description",
       render: (dropoff_description) => <Text>{dropoff_description}</Text>,
+    },
+    {
+      title: "Completed At",
+      dataIndex: "dropoff_completed_at",
+      key: "dropoff_completed_at",
+      render: (dropoff_completed_at) => (
+        <Text>
+          {dropoff_completed_at
+            ? `${dropoff_completed_at.split("T")[0]} ${
+                dropoff_completed_at.split("T")[1].split(".")[0]
+              }`
+            : ""}
+        </Text>
+      ),
     },
   ];
   const handleRowExpand = (record) => {
