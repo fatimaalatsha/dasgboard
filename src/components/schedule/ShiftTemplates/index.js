@@ -1,6 +1,8 @@
+import { useEffect } from 'react'
 import { Row, Col, Card, Descriptions, Button, Badge, Typography, Table, Space, Popconfirm, Radio, Tooltip, message } from 'antd'
 import { DeleteOutlined, QuestionCircleOutlined, TableOutlined, AppstoreOutlined } from '@ant-design/icons'
 
+import qs from 'qs' // Import qs library
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 
@@ -9,6 +11,12 @@ import { CreateTemplate, EditTemplate, PublishTemplate } from '../CreateTemplate
 import { deleteShiftTemplate } from '../../../utils/schedule-status'
 import useFetch from '../../../hooks/use-new-fetch'
 
+//get the papams that will be passed to filters through qs
+const getUserParams = (params) => ({ // Get table params
+  limit: params.pagination?.pageSize,
+  page: params.pagination?.current,
+})
+
 dayjs.extend(utc)
 
 const { Text } = Typography
@@ -16,7 +24,28 @@ const { Text } = Typography
 const ShiftTemplates = () => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
-    const { data, isLoading, error, refetch } = useFetch(`v1/shifts-templates`)
+    const { data, isLoading, error, refetch } = useFetch(`v1/shifts-templates?${qs.stringify(getUserParams(scheduleFilter), { skipNulls: true, arrayFormat: 'comma' })}`)
+
+    useEffect(() => {
+        setScheduleFilter({
+            ...scheduleFilter,
+            pagination: {
+                ...scheduleFilter.pagination,
+                total: data.meta?.total_items,
+                showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Templates`,
+            }
+        })
+    }, [data])
+
+    const handleTableChange = (pagination, filter, sorter) => {
+        setScheduleFilter({
+            ...scheduleFilter,
+            pagination: {
+                ...scheduleFilter.pagination,
+                ...pagination,
+            }
+        })
+    }
 
     const templateViewOptions = [
         {
@@ -225,7 +254,8 @@ const ShiftTemplates = () => {
                     <Table
                         columns={columns}
                         dataSource={data.data}
-                        pagination={false}
+                        pagination={scheduleFilter.pagination}
+                        onChange={handleTableChange}
                         loading={isLoading}
                         bordered
                         rowKey="id"
