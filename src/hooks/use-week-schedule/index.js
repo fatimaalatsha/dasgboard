@@ -38,9 +38,25 @@ const useWeekSchedule = (url, timezone) => {
             }
             const response = await API.get(url, options)// Fetch data from API
             const { items } = await response.data// Get data from response
+            const weekItems = items.map((item, idx) => {
+                if(item.is_overnight) {
+                    const isSameDay = dayjs(item.start_time).tz().utc().isSame(dayjs(item.end_time).tz().utc(), 'day')
+                    if(!isSameDay) {
+                        item.overnight_end = item.end_time
+                        item.end_time = dayjs(item.start_time).tz().utc().endOf('day').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+                        item.overnight_start = item.start_time
+                    } else {
+                        item.overnight_start = item.start_time
+                        item.start_time = dayjs(item.end_time).tz().utc().startOf('day').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+                        item.overnight_end = item.end_time
+                    }
+                }
+                return item
+            })
             const weekData = weekHours.reduce((acc, time) => {
+                console.log('Data: ', acc)
                 const dayObj = weekDays.reduce((obj, day) => {
-                    obj[day] = items.filter(item => day === dayjs(item.start_time).tz().utc().format('dddd').toLowerCase() && time === dayjs(item.start_time).tz().utc().format('HH:mm'))
+                    obj[day] = weekItems.filter(item => day === dayjs(item.start_time).tz().utc().format('dddd').toLowerCase() && time === dayjs(item.start_time).tz().utc().format('HH:mm'))
                     obj[day] = obj[day] ? obj[day] : []
                     return obj
                 }, {})
