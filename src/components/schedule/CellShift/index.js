@@ -634,9 +634,21 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
             end_date: null,
             occurrences: 0,
             days_of_week: [DEFAULT_DAY],
-        }
+        },
+        is_overnight: record.is_overnight,
+        ...(record.is_overnight && {
+            overnight_start: convertToHourTz(record.overnight_start, scheduleFilter.tz),
+            overnight_end: convertToHourTz(record.overnight_end, scheduleFilter.tz)
+        })
     })
-    const floatingComponentHeight = hours.diff * 57 + 2
+
+    const getShiftDuration = () => {
+        const END_TIME = dayjs(record.end_time).tz(scheduleFilter.tz).utc()
+        const START_TIME = dayjs(record.start_time).tz(scheduleFilter.tz).utc()
+        return END_TIME.diff(START_TIME, 'hour', true)
+    }
+
+    const floatingComponentHeight = (record.is_overnight ? getShiftDuration() : hours.diff) * 57 + 2
     const itemZIndex = record.start_time ? parseInt(record.start_time.split(":")[0], 10) : 1
     const calcWidth = (isContained ? 90 : 100) / overlap
     const calcLeft = (calcWidth / 100) * 197 * index
