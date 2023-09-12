@@ -17,20 +17,18 @@ const { Text } = Typography;
 
 const Rides = ({ driverId }) => {
     const [params, setParams] = useState({
-        pagination: {
-            current: 1,
-            pageSize: 10,
-            showSizeChanger: true,
-            pageSizeOptions: ["10", "20", "50"],
-            position: ["bottomRight", "topRight"],
+      pagination: {
+        current: 1,
+        pageSize: 10,
+        showSizeChanger: true,
+        pageSizeOptions: ["10", "20", "50"],
+        position: ["bottomRight", "topRight"],
         },
         sort: {
-            created_at: "desc",
+            dropoff_completed_at: "asc",
         },
-        filter: {
-            status: ["in|completed", "cancelled"],
-        }, 
-  }); // Set params state
+        
+    }); // Set params state
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
 
   const { data, loading, error } = useNewFetch(
@@ -45,10 +43,11 @@ const Rides = ({ driverId }) => {
     {
       title: "Status",
       dataIndex: "status",
-      key: "status",
+        key: "status",
+      align: "center",
       render: (status) => (
         <Tag color={status === "completed" ? "green" : "red"}>{status}</Tag>
-      ),
+        ),
     },
     {
       title: "Total Price",
@@ -63,18 +62,21 @@ const Rides = ({ driverId }) => {
       dataIndex: "pickup_description",
       key: "pickup_description",
       render: (pickup_description) => <Text>{pickup_description}</Text>,
+      ellipsis: true,
     },
     {
       title: "Drop Off",
       dataIndex: "dropoff_description",
       key: "dropoff_description",
       render: (dropoff_description) => <Text>{dropoff_description}</Text>,
+      ellipsis: true,
     },
     {
       title: "Completed At",
       dataIndex: "dropoff_completed_at",
       key: "dropoff_completed_at",
       sorter: true,
+      align: "center",
       render: (dropoff_completed_at) => (
         <Text>
           {dropoff_completed_at
@@ -87,55 +89,63 @@ const Rides = ({ driverId }) => {
     },
     ];
     
+    
+    
     // handle table change
-    const handleTableChange = (pagination, filters, sorter) => {
-        // Update the params when the table state changes
-        setParams({
-            ...params,
-            pagination: {
-                current: pagination.current,
-                pageSize: pagination.pageSize,
-                limit: pagination.pageSize,
 
-            },
-            
+ const handleTableChange = (pagination, filter, sorter) => {
+   // Handle table change
+   Object.keys(filter).forEach((key) => {
+     if (filter[key] && key !== "city_id") {
+       filter[key].unshift("in|" + filter[key][0]);
+       filter[key].splice(1, 1);
+     }
+   });
 
-            ...filters,
-        });
-    };
-
+   setParams({
+     // Set filter to store
+     pagination: {
+       ...params.pagination,
+       ...pagination,
+     },
+     sort: {
+       [sorter.field]: sorter.order === "ascend" ? "asc" : "desc",
+     },
+   });
+ };
   const handleRowExpand = (record) => {
     // Toggle the expanded row when a row is clicked
     setExpandedRowKey((prevExpandedKey) =>
       prevExpandedKey === record.ride_id ? null : record.ride_id
     );
-  };
-// {
-//           total: data?.meta?.total_items,
-//           showSizeChanger: true,
-//           pageSizeOptions: ["10", "20", "50"],
-//           showTotal: (total, range) =>
-//             `${range[0]}-${range[1]} of ${total} rides`,
-    //         }
-    // (pagination, filters, sorter) => {
-    //       // Update the params when the table state changes
-    //       setParams({
-    //         ...params,
-    //         pagination: {
-    //           current: pagination.current,
-    //           pageSize: pagination.pageSize,
-    //           limit: pagination.pageSize,
-    //         },
-    //         sortField: sorter.field,
-    //         sortOrder: sorter.order,
-    //         ...filters,
-    //       });
-    //     }
+    };
+    
+
+    useEffect(() => {
+      // Reset the pagination when the filters change
+      let isMounted = true;
+      setParams({
+        pagination: {
+          ...params.pagination,
+          total: data?.meta?.total_items,
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} Rides`,
+        },
+      });
+    //   if (isMounted) {
+    //   }
+      return () => {
+        isMounted = false;
+      };
+    }, [data]);
+
+
   return (
     <>
       <Table
         columns={columns}
         dataSource={data?.data}
+        tableLayout="fixed"
         loading={loading}
         pagination={params.pagination}
         onChange={handleTableChange}
