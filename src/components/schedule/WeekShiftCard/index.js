@@ -22,7 +22,7 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
     }
 
     const ellipsisStyle = {
-        style: calcWidth < 100 ? {width: calcWidth, textAlign: 'left'} : {},
+        style: calcWidth < 100 ? {width: calcWidth, textAlign: 'left', ...(record.is_overnight && { color: '#FFFFFF' })} : {...(record.is_overnight && { color: '#FFFFFF' })},
         ellipsis: { tooltip: true, suffix: '' }
     }
 
@@ -72,7 +72,11 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
                         <CalendarOutlined {...iconStyle} />
                     </Col>
                     <Col span={22}>
-                        <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(record.day).format('dddd, MMMM DD')} ⋅ ${record.start} ➡ ${record.end}`}</Text>
+                        { record.is_overnight && record.start_time !== record.overnight_start ? (
+                            <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(record.day).format('dddd, MMMM DD')} ⋅ ${record.overnight_start} ➡ ${record.overnight_end}`}</Text>
+                            ) : (
+                            <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(record.day).format('dddd, MMMM DD')} ⋅ ${record.start} ➡ ${record.end}`}</Text>    
+                        )}
                     </Col>
                 </Row>
                 <Row gutter={[16, 0]}>
@@ -136,9 +140,9 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
                     onClick={() => setOpen(true)}
                 >
                     <Space direction="vertical" style={{ display: 'flex', width: '100%', alignItems: 'flex-start', rowGap: 2 }}>
-                        <Text strong style={{ fontSize: 16, textAlign: 'left', ...(calcWidth < 100 ? {width: calcWidth} : {}) }} ellipsis={{ tooltip: true, suffix: '' }}>{`${record.count || 0} / ${record.drivers}`}</Text>
+                        <Text strong style={{ fontSize: 16, textAlign: 'left', ...(calcWidth < 100 ? {width: calcWidth} : {}), ...(record.is_overnight ? { color: '#FFFFFF'} : {}) }} ellipsis={{ tooltip: true, suffix: '' }}>{`${record.count || 0} / ${record.drivers}`}</Text>
                         { record.guarantee !== 0 && <Text {...ellipsisStyle}>${record.guarantee}</Text>}
-                        <Text {...ellipsisStyle}>{`${record.start} ➡ ${record.end}`}</Text>
+                        <Text {...ellipsisStyle}>{`${record.is_overnight && record.start !== record.overnight_start ? `🌙` + record.overnight_start : record?.start} ➡ ${record.is_overnight && record.end !== record.overnight_end ? record.overnight_end + `🌙` : record?.end}`}</Text>
                     </Space>
                 </Card>
             </Popover>

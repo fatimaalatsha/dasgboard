@@ -654,8 +654,8 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
     const calcLeft = (calcWidth / 100) * 197 * index
 
     const cardStyleConfig = {
-        backgroundColor: record.status === 'active' ? token.colorSuccessBg : token.colorWarningBg,
-        borderColor: record.status === 'active' ? token['green-4'] : token['gold-4'],
+        backgroundColor: record.status === 'active' ? record.is_overnight ? token['purple-8'] : token.colorSuccessBg : token.colorWarningBg,
+        borderColor: record.status === 'active' ? record.is_overnight ? token['geekblue-10'] : token['green-4'] : token['gold-4'],
         height: floatingComponentHeight,
         cursor: 'pointer',
         position: 'absolute',
