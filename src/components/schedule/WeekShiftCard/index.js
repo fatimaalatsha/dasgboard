@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Card, Space, Row, Col, Typography, Tag, Tooltip, Popover, Button, theme } from 'antd'
 import { DeleteOutlined, EditOutlined, FlagOutlined, LikeOutlined, DislikeOutlined, CalendarOutlined, ExceptionOutlined, DollarOutlined, UserOutlined } from '@ant-design/icons'
+import OvernightIcon from '../../icons/OvernightIcon'
 import dayjs from 'dayjs'
 
 const { Text, Title } = Typography
@@ -67,6 +68,16 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
             headStyle={{ borderBottom: 'none' }}
         >
             <Space direction="vertical">
+                {record.is_overnight && (
+                    <Row gutter={[16, 0]}>
+                        <Col span={2}>
+                            <OvernightIcon />
+                        </Col>
+                        <Col span={22}>
+                            <Text style={{ whiteSpace: 'nowrap' }}>Overnight</Text>
+                        </Col>
+                    </Row>
+                )}
                 <Row gutter={[16, 0]}>
                     <Col span={2}>
                         <CalendarOutlined {...iconStyle} />
