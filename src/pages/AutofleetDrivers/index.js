@@ -274,7 +274,7 @@ const AutofleetDrivers = () => {
       },
     });
     if (isMounted) {
-      getVendorIdList();
+      getVendorIdList();      
       loadCities();
     }
     return () => {
