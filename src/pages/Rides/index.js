@@ -3,6 +3,7 @@ import { Table, Tag, Space, Typography, Descriptions, Rate } from "antd";
 import useNewFetch from "../../hooks/use-new-fetch";
 import qs from "qs";
 
+import { useFilterStore } from "../../store"; // Import filter store
 
 //get the papams that will be passed to filters through qs
 const getUserParams = (params) => ({
@@ -16,20 +17,9 @@ const getUserParams = (params) => ({
 const { Text } = Typography;
 
 const Rides = ({ driverId }) => {
-    const [params, setParams] = useState({
-      pagination: {
-        current: 1,
-        pageSize: 10,
-        showSizeChanger: true,
-        pageSizeOptions: ["10", "20", "50"],
-        position: ["bottomRight", "topRight"],
-        },
-        sort: {
-            dropoff_completed_at: "asc",
-        },
-        
-    }); // Set params state
-  const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
+    const params = useFilterStore((state) => state.ridesFilter); // Get filter store
+    const setParams = useFilterStore((state) => state.setRidesFilter); // Get filter store
+    const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
 
   const { data, loading, error } = useNewFetch(
     `/v1/rides/drivers/${driverId}?${qs.stringify(getUserParams(params))}`

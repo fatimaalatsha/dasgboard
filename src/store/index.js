@@ -84,6 +84,19 @@ let filterStore = (set) => ({
         ...filter,
       },
     })),
+  ridesFilter: {
+    pagination: {
+      current: 1,
+      pageSize: 50,
+      showSizeChanger: true,
+      pageSizeOptions: pageSize,
+      position: ["bottomRight", "topRight"],
+    },
+  },
+  setRidesFilter: (filter) =>
+    set((state) => ({
+      ridesFilter: { ...state.ridesFilter, ...filter },
+    })),
   scheduleFilter: {
     filter: {
       city_id: "",
