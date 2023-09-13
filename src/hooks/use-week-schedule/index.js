@@ -10,7 +10,7 @@ import { getDayHours } from '../../utils/schedule-status'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-const useWeekSchedule = (url, timezone) => {
+const useWeekSchedule = (url, timezone, selectedWeek) => {
     dayjs.tz.setDefault(timezone)
     const [fetchedData, setFetchedData] = useState({// Set initia fetch state to empty
         data: [],
@@ -40,7 +40,7 @@ const useWeekSchedule = (url, timezone) => {
             const { items } = await response.data// Get data from response
 
             const duplicatedItems = items.flatMap((item) => // Duplicate overnight shifts
-                item.is_overnight
+                item.is_overnight && dayjs(item.end_time).tz().utc().isSame(dayjs(selectedWeek).tz().utc(), 'week') && dayjs(item.start_time).tz().utc().isSame(dayjs(selectedWeek).tz().utc(), 'week')
                     ? [item, { ...item, is_duplicate: true }]
                     : item
             )
@@ -48,7 +48,8 @@ const useWeekSchedule = (url, timezone) => {
             const weekItems = duplicatedItems.map((item, idx) => { // Add overnight times
                 if(item.is_overnight) {
                     const isSameDay = dayjs(item.start_time).tz().utc().isSame(dayjs(item.end_time).tz().utc(), 'day')
-                    if(!isSameDay && !item.is_duplicate) {
+                    const isSameWeek = dayjs(item.start_time).tz().utc().isSame(dayjs(selectedWeek).tz().utc(), 'week')
+                    if(!isSameDay && !item.is_duplicate && isSameWeek) {
                         item.overnight_end = item.end_time
                         item.end_time = dayjs(item.start_time).tz().utc().endOf('day').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
                         item.overnight_start = item.start_time
