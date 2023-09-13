@@ -37,7 +37,7 @@ const WeekView = ({selectedWeek, days, tz, city, loadTimeline }) => {
         date_from: selectedWeek.startOf('week').format('YYYY-MM-DD'),
         date_to: selectedWeek.endOf('week').format('YYYY-MM-DD'),
     }
-    const { data, isLoading, error, refetch } = useWeekSchedule(`/v1/shifts?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz) // Call useSchedule hook
+    const { data, isLoading, error, refetch } = useWeekSchedule(`/v1/shifts?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, filters.date_to) // Call useSchedule hook
     const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
     const controller = new AbortController()// Create a new AbortController
   
