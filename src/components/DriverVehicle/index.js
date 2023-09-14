@@ -10,6 +10,7 @@ import {
     Drawer,
     Modal,
     Typography,
+    Empty,
 } from 'antd' // Import antd components
 import { Formik, Form } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import yup validation schema
@@ -49,10 +50,10 @@ const VehiclePhotosFeeder = ({vehicle, sub}) => {
             {
                 data.items.length !== 0 ? data.items.map((item, index) => (
                     <div key={index}>
-                        <Title level={4} >{item.title}</Title> 
+                        <Title level={4} >{item.type?.title}</Title> 
                         <DocViewer key={index} objectKey={`${sub}/${item.key}`} />
                     </div>
-                )) : <Typography.Text>No photos found</Typography.Text>
+                )) : <Empty />
             }
         </Space>
     )
