@@ -313,7 +313,15 @@ const DriverVehicle = ({ id, sub }) => {
                 initialValues={initialValues}
                 validationSchema={vehicleSchema}
                 onSubmit={ async (values, { setSubmitting }) => {
-                    await createVehicle(values).then((response) => {
+                    const payload = { // Sets values to specified contraints
+                        'user_id': Number(values.user_id),
+                        'plate_number': values.plate_number,
+                        'year': Number(values.year),
+                        'color': values.color,
+                        'model_id': Number(values.model_id),
+                        'make_id': Number(values.make_id)
+                    }
+                    await createVehicle(payload).then((response) => {
                         if(response) {
                             setSubmitting(false)
                             setOpen({...open, modal: false})
