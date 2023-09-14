@@ -2,17 +2,17 @@ import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
 import API from '../../api/BaseUrl' // Import API base URL
 import NEW_API from '../../api/NewUrl'// Import API base url
 
-const deleteDriver = async (driverId) => {
+const deleteDriver = async (driverId) => { // Declared but not on use.
     try {
         const auth = await Auth.currentSession()// Get current session
         const token = auth.getAccessToken().getJwtToken()// Get token from session
         const options = { // Set options for endpoint
             headers: {
                 'Authorization': token,
-                ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+                ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
             }
         }
-        const response = await API.delete(`/v1/drivers/cc/${driverId}`, options)
+        const response = await NEW_API.delete(`/v1/drivers/${driverId}`, options)
         const data = await response.data
         if(data) {
             return data.success
@@ -30,11 +30,11 @@ const updateStatus = async (status, driverId) => {
       const options = { // Set options for fetch
           headers: {
               'Authorization': token,
-              ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+              ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
           }
       }
       const body = {'status': status}
-      const response = await API.post(`/v1/drivers/cc/${driverId}/status`, body, options)
+      const response = await NEW_API.post(`/v1/drivers/${driverId}/status`, body, options)
       const data = await response.data
       return data
     } catch (error) {
@@ -50,14 +50,14 @@ const updateApplicationStatus = async (driverId,applicationStatus,statusReason =
         const options = { // Set options for fetch
             headers: {
                 'Authorization': token,
-                ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
+              ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
             }
         }
         const body = {
         'application_status': applicationStatus,
         'status_reason': statusReason || ''
         }
-        const response = await API.put(`/v1/drivers/cc/${driverId}`, body, options)
+        const response = await NEW_API.put(`/v1/drivers/${driverId}`, body, options)
         const data = await response.data
         return data
     } catch (error) {
@@ -115,10 +115,10 @@ const updateDriver = async (driverId, body) => { // Update driver details
         const options = { // Set options for endpoint
             headers: {
                 'Authorization': token,
-                ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+                ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
             }
         }
-        const response = await API.put(`/v1/drivers/cc/${driverId}`, body, options)
+        const response = await NEW_API.put(`/v1/drivers/${driverId}`, body, options)
         const data = await response.data
         return data
     } catch (error) {
