@@ -20,8 +20,8 @@ const DriverTimeline = ({ id }) => {
         data.reverse().map((item, index) => (
           <Timeline.Item 
           key={index} 
-          color={item.action.includes('rejected') ? 'red' : 'green'}>
-            {item.action} - {dayjs(item.createdAt).format('MMM, DD - YYYY hh:mm A')}
+          color={item.description.includes('rejected') ? 'red' : 'green'}>
+            {item.description} - {dayjs(item.createdAt).format('MMM, DD - YYYY hh:mm A')}
           </Timeline.Item> 
         ))
       }
