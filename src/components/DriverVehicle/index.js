@@ -35,6 +35,7 @@ const vehicleSchema = object().shape({
 
 const VehiclePhotosFeeder = ({vehicle, sub}) => {
     const { data, isLoading, error } = useFetch(`/v1/vehicles/photos/${vehicle}/vehicle`)// Call useFetch custom hook
+
     if (isLoading) {
         return <>Loading...</>
     }
@@ -46,11 +47,11 @@ const VehiclePhotosFeeder = ({vehicle, sub}) => {
     return (
         <Space direction="vertical" size="large">
             {
-                data.items[0]?.photo?.length !== 0 && data.items[0]?.photo !== null ? data.items.map((photo, index) => (
-                    <>
-                        <Title level={4} >{photo.title}</Title> 
-                        <DocViewer key={index} objectKey={`${sub}/${photo.photo.key}`} />
-                    </>
+                data.items.length !== 0 ? data.items.map((item, index) => (
+                    <div key={index}>
+                        <Title level={4} >{item.title}</Title> 
+                        <DocViewer key={index} objectKey={`${sub}/${item.key}`} />
+                    </div>
                 )) : <Typography.Text>No photos found</Typography.Text>
             }
         </Space>
@@ -187,7 +188,8 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                 >
                     Delete
                 </Button>,
-<Button type="primary" size="small" onClick={ () => setOpen({...open, drawer: { open: true, id: vehicle.vehicleId }}) }>View</Button>,                <Switch 
+                <Button type="primary" size="small" onClick={ () => setOpen({...open, drawer: { open: true, id: vehicle.vehicle_id }}) }>View</Button>,                
+                <Switch 
                     defaultChecked={vehicle.status === 'active'} 
                     loading={open.switch} 
                     disabled={vehicle.status === 'active'}
