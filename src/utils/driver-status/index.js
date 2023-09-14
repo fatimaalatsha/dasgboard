@@ -1,5 +1,4 @@
 import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
-import API from '../../api/BaseUrl' // Import API base URL
 import NEW_API from '../../api/NewUrl'// Import API base url
 
 const deleteDriver = async (driverId) => { // Declared but not on use.
@@ -96,10 +95,10 @@ const notifyDriver = async (driverId, body) => {
         const options = { // Set options for endpoint
             headers: {
                 'Authorization': token,
-                ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+                ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
             }
         }
-      const response = await API.post(`/v1/drivers/cc/${driverId}/notify-documents`, { ...(body.message && body) }, options)
+      const response = await NEW_API.post(`/v1/drivers/${driverId}/notify`, { ...(body.message && body) }, options)
       const data = await response.data
       return data
     } catch (error) {

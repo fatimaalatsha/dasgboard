@@ -1,5 +1,5 @@
 import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
-import API from '../../api/BaseUrl' // Import API base URL
+import API from '../../api/NewUrl' // Import API base URL
 
 const createVehicle = async (payload) => {
     try {
@@ -8,10 +8,10 @@ const createVehicle = async (payload) => {
         const options = { // Set options for endpoint
             headers: {
                 'Authorization': token,
-                ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+                ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
             }
         }
-        const response = await API.post(`/v1/vehicles/cc`, payload, options)
+        const response = await API.post(`/v1/vehicles`, payload, options)
         return response
     } catch (error) {
         console.log(error)
@@ -26,10 +26,10 @@ const deleteVehicle = async (vehicleId) => {
         const options = { // Set options for endpoint
             headers: {
                 'Authorization': token,
-                ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+                ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
             }
         }
-        const response = await API.delete(`/v1/vehicles/cc/${vehicleId}`, options)
+        const response = await API.delete(`/v1/vehicles/${vehicleId}`, options)
         return response
     } catch (error) {
         console.log(error)
@@ -44,11 +44,11 @@ const updateVehicle = async (payload, id) => {
         const options = { // Set options for endpoint
             headers: {
                 'Authorization': token,
-                ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+                ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
             }
         }
         const body = payload
-        const response = await API.put(`/v1/vehicles/cc/${id}`, body, options)
+        const response = await API.put(`/v1/vehicles/${id}`, body, options)
         return response
     } catch (error) {
         console.log(error)
