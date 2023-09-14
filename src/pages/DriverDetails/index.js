@@ -646,7 +646,7 @@ const DriverDetails = () => {
           await updateApplicationStatus( id, values.application_status, values.status_reason)
             .then((response) => {
               if (response) {
-                successAlert(response.message)
+                successAlert('Application status updated successfully')
                 setSubmitting(false)
                 setChangeStatusModal(false)
                 refetch()
