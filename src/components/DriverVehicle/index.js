@@ -14,7 +14,7 @@ import {
 import { Formik, Form } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import yup validation schema
 
-import useFetch from "../../hooks/use-fetch" // Import useFetch custom hook
+import useFetch from "../../hooks/use-new-fetch" // Import useFetch custom hook
 import { createVehicle, deleteVehicle, updateVehicle } from '../../utils/vehicle-status' // Import vehicle status functions
 
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
@@ -34,7 +34,7 @@ const vehicleSchema = object().shape({
 })
 
 const VehiclePhotosFeeder = ({vehicle, sub}) => {
-    const { data, isLoading, error } = useFetch(`/v1/vehicles/photos/cc/${vehicle}/vehicle`)// Call useFetch custom hook
+    const { data, isLoading, error } = useFetch(`/v1/vehicles/photos/${vehicle}/vehicle`)// Call useFetch custom hook
     if (isLoading) {
         return <>Loading...</>
     }
@@ -69,11 +69,11 @@ const VehicleMakeFeeder = ({name, editable, value, handleUpdate}) => {
     }
 
     if (editable) {
-        return  <EditableSelect name={name} options={data.items} value={value} updateCallback={handleUpdate} />
+        return  <EditableSelect name={name} options={data.data} value={value} updateCallback={handleUpdate} />
     }
     
     return (
-        <SelectWrapper name={name} datasource={data.items} placeholder="Vehicle Make" searchable="true" />
+        <SelectWrapper name={name} datasource={data.data} placeholder="Vehicle Make" searchable="true" />
     )
 }
 
@@ -87,13 +87,13 @@ const VehicleModelFeeder = ({name, make_id, editable, value, handleUpdate}) => {
     if (error) {
         return <>Something went wrong</>
     }
-
+console.log(data)
     if (editable) {
-        return  <EditableSelect name={name} options={data.models} value={value} updateCallback={handleUpdate} />
+        return  <EditableSelect name={name} options={data.items} value={value} updateCallback={handleUpdate} />
     }
     
     return (
-        <SelectWrapper name={name} datasource={data.models} placeholder="Vehicle Model" searchable="true" />
+        <SelectWrapper name={name} datasource={data.items} placeholder="Vehicle Model" searchable="true" />
     )
 }
 
@@ -273,7 +273,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
 const { Title, Text } = Typography // Destructure Title from Typography
 
 const DriverVehicle = ({ id, sub }) => {
-    const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}/vehicles`)// Call useFetch custom hook
+    const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/${id}/vehicles`)// Call useFetch custom hook
     const [open, setOpen] = useState({// Drawer state manager
         drawer: {
             open: false,
