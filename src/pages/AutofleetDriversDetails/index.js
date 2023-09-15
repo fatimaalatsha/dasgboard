@@ -19,172 +19,16 @@ import qs from "qs"; // Import qs library
 //import pages 
 import DriverReviews from "../DriverReviews";
 
-const { Title, Text } = Typography;
 
+import Rides from "../Rides";
+
+const { Title, Text } = Typography;
 //get the papams that will be passed to filters through qs
   const getUserParams = (params) => ({ // Get table params
     limit: params.pagination?.pageSize,
     page: params.pagination?.current,
     ...params,
 })
-
-
-const LastRides = ({ driverId }) => {
-
-  const [params, setParams] = useState({}); // Set params state
-  const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
-
-  const { data, loading, error } = useNewFetch(`/v1/rides/drivers/${driverId}?${qs.stringify(getUserParams(params))}`);
-
-  const columns = [
-    {
-      title: "Ride Id",
-      dataIndex: "ride_id",
-      key: "ride_id",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => (
-        <Tag color={status === "completed" ? "green" : "red"}>{status}</Tag>
-      ),
-    },
-    {
-      title: "Total Price",
-      dataIndex: "total_price",
-      key: "total_price",
-      render: (total_price) => (
-        <Text>{total_price ? `${total_price} CAD` : ""}</Text>
-      ),
-    },
-    {
-      title: "Pickup",
-      dataIndex: "pickup_description",
-      key: "pickup_description",
-      render: (pickup_description) => <Text>{pickup_description}</Text>,
-    },
-    {
-      title: "Drop Off",
-      dataIndex: "dropoff_description",
-      key: "dropoff_description",
-      render: (dropoff_description) => <Text>{dropoff_description}</Text>,
-    },
-  ];
-    const handleRowExpand = (record) => {
-      // Toggle the expanded row when a row is clicked
-      setExpandedRowKey((prevExpandedKey) =>
-        prevExpandedKey === record.ride_id ? null : record.ride_id
-      );
-    };
-
-
-  return (
-    <>
-      <Table
-        columns={columns}
-        dataSource={data?.data}
-        loading={loading}
-        pagination={{
-          total: data?.meta?.total_items,
-          showSizeChanger: true,
-          pageSizeOptions: ["10", "20", "50"],
-          showTotal: (total, range) =>
-            `${range[0]}-${range[1]} of ${total} rides`,
-        }}
-        onChange={(pagination, filters, sorter) => {
-          // Update the params when the table state changes
-          setParams({
-            ...params,
-            pagination: {
-              current: pagination.current,
-              pageSize: pagination.pageSize,
-              limit: pagination.pageSize,
-            },
-            sortField: sorter.field,
-            sortOrder: sorter.order,
-            ...filters,
-          });
-        }}
-        rowKey="ride_id"
-        expandable={{
-          expandedRowKeys: [expandedRowKey], // Specify the currently expanded row key
-          onExpand: (expanded, record) => handleRowExpand(record), // Handle row expansion
-          expandedRowRender: (record) => (
-            <>
-              <Space direction="horizontal" size="large">
-                <Space direction="vertical">
-                  <Tag
-                    color={record.status === "completed" ? "green" : "red"}
-                    className="large-badge"
-                  >
-                    {" "}
-                    {record.status}{" "}
-                  </Tag>
-                  {record.rating ? (
-                    <Rate disabled defaultValue={record.rating} />
-                  ) : null}
-                </Space>
-                <Space direction="vertical">
-                  <Descriptions
-                    labelStyle={{ fontWeight: "bold" }}
-                    column={2}
-                    style={{ columnGap: "40px" }}
-                  >
-                    <Descriptions.Item label="Ride ID ">
-                      <Text>{record.ride_id}</Text>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Passenger ID ">
-                      <Text>{record.passenger_id}</Text>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Total Price">
-                      <Text>{record.total_price} CAD</Text>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Driver Earnings">
-                      <Text>{record.driver_earnings} CAD</Text>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Pickup Date ">
-                      <Text>
-                        {record.pickup_completed_at
-                          ? `${record.pickup_completed_at.split("T")[0]} ${
-                              record.pickup_completed_at
-                                .split("T")[1]
-                                .split(".")[0]
-                            }`
-                          : ""}
-                      </Text>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Pickup Location">
-                      <Text>{record.pickup_description}</Text>
-                    </Descriptions.Item>
-                  
-                    <Descriptions.Item label="Drop Off Date ">
-                      <Text>
-                        {record.dropoff_completed_at
-                          ? `${record.dropoff_completed_at.split("T")[0]} ${
-                              record.dropoff_completed_at
-                                .split("T")[1]
-                                .split(".")[0]
-                            }`
-                          : ""}
-                      </Text>
-                    </Descriptions.Item>
-                    <Descriptions.Item label="Drop Off ">
-                      <Text>{record.dropoff_description}</Text>
-                    </Descriptions.Item>
-                  </Descriptions>
-                </Space>
-              </Space>
-            </>
-          ),
-          rowExpandable: () => true,
-        }}
-      />
-    </>
-  );
-};
-
-
 
 
 const AutofleetDriversDetails = () => {
@@ -256,7 +100,7 @@ const AutofleetDriversDetails = () => {
             <Divider orientation="left"> Reviews </Divider>
             <DriverReviews name="Review" driverId={id} />
             <Divider orientation="left"> Rides </Divider>
-            <LastRides name="Last Rides" driverId={id} />
+            <Rides name="Last Rides" driverId={id} />
           </Space>
         }
       />
