@@ -20,73 +20,71 @@ const getUserParams = (params) => ({
 const Finance = () => {
     const financeFilter = useFilterStore((state) => state.financeFilter);
     const setFinanceFilter = useFilterStore((state) => state.setFinanceFilter);
-    
 
-    
-  const [open, setOpen] = useState(false);
-  const columns = [
-    {
-      title: "Name",
-      dataIndex: "name",
-      key: "name",
-    },
-    {
-      title: "Cities",
-      dataIndex: "cities",
-      key: "cities",
-      render: (cities) => {
-        return cities.map((city) => city.name).join(", ");
-      }
-      
-    },
-    {
-      title: "Type",
-      dataIndex: "type",
-      key: "type",
-    },
-    {
-      title: "Status",
-      dataIndex: "status",
-      key: "status",
-      render: (status) => {
-        return status === "active" ? (
-          <span style={{ color: "green" }}>{status}</span>
-        ) : (
-          <span style={{ color: "red" }}>{status}</span>
-        );
+    const [open, setOpen] = useState(false);
+    const columns = [
+      {
+        title: "Name",
+        dataIndex: "name",
+        key: "name",
       },
-    },
-    {
-      title: "Goal",
-      dataIndex: "goal",
-      key: "goal",
-    },
-    {
-      title: "Start Date",
-      dataIndex: "start_time",
-      key: "start_time",
-      render: (start_time) => {
-        return start_time?.split("T")[0];
+      {
+        title: "Cities",
+        dataIndex: "cities",
+        key: "cities",
+        render: (cities) => {
+          return cities.map((city) => city.name).join(", ");
+        }
+        
       },
-    },
-    {
-      title: "End Date",
-      dataIndex: "end_time",
-      key: "end_time",
-      render: (end_time) => {
-        return end_time?.split("T")[0];
+      {
+        title: "Type",
+        dataIndex: "type",
+        key: "type",
       },
-    },
-  ];
+      {
+        title: "Status",
+        dataIndex: "status",
+        key: "status",
+        render: (status) => {
+          return status === "active" ? (
+            <span style={{ color: "green" }}>{status}</span>
+          ) : (
+            <span style={{ color: "red" }}>{status}</span>
+          );
+        },
+      },
+      {
+        title: "Goal",
+        dataIndex: "goal",
+        key: "goal",
+      },
+      {
+        title: "Start Date",
+        dataIndex: "start_time",
+        key: "start_time",
+        render: (start_time) => {
+          //clean up but show the time
+          return start_time?. split("T")[0];
+        },
+      },
+      {
+        title: "End Date",
+        dataIndex: "end_time",
+        key: "end_time",
+        render: (end_time) => {
+          return end_time?.split("T")[0];
+        },
+      },
+    ];
 
-    // const { data, loading, error } = useNewFetch("/v1/bonuses");
-    const { data, error, loading, refetch } = useNewFetch(
-      `/v1/bonuses?${qs.stringify(getUserParams(financeFilter), {
-        skipNulls: true,
-        arrayFormat: "comma",
-      })}`
-    );
-
+      // const { data, loading, error } = useNewFetch("/v1/bonuses");
+      const { data, error, loading, refetch } = useNewFetch(
+        `/v1/bonuses?${qs.stringify(getUserParams(financeFilter), {
+          skipNulls: true,
+          arrayFormat: "comma",
+        })}`
+      );
   //handle closing modal
   const handleCancel = () => {
     setOpen(false);
@@ -123,12 +121,12 @@ const Finance = () => {
     useEffect(() => {
         let isMounted = true;
         setFinanceFilter({
-            pagination: {
-                ...financeFilter.pagination,
-                total: data?.meta?.total_items,
-                showTotal: (total, range) =>
-                    `${range[0]}-${range[1]} of ${total} Bonuses`,
-            }
+          pagination: {
+            ...financeFilter.pagination,
+            total: data?.meta?.total_items,
+            showTotal: (total, range) =>
+              `${range[0]}-${range[1]} of ${total} Bonuses`,
+          },
         });
         if (isMounted) {
             refetch();

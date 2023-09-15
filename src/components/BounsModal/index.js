@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 
-import { Modal, Typography, Select, Space } from "antd";
+import { Modal, Typography, TimePicker, Space, Divider } from "antd";
 import { Formik, Form , Field} from 'formik' // Import Formik form components
 import * as Yup from 'yup' // import yup for validation
 import dayjs from "dayjs";
@@ -8,7 +8,6 @@ import dayjs from "dayjs";
 import {createBonus} from "../../utils/finance-status"; // Import API base url
 import { getCities } from "../../utils/city-status"; // Import API base url
 //import components
-import EditableDate from "../EditableDate"
 import SubmitWrapper from "../forms/SubmitWrapper"
 import InputWrapper from "../forms/InputWrapper"
 import SelectWrapper from "../forms/SelectWrapper";
@@ -68,15 +67,20 @@ const test = {
 
   // date selection handler
   const [selectedDateRange, setSelectedDateRange] = useState({
-    date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD"),
-    date_to: dayjs().format("YYYY-MM-DD"),
+    date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD HH:mm:ss"),
+    date_to: dayjs().format("YYYY-MM-DD HH:mm:ss"),
   });
   const handleDateSelect = (dateRange) => {
     setSelectedDateRange({
-      date_from: dayjs(dateRange[0]).format("YYYY-MM-DD"),
-      date_to: dayjs(dateRange[1]).format("YYYY-MM-DD"),
+      date_from: dayjs(dateRange[0]).format("YYYY-MM-DD HH:mm:ss"),
+      date_to: dayjs(dateRange[1]).format("YYYY-MM-DD HH:mm:ss"),
     });
   };
+
+  const [selectedTimeRange, setSelectedTimeRange] = useState({
+    time_from: dayjs().subtract(90, "days").format("HH:mm"),
+    time_to: dayjs().format("HH:mm"),
+  });
   
   // bounce type options
   const BounceType = [
@@ -102,6 +106,7 @@ const test = {
               type: values.type,
               status: values.status,
               goal: parseFloat(values.goal),
+              //add time to body
               start_time: selectedDateRange.date_from,
               end_time: selectedDateRange.date_to,
             };
@@ -112,10 +117,10 @@ const test = {
         >
           <Modal
             title={
-              <Text strong style={{ fontSize: "1.2rem" }}>
+              <Divider strong style={{ fontSize: "1.2rem" }}>
                 {" "}
                 Create New Bounce{" "}
-              </Text>
+              </Divider>
             }
             className="modalStyle"
             open={props.open}
@@ -148,26 +153,152 @@ const test = {
                 <SelectWrapper
                   name="status"
                   placeholder="Status"
-                  datasource={
-                    [
-                      {
-                        text: "Active",
-                        value: "active",
-                      },
-                      {
-                        text: "Inactive",
-                        value: "inactive",
-                      },
-                    ]
-                  }
+                  datasource={[
+                    {
+                      text: "Active",
+                      value: "active",
+                    },
+                    {
+                      text: "Inactive",
+                      value: "inactive",
+                    },
+                  ]}
                 />
                 <Text type="secondary">Goal</Text>
                 <InputWrapper name="goal" placeholder="Goal" />
-                <Text type="secondary"> Date Range </Text>
+                <Divider> Time and Date</Divider>
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 16,
+                  }}
+                >
+                  <Text type="secondary">Start Time</Text>
+                  <TimePicker
+                    name="start_time"
+                    showNow
+                    format="HH:mm"
+                    hideDisabledOptions
+                    disabledTime={(current) => {
+                      return {
+                        disabledMinutes: () => {
+                          const minuteSteps = [0, 15, 30, 45, 59];
+                          const minutes = [];
+                          for (let i = 0; i < 60; i++) {
+                            if (!minuteSteps.includes(i)) {
+                              minutes.push(i);
+                            }
+                          }
+                          return minutes;
+                        },
+                      };
+                    }}
+                    onSelect={(value) => {
+                      setSelectedTimeRange({
+                        time_from: dayjs(value).format("HH:mm"),
+                      });
+                      console.log("time from", selectedTimeRange);
+                    }}
+                  />
+                  <Text type="secondary">End Time</Text>
+                  <TimePicker
+                    name="end_time"
+                    showNow={false}
+                    format="HH:mm"
+                    hideDisabledOptions
+                    disabledTime={(current) => {
+                      return {
+                        disabledMinutes: () => {
+                          const minuteSteps = [0, 15, 30, 45, 59];
+                          const minutes = [];
+                          for (let i = 0; i < 60; i++) {
+                            if (!minuteSteps.includes(i)) {
+                              minutes.push(i);
+                            }
+                          }
+                          return minutes;
+                        },
+                      };
+                    }}
+                    onSelect={(value) => {
+                      setSelectedTimeRange({
+                        time_to: dayjs(value).format("HH:mm"),
+                      });
+                      console.log("timeTo", selectedTimeRange);
+                    }}
+                  />
+                </div>
+                {/* <Text type="secondary"> wDate Range </Text> */}
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 16,
+                  }}
+                >
+                  <Text type="secondary">Start Date</Text>
+                  <TimePicker
+                    name="start_time"
+                    showNow
+                    format="HH:mm"
+                    hideDisabledOptions
+                    disabledTime={(current) => {
+                      return {
+                        disabledMinutes: () => {
+                          const minuteSteps = [0, 15, 30, 45, 59];
+                          const minutes = [];
+                          for (let i = 0; i < 60; i++) {
+                            if (!minuteSteps.includes(i)) {
+                              minutes.push(i);
+                            }
+                          }
+                          return minutes;
+                        },
+                      };
+                    }}
+                    onSelect={(value) => {
+                      setSelectedTimeRange({
+                        time_from: dayjs(value).format("HH:mm"),
+                      });
+                      console.log("time from", selectedTimeRange);
+                    }}
+                  />
+                  <Text type="secondary">End Date</Text>
+                  <TimePicker
+                    name="end_time"
+                    showNow={false}
+                    format="HH:mm"
+                    hideDisabledOptions
+                    disabledTime={(current) => {
+                      return {
+                        disabledMinutes: () => {
+                          const minuteSteps = [0, 15, 30, 45, 59];
+                          const minutes = [];
+                          for (let i = 0; i < 60; i++) {
+                            if (!minuteSteps.includes(i)) {
+                              minutes.push(i);
+                            }
+                          }
+                          return minutes;
+                        },
+                      };
+                    }}
+                    onSelect={(value) => {
+                      setSelectedTimeRange({
+                        time_to: dayjs(value).format("HH:mm"),
+                      });
+                      console.log("timeTo", selectedTimeRange);
+                    }}
+                  />
+                </div>
                 <DateRangePicker
                   value={selectedDateRange}
                   onDateSelect={handleDateSelect}
                   unpresets={true}
+                  showTime={true}
                 />
               </Space>
             </Form>
