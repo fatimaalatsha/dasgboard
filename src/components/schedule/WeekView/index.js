@@ -1,4 +1,4 @@
-import { useState } from 'react' // Import React hooks
+import { useState, useEffect } from 'react' // Import React hooks
 import { Table, Space, Typography, Result } from 'antd' // Import Ant components
 import { geekblue } from '@ant-design/colors' // Import Ant colors
 import dayjs from 'dayjs' // Import dayjs
@@ -37,8 +37,14 @@ const WeekView = ({selectedWeek, days, tz, city, loadTimeline }) => {
         date_from: selectedWeek.startOf('week').format('YYYY-MM-DD'),
         date_to: selectedWeek.endOf('week').format('YYYY-MM-DD'),
     }
-    const { data, isLoading, error, refetch } = useWeekSchedule(`/v1/shifts?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz) // Call useSchedule hook
+    const { data, isLoading, error, refetch } = useWeekSchedule(`/v1/shifts?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, filters.date_to) // Call useSchedule hook
     const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
+    const controller = new AbortController()// Create a new AbortController
+  
+    useEffect(() => {
+      refetch()
+      return () => controller.abort()// Abort fetch on unmount
+    }, [selectedWeek, city])
 
     const columns = [
         {

@@ -33,6 +33,7 @@ import {
     ApiOutlined,
     InteractionOutlined,
 } from '@ant-design/icons'
+import OvernightIcon from '../../icons/OvernightIcon'
 
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -45,6 +46,7 @@ import { useFilterStore } from '../../../store'
 
 import Submit from '../../forms/SubmitWrapper'
 import TimePickerWrapper from '../../forms/TimePickerWrapper'
+import DatePickerWrapper from '../../forms/DatePickerWrapper'
 
 import { 
     convertToHourTz, 
@@ -127,12 +129,13 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                 is_recurring: false,
                 capacity: 1,
                 is_individual: true,
+                overnight: data.is_overnight || false
             }}
             validationSchema={timeslotSchema}
             onSubmit={async (values, { setSubmitting, resetForm }) => {
                 const payload ={
                     'start_time': converToUTC( dayjs(data.start_time).tz(tz).utc().format('YYYY-MM-DD'), values.start_time, tz),
-                    'end_time': converToUTC( dayjs(data.start_time).tz(tz).utc().format('YYYY-MM-DD'), values.end_time, tz),
+                    'end_time': converToUTC( values.overnight ? dayjs(data.start_time).add(1, 'day').tz(tz).utc().format('YYYY-MM-DD') : dayjs(data.start_time).tz(tz).utc().format('YYYY-MM-DD'), values.end_time, tz),
                     'drivers': [{'driver_id': values.driver_ids, 'is_permanent': false}],
                     'city_id': values.city_id,
                     'is_recurring': values.is_recurring,
@@ -196,39 +199,92 @@ const EditShiftModal = ({shift_id, open, tz, refetch}) => {
                                 }
                             }}
                         />
-                        <TimePickerWrapper 
-                            name="end_time"
-                            style={{ width: '100%' }} 
-                            value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
-                            format="HH:mm" 
-                            allowClear={false}
-                            showNow={false}
-                            hideDisabledOptions
-                            disabledTime={(current) => {
-                                return {
-                                    disabledHours: () => {
-                                        const hours = []
-                                        for (let i = 0; i < 24; i++) {
-                                            if (i < (dayjs(data.start_time).tz(tz).utc().hour()) + 1) {
-                                                hours.push(i)
+                        {!props.values.overnight && (
+                            <TimePickerWrapper 
+                                name="end_time"
+                                style={{ width: '100%' }} 
+                                value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                format="HH:mm" 
+                                allowClear={false}
+                                showNow={false}
+                                hideDisabledOptions
+                                disabledTime={(current) => {
+                                    return {
+                                        disabledHours: () => {
+                                            const hours = []
+                                            for (let i = 0; i < 24; i++) {
+                                                if (i < (dayjs(data.start_time).tz(tz).utc().hour()) + 1) {
+                                                    hours.push(i)
+                                                }
                                             }
-                                        }
-                                        return hours
-                                    },
-                                    disabledMinutes: () => {
-                                        const minuteSteps = [0, 30, 59]
-                                        const minutes = []
-                                        for (let i = 0; i < 60; i++) {
-                                            if (!minuteSteps.includes(i)) {
-                                                minutes.push(i)
+                                            return hours
+                                        },
+                                        disabledMinutes: () => {
+                                            const minuteSteps = [0, 30, 59]
+                                            const minutes = []
+                                            for (let i = 0; i < 60; i++) {
+                                                if (!minuteSteps.includes(i)) {
+                                                    minutes.push(i)
+                                                }
                                             }
-                                        }
-                                        return minutes
-                                    },
-                                }
-                            }}
-                        />
+                                            return minutes
+                                        },
+                                    }
+                                }}
+                            />
+                        )}
+                        <Space direction="vertical" >
+                            <Text strong >&nbsp;</Text>
+                            <Tooltip title="Overnight Shift">
+                            <Button type="primary" ghost={!props.values.overnight} onClick={() => props.setFieldValue('overnight', !props.values.overnight)}>
+                            +1
+                            </Button>
+                            </Tooltip>
+                        </Space>
                         </div>
+                                {   props.values.overnight && (
+                                    <div size={16} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                        <div style={{ width: '100%', display: 'block' }}>
+                                            <DatePickerWrapper 
+                                                name="end_day"
+                                                style={{ width: '100%' }} 
+                                                value={dayjs(data.start_time).add(1, 'day')} 
+                                                allowClear={false}
+                                                disabled
+                                            />
+                                        </div>
+                                        <TimePickerWrapper 
+                                            name="end_time"
+                                            style={{ width: '100%' }} 
+                                            value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                            format="HH:mm" 
+                                            allowClear={false}
+                                            showNow={false}
+                                            hideDisabledOptions
+                                            disabledTime={(current) => {
+                                                return {
+                                                    disabledHours: () => {
+                                                        const hours = []
+                                                        for (let i = 8; i < 24; i++) {
+                                                            hours.push(i)
+                                                        }
+                                                        return hours
+                                                    },
+                                                    disabledMinutes: () => {
+                                                        const minuteSteps = [0, 30, 59]
+                                                        const minutes = []
+                                                        for (let i = 0; i < 60; i++) {
+                                                            if (!minuteSteps.includes(i)) {
+                                                                minutes.push(i)
+                                                            }
+                                                        }
+                                                        return minutes
+                                                    },
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                )}
                         <Checkbox 
                             name="checked"
                             checked={props.values.checked}
@@ -315,6 +371,9 @@ const ShiftDetails = ({
         day, 
         guarantee, 
         is_individual, 
+        is_overnight,
+        overnight_start,
+        overnight_end,
         handleEdit, 
         handleOpen, 
         handleUnassign, 
@@ -389,12 +448,26 @@ const ShiftDetails = ({
             }
         >
             <Space direction="vertical">
+                { is_overnight && (
+                    <Row gutter={[16, 0]}>
+                        <Col span={2}>
+                            <OvernightIcon />
+                        </Col>
+                        <Col span={22}>
+                            <Text style={{ whiteSpace: 'nowrap' }}>Overnight</Text>
+                        </Col>
+                    </Row>
+                )}
                 <Row gutter={[16, 0]}>
                     <Col span={2}>
                         <CalendarOutlined {...iconStyle} />
                     </Col>
                     <Col span={22}>
-                        <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(day).format('dddd, MMMM DD')} ⋅ ${start_time} ➡ ${end_time}`}</Text>
+                        { is_overnight && start_time !== overnight_start ? (
+                            <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(day).subtract(1, 'day').format('dddd, MMMM DD')} ⋅ ${overnight_start} ➡ ${end_time}`}</Text>
+                            ) : (
+                            <Text style={{ whiteSpace: 'nowrap' }}>{`${dayjs(day).format('dddd, MMMM DD')} ⋅ ${start_time} ➡ ${is_overnight && end_time !== overnight_end ? overnight_end : end_time}`}</Text>
+                        )}
                     </Col>
                 </Row>
                 <Row gutter={[16, 0]}>
@@ -465,10 +538,12 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
     const [ open, setOpen ] = useState(false)
 
     const ellipsisStyle = {
-        style: cardStyle.width < 100 ? { width: cardStyle.width, textAlign: 'left'} : {},
+        style: cardStyle.width < 100 ? { width: cardStyle.width, textAlign: 'left', 
+        ...(record.is_overnight && { color: '#FFFFFF' })} : {...(record.is_overnight && { color: '#FFFFFF' })},
         ellipsis: { tooltip: true, suffix: '' },
         strong: true,
     }
+
     const handleOpenChange = (newOpen) => {
         setOpen(newOpen)
     }
@@ -501,6 +576,9 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
                     day={record.current_day}
                     guarantee={record.guarantee}
                     is_individual={!record.is_individual}
+                    is_overnight={record.is_overnight}
+                    overnight_start={record.overnight_start}
+                    overnight_end={record.overnight_end}
                     handleEdit={(value) => handleEdit(value)}
                     handleOpen={(value) => handleOpenChange(value)}
                     handleUnassign={handleUnassign}
@@ -520,7 +598,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
                         <Space direction="vertical" size={0}>
                             <Row>
                                 <Space>
-                                    <Text {...ellipsisStyle} >{`${record?.start} ➡ ${record?.end}`}</Text>
+                                    <Text {...ellipsisStyle} >{`${record.is_overnight && record.start !== record.overnight_start ? `🌙` + record.overnight_start : record?.start} ➡ ${record.is_overnight && record.end !== record.overnight_end ? record.overnight_end + `🌙` : record?.end}`}</Text>
                                 </Space>
                             </Row>
                             <Row>
@@ -562,6 +640,11 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         current_day: dayjs(day).tz(scheduleFilter.tz).utc().format('YYYY-MM-DD'),
         is_individual: record.is_individual,
         id: record.id,
+        is_overnight: record.is_overnight,
+        ...(record.is_overnight && {
+            overnight_start: convertToHourTz(record.overnight_start, scheduleFilter.tz),
+            overnight_end: convertToHourTz(record.overnight_end, scheduleFilter.tz)
+        })
     })
     const [isHovering, setIsHovering] = useState(false)
     const [isModalOpen, setIsModalOpen] = useState(false)
@@ -575,13 +658,19 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         open: false
     })
 
-    const floatingComponentWidth = hours.diff * 60.9936  // 60.9936 is the average width of each hour in the calendar
+    const getShiftDuration = () => {
+        const END_TIME = dayjs(record.end_time).tz(scheduleFilter.tz).utc()
+        const START_TIME = dayjs(record.start_time).tz(scheduleFilter.tz).utc()
+        return END_TIME.diff(START_TIME, 'hour', true)
+    }
+
+    const floatingComponentWidth = (record.is_overnight ? getShiftDuration() : hours.diff) * 60.9936  // 60.9936 is the average width of each hour in the calendar
 
     const cardStyleConfig = {
-        backgroundColor: token['geekblue-1'],
-        borderColor: token['geekblue-3'],
+        backgroundColor: record.is_overnight ? token['purple-8'] : token['geekblue-1'],
+        borderColor: record.is_overnight ? token['geekblue-10'] : token['geekblue-3'],
         width: floatingComponentWidth,
-        height: 'calc(100% + 2px)'
+        height: 'calc(100% + 2px)',
     }
   
     const handleClick = () => {
@@ -659,12 +748,13 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                         is_recurring: false,
                         capacity: 1,
                         is_individual: true,
+                        overnight: false,
                     }}
                     validationSchema={timeslotSchema}
                     onSubmit={async (values, { setSubmitting, resetForm }) => {
                         const payload ={
                             'start_time': converToUTC( hours.current_day, values.start_time, scheduleFilter.tz),
-                            'end_time': converToUTC( hours.current_day, values.end_time, scheduleFilter.tz),
+                            'end_time': converToUTC( values.overnight ? dayjs(day).tz(scheduleFilter.tz).utc().add(1, 'day').format('YYYY-MM-DD'): hours.current_day, values.end_time, scheduleFilter.tz),
                             'drivers': [{'driver_id': values.driver_ids, 'is_permanent': false}],
                             'city_id': values.city_id,
                             'is_recurring': values.is_recurring,
@@ -727,39 +817,92 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                                         }
                                     }}
                                 />
-                                <TimePickerWrapper 
-                                    name="end_time"
-                                    style={{ width: '100%' }} 
-                                    value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
-                                    format="HH:mm" 
-                                    allowClear={false}
-                                    showNow={false}
-                                    hideDisabledOptions
-                                    disabledTime={(current) => {
-                                        return {
-                                            disabledHours: () => {
-                                                const hours = []
-                                                for (let i = 0; i < 24; i++) {
-                                                    if (i < dayjs(props.values.start_time, 'HH:mm').hour() + 1) {
-                                                        hours.push(i)
+                                {!props.values.overnight && (
+                                    <TimePickerWrapper 
+                                        name="end_time"
+                                        style={{ width: '100%' }} 
+                                        value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                        format="HH:mm" 
+                                        allowClear={false}
+                                        showNow={false}
+                                        hideDisabledOptions
+                                        disabledTime={(current) => {
+                                            return {
+                                                disabledHours: () => {
+                                                    const hours = []
+                                                    for (let i = 0; i < 24; i++) {
+                                                        if (i < dayjs(props.values.start_time, 'HH:mm').hour() + 1) {
+                                                            hours.push(i)
+                                                        }
                                                     }
-                                                }
-                                                return hours
-                                            },
-                                            disabledMinutes: () => {
-                                                const minuteSteps = [0, 30, 59]
-                                                const minutes = []
-                                                for (let i = 0; i < 60; i++) {
-                                                    if (!minuteSteps.includes(i)) {
-                                                        minutes.push(i)
+                                                    return hours
+                                                },
+                                                disabledMinutes: () => {
+                                                    const minuteSteps = [0, 30, 59]
+                                                    const minutes = []
+                                                    for (let i = 0; i < 60; i++) {
+                                                        if (!minuteSteps.includes(i)) {
+                                                            minutes.push(i)
+                                                        }
                                                     }
-                                                }
-                                                return minutes
-                                            },
-                                        }
-                                    }}
-                                />
+                                                    return minutes
+                                                },
+                                            }
+                                        }}
+                                    />
+                                )}
+                                <Space direction="vertical" >
+                                    <Text strong >&nbsp;</Text>
+                                    <Tooltip title="Overnight Shift">
+                                    <Button type="primary" ghost={!props.values.overnight} onClick={() => props.setFieldValue('overnight', !props.values.overnight)}>
+                                    +1
+                                    </Button>
+                                    </Tooltip>
+                                </Space>
                                 </div>
+                                {   props.values.overnight && (
+                                    <div size={16} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                        <div style={{ width: '100%', display: 'block' }}>
+                                            <DatePickerWrapper 
+                                                name="end_day"
+                                                style={{ width: '100%' }} 
+                                                value={day.add(1, 'day')} 
+                                                allowClear={false}
+                                                disabled
+                                            />
+                                        </div>
+                                        <TimePickerWrapper 
+                                            name="end_time"
+                                            style={{ width: '100%' }} 
+                                            value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                            format="HH:mm" 
+                                            allowClear={false}
+                                            showNow={false}
+                                            hideDisabledOptions
+                                            disabledTime={(current) => {
+                                                return {
+                                                    disabledHours: () => {
+                                                        const hours = []
+                                                        for (let i = 8; i < 24; i++) {
+                                                            hours.push(i)
+                                                        }
+                                                        return hours
+                                                    },
+                                                    disabledMinutes: () => {
+                                                        const minuteSteps = [0, 30, 59]
+                                                        const minutes = []
+                                                        for (let i = 0; i < 60; i++) {
+                                                            if (!minuteSteps.includes(i)) {
+                                                                minutes.push(i)
+                                                            }
+                                                        }
+                                                        return minutes
+                                                    },
+                                                }
+                                            }}
+                                        />
+                                    </div>
+                                )}
                                 <Checkbox 
                                     name="checked"
                                     checked={props.values.checked}

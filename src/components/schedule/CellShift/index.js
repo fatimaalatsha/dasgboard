@@ -25,7 +25,8 @@ import { object, string, number, boolean, array, mixed } from 'yup' // Import Yu
 import { useFilterStore } from '../../../store'
 
 import InputWrapper from '../../forms/InputWrapper' // Import InputWrapper component
-import TimePickerWrapper from '../../forms/TimePickerWrapper'
+import TimePickerWrapper from '../../forms/TimePickerWrapper' // Formik Time Picker
+import DatePickerWrapper from '../../forms/DatePickerWrapper' // Formik Date Picker
 import Submit from '../../forms/SubmitWrapper' // Import SubmitWrapper component
 import { CitySelect } from '../../CitySelect' // Import CitySelect component
 import DriverSelect from '../../DriverSelect' // Import DriverSelect component
@@ -190,12 +191,13 @@ const EditShiftModal = ({shift_id, parent_id ,open, tz, refetch, record}) => {
                 max_occurrences: data.recurrence?.max_occurrences || 0,
                 'days_of_week': data.recurrence?.days_of_week || [],
                 status: false,
+                overnight: data.is_overnight || false
             }}
             validationSchema={shiftSchema}
             onSubmit={async (values, { setSubmitting, resetForm }) => {
                 const payload = {
                     'start_time': converToUTC( dayjs(shift_id ? data.start_time : record.start_time).tz(tz).utc().format('YYYY-MM-DD'), values.start_time, tz),
-                    'end_time': converToUTC( dayjs(shift_id ? data.start_time : record.start_time).tz(tz).utc().format('YYYY-MM-DD'), values.end_time, tz),
+                    'end_time': converToUTC( values.overnight ? dayjs(shift_id ? data.start_time : record.start_time).add(1, 'day').tz(tz).utc().format('YYYY-MM-DD') : dayjs(shift_id ? data.start_time : record.start_time).tz(tz).utc().format('YYYY-MM-DD'), values.end_time, tz),
                     'capacity': Number(values.capacity),
                     'city_id': Number(values.city_id),
                     'is_recurring': values.is_recurring,
@@ -291,39 +293,92 @@ const EditShiftModal = ({shift_id, parent_id ,open, tz, refetch, record}) => {
                                         }
                                     }}
                                 />
-                                <TimePickerWrapper 
-                                    name="end_time"
-                                    style={{ width: '100%' }} 
-                                    value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
-                                    format="HH:mm" 
-                                    allowClear={false}
-                                    showNow={false}
-                                    hideDisabledOptions
-                                    disabledTime={(current) => {
-                                        return {
-                                            disabledHours: () => {
-                                                const hours = []
-                                                for (let i = 0; i < 24; i++) {
-                                                    if (i < (dayjs(data.start_time).tz(tz).utc().hour()) + 1) {
+                                {!props.values.overnight && (
+                                    <TimePickerWrapper 
+                                        name="end_time"
+                                        style={{ width: '100%' }} 
+                                        value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                        format="HH:mm" 
+                                        allowClear={false}
+                                        showNow={false}
+                                        hideDisabledOptions
+                                        disabledTime={(current) => {
+                                            return {
+                                                disabledHours: () => {
+                                                    const hours = []
+                                                    for (let i = 0; i < 24; i++) {
+                                                        if (i < (dayjs(data.start_time).tz(tz).utc().hour()) + 1) {
+                                                            hours.push(i)
+                                                        }
+                                                    }
+                                                    return hours
+                                                },
+                                                disabledMinutes: () => {
+                                                    const minuteSteps = [0, 30, 59]
+                                                    const minutes = []
+                                                    for (let i = 0; i < 60; i++) {
+                                                        if (!minuteSteps.includes(i)) {
+                                                            minutes.push(i)
+                                                        }
+                                                    }
+                                                    return minutes
+                                                },
+                                            }
+                                        }}
+                                    />
+                                )}
+                                <Space direction="vertical" >
+                                    <Text strong >&nbsp;</Text>
+                                    <Tooltip title="Overnight Shift">
+                                    <Button type="primary" ghost={!props.values.overnight} onClick={() => props.setFieldValue('overnight', !props.values.overnight)}>
+                                    +1
+                                    </Button>
+                                    </Tooltip>
+                                </Space>
+                            </div>
+                            {props.values.overnight && (
+                                <div size={16} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                    <div style={{ width: '100%', display: 'block' }}>
+                                        <DatePickerWrapper 
+                                            name="end_day"
+                                            style={{ width: '100%' }} 
+                                            value={dayjs(data.start_time).add(1, 'day')} 
+                                            allowClear={false}
+                                            disabled
+                                        />
+                                    </div>
+                                    <TimePickerWrapper 
+                                        name="end_time"
+                                        style={{ width: '100%' }} 
+                                        value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                        format="HH:mm" 
+                                        allowClear={false}
+                                        showNow={false}
+                                        hideDisabledOptions
+                                        disabledTime={(current) => {
+                                            return {
+                                                disabledHours: () => {
+                                                    const hours = []
+                                                    for (let i = 8; i < 24; i++) {
                                                         hours.push(i)
                                                     }
-                                                }
-                                                return hours
-                                            },
-                                            disabledMinutes: () => {
-                                                const minuteSteps = [0, 30, 59]
-                                                const minutes = []
-                                                for (let i = 0; i < 60; i++) {
-                                                    if (!minuteSteps.includes(i)) {
-                                                        minutes.push(i)
+                                                    return hours
+                                                },
+                                                disabledMinutes: () => {
+                                                    const minuteSteps = [0, 30, 59]
+                                                    const minutes = []
+                                                    for (let i = 0; i < 60; i++) {
+                                                        if (!minuteSteps.includes(i)) {
+                                                            minutes.push(i)
+                                                        }
                                                     }
-                                                }
-                                                return minutes
-                                            },
-                                        }
-                                    }}
-                                />
-                            </div>
+                                                    return minutes
+                                                },
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            )}
                             <CitySelect 
                                 defaultValue={props.values.city_id}    
                                 style={{ width: '100%' }}
@@ -633,17 +688,28 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
             end_date: null,
             occurrences: 0,
             days_of_week: [DEFAULT_DAY],
-        }
+        },
+        is_overnight: record.is_overnight,
+        ...(record.is_overnight && {
+            overnight_start: convertToHourTz(record.overnight_start, scheduleFilter.tz),
+            overnight_end: convertToHourTz(record.overnight_end, scheduleFilter.tz)
+        })
     })
 
-    const floatingComponentHeight = hours.diff * 57 + 2
+    const getShiftDuration = () => {
+        const END_TIME = dayjs(record.end_time).tz(scheduleFilter.tz).utc()
+        const START_TIME = dayjs(record.start_time).tz(scheduleFilter.tz).utc()
+        return END_TIME.diff(START_TIME, 'hour', true)
+    }
+
+    const floatingComponentHeight = (record.is_overnight ? getShiftDuration() : hours.diff) * 57 + 2
     const itemZIndex = record.start_time ? parseInt(record.start_time.split(":")[0], 10) : 1
     const calcWidth = (isContained ? 90 : 100) / overlap
     const calcLeft = (calcWidth / 100) * 197 * index
 
     const cardStyleConfig = {
-        backgroundColor: record.status === 'active' ? token.colorSuccessBg : token.colorWarningBg,
-        borderColor: record.status === 'active' ? token['green-4'] : token['gold-4'],
+        backgroundColor: record.status === 'active' ? record.is_overnight ? token['purple-8'] : token.colorSuccessBg : token.colorWarningBg,
+        borderColor: record.status === 'active' ? record.is_overnight ? token['geekblue-10'] : token['green-4'] : token['gold-4'],
         height: floatingComponentHeight,
         cursor: 'pointer',
         position: 'absolute',
@@ -704,154 +770,156 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
 
     return (
         <>
-                { isCellFilled ? (
-                    <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} status={record.status} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} day={selectedDay} />
-                ) : (
-                <>
-                    {  display && (
-                    <Tooltip title="Add shift">
-                        <Button type="text" style={{ width: '100%', height: '100%', padding: 16 }} size="small" onClick={handleClick} icon={<PlusOutlined />} />
-                    </Tooltip> 
-                    )}
-                        { isHovering && (
-                            <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} status={record.status} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} day={selectedDay} />
-                        )}
-                </>
+            { isCellFilled ? (
+                <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} status={record.status} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} day={selectedDay} />
+            ) : (
+            <>
+                {  display && (
+                <Tooltip title="Add shift">
+                    <Button type="text" style={{ width: '100%', height: '100%', padding: 16 }} size="small" onClick={handleClick} icon={<PlusOutlined />} />
+                </Tooltip> 
                 )}
-                {/* Shift Modal for Creation */}
-                { isModalOpen && (
-                    <Formik
-                        initialValues={{
-                            start_time: shift.start,
-                            end_time: shift.end,
-                            capacity: shift.drivers,
-                            city_id: [Number(city)],
-                            guarantee: shift.guarantee,
-                            guarantee_specs: shift.guarantee_specs,
-                            hasGuarantee: shift.hasGuarantee,
-                            'drivers': [],
-                            hasEarlyAccess: false,
-                            early_access: 0,
-                            is_recurring: shift.hasRecurrency,
-                            template: 'weekly',
-                            pattern: shift.pattern,
-                            ends: shift.ends,
-                            end_date: shift.recurrency.end_date || shift.day,
-                            max_occurrences: shift.recurrency.occurrences,
-                            'days_of_week': shift.recurrency.days_of_week,
-                            status: false,
-                        }}
-                        validationSchema={shiftSchema}
-                        onSubmit={async (values, { setSubmitting, resetForm }) => {
-                            
-                            const payload = {
-                                'start_time': converToUTC( shift.day, values.start_time, scheduleFilter.tz),
-                                'end_time': converToUTC(shift.day, values.end_time, scheduleFilter.tz),
-                                'capacity': Number(values.capacity),
-                                'city_id': [Number(city)],
-                                'is_recurring': values.is_recurring,
-                                ...(values.status && {
-                                    'status': 'inactive',
-                                    }),
-                                ...(values.drivers.length > 0 && {
-                                    'drivers': values.drivers,
-                                    }),
-                                ...(values.hasGuarantee && {
-                                    'guarantee': Number(values.guarantee),
-                                    'guarantee_specs': values.guarantee_specs,
+                    { isHovering && (
+                        <WeekShiftCard overlap={overlap} index={index} cardStyle={cardStyleConfig} record={shift} status={record.status} handleEdit={(value) => handleEdit(value)} handleDelete={handleDelete} handleStatus={(value) => handleStatusChange(value)} refetch={refetch} day={selectedDay} />
+                    )}
+            </>
+            )}
+            {/* Shift Modal for Creation */}
+            { isModalOpen && (
+                <Formik
+                    initialValues={{
+                        start_time: shift.start,
+                        end_time: shift.end,
+                        capacity: shift.drivers,
+                        city_id: [Number(city)],
+                        guarantee: shift.guarantee,
+                        guarantee_specs: shift.guarantee_specs,
+                        hasGuarantee: shift.hasGuarantee,
+                        'drivers': [],
+                        hasEarlyAccess: false,
+                        early_access: 0,
+                        is_recurring: shift.hasRecurrency,
+                        template: 'weekly',
+                        pattern: shift.pattern,
+                        ends: shift.ends,
+                        end_date: shift.recurrency.end_date || shift.day,
+                        max_occurrences: shift.recurrency.occurrences,
+                        'days_of_week': shift.recurrency.days_of_week,
+                        status: false,
+                        overnight: false,
+                    }}
+                    validationSchema={shiftSchema}
+                    onSubmit={async (values, { setSubmitting, resetForm }) => {
+                        
+                        const payload = {
+                            'start_time': converToUTC( shift.day, values.start_time, scheduleFilter.tz),
+                            'end_time': converToUTC(values.overnight ? dayjs(selectedDay).add(1, 'day').format('YYYY-MM-DD') : shift.day, values.end_time, scheduleFilter.tz),
+                            'capacity': Number(values.capacity),
+                            'city_id': [Number(city)],
+                            'is_recurring': values.is_recurring,
+                            ...(values.status && {
+                                'status': 'inactive',
                                 }),
-                                ...(values.hasEarlyAccess && !values.is_recurring && {
-                                    'early_access': Number(values.early_access),
+                            ...(values.drivers.length > 0 && {
+                                'drivers': values.drivers,
                                 }),
-                                ...(values.is_recurring && !values.hasEarlyAccess && {
-                                    'pattern': values.pattern,
-                                    ...(values.pattern !== 'once' && {'days_of_week': values.days_of_week}),
-                                    'never_ends': Boolean(values.ends === 'never'),
-                                    ...((values.pattern === 'once' || values.ends === 'after') && {
-                                        'max_occurrences': values.max_occurrences,
-                                    }),
-                                    ...(values.ends === 'on' && {
-                                        'end_date': values.end_date,
-                                    }),
+                            ...(values.hasGuarantee && {
+                                'guarantee': Number(values.guarantee),
+                                'guarantee_specs': values.guarantee_specs,
+                            }),
+                            ...(values.hasEarlyAccess && !values.is_recurring && {
+                                'early_access': Number(values.early_access),
+                            }),
+                            ...(values.is_recurring && !values.hasEarlyAccess && {
+                                'pattern': values.pattern,
+                                ...(values.pattern !== 'once' && {'days_of_week': values.days_of_week}),
+                                'never_ends': Boolean(values.ends === 'never'),
+                                ...((values.pattern === 'once' || values.ends === 'after') && {
+                                    'max_occurrences': values.max_occurrences,
                                 }),
-                            }
-                            await createWeekShift(payload)
-                            .then(() => {
-                                message.success('Shift created successfully')
-                                setSubmitting(false)
-                                resetForm()
-                                setIsModalOpen(false)
-                                refetch()
-                            })
-                        }}
-                    >
-                        {props => (
-                            <FormikForm>
-                                <Modal 
-                                    title={
-                                        <Space direction="vertical">
-                                            <Title level={5} style={{ marginTop: 4 }}>{`New Shift: ${dayjs(shift.day).format(' MMM, dddd DD - YYYY')}`}</Title>
-                                            <Space>
-                                                <Text>Hide shift?</Text>
-                                                <Switch
-                                                    checkedChildren={<CheckOutlined />}
-                                                    unCheckedChildren={<CloseOutlined />}
-                                                    checked={props.values.status}
-                                                    onChange={(value) => {
-                                                        props.setFieldValue('status', value)
-                                                    }}
-                                                />
-                                            </Space>
+                                ...(values.ends === 'on' && {
+                                    'end_date': values.end_date,
+                                }),
+                            }),
+                        }
+                        await createWeekShift(payload)
+                        .then(() => {
+                            message.success('Shift created successfully')
+                            setSubmitting(false)
+                            resetForm()
+                            setIsModalOpen(false)
+                            refetch()
+                        })
+                    }}
+                >
+                    {props => (
+                        <FormikForm>
+                            <Modal 
+                                title={
+                                    <Space direction="vertical">
+                                        <Title level={5} style={{ marginTop: 4 }}>{`New Shift: ${dayjs(shift.day).format(' MMM, dddd DD - YYYY')}`}</Title>
+                                        <Space>
+                                            <Text>Hide shift?</Text>
+                                            <Switch
+                                                checkedChildren={<CheckOutlined />}
+                                                unCheckedChildren={<CloseOutlined />}
+                                                checked={props.values.status}
+                                                onChange={(value) => {
+                                                    props.setFieldValue('status', value)
+                                                }}
+                                            />
                                         </Space>
-                                    }
-                                    open={isModalOpen} 
-                                    onCancel={handleCancel}
-                                    destroyOnClose
-                                    footer={[
-                                        <Button key="back" onClick={handleCancel}>
-                                            Cancel
-                                        </Button>,
-                                        <Submit key="submit" type="primary">
-                                            Create Shift
-                                        </Submit>,
-                                    ]}
-                                >
-                                    <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                                        {/* TODO: Example for global shift creator
-                                        * <Checkbox 
-                                            onChange={() => {
-                                                props.setFieldValue('start_time', '00:00')
-                                                props.setFieldValue('end_time', '23:59')
-                                                handleHoursChange(['00:00', '23:59'])
-                                            }}
-                                        >
-                                            All Day
-                                        </Checkbox> */}
-                                        <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
-                                        <TimePickerWrapper 
-                                            name="start_time"
-                                            style={{ width: '100%' }} 
-                                            value={dayjs(props.values.start_time, 'HH:mm')}
-                                            defaultValue={dayjs(props.values.start_time, 'HH:mm')}
-                                            format="HH:mm" 
-                                            allowClear={false}
-                                            showNow={false}
-                                            hideDisabledOptions
-                                            disabledTime={(current) => {
-                                                return {
-                                                    disabledMinutes: () => {
-                                                        const minuteSteps = [0, 30, 59]
-                                                        const minutes = []
-                                                        for (let i = 0; i < 60; i++) {
-                                                            if (!minuteSteps.includes(i)) {
-                                                                minutes.push(i)
-                                                            }
+                                    </Space>
+                                }
+                                open={isModalOpen} 
+                                onCancel={handleCancel}
+                                destroyOnClose
+                                footer={[
+                                    <Button key="back" onClick={handleCancel}>
+                                        Cancel
+                                    </Button>,
+                                    <Submit key="submit" type="primary">
+                                        Create Shift
+                                    </Submit>,
+                                ]}
+                            >
+                                <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                    {/* TODO: Example for global shift creator
+                                    * <Checkbox 
+                                        onChange={() => {
+                                            props.setFieldValue('start_time', '00:00')
+                                            props.setFieldValue('end_time', '23:59')
+                                            handleHoursChange(['00:00', '23:59'])
+                                        }}
+                                    >
+                                        All Day
+                                    </Checkbox> */}
+                                    <div style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                    <TimePickerWrapper 
+                                        name="start_time"
+                                        style={{ width: '100%' }} 
+                                        value={dayjs(props.values.start_time, 'HH:mm')}
+                                        defaultValue={dayjs(props.values.start_time, 'HH:mm')}
+                                        format="HH:mm" 
+                                        allowClear={false}
+                                        showNow={false}
+                                        hideDisabledOptions
+                                        disabledTime={(current) => {
+                                            return {
+                                                disabledMinutes: () => {
+                                                    const minuteSteps = [0, 30, 59]
+                                                    const minutes = []
+                                                    for (let i = 0; i < 60; i++) {
+                                                        if (!minuteSteps.includes(i)) {
+                                                            minutes.push(i)
                                                         }
-                                                        return minutes
-                                                    },
-                                                }
-                                            }}
-                                        />
+                                                    }
+                                                    return minutes
+                                                },
+                                            }
+                                        }}
+                                    />
+                                    {!props.values.overnight && (
                                         <TimePickerWrapper 
                                             name="end_time"
                                             style={{ width: '100%' }} 
@@ -884,293 +952,345 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                 }
                                             }}
                                         />
+                                    )}
+                                    <Space direction="vertical" >
+                                        <Text strong >&nbsp;</Text>
+                                        <Tooltip title="Overnight Shift">
+                                        <Button type="primary" ghost={!props.values.overnight} onClick={() => props.setFieldValue('overnight', !props.values.overnight)}>
+                                        +1
+                                        </Button>
+                                        </Tooltip>
+                                    </Space>
+                                    </div>
+                                    {props.values.overnight && (
+                                        <div size={16} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                            <div style={{ width: '100%', display: 'block' }}>
+                                                <DatePickerWrapper 
+                                                    name="end_day"
+                                                    style={{ width: '100%' }} 
+                                                    value={dayjs(selectedDay).add(1, 'day')} 
+                                                    allowClear={false}
+                                                    disabled
+                                                />
+                                            </div>
+                                            <TimePickerWrapper 
+                                                name="end_time"
+                                                style={{ width: '100%' }} 
+                                                value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                                format="HH:mm" 
+                                                allowClear={false}
+                                                showNow={false}
+                                                hideDisabledOptions
+                                                disabledTime={(current) => {
+                                                    return {
+                                                        disabledHours: () => {
+                                                            const hours = []
+                                                            for (let i = 8; i < 24; i++) {
+                                                                hours.push(i)
+                                                            }
+                                                            return hours
+                                                        },
+                                                        disabledMinutes: () => {
+                                                            const minuteSteps = [0, 30, 59]
+                                                            const minutes = []
+                                                            for (let i = 0; i < 60; i++) {
+                                                                if (!minuteSteps.includes(i)) {
+                                                                    minutes.push(i)
+                                                                }
+                                                            }
+                                                            return minutes
+                                                        },
+                                                    }
+                                                }}
+                                            />
                                         </div>
-                                        <CitySelect 
-                                            defaultValue={props.values.city_id}    
-                                            style={{ width: '100%' }}
-                                            disabled
-                                        />
-                                        <DriverSelect 
-                                            onChange={(value, label) => {
-                                                const driverFormatted = label.map((item) => { // format driver object to match payload
-                                                    const { label, value, ...rest } = item
-                                                    return {...rest, driver_id: value}
-                                                
-                                                })
-                                                props.setFieldValue('drivers', driverFormatted)
-                                            }}
-                                        />
-                                        <InputWrapper 
-                                            name="capacity" 
-                                            prefix={<UserOutlined />} 
-                                            placeholder="Shift Capacity" 
-                                            type="number" 
-                                            min={1} max={999} 
-                                            value={props.values.capacity}  
-                                            onChange={(e) => {
-                                                props.setFieldValue('capacity', Number(e.target.value))
-                                            }}
-                                        />
-                                        <Divider>
-                                        <Checkbox
-                                            name="hasGuarantee"
-                                            checked={props.values.hasGuarantee}
-                                            onChange={(e) => {
-                                                props.setFieldValue('hasGuarantee', e.target.checked)
-                                            }}
-                                        >
-                                            Guarantee?
-                                        </Checkbox>
-                                        </Divider>
-                                        { props.values.hasGuarantee && (
+                                    )}
+                                    <CitySelect 
+                                        defaultValue={props.values.city_id}    
+                                        style={{ width: '100%' }}
+                                        disabled
+                                    />
+                                    <DriverSelect 
+                                        onChange={(value, label) => {
+                                            const driverFormatted = label.map((item) => { // format driver object to match payload
+                                                const { label, value, ...rest } = item
+                                                return {...rest, driver_id: value}
+                                            
+                                            })
+                                            props.setFieldValue('drivers', driverFormatted)
+                                        }}
+                                    />
+                                    <InputWrapper 
+                                        name="capacity" 
+                                        prefix={<UserOutlined />} 
+                                        placeholder="Shift Capacity" 
+                                        type="number" 
+                                        min={1} max={999} 
+                                        value={props.values.capacity}  
+                                        onChange={(e) => {
+                                            props.setFieldValue('capacity', Number(e.target.value))
+                                        }}
+                                    />
+                                    <Divider>
+                                    <Checkbox
+                                        name="hasGuarantee"
+                                        checked={props.values.hasGuarantee}
+                                        onChange={(e) => {
+                                            props.setFieldValue('hasGuarantee', e.target.checked)
+                                        }}
+                                    >
+                                        Guarantee?
+                                    </Checkbox>
+                                    </Divider>
+                                    { props.values.hasGuarantee && (
+                                        <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                            <InputWrapper 
+                                                name="guarantee"
+                                                placeholder="Guarantee amount"
+                                                type="number"
+                                                min={0}
+                                                max={1000}
+                                                prefix="$" 
+                                                suffix="CAD" 
+                                                value={props.values.guarantee}
+                                                onChange={(e) => {
+                                                    props.setFieldValue('guarantee', Number(e.target.value))
+                                                }}
+                                            />
+                                            <Input.TextArea 
+                                                name="guarantee_specs"
+                                                defaultValue={props.values.guarantee_specs}
+                                                rows={4} 
+                                                placeholder="Guarantee description (optional)"
+                                                onChange={(e) => {
+                                                    props.setFieldValue('guarantee_specs', e.target.value)
+                                                }}
+                                            />
+                                        </Space>
+                                    )}
+                                    <Divider>
+                                    <Checkbox
+                                        disabled={props.values.is_recurring}
+                                        checked={props.values.hasEarlyAccess}
+                                        onChange={(e) => {
+                                            props.setFieldValue('hasEarlyAccess', e.target.checked)
+                                        }}
+                                    >
+                                        Early Access?
+                                    </Checkbox>
+                                    </Divider>
+                                        { props.values.hasEarlyAccess && (
                                             <Space direction="vertical" size={16} style={{ width: '100%' }}>
                                                 <InputWrapper 
-                                                    name="guarantee"
-                                                    placeholder="Guarantee amount"
+                                                    name="early_access"
+                                                    placeholder="Early Access amount"
                                                     type="number"
                                                     min={0}
                                                     max={1000}
-                                                    prefix="$" 
-                                                    suffix="CAD" 
-                                                    value={props.values.guarantee}
+                                                    suffix="Days" 
+                                                    value={props.values.early_access}
                                                     onChange={(e) => {
-                                                        props.setFieldValue('guarantee', Number(e.target.value))
-                                                    }}
-                                                />
-                                                <Input.TextArea 
-                                                    name="guarantee_specs"
-                                                    defaultValue={props.values.guarantee_specs}
-                                                    rows={4} 
-                                                    placeholder="Guarantee description (optional)"
-                                                    onChange={(e) => {
-                                                        props.setFieldValue('guarantee_specs', e.target.value)
+                                                        props.setFieldValue('early_access', Number(e.target.value))
                                                     }}
                                                 />
                                             </Space>
                                         )}
-                                        <Divider>
-                                        <Checkbox
-                                            disabled={props.values.is_recurring}
-                                            checked={props.values.hasEarlyAccess}
-                                            onChange={(e) => {
-                                                props.setFieldValue('hasEarlyAccess', e.target.checked)
-                                            }}
-                                        >
-                                            Early Access?
-                                        </Checkbox>
-                                        </Divider>
-                                            { props.values.hasEarlyAccess && (
-                                                <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                                                    <InputWrapper 
-                                                        name="early_access"
-                                                        placeholder="Early Access amount"
-                                                        type="number"
-                                                        min={0}
-                                                        max={1000}
-                                                        suffix="Days" 
-                                                        value={props.values.early_access}
-                                                        onChange={(e) => {
-                                                            props.setFieldValue('early_access', Number(e.target.value))
-                                                        }}
-                                                    />
-                                                </Space>
-                                            )}
-                                        <Divider>
-                                        <Checkbox
-                                            name="is_recurring"
-                                            checked={props.values.is_recurring}
-                                            disabled={props.values.hasEarlyAccess}
-                                            onChange={(e) => {
-                                                props.setFieldValue('is_recurring', e.target.checked)
-                                            }}
-                                        >
-                                            Recurring Shift?
-                                        </Checkbox>
-                                        </Divider>
-                                        {  props.values.is_recurring && (
-                                            <Radio.Group 
-                                                style={{ width: '100%' }} 
-                                                onChange={ (e) => {
-                                                        props.setFieldValue('template', e.target.value)
-                                                        props.setFieldValue('pattern', 'weekly')
+                                    <Divider>
+                                    <Checkbox
+                                        name="is_recurring"
+                                        checked={props.values.is_recurring}
+                                        disabled={props.values.hasEarlyAccess}
+                                        onChange={(e) => {
+                                            props.setFieldValue('is_recurring', e.target.checked)
+                                        }}
+                                    >
+                                        Recurring Shift?
+                                    </Checkbox>
+                                    </Divider>
+                                    {  props.values.is_recurring && (
+                                        <Radio.Group 
+                                            style={{ width: '100%' }} 
+                                            onChange={ (e) => {
+                                                    props.setFieldValue('template', e.target.value)
+                                                    props.setFieldValue('pattern', 'weekly')
 
-                                                        switch (e.target.value) {
-                                                            case '1':
-                                                                props.setFieldValue('days_of_week', WEEK_PATTERNS.full_week)
-                                                                break
-                                                            case '2':
-                                                                props.setFieldValue('days_of_week', WEEK_PATTERNS.work_week)
-                                                                break
-                                                            case '3':
-                                                                props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
-                                                                break
-                                                            case '4':
-                                                                props.setFieldValue('days_of_week', WEEK_PATTERNS.end_week)
-                                                                break
-                                                            case 'weekly':
-                                                                props.setFieldValue('days_of_week', [DEFAULT_DAY])
-                                                                break
-                                                            case 'custom':
-                                                                props.setFieldValue('days_of_week', [DEFAULT_DAY])
-                                                                break
-                                                            default:
-                                                                props.setFieldValue('days_of_week', [DEFAULT_DAY])
-                                                                break
-                                                        }
-                                                    } 
+                                                    switch (e.target.value) {
+                                                        case '1':
+                                                            props.setFieldValue('days_of_week', WEEK_PATTERNS.full_week)
+                                                            break
+                                                        case '2':
+                                                            props.setFieldValue('days_of_week', WEEK_PATTERNS.work_week)
+                                                            break
+                                                        case '3':
+                                                            props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
+                                                            break
+                                                        case '4':
+                                                            props.setFieldValue('days_of_week', WEEK_PATTERNS.end_week)
+                                                            break
+                                                        case 'weekly':
+                                                            props.setFieldValue('days_of_week', [DEFAULT_DAY])
+                                                            break
+                                                        case 'custom':
+                                                            props.setFieldValue('days_of_week', [DEFAULT_DAY])
+                                                            break
+                                                        default:
+                                                            props.setFieldValue('days_of_week', [DEFAULT_DAY])
+                                                            break
+                                                    }
                                                 } 
-                                                value={props.values.template}
-                                            >
-                                                <Space direction="vertical" style={{ width: '100%' }}>
-                                                    <Radio value="1">{`Monday to Sunday`}</Radio>
-                                                    <Radio value="2">{`Monday to Friday`}</Radio>
-                                                    <Radio value="4">{`Friday and Saturday`}</Radio>
-                                                    <Radio value="3">{`Saturday and Sunday`}</Radio>
-                                                    <Radio value={'weekly'}>{`Weekly on: ${dayjs(shift.day).format('dddd')}`}</Radio>
-                                                    <Radio value={'custom'}>Custom</Radio>
-                                                { props.values.template === 'custom' && (
+                                            } 
+                                            value={props.values.template}
+                                        >
+                                            <Space direction="vertical" style={{ width: '100%' }}>
+                                                <Radio value="1">{`Monday to Sunday`}</Radio>
+                                                <Radio value="2">{`Monday to Friday`}</Radio>
+                                                <Radio value="4">{`Friday and Saturday`}</Radio>
+                                                <Radio value="3">{`Saturday and Sunday`}</Radio>
+                                                <Radio value={'weekly'}>{`Weekly on: ${dayjs(shift.day).format('dddd')}`}</Radio>
+                                                <Radio value={'custom'}>Custom</Radio>
+                                            { props.values.template === 'custom' && (
+                                                <>
+                                                <Divider orientation="left" plain>Custom Recurrence</Divider>
+                                                <Radio.Group 
+                                                    value={props.values.pattern} 
+                                                    buttonStyle="solid" 
+                                                    onChange={(e) => {
+                                                        props.setFieldValue('pattern', e.target.value)
+                                                        if (e.target.value === 'once') {
+                                                            props.setFieldValue('ends', 'after')
+                                                            props.setFieldValue('max_occurrences', 1)
+                                                        }
+                                                    }}
+                                                >
+                                                    <Radio.Button value="once">Once</Radio.Button>
+                                                    <Radio.Button value="weekly">Weekly</Radio.Button>
+                                                </Radio.Group>
+                                                { props.values.pattern === 'weekly' && (
                                                     <>
-                                                    <Divider orientation="left" plain>Custom Recurrence</Divider>
-                                                    <Radio.Group 
-                                                        value={props.values.pattern} 
-                                                        buttonStyle="solid" 
-                                                        onChange={(e) => {
-                                                            props.setFieldValue('pattern', e.target.value)
-                                                            if (e.target.value === 'once') {
-                                                                props.setFieldValue('ends', 'after')
-                                                                props.setFieldValue('max_occurrences', 1)
-                                                            }
-                                                        }}
-                                                    >
-                                                        <Radio.Button value="once">Once</Radio.Button>
-                                                        <Radio.Button value="weekly">Weekly</Radio.Button>
-                                                    </Radio.Group>
-                                                    { props.values.pattern === 'weekly' && (
-                                                        <>
-                                                        <Divider orientation="left" plain>Repeat On</Divider>
-                                                        <Checkbox.Group options={weeklyDaysReccurence} defaultValue={dayjs(shift.day).format('d')} onChange={(value) => props.setFieldValue('days_of_week', value)} />
-                                                        </>
-                                                    )}
-                                                    <Divider orientation="left" plain>Ends</Divider>
-                                                    <Radio.Group 
-                                                        name="ends"
-                                                        value={props.values.ends}
-                                                        onChange={(e) => {
-                                                            props.setFieldValue('ends', e.target.value)
-                                                        }}
-                                                    >
-                                                        <Space direction="vertical">
-                                                            <Radio disabled={props.values.pattern === 'once'} value="never">Never</Radio>
-                                                            <Radio disabled={props.values.pattern === 'once'} value="on">
-                                                                On
-                                                                <DatePicker 
-                                                                    disabled={props.values.ends !== 'on' } 
-                                                                    style={{ marginLeft: 16 }} 
-                                                                    value={dayjs(props.values.end_date)}
-                                                                    onChange={(date, dateString) => props.setFieldValue('end_date', dateString)} 
-                                                                    allowClear={false}
-                                                                />
-                                                            </Radio>
-                                                            <Radio disabled={props.values.pattern === 'once'} value="after">
-                                                                After
-                                                                <InputNumber 
-                                                                    name="max_occurrences" 
-                                                                    disabled={props.values.ends !== 'after' || props.values.pattern === 'once'} 
-                                                                    style={{ width: 180, marginLeft: 8 }} 
-                                                                    addonAfter="occurrences" 
-                                                                    min={1} 
-                                                                    value={props.values.ends !== 'after' ? 0 : props.values.max_occurrences} 
-                                                                    onChange={(value) => {
-                                                                        props.setFieldValue('max_occurrences', Number(value))
-                                                                        }
-                                                                    } 
-                                                                />
-                                                            </Radio>
-                                                        </Space>
-                                                    </Radio.Group>
+                                                    <Divider orientation="left" plain>Repeat On</Divider>
+                                                    <Checkbox.Group options={weeklyDaysReccurence} defaultValue={dayjs(shift.day).format('d')} onChange={(value) => props.setFieldValue('days_of_week', value)} />
                                                     </>
                                                 )}
-                                                </Space>
-                                            </Radio.Group>
-                                        )}
-                                    </Space>
-                                </Modal>
-                            </FormikForm>
-                        )}
-                    </Formik>
-                )}
-                {/* Shift Modal for Edit Mode */}
-                { edit.editMode &&  (
-                    <EditShiftModal shift_id={edit.editRecord} parent_id={record.parent_id} open={edit.editMode} tz={scheduleFilter.tz} refetch={refetch} record={record}/>
-                )}
-                
-                { deleteModal.open && (
-                <Formik
-                    initialValues={{
-                        affects_to: 'current',
-                    }}
-                    validationSchema={editRecurringSchema}
-                    onSubmit={async (values, { setSubmitting, resetForm }) => {
-                        await deleteWeekShift({'affects_to': values.affects_to}, deleteModal.shift_id)
-                        .then((res) => {
-                            if(res.status === 400) {
-                                message.error(res.message)
-                            } else {
-                                message.success(res.message)
-                            }
-                            setSubmitting(false)
-                            resetForm()
-                            setDeleteModal({ ...deleteModal, open: false})
-                            refetch()
-                        })
-                    }}
-                >
-                    {props => (
-                        <FormikForm>
-                            <Modal
-                                title={`Delete ${record.is_recurring ? 'recurring' : ''} shift`}
-                                open={deleteModal.open}
-                                destroyOnClose
-                                onCancel={() => {
-                                    setDeleteModal({ ...deleteModal, open: false})
-                                    props.resetForm()
-                                    refetch()
-                                }}
-                                footer={[
-                                    <Button key="back" onClick={() => {
-                                        setDeleteModal({ ...deleteModal, open: false})
-                                        props.resetForm()
-                                        refetch()
-                                    }}>
-                                        Cancel
-                                    </Button>,
-                                    <Submit key="submit" type="primary">
-                                        OK
-                                    </Submit>,
-                                ]}
-                            >
-                                <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                                    {record.is_recurring ? (
-                                        <Radio.Group
-                                            style={{ width: '100%' }} 
-                                            value={props.values.affects_to}
-                                            onChange={(e) => props.setFieldValue('affects_to', e.target.value)}
-                                        >
-                                        <Space direction="vertical" style={{ width: '100%' }}>
-                                            <Radio value="current">{`This shift`}</Radio>
-                                            <Radio value="future">{`This and following shifts`}</Radio>
-                                            <Radio value="all">{`All Shifts`}</Radio>
-                                        </Space>
+                                                <Divider orientation="left" plain>Ends</Divider>
+                                                <Radio.Group 
+                                                    name="ends"
+                                                    value={props.values.ends}
+                                                    onChange={(e) => {
+                                                        props.setFieldValue('ends', e.target.value)
+                                                    }}
+                                                >
+                                                    <Space direction="vertical">
+                                                        <Radio disabled={props.values.pattern === 'once'} value="never">Never</Radio>
+                                                        <Radio disabled={props.values.pattern === 'once'} value="on">
+                                                            On
+                                                            <DatePicker 
+                                                                disabled={props.values.ends !== 'on' } 
+                                                                style={{ marginLeft: 16 }} 
+                                                                value={dayjs(props.values.end_date)}
+                                                                onChange={(date, dateString) => props.setFieldValue('end_date', dateString)} 
+                                                                allowClear={false}
+                                                            />
+                                                        </Radio>
+                                                        <Radio disabled={props.values.pattern === 'once'} value="after">
+                                                            After
+                                                            <InputNumber 
+                                                                name="max_occurrences" 
+                                                                disabled={props.values.ends !== 'after' || props.values.pattern === 'once'} 
+                                                                style={{ width: 180, marginLeft: 8 }} 
+                                                                addonAfter="occurrences" 
+                                                                min={1} 
+                                                                value={props.values.ends !== 'after' ? 0 : props.values.max_occurrences} 
+                                                                onChange={(value) => {
+                                                                    props.setFieldValue('max_occurrences', Number(value))
+                                                                    }
+                                                                } 
+                                                            />
+                                                        </Radio>
+                                                    </Space>
+                                                </Radio.Group>
+                                                </>
+                                            )}
+                                            </Space>
                                         </Radio.Group>
-                                        ) : (
-                                        <Text>{`Are you sure you want to delete this shift?`}</Text>)
-                                    }
+                                    )}
                                 </Space>
                             </Modal>
                         </FormikForm>
                     )}
                 </Formik>
+            )}
+            {/* Shift Modal for Edit Mode */}
+            { edit.editMode &&  (
+                <EditShiftModal shift_id={edit.editRecord} parent_id={record.parent_id} open={edit.editMode} tz={scheduleFilter.tz} refetch={refetch} record={record}/>
+            )}
+            
+            { deleteModal.open && (
+            <Formik
+                initialValues={{
+                    affects_to: 'current',
+                }}
+                validationSchema={editRecurringSchema}
+                onSubmit={async (values, { setSubmitting, resetForm }) => {
+                    await deleteWeekShift({'affects_to': values.affects_to}, deleteModal.shift_id)
+                    .then((res) => {
+                        if(res.status === 400) {
+                            message.error(res.message)
+                        } else {
+                            message.success(res.message)
+                        }
+                        setSubmitting(false)
+                        resetForm()
+                        setDeleteModal({ ...deleteModal, open: false})
+                        refetch()
+                    })
+                }}
+            >
+                {props => (
+                    <FormikForm>
+                        <Modal
+                            title={`Delete ${record.is_recurring ? 'recurring' : ''} shift`}
+                            open={deleteModal.open}
+                            destroyOnClose
+                            onCancel={() => {
+                                setDeleteModal({ ...deleteModal, open: false})
+                                props.resetForm()
+                                refetch()
+                            }}
+                            footer={[
+                                <Button key="back" onClick={() => {
+                                    setDeleteModal({ ...deleteModal, open: false})
+                                    props.resetForm()
+                                    refetch()
+                                }}>
+                                    Cancel
+                                </Button>,
+                                <Submit key="submit" type="primary">
+                                    OK
+                                </Submit>,
+                            ]}
+                        >
+                            <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                {record.is_recurring ? (
+                                    <Radio.Group
+                                        style={{ width: '100%' }} 
+                                        value={props.values.affects_to}
+                                        onChange={(e) => props.setFieldValue('affects_to', e.target.value)}
+                                    >
+                                    <Space direction="vertical" style={{ width: '100%' }}>
+                                        <Radio value="current">{`This shift`}</Radio>
+                                        <Radio value="future">{`This and following shifts`}</Radio>
+                                        <Radio value="all">{`All Shifts`}</Radio>
+                                    </Space>
+                                    </Radio.Group>
+                                    ) : (
+                                    <Text>{`Are you sure you want to delete this shift?`}</Text>)
+                                }
+                            </Space>
+                        </Modal>
+                    </FormikForm>
                 )}
+            </Formik>
+            )}
         </>
     )
 }

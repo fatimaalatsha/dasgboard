@@ -10,7 +10,7 @@ import { getDayHours } from '../../utils/schedule-status'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-const useDaySchedule = (url, timezone) => {
+const useDaySchedule = (url, timezone, selectedDay) => {
     dayjs.tz.setDefault(timezone)
     const [fetchedData, setFetchedData] = useState({// Set initia fetch state to empty
         data: [],
@@ -35,7 +35,25 @@ const useDaySchedule = (url, timezone) => {
             }
             const response = await API.get(url, options)// Fetch data from API
             const { items } = await response.data// Get data from response
-            const dayData = items.reduce((acc, name) => {
+            const dayItems = items.map((item, idx) => { // Modify response data based on overnight flag
+                item.shifts?.map((shift, index) => {
+                    if(shift.is_overnight) {
+                        const isSameDay = selectedDay.tz().utc().isSame(dayjs(shift.end_time).tz().utc(), 'day')
+                        if(!isSameDay) {
+                            shift.overnight_end = shift.end_time
+                            shift.end_time = selectedDay.tz().utc().endOf('day').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+                            shift.overnight_start = shift.start_time
+                        } else {
+                            shift.overnight_start = shift.start_time
+                            shift.start_time = selectedDay.tz().utc().startOf('day').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
+                            shift.overnight_end = shift.end_time
+                        }
+                    }
+                    return shift
+                })
+                return item
+            } )
+            const dayData = dayItems.reduce((acc, name) => {// Reduce data to fit AntD Table structure
                 const keyName = `${name.first_name} ${name.last_name}`
                 const timeObj = dayHours.reduce((obj, time) => {
                     obj[time] = name.shifts.filter(item => time === dayjs(item.start_time).tz().utc().format('HH:mm'))
