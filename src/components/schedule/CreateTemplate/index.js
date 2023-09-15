@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Button, Modal, Input, Checkbox, Space, DatePicker, Divider, Radio, InputNumber, message, Popconfirm } from "antd"
+import { Button, Modal, Input, Checkbox, Space, DatePicker, Divider, Radio, InputNumber, message, Popconfirm, Tooltip, Typography, Spin, Alert } from "antd"
 import { UserOutlined, EditOutlined, SendOutlined } from '@ant-design/icons'
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
@@ -11,6 +11,7 @@ import { createWeekShift, createShiftTemplate, updateShiftTemplate } from '../..
 import { CitySelect } from '../../CitySelect'
 import DriverSelect from '../../DriverSelect'
 import useFetch from '../../../hooks/use-new-fetch'
+import OvernightIcon from '../../icons/OvernightIcon' // Custom Overnight Icon
 
 import dayjs from 'dayjs' // Import date handlers
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -96,6 +97,7 @@ const templateSchema = object().shape({
         then: number().min(1, 'Shift max occurrences must be greater than or equal to 1.').required('Required'),
         otherwise: number().notRequired(),
     }),
+    is_overnight: boolean().notRequired(),
 })
 
 const publishSchema = object().shape({
@@ -110,6 +112,8 @@ const WEEK_PATTERNS = {
     weekend: [6, 0],
     full_week: [...Array(7)].map((_,idx) => idx),
 }
+
+const { Text } = Typography
 
 const EditTemplate = ({refetch, template_id }) => {
     const [open, setOpen] = useState(false)
@@ -163,6 +167,7 @@ const EditTemplate = ({refetch, template_id }) => {
                     max_occurrences: data.max_occurrences || 0,
                     ends: data.never_ends ? 'never' : data.end_date ? 'on' : data.max_occurrences ? 'after' : 'never',
                     end_date: data.end_date || DEFAULT_DAY,
+                    is_overnight: data.is_overnight || false,
                 }}
                 validationSchema={templateSchema}
                 onSubmit={ async (values, { setSubmitting, resetForm }) => {
@@ -172,6 +177,7 @@ const EditTemplate = ({refetch, template_id }) => {
                         'end_time': values.end_time + ':00',
                         'capacity': Number(values.capacity),
                         'is_recurring': values.is_recurring,
+                        'is_overnight': values.is_overnight,
                         ...(values.hasGuarantee && {
                             'guarantee': Number(values.guarantee),
                             'guarantee_specs': values.guarantee_specs,
@@ -260,39 +266,82 @@ const EditTemplate = ({refetch, template_id }) => {
                                         }
                                     }}
                                 />
-                                <TimePickerWrapper 
-                                    name="end_time"
-                                    style={{ width: '100%' }} 
-                                    value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
-                                    format="HH:mm" 
-                                    allowClear={false}
-                                    showNow={false}
-                                    hideDisabledOptions
-                                    disabledTime={(current) => {
-                                        return {
-                                            disabledHours: () => {
-                                                const hours = []
-                                                for (let i = 0; i < 24; i++) {
-                                                    if (i < (dayjs(props.values.start_time, 'HH:mm').hour()) + 1) {
+                                {!props.values.is_overnight && (
+                                    <TimePickerWrapper 
+                                        name="end_time"
+                                        style={{ width: '100%' }} 
+                                        value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                        format="HH:mm" 
+                                        allowClear={false}
+                                        showNow={false}
+                                        hideDisabledOptions
+                                        disabledTime={(current) => {
+                                            return {
+                                                disabledHours: () => {
+                                                    const hours = []
+                                                    for (let i = 0; i < 24; i++) {
+                                                        if (i < (dayjs(props.values.start_time, 'HH:mm').hour()) + 1) {
+                                                            hours.push(i)
+                                                        }
+                                                    }
+                                                    return hours
+                                                },
+                                                disabledMinutes: () => {
+                                                    const minuteSteps = [0, 30, 59]
+                                                    const minutes = []
+                                                    for (let i = 0; i < 60; i++) {
+                                                        if (!minuteSteps.includes(i)) {
+                                                            minutes.push(i)
+                                                        }
+                                                    }
+                                                    return minutes
+                                                },
+                                            } }}
+                                    />
+                                )}
+                                <Space direction="vertical" >
+                                    <Text strong >&nbsp;</Text>
+                                    <Tooltip title="Overnight Shift">
+                                    <Button type="primary" ghost={!props.values.is_overnight} onClick={() => props.setFieldValue('overnight', !props.values.overnight)}>
+                                    +1
+                                    </Button>
+                                    </Tooltip>
+                                </Space>
+                            </div>
+                            {props.values.is_overnight && (
+                                <div size={16} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                    <TimePickerWrapper 
+                                        name="end_time"
+                                        style={{ width: '100%' }} 
+                                        value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                        format="HH:mm" 
+                                        allowClear={false}
+                                        showNow={false}
+                                        hideDisabledOptions
+                                        disabledTime={(current) => {
+                                            return {
+                                                disabledHours: () => {
+                                                    const hours = []
+                                                    for (let i = 8; i < 24; i++) {
                                                         hours.push(i)
                                                     }
-                                                }
-                                                return hours
-                                            },
-                                            disabledMinutes: () => {
-                                                const minuteSteps = [0, 30, 59]
-                                                const minutes = []
-                                                for (let i = 0; i < 60; i++) {
-                                                    if (!minuteSteps.includes(i)) {
-                                                        minutes.push(i)
+                                                    return hours
+                                                },
+                                                disabledMinutes: () => {
+                                                    const minuteSteps = [0, 30, 59]
+                                                    const minutes = []
+                                                    for (let i = 0; i < 60; i++) {
+                                                        if (!minuteSteps.includes(i)) {
+                                                            minutes.push(i)
+                                                        }
                                                     }
-                                                }
-                                                return minutes
-                                            },
-                                        }
-                                    }}
-                                />
-                            </div>
+                                                    return minutes
+                                                },
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            )}
                             <InputWrapper 
                                 name="capacity" 
                                 prefix={<UserOutlined />} 
@@ -534,6 +583,7 @@ const CreateTemplate = ({refetch}) => {
                     max_occurrences: 0,
                     ends: 'never',
                     end_date: DEFAULT_DAY,
+                    is_overnight: false
                 }}
                 validationSchema={templateSchema}
                 onSubmit={ async (values, { setSubmitting, resetForm }) => {
@@ -543,6 +593,7 @@ const CreateTemplate = ({refetch}) => {
                         'end_time': values.end_time + ':00',
                         'capacity': Number(values.capacity),
                         'is_recurring': values.is_recurring,
+                        'is_overnight': values.is_overnight,
                         ...(values.hasGuarantee && {
                             'guarantee': Number(values.guarantee),
                             'guarantee_specs': values.guarantee_specs,
@@ -562,6 +613,7 @@ const CreateTemplate = ({refetch}) => {
                             }),
                         }),
                     }
+                    console.log(payload)
                     await createShiftTemplate(payload)
                     .then(() => {
                         message.success('Shift template created successfully!')
@@ -631,39 +683,83 @@ const CreateTemplate = ({refetch}) => {
                                         }
                                     }}
                                 />
-                                <TimePickerWrapper 
-                                    name="end_time"
-                                    style={{ width: '100%' }} 
-                                    value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
-                                    format="HH:mm" 
-                                    allowClear={false}
-                                    showNow={false}
-                                    hideDisabledOptions
-                                    disabledTime={(current) => {
-                                        return {
-                                            disabledHours: () => {
-                                                const hours = []
-                                                for (let i = 0; i < 24; i++) {
-                                                    if (i < (dayjs(props.values.start_time, 'HH:mm').hour()) + 1) {
+                                {!props.values.is_overnight && (
+                                    <TimePickerWrapper 
+                                        name="end_time"
+                                        style={{ width: '100%' }} 
+                                        value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                        format="HH:mm" 
+                                        allowClear={false}
+                                        showNow={false}
+                                        hideDisabledOptions
+                                        disabledTime={(current) => {
+                                            return {
+                                                disabledHours: () => {
+                                                    const hours = []
+                                                    for (let i = 0; i < 24; i++) {
+                                                        if (i < (dayjs(props.values.start_time, 'HH:mm').hour()) + 1) {
+                                                            hours.push(i)
+                                                        }
+                                                    }
+                                                    return hours
+                                                },
+                                                disabledMinutes: () => {
+                                                    const minuteSteps = [0, 30, 59]
+                                                    const minutes = []
+                                                    for (let i = 0; i < 60; i++) {
+                                                        if (!minuteSteps.includes(i)) {
+                                                            minutes.push(i)
+                                                        }
+                                                    }
+                                                    return minutes
+                                                },
+                                            }
+                                        }}
+                                    />
+                                )}
+                                <Space direction="vertical" >
+                                    <Text strong >&nbsp;</Text>
+                                    <Tooltip title="Overnight Shift">
+                                    <Button type="primary" ghost={!props.values.is_overnight} onClick={() => props.setFieldValue('is_overnight', !props.values.is_overnight)}>
+                                    +1
+                                    </Button>
+                                    </Tooltip>
+                                </Space>
+                            </div>
+                            {props.values.is_overnight && (
+                                <div size={16} style={{ width: '100%', display: 'flex', justifyContent: 'space-between', gap: 16 }}>
+                                    <TimePickerWrapper 
+                                        name="end_time"
+                                        style={{ width: '100%' }} 
+                                        value={props.values.end_time ? dayjs(props.values.end_time, 'HH:mm') : ''}
+                                        format="HH:mm" 
+                                        allowClear={false}
+                                        showNow={false}
+                                        hideDisabledOptions
+                                        disabledTime={(current) => {
+                                            return {
+                                                disabledHours: () => {
+                                                    const hours = []
+                                                    for (let i = 8; i < 24; i++) {
                                                         hours.push(i)
                                                     }
-                                                }
-                                                return hours
-                                            },
-                                            disabledMinutes: () => {
-                                                const minuteSteps = [0, 30, 59]
-                                                const minutes = []
-                                                for (let i = 0; i < 60; i++) {
-                                                    if (!minuteSteps.includes(i)) {
-                                                        minutes.push(i)
+                                                    return hours
+                                                },
+                                                disabledMinutes: () => {
+                                                    const minuteSteps = [0, 30, 59]
+                                                    const minutes = []
+                                                    for (let i = 0; i < 60; i++) {
+                                                        if (!minuteSteps.includes(i)) {
+                                                            minutes.push(i)
+                                                        }
                                                     }
-                                                }
-                                                return minutes
-                                            },
-                                        }
-                                    }}
-                                />
-                            </div>
+                                                    return minutes
+                                                },
+                                            }
+                                        }}
+                                    />
+                                </div>
+                            )}
                             <InputWrapper 
                                 name="capacity" 
                                 prefix={<UserOutlined />} 
@@ -874,7 +970,7 @@ const PublishTemplate = ({refetch, template_id }) => {
         const { data, isLoading, error } = useFetch(`v1/shifts-templates/${template_id}`)
         const DEFAULT_DAY = dayjs()
 
-        if (isLoading) { return <>Loading...</> }
+        if (isLoading) { return <Spin /> }
         if (error) {return <>Error...</>}
 
         return (
@@ -888,10 +984,11 @@ const PublishTemplate = ({refetch, template_id }) => {
                 onSubmit={ async (values, { setSubmitting, resetForm }) => {
                     const payload = {
                         'start_time':  values.day.utc().format('YYYY-MM-DD') + 'T' + data.start_time + '.00Z',
-                        'end_time': values.day.utc().format('YYYY-MM-DD') + 'T' + data.end_time + '.00Z',
+                        'end_time': (data.is_overnight ? values.day.add(1,'day').utc().format('YYYY-MM-DD') : values.day.utc().format('YYYY-MM-DD')) + 'T' + data.end_time + '.00Z',
                         'capacity': data.capacity,
                         'city_id': [Number(values.city_id)],
                         'is_recurring': data.is_recurring,
+                        'is_overnight': data.is_overnight,
                         'status': data.status,
                         ...(values.drivers.length > 0 && {
                             'drivers': values.drivers,
@@ -948,7 +1045,15 @@ const PublishTemplate = ({refetch, template_id }) => {
                             ]}
                         >
                         <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                            
+                            { data.is_overnight && (
+                                <Alert 
+                                    message="Overnight Shift" 
+                                    description="The shift is late-night work and may overlap into the next selected day on the specified end time."
+                                    type="info" 
+                                    showIcon
+                                    icon={<OvernightIcon />}
+                                />
+                            )}
                             <CitySelect
                                 onChange={(value) => {
                                     props.setFieldValue('city_id', Number(value))
@@ -959,8 +1064,21 @@ const PublishTemplate = ({refetch, template_id }) => {
                                 style={{ width: '100%' }}
                                 format="ddd D MMM" 
                                 allowClear={false}
+                                value={props.values.day}
                                 onChange={(date) => props.setFieldValue('day', date ) } 
                             />
+                            { data.is_overnight && (
+                                <Space direction="vertical" size={2} style={{ width: '100%' }}>
+                                <Text strong>End Date</Text>
+                                <DatePicker 
+                                    style={{ width: '100%' }}
+                                    format="ddd D MMM" 
+                                    allowClear={false}
+                                    value={props.values.day.add(1, 'day')}
+                                    disabled
+                                />
+                                </Space>
+                            )}
                             <DriverSelect 
                                 onChange={(value, label) => {
                                     const driverFormatted = label.map((item) => { // format driver object to match payload

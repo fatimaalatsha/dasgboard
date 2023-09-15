@@ -113,6 +113,13 @@ let filterStore = (set) => ({
       view: 1, // 1 = week, 0 = day, 2 = month (default: 1)
       template: 1, // 1 = Table, 0 = Grid (default: 1)
     },
+    pagination: {
+      current: 1,
+      pageSize: 20,
+      showSizeChanger: true,
+      pageSizeOptions: pageSize,
+      position: ["bottomRight", "topRight"],
+    },
   },
   setScheduleFilter: (filter) =>
     set((state) => ({
