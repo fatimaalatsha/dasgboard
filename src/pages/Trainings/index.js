@@ -147,7 +147,11 @@ const AddTraining = ({refetch}) => {
     )
 }
 
-const Trainings = () => {
+/** @Trainings 
+ * SECTION NEEDS REVISIONING FOR PAGINATION AND OTHER FILTERS 
+ * */
+
+const Trainings = () => { 
     const { data, isLoading, error, refetch } = useFetch(`/v1/trainings`) // Fetch data from API
     const navigate = useNavigate() // navigate to video details page
     
