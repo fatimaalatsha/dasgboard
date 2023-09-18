@@ -84,7 +84,8 @@ const Finance = () => {
           skipNulls: true,
           arrayFormat: "comma",
         })}`
-      );
+  );
+  console.log(data);
   //handle closing modal
   const handleCancel = () => {
     setOpen(false);

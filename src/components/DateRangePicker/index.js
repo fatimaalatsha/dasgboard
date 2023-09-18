@@ -30,7 +30,7 @@ const rangePresets = [
 const DateRangePicker = ({ value, onDateSelect, unpresets, showTime }) => {
   const [isEnable, setIsEnable] = useState(false);
   const [selectedRange, setSelectedRange] = useState(value);
-  const dateFormat = "YYYY-MM-DD HH:mm:ss";
+  const dateFormat = "YYYY-MM-DD";
 
   const onRangeChange = (dates, dateStrings) => {
     if (dates) {
@@ -54,7 +54,7 @@ const DateRangePicker = ({ value, onDateSelect, unpresets, showTime }) => {
         open={isEnable}
         size="small"
         format={dateFormat}
-        showTime={showTime}
+        // showTime={showTime}
         onClick={() => {
           setIsEnable(true);
         }}

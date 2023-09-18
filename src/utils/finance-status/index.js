@@ -23,6 +23,7 @@ const createBonus = async (values) => {
             'goal': values.goal,
             'start_time': values.start_time,
             'end_time': values.end_time,
+            'payout': values.payout,
         }
         const response = await NEW_API.post(`/v1/bonuses`, body, options)
         const data = await response.data
