@@ -89,7 +89,7 @@ const VehicleModelFeeder = ({name, make_id, editable, value, handleUpdate}) => {
     if (error) {
         return <>Something went wrong</>
     }
-console.log(data)
+
     if (editable) {
         return  <EditableSelect name={name} options={data.items} value={value} updateCallback={handleUpdate} />
     }
