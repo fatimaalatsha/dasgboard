@@ -1,6 +1,6 @@
 import API from '../../api/BaseUrl' // Import API base URL
 import { useParams } from 'react-router-dom'
-import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
+import useFetch from '../../hooks/use-new-fetch' // Import useFetch custom hook
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { useNavigate } from 'react-router-dom'
 import { useState } from 'react'
@@ -15,7 +15,6 @@ import { PageHeader } from '@ant-design/pro-layout';
 
 
 import { 
-  
   Card, 
   Descriptions, 
   Button, 
@@ -31,44 +30,50 @@ import {
 const { confirm } = Modal // Destructure config from Modal
 
 const TrainingStats = ({id}) => {
-    const { data, isLoading, error, refetch } = useFetch(`/v1/trainings/cc/${id}/stats`)
+    const { data, isLoading, error, refetch } = useFetch(`/v1/trainings/${id}/stats`)
 
     if (isLoading) return <p>Loading...</p>
 
     if (error) return <p>Something went wrong: {error.message}</p>
 
     return (
-         <Card title={<p>  <BarChartOutlined style={{ fontSize: '16px', color: '#08c', spacing: '16px' }} /> Total Views</p>}
-                        bordered={true}
-                        style={{ width: 300, margin: "20px", borderRadius: "20px", overflow: "hidden" }}
-                        bodyStyle={{ backgroundColor: '#f0f0f0', border: 0 }}>
+         <Card 
+            title={
+                <>
+                    <BarChartOutlined style={{ fontSize: '16px', color: '#08c', spacing: '16px' }} />
+                    Total Views
+                </>
+            }
+            bordered={true}
+            style={{ width: 300, margin: "20px", borderRadius: "20px", overflow: "hidden" }}
+            bodyStyle={{ backgroundColor: '#f0f0f0', border: 0 }}
+        >
                             
-                            <Statistic
-                                    
-                                    value={data.views.percentage}
-                                    precision={2}
-                                    valueStyle={{ color: '#08c' }}
-                                    prefix={<CheckCircleOutlined />}
-                                    suffix="%"
-                            />
-                        <Space size={20} direction='horizontal' style={{ width: '100%' }}>
-                            <Card  style={{ borderRadius: "20px", overflow: "hidden" }}>
-                                <Statistic
-                                    title="Unique Views"
-                                    value={data.views.total_views}
-                                    valueStyle={{ color: '#3f8600' }}
-                                />
-                            </Card>
-                            <Card style={{ borderRadius: "20px", overflow: "hidden" }}>
-                                <Statistic
-                                    title="Total Drivers"
-                                    value= {data.views.total_users}
-                                    valueStyle={{ color: '#cf1322' }}
+            <Statistic
+                value={data.percentage}
+                precision={2}
+                valueStyle={{ color: '#08c' }}
+                prefix={<CheckCircleOutlined />}
+                suffix="%"
+            />
+            <Space size={20} direction='horizontal' style={{ width: '100%' }}>
+                <Card  style={{ borderRadius: "20px", overflow: "hidden" }}>
+                    <Statistic
+                        title="Unique Views"
+                        value={data.total_views}
+                        valueStyle={{ color: '#3f8600' }}
+                    />
+                </Card>
+                <Card style={{ borderRadius: "20px", overflow: "hidden" }}>
+                    <Statistic
+                        title="Total Drivers"
+                        value= {data.total_users}
+                        valueStyle={{ color: '#cf1322' }}
 
-                                />
-                            </Card>
-                        </Space>
-                    </Card>
+                    />
+                </Card>
+            </Space>
+        </Card>
     )
 }
 
@@ -83,7 +88,7 @@ const TrainingDetails = () => {
     const [loading, setLoading] = useState(false)// Set loading state
     
 
-    const { data, isLoading, error, refetch } = useFetch(`/v1/trainings/cc/${id}`)
+    const { data, isLoading, error, refetch } = useFetch(`/v1/trainings/${id}`)
 
     //show modal
     const showModal = () => {
