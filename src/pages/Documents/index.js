@@ -6,10 +6,10 @@ import dayjs from "dayjs"// Import date handlers
 import utc from 'dayjs/plugin/advancedFormat' // Import dayjs utc plugin
 import { useLocation } from 'react-router-dom' // Import hook from react-router
 
-import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
-import API from '../../api/BaseUrl' // Import API
+import useFetch from '../../hooks/use-new-fetch'// Import useFetch custom hook
 
 import { useFilterStore } from '../../store' // Import filter store
+import { getCities } from '../../utils/city-status'
 
 const getUserParams = (params) => ({ // Get table params
     limit: params.pagination?.pageSize,
@@ -28,7 +28,8 @@ const Documents = () => {
 
     const controller = new AbortController()// Create a new abort controller
     const [cities, setCities] = useState([])
-    const { data, isLoading, error, refetch } = useFetch(`v1/documents/cc?${qs.stringify(getUserParams(documentFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
+    const { data, isLoading, error, refetch } = useFetch(`v1/documents?${qs.stringify(getUserParams(documentFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
+
     const handleTableChange = (pagination, filter, sorter) => { // Handle table change
         Object.keys(filter).forEach(key => {
             if (filter[key]) {
@@ -52,35 +53,22 @@ const Documents = () => {
         })
     }
 
-    const getCities = async () => {
-        try { 
-          const response = await API.get('/v1/cities')
-          const data = await response.data
-          if (data) {
-            const cities = data.items.map((city) => {
-              city.value = city.city_id
-              city.text = city.name
-              delete city.name
-              return city;
-            })
-            setCities(cities)
-          }
-        }
-        catch (error) {
-          console.log(error)
-        }  
-      }
+    const fetchCities = async () => {
+      await getCities().then((response) => {
+        setCities(response)
+      })
+    }
 
     useEffect(() => {
         setDocumentFilter({ // Set filter to store
             pagination: {
                 ...documentFilter.pagination,
-                total: data?.total_items,
+                total: data.meta?.total_items,
                 showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Documents`,
 
             }
         }) 
-        getCities()
+        fetchCities()
         return () => controller.abort()// Abort fetch on unmount
     }, [data]) // Update table params
 
@@ -176,7 +164,7 @@ const Documents = () => {
                     </Tooltip>
             <Table
                 columns={columns}
-                dataSource={data?.items}
+                dataSource={data?.data}
                 loading={isLoading}
                 rowKey={record => record.id + record.type}
                 sortDirections={['ascend', 'descend', 'ascend']}
