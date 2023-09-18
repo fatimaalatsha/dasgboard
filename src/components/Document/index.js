@@ -23,7 +23,7 @@ import DocViewer from '../DocViewer' // import document viewer component
 import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper component
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
 import EditableDate from '../../components/EditableDate' // Import Driver contact information component
-import API from '../../api/BaseUrl' // Import API base URL
+import API from '../../api/NewUrl' // Import API base URL
 import UploadDriverDoc from '../UploadDriverDoc' // Import allowed upload on existing driver component
 
 const { Panel } = Collapse // Destructure Panel from Collapse
@@ -75,7 +75,7 @@ const Document = (props) => {
             const options = { // Set options for fetch
                 headers: {
                     'Authorization': token,
-                    ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+                    ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
                 }
             }
             const body = {
@@ -86,7 +86,7 @@ const Document = (props) => {
                 notes_public: notes_public
 
             }
-            const response = await API.post(`/v1/documents/cc/${id}`, body, options)
+            const response = await API.put(`/v1/documents/${id}`, body, options)
             const data = await response.data
             if (data.success) {
                 status === 'approved' ? setDocumentStatus({
