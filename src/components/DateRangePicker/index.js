@@ -27,7 +27,7 @@ const rangePresets = [
   },
 ];
 
-const DateRangePicker = ({ value, onDateSelect, unpresets }) => {
+const DateRangePicker = ({ value, onDateSelect, unpresets, showTime }) => {
   const [isEnable, setIsEnable] = useState(false);
   const [selectedRange, setSelectedRange] = useState(value);
   const dateFormat = "YYYY-MM-DD";
@@ -54,6 +54,7 @@ const DateRangePicker = ({ value, onDateSelect, unpresets }) => {
         open={isEnable}
         size="small"
         format={dateFormat}
+        // showTime={showTime}
         onClick={() => {
           setIsEnable(true);
         }}
