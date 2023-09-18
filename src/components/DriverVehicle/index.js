@@ -117,7 +117,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                 </Space>
                 ,
             onOk: async () => {
-                const response = await deleteVehicle(vehicle.vehicleId)
+                const response = await deleteVehicle(vehicle.vehicle_id)
                 if(response) {
                     refetch()
                 }
@@ -139,7 +139,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                 </Title>,
             content: 'This action cannot be undone',
             onOk: async () => {
-                await updateVehicle({'status': status}, vehicle.vehicleId)
+                await updateVehicle({'status': status}, vehicle.vehicle_id)
                 .then((response) => {
                 if (response) {
                     setOpen({ ...open, switch: false })
@@ -158,7 +158,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
         if(Object.keys(newValue)[0] === 'model_id') {
             setMakeId(newValue.make_id)
         }
-        await updateVehicle(newValue, vehicle.vehicleId)
+        await updateVehicle(newValue, vehicle.vehicle_id)
         .then((response) => {
             if (response) {
                 refetch()
@@ -213,7 +213,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                     }
                 </Descriptions.Item>
                 <Descriptions.Item label="Year">
-                    <EditableText name='year' value={vehicle.year} updateCallback={value => handleUpdate(value)} />
+                    <EditableText name='year' type="number" value={vehicle.year} updateCallback={value => handleUpdate(value)} />
                 </Descriptions.Item>
                 <Descriptions.Item label="Color">
                     <EditableText name='color' value={vehicle.color} updateCallback={value => handleUpdate(value)} />
@@ -239,7 +239,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
             }}
             validationSchema={modelSchema}
             onSubmit={async (values, { setSubmitting }) => {
-                await updateVehicle({make_id: makeId, ...values}, vehicle.vehicleId)
+                await updateVehicle({make_id: makeId, ...values}, vehicle.vehicle_id)
                 .then((response) => {
                     if (response) {
                         setIsModalVisible(false)
