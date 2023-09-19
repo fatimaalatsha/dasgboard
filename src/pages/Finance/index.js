@@ -4,7 +4,7 @@ import { useEffect, useState } from "react"; // import react hooks
 import useNewFetch from "../../hooks/use-new-fetch"; // import custom hook
 import qs from "qs"; // Import qs library
 import { useFilterStore } from "../../store"; // Import filter store
-
+import { deleteBonus } from "../../utils/finance-status"; // Import API base url
 //import components
 import CreateBounsModal from "../../components/BounsModal";
 import BounceDetails from "../BounceDetails";
@@ -92,7 +92,13 @@ const Finance = () => {
         render: (text, record) => (
           <Space size="middle">
             <Button>Edit</Button>
-            <Button>Delete</Button>
+            <Button
+              onClick={() => {
+                deleteBonus(record.id);
+                refetch();
+              }
+              }
+            >Delete</Button>
             <Button onClick={() =>{
               setBounceId(record.id);
               console.log(record.id);
