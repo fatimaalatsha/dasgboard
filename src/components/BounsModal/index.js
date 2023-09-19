@@ -1,11 +1,11 @@
 import React, { useState } from "react";
 
-import { Modal, Typography, TimePicker, Space, Divider } from "antd";
-import { Formik, Form , Field} from 'formik' // Import Formik form components
+import { Modal, Typography, TimePicker, Space, Divider, message } from "antd";
+import { Formik, Form} from 'formik' // Import Formik form components
 import * as Yup from 'yup' // import yup for validation
 import dayjs from "dayjs";
 
-import {createBonus} from "../../utils/finance-status"; // Import API base url
+import { createBonus } from "../../utils/finance-status"; // Import API base url
 import { getCities } from "../../utils/city-status"; // Import API base url
 //import components
 import SubmitWrapper from "../forms/SubmitWrapper"
@@ -94,7 +94,7 @@ const [cities, setCities] = useState([]); // Set cities state
         <Formik
           initialValues={initialValues}
           validationSchema={validationSchema}
-          onSubmit={async (values) => {
+          onSubmit={async (values, actions) => {
             const body = {
               name: values.name,
               city_id: values.city_id,
@@ -110,13 +110,18 @@ const [cities, setCities] = useState([]); // Set cities state
               end_time:
                 selectedDateRange.date_to + " " + selectedTimeRange.time_to,
             };
-            // close modal after submit
             props.onCancel();
-            await createBonus(body); // Call create bonus function
+            await createBonus(body).then((response) => {
+              if (response) {
+                actions.resetForm();
+                message.success("Bonus created successfully");
+                props.refetch();
+              }
+            });
           }}
         >
           <Modal
-            title={
+            title={ // Create New Bounce
               <Divider strong style={{ fontSize: "1.2rem" }}>
                 {" "}
                 Create New Bounce{" "}
