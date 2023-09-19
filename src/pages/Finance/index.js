@@ -1,5 +1,5 @@
-import { Table, Card, Button, Space } from "antd"; // import antd components
-
+import { Table, Card, Button, Space, Alert, Modal } from "antd"; // import antd components
+import { DeleteOutlined } from "@ant-design/icons"; // import antd icons
 import { useEffect, useState } from "react"; // import react hooks
 import useNewFetch from "../../hooks/use-new-fetch"; // import custom hook
 import qs from "qs"; // Import qs library
@@ -24,6 +24,7 @@ const Finance = () => {
   const [open, setOpen] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [bounceId, setBounceId] = useState(null);
+  const [warning, setWarning] = useState(false);
     const columns = [
       {
         title: "Name",
@@ -36,14 +37,14 @@ const Finance = () => {
         key: "cities",
         render: (cities) => {
           return cities.map((city) => city.name).join(", ");
-        }
-        
+        },
       },
       {
         title: "Type",
         dataIndex: "type",
         key: "type",
-        render: (type) => {// make the first letter capital
+        render: (type) => {
+          // make the first letter capital
           return type.charAt(0).toUpperCase() + type.slice(1);
         },
       },
@@ -62,7 +63,7 @@ const Finance = () => {
       {
         title: "Goal",
         dataIndex: "goal",
-        key: "goal",         
+        key: "goal",
       },
       {
         title: "Start Date",
@@ -93,21 +94,31 @@ const Finance = () => {
           <Space size="middle">
             <Button>Edit</Button>
             <Button
+              icon={<DeleteOutlined />}
+              danger
+              type="text"
+              onClick={
+                // warning before delete
+                () => {
+                  setBounceId(record.id);
+                  setWarning(true)
+                }
+              }
+            >
+           
+            </Button>
+            <Button
               onClick={() => {
-                deleteBonus(record.id);
-                refetch();
-              }
-              }
-            >Delete</Button>
-            <Button onClick={() =>{
-              setBounceId(record.id);
-              console.log(record.id);
-              setShowDetails(true);
-            }
-            }>Details</Button>
+                setBounceId(record.id);
+                console.log(record.id);
+                setShowDetails(true);
+              }}
+            >
+              Details
+            </Button>
           </Space>
         ),
-      }
+      },
     ];
 
       // const { data, loading, error } = useNewFetch("/v1/bonuses");
@@ -176,6 +187,25 @@ const Finance = () => {
 
   return (
     <Card title={"Finance"} style={{ margin: 15 }}>
+      {warning && (
+        <Modal
+          title="Warning"
+          open={warning}
+          onCancel={() => setWarning(false)}
+          onOk={() => {
+          deleteBonus(bounceId);
+          setWarning(false);
+          refetch();
+        }}>
+
+        <Alert
+          message="Warning"
+          description="Are you sure you want to delete this bonus?"
+          type="warning"
+          showIcon
+          />
+        </Modal>
+      )}
       <Space style={{ marginBottom: 15 }}>
         <Button type="primary" onClick={() => setOpen(true)}>
           Create Bonus

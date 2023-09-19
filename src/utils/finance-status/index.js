@@ -56,6 +56,7 @@ const getOneBonus = async (id) => {
 //delete bonus function
 const deleteBonus = async (id) => {
     try {
+        
         const auth = await Auth.currentSession() // Get current session
         const token = auth.getAccessToken().getJwtToken() // Get token from session
         const options = { // Set options for fetch
