@@ -7,7 +7,7 @@ import { useFilterStore } from "../../store"; // Import filter store
 
 //import components
 import CreateBounsModal from "../../components/BounsModal";
-
+import BounceDetails from "../BounceDetails";
 
 // user params
 const getUserParams = (params) => ({
@@ -21,7 +21,9 @@ const Finance = () => {
     const financeFilter = useFilterStore((state) => state.financeFilter);
     const setFinanceFilter = useFilterStore((state) => state.setFinanceFilter);
 
-    const [open, setOpen] = useState(false);
+  const [open, setOpen] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [bounceId, setBounceId] = useState(null);
     const columns = [
       {
         title: "Name",
@@ -41,6 +43,9 @@ const Finance = () => {
         title: "Type",
         dataIndex: "type",
         key: "type",
+        render: (type) => {// make the first letter capital
+          return type.charAt(0).toUpperCase() + type.slice(1);
+        },
       },
       {
         title: "Status",
@@ -57,15 +62,15 @@ const Finance = () => {
       {
         title: "Goal",
         dataIndex: "goal",
-        key: "goal",
+        key: "goal",         
       },
       {
         title: "Start Date",
         dataIndex: "start_time",
         key: "start_time",
         render: (start_time) => {
-          //clean up but show the time
-          return start_time?. split("T")[0];
+          //show date and time
+          return start_time?.split("T")[0];
         },
       },
       {
@@ -76,6 +81,27 @@ const Finance = () => {
           return end_time?.split("T")[0];
         },
       },
+      {
+        title: "Payout",
+        dataIndex: "payout",
+        key: "payout",
+      },
+      {
+        title: "Action",
+        key: "action",
+        render: (text, record) => (
+          <Space size="middle">
+            <Button>Edit</Button>
+            <Button>Delete</Button>
+            <Button onClick={() =>{
+              setBounceId(record.id);
+              console.log(record.id);
+              setShowDetails(true);
+            }
+            }>Details</Button>
+          </Space>
+        ),
+      }
     ];
 
       // const { data, loading, error } = useNewFetch("/v1/bonuses");
@@ -85,6 +111,7 @@ const Finance = () => {
           arrayFormat: "comma",
         })}`
   );
+ console.log(data);
   //handle closing modal
   const handleCancel = () => {
     setOpen(false);
@@ -160,6 +187,7 @@ const Finance = () => {
         onCancel={handleCancel}
         onOk={handleCancel}
       />
+      {showDetails && <BounceDetails bounceId={bounceId} />}
     </Card>
   );
 };

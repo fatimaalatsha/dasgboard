@@ -1,10 +1,8 @@
 import { Auth } from "aws-amplify"; // Import Auth from aws-amplify
-import API from "../../api/BaseUrl"; // Import API base URL
 import NEW_API from "../../api/NewUrl"; // Import API base url
 
 
 // create a bonus function
-
 const createBonus = async (values) => {
        try {
       const auth = await Auth.currentSession()// Get current session
@@ -33,7 +31,27 @@ const createBonus = async (values) => {
         return false
     }
 }
+// get one bonus function
 
+const getOneBonus = async (id) => {
+    try {
+        const auth = await Auth.currentSession() // Get current session
+        const token = auth.getAccessToken().getJwtToken() // Get token from session
+        const options = { // Set options for fetch
+            headers: {
+                'Authorization': token,
+                ...(process.env.REACT_APP_NEW_ENV && { 'env': process.env.REACT_APP_NEW_ENV }),
+            }
+        }
+        const response = await NEW_API.get(`/v1/bonuses/${id}`, options)
+        const data = await response.data
+        console.log(data)
+        return data
+    } catch (error) {
+        console.log(error)
+        return false
+    }
+}
 
-export { createBonus };
+export { createBonus, getOneBonus };
           
