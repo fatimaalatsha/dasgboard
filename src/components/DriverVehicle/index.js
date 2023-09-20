@@ -10,11 +10,12 @@ import {
     Drawer,
     Modal,
     Typography,
+    Empty,
 } from 'antd' // Import antd components
 import { Formik, Form } from 'formik'   // Import Formik form components
 import { object, string, number } from 'yup' // Import yup validation schema
 
-import useFetch from "../../hooks/use-fetch" // Import useFetch custom hook
+import useFetch from "../../hooks/use-new-fetch" // Import useFetch custom hook
 import { createVehicle, deleteVehicle, updateVehicle } from '../../utils/vehicle-status' // Import vehicle status functions
 
 import SubmitWrapper from '../forms/SubmitWrapper' // Import SubmitWrapper component
@@ -34,7 +35,8 @@ const vehicleSchema = object().shape({
 })
 
 const VehiclePhotosFeeder = ({vehicle, sub}) => {
-    const { data, isLoading, error } = useFetch(`/v1/vehicles/photos/cc/${vehicle}/vehicle`)// Call useFetch custom hook
+    const { data, isLoading, error } = useFetch(`/v1/vehicles/photos/${vehicle}/vehicle`)// Call useFetch custom hook
+
     if (isLoading) {
         return <>Loading...</>
     }
@@ -46,12 +48,12 @@ const VehiclePhotosFeeder = ({vehicle, sub}) => {
     return (
         <Space direction="vertical" size="large">
             {
-                data.items[0]?.photo?.length !== 0 && data.items[0]?.photo !== null ? data.items.map((photo, index) => (
-                    <>
-                        <Title level={4} >{photo.title}</Title> 
-                        <DocViewer key={index} objectKey={`${sub}/${photo.photo.key}`} />
-                    </>
-                )) : <Typography.Text>No photos found</Typography.Text>
+                data.items.length !== 0 ? data.items.map((item, index) => (
+                    <div key={index}>
+                        <Title level={4} >{item.type?.title}</Title> 
+                        <DocViewer key={index} objectKey={`${sub}/${item.key}`} />
+                    </div>
+                )) : <Empty />
             }
         </Space>
     )
@@ -69,11 +71,11 @@ const VehicleMakeFeeder = ({name, editable, value, handleUpdate}) => {
     }
 
     if (editable) {
-        return  <EditableSelect name={name} options={data.items} value={value} updateCallback={handleUpdate} />
+        return  <EditableSelect name={name} options={data.data} value={value} updateCallback={handleUpdate} />
     }
     
     return (
-        <SelectWrapper name={name} datasource={data.items} placeholder="Vehicle Make" searchable="true" />
+        <SelectWrapper name={name} datasource={data.data} placeholder="Vehicle Make" searchable="true" />
     )
 }
 
@@ -89,11 +91,11 @@ const VehicleModelFeeder = ({name, make_id, editable, value, handleUpdate}) => {
     }
 
     if (editable) {
-        return  <EditableSelect name={name} options={data.models} value={value} updateCallback={handleUpdate} />
+        return  <EditableSelect name={name} options={data.items} value={value} updateCallback={handleUpdate} />
     }
     
     return (
-        <SelectWrapper name={name} datasource={data.models} placeholder="Vehicle Model" searchable="true" />
+        <SelectWrapper name={name} datasource={data.items} placeholder="Vehicle Model" searchable="true" />
     )
 }
 
@@ -115,7 +117,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                 </Space>
                 ,
             onOk: async () => {
-                const response = await deleteVehicle(vehicle.vehicleId)
+                const response = await deleteVehicle(vehicle.vehicle_id)
                 if(response) {
                     refetch()
                 }
@@ -137,7 +139,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                 </Title>,
             content: 'This action cannot be undone',
             onOk: async () => {
-                await updateVehicle({'status': status}, vehicle.vehicleId)
+                await updateVehicle({'status': status}, vehicle.vehicle_id)
                 .then((response) => {
                 if (response) {
                     setOpen({ ...open, switch: false })
@@ -156,7 +158,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
         if(Object.keys(newValue)[0] === 'model_id') {
             setMakeId(newValue.make_id)
         }
-        await updateVehicle(newValue, vehicle.vehicleId)
+        await updateVehicle(newValue, vehicle.vehicle_id)
         .then((response) => {
             if (response) {
                 refetch()
@@ -187,7 +189,8 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                 >
                     Delete
                 </Button>,
-<Button type="primary" size="small" onClick={ () => setOpen({...open, drawer: { open: true, id: vehicle.vehicleId }}) }>View</Button>,                <Switch 
+                <Button type="primary" size="small" onClick={ () => setOpen({...open, drawer: { open: true, id: vehicle.vehicle_id }}) }>View</Button>,                
+                <Switch 
                     defaultChecked={vehicle.status === 'active'} 
                     loading={open.switch} 
                     disabled={vehicle.status === 'active'}
@@ -210,7 +213,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                     }
                 </Descriptions.Item>
                 <Descriptions.Item label="Year">
-                    <EditableText name='year' value={vehicle.year} updateCallback={value => handleUpdate(value)} />
+                    <EditableText name='year' type="number" value={vehicle.year} updateCallback={value => handleUpdate(value)} />
                 </Descriptions.Item>
                 <Descriptions.Item label="Color">
                     <EditableText name='color' value={vehicle.color} updateCallback={value => handleUpdate(value)} />
@@ -236,7 +239,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
             }}
             validationSchema={modelSchema}
             onSubmit={async (values, { setSubmitting }) => {
-                await updateVehicle({make_id: makeId, ...values}, vehicle.vehicleId)
+                await updateVehicle({make_id: makeId, ...values}, vehicle.vehicle_id)
                 .then((response) => {
                     if (response) {
                         setIsModalVisible(false)
@@ -273,7 +276,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
 const { Title, Text } = Typography // Destructure Title from Typography
 
 const DriverVehicle = ({ id, sub }) => {
-    const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/cc/${id}/vehicles`)// Call useFetch custom hook
+    const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/${id}/vehicles`)// Call useFetch custom hook
     const [open, setOpen] = useState({// Drawer state manager
         drawer: {
             open: false,
@@ -313,7 +316,15 @@ const DriverVehicle = ({ id, sub }) => {
                 initialValues={initialValues}
                 validationSchema={vehicleSchema}
                 onSubmit={ async (values, { setSubmitting }) => {
-                    await createVehicle(values).then((response) => {
+                    const payload = { // Sets values to specified contraints
+                        'user_id': Number(values.user_id),
+                        'plate_number': values.plate_number,
+                        'year': Number(values.year),
+                        'color': values.color,
+                        'model_id': Number(values.model_id),
+                        'make_id': Number(values.make_id)
+                    }
+                    await createVehicle(payload).then((response) => {
                         if(response) {
                             setSubmitting(false)
                             setOpen({...open, modal: false})

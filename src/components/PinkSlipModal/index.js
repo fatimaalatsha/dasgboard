@@ -1,7 +1,7 @@
 import { useState, useEffect} from 'react'
 import { Spin, Modal, Alert, Result, message } from 'antd'
 
-import useFetch from "../../hooks/use-fetch"
+import useFetch from "../../hooks/use-new-fetch"
 import { PdfRenderer }  from "../DocViewer"
 import { createPinkSlip } from '../../utils/pdf-document'
 import {uint8ArrayToS3} from '../../utils/s3-storage'
@@ -9,7 +9,7 @@ import { pinkSlipContent } from '../../assets/data/pinkslipcontent' // Pink skil
 import { updatePinkSlipStatus } from '../../utils/doc-status'
 
 const PinkSlipModal = ({ id, provinceId, usersub, open, setOpen, pinkslipStatus }) => {
-  const { data, error, isLoading } = useFetch(`/v1/drivers/cc/${id}/vehicles`)
+  const { data, error, isLoading } = useFetch(`/v1/drivers/${id}/vehicles`)
     const [pinkslip, setPinkslip] = useState({
         pdfBytes: null, 
         pdfUrl: null

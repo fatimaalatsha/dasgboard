@@ -1,5 +1,4 @@
 import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
-import API from '../../api/BaseUrl' // Import API base URL
 import NEW_API from '../../api/NewUrl'// Import API base url
 
 const isAllApproved = async (driverId) => {
@@ -28,10 +27,10 @@ const readyToDrive = async (driverId) => {
     const options = { // Set options for endpoint
         headers: {
             'Authorization': token,
-            ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+            ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
         }
     }
-    const response = await API.post(`/v1/drivers/cc/${driverId}/ready-email`, {}, options)
+    const response = await NEW_API.post(`/v1/drivers/${driverId}/ready-to-drive`, {}, options)
     const data = await response.data
     return data
   } catch (error) {
@@ -47,10 +46,10 @@ const deleteAdditionalDoc = async (docId) => {
     const options = { // Set options for endpoint
         headers: {
             'Authorization': token,
-            ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+            ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
         }
     }
-    const response = await API.delete(`/v1/documents/cc/additional/${docId}`, options)
+    const response = await NEW_API.delete(`/v1/documents/additional/${docId}`, options)
     const data = await response.data
     return data.success
   } catch {
@@ -65,10 +64,10 @@ const enableAdditionalDocs = async (driverId) => {
     const options = { // Set options for endpoint
         headers: {
             'Authorization': token,
-            ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+            ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
         }
     }
-    const response = await API.post(`/v1/documents/cc/additional/${driverId}/enable/`, {}, options)
+    const response = await NEW_API.post(`/v1/documents/additional/${driverId}/enable`, {}, options)
     const data = await response.data
     return data.success
   } catch (error) {
@@ -83,10 +82,10 @@ const disableAdditionalDocs = async (driverId) => {
     const options = { // Set options for endpoint
         headers: {
             'Authorization': token,
-            ...(process.env.REACT_APP_ENV && {'env': process.env.REACT_APP_ENV}),
+            ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
         }
     }
-    const response = await API.post(`/v1/documents/cc/additional/${driverId}/disable/`, {}, options)
+    const response = await NEW_API.post(`/v1/documents/additional/${driverId}/disable`, {}, options)
     const data = await response.data
     return data.success
   } catch (error) {
@@ -101,11 +100,11 @@ const updatePinkSlipStatus = async (driverId, setPinkSlipStatus) => {
     const options = { // Set options for endpoint
       headers: {
         'Authorization': token,
-        ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
+        ...(process.env.REACT_APP_NEW_ENV && {'env': process.env.REACT_APP_NEW_ENV}),
       },
     }
     const body = {'pink_slip': true}
-    const response = await API.put(`/v1/drivers/cc/${driverId}`, body, options)
+    const response = await NEW_API.put(`/v1/drivers/${driverId}`, body, options)
     const data = await response.data
     setPinkSlipStatus(true) // Update the state of the variable
     return data

@@ -1,10 +1,10 @@
 import { Timeline } from 'antd'// Import Timeline component from antd
-import useFetch from '../../hooks/use-fetch' // Import useFetch custom hook
+import useFetch from '../../hooks/use-new-fetch' // Import useFetch custom hook
 
 const dayjs = require('dayjs')
 
 const DriverTimeline = ({ id }) => {
-  const { data, isLoading, error } = useFetch(`/v1/drivers/cc/${id}/logs`)// Call useFetch custom hook
+  const { data, isLoading, error } = useFetch(`/v1/drivers/${id}/logs`)// Call useFetch custom hook
 
   if(isLoading) {
     return <div>Loading...</div>
@@ -17,11 +17,11 @@ const DriverTimeline = ({ id }) => {
   return(
     <Timeline mode='alternate'>
       {
-        data.data.slice(0).reverse().map((item, index) => (
+        data.reverse().map((item, index) => (
           <Timeline.Item 
           key={index} 
-          color={item.action.includes('rejected') ? 'red' : 'green'}>
-            {item.action} - {dayjs(item.createdAt).format('MMM, DD - YYYY hh:mm A')}
+          color={item.description.includes('rejected') ? 'red' : 'green'}>
+            {item.description} - {dayjs(item.createdAt).format('MMM, DD - YYYY hh:mm A')}
           </Timeline.Item> 
         ))
       }
