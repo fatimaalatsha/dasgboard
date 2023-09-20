@@ -1,24 +1,19 @@
-import { Card, Table, Tag, Button, Tooltip, Space , Modal } from 'antd' // Import Ant components
+import { Card, Table, Tag, Button, Tooltip, Space , Modal, Radio, Divider, message } from 'antd' // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import dayjs from "dayjs"// Import date handlers
-import useFetch from '../../hooks/use-fetch'// Import useFetch custom hook
+import useFetch from '../../hooks/use-new-fetch'// Import useFetch custom hook
 
 import React ,{ useState } from 'react'; // Import React
 import { useNavigate } from 'react-router-dom'; // Import Nav component
 
-import * as yup from 'yup'; // Import Yup validation library
-
-import { Auth } from 'aws-amplify'// Import Auth from aws-amplify
-import API from '../../api/BaseUrl' // Import API base URL
-import { message } from 'antd' // Import Ant components
+import {object, string, array, number, boolean} from 'yup'; // Import Yup validation library
 
 import SubmitWrapper from '../../components/forms/SubmitWrapper' // Import SubmitWrapper component
 import InputWrapper from '../../components/forms/InputWrapper' // Import InputWrapper component
-import SelectWrapper from '../../components/forms/SelectWrapper' // Import SelectWrapper component
+import { CitySelect } from '../../components/CitySelect' // City selector
+import { createTraining } from '../../utils/training-status'
 
-import { Formik, Form } from 'formik'   // Import Formik form components
-
-
+import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
 
 const tableColumns = [
     {
@@ -44,26 +39,122 @@ const tableColumns = [
     },
 ]
 
-const Trainings = () => {
-    const { data, isLoading, error, refetch } = useFetch(`/v1/trainings/cc`) // Fetch data from API
-    const [cities, setCities] = useState([])
-    const [open, setOpen] = useState(false);
-    const [confirmLoading, setConfirmLoading] = useState(false);
-    const [showCities, setShowCities] = useState(false);
-    
-    // navigate to video details page
-      const navigate = useNavigate();
+//validationSchema for Formik
+const trainingSchema = object().shape({
+    title: string().required('Required'),
+    url: string().required('Required'),
+    global: boolean().required('Required'),
+    city_id: array().of(number()).when('global', {
+        is: false,
+        then: array().min(1).of(number()).required('Required'),
+        otherwise: array().of(number()).notRequired()
+    }),
+})
 
-      const showModal = () => {
-          setOpen({ ...open, modal: true })
-          getCities();
-    };
-    //handle closing modal
-    const handleCancel = () => {
-    setOpen(false);
-    };
-    
+const AddTraining = ({refetch}) => {
+    const [open, setOpen] = useState(false)
 
+    const handleOpen = () => {
+        setOpen(true)
+    }
+
+    const handleClose = () => {
+        setOpen(false)
+        refetch()
+    }
+
+    return (
+        <>
+            <Button
+                onClick={handleOpen}
+                type="primary"
+                style={{ marginBottom: 20 }}
+            >
+                Add New Training
+            </Button>
+            {open && (
+                <Formik
+                    initialValues={{
+                        title: '',
+                        city_id: [],
+                        url: '',
+                        global: true,
+                    }}
+                    validationSchema={trainingSchema}
+                    onSubmit={async (values, {setSubmitting, resetForm }) => {
+                        const payload = {
+                            'url': values.url,
+                            'title': values.title,
+                            'global': values.global,
+                            ...(!values.global ? { 'city_id': values.city_id } : {})
+                        }
+                        await createTraining(payload).then((response) => {
+                            message.success(response.message)
+                            setSubmitting(false)
+                            resetForm()
+                            handleClose()
+                        })
+                    }}           
+                >
+                    {props => (
+                        <FormikForm>
+                            <Modal
+                                title="Add New Training Video" 
+                                open={open}
+                                confirmLoading={props.isSubmitting}
+                                onCancel={handleClose}
+                                footer={[
+                                    <Button key="cancel" onClick={handleClose}>
+                                        Cancel
+                                    </Button>,
+                                    <SubmitWrapper key="submit" type="primary" >
+                                        Add New Training Video
+                                    </SubmitWrapper>,
+                                ]}              
+                            >
+                                    <Space direction='vertical' style={{ width: '100%'}}>
+                                        <InputWrapper type="text" name="title" placeholder="Title" />
+                                        <InputWrapper type="text" name="url" placeholder="Video Link (from YouTube)" /> 
+                                        <Divider> Scope </Divider>
+                                        <Radio.Group
+                                            style={{ width: '100%' }}
+                                            onChange={ (e) => {
+                                                props.setFieldValue('global', e.target.value)
+                                            }}
+                                            value={props.values.global}
+                                        >
+                                            <Space>
+                                                <Radio value={true}>All cities</Radio>
+                                                <Radio value={false}>Specific Cities</Radio>
+                                            </Space>
+                                        </Radio.Group>
+                                        { !props.values.global && (
+                                            <CitySelect
+                                                onChange={(value) => {
+                                                    props.setFieldValue('city_id', value)
+                                                }}
+                                                style={{ width: '100%' }}
+                                                mode="multiple"
+                                            />
+                                        )} 
+                                    </Space>
+                            </Modal>
+                        </FormikForm>
+                    )}
+                </Formik>
+            )}
+        </>
+    )
+}
+
+/** @Trainings 
+ * SECTION NEEDS REVISIONING FOR PAGINATION AND OTHER FILTERS 
+ * */
+
+const Trainings = () => { 
+    const { data, isLoading, error, refetch } = useFetch(`/v1/trainings`) // Fetch data from API
+    const navigate = useNavigate() // navigate to video details page
+    
     const buttonConfig = {
         icon: <ReloadOutlined />,
         onClick: () => refetch(),
@@ -79,145 +170,17 @@ const Trainings = () => {
       return <div>Something went wrong...</div>
     }
 
-    //global or specific city
-    const global =
-    [{ text: 'For Specific Cities', value: false },{ text: 'For All Cities', value: true }]
-
-    //initialValues for Formik
-    const initialValues = {
-        title: '',
-        city_id: [],
-        url: '',
-        global: false,
-    }
-
-    //validationSchema for Formik
-    const validationSchema = yup.object({
-        title: yup.string().required('Required'),
-        city_id: yup.array(),
-        url: yup.string().required('Required'),
-        global: yup.boolean().required('Required'),
-    })
-
-    //onSubmit for Formik creating new training video
-    const createTraining =  async (values) => {
-            
-        try {
-      const auth = await Auth.currentSession()// Get current session
-      const token = auth.getAccessToken().getJwtToken()// Get token from session
-      const options = { // Set options for fetch
-        headers: {
-          Authorization: token,
-          ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
-        }
-      
-      }
- 
-      const response = await API.post(`/v1/trainings/cc`, values, options)
-      const data = await response.data
-      if (data) {
-        message.success('Training Video Added Successfully');
-      }
-    }
-    catch (error) {
-      console.log(error)
-    }  
-    }
- 
-
-// get cities from API
-
-    const getCities = async () => {
-        try {
-            const auth = await Auth.currentSession()// Get current session
-            const token = auth.getAccessToken().getJwtToken()// Get token from session
-            const options = { // Set options for fetch
-                headers: {
-                    Authorization: token,
-                    ...(process.env.REACT_APP_ENV && { 'env': process.env.REACT_APP_ENV }),
-                }
-            }
-            const response = await API.get(`v1/cities/cc`, options)
-            const data = await response.data
-            if (data) {
-                const cities = data.items.map((city) => {
-                    city.text = city.name
-                    city.value = city.id
-                    return city;
-                })
-                setCities(cities)
-            }
-        }
-        catch (error) {
-            console.log(error)
-        }
-    }
-
-//to handle disable and enable cities select
-    const handleGlobal = (value) => {
-        if (value === true) {
-
-            setShowCities(false)
-        }
-        else {
-            setShowCities(true)
-        }
-    }
- 
     return (
         <Card title={'Trainings'} style={{ margin: 15 }}>
             <Space direction="vertical" style={{ paddingBottom: 16 }}>
                 <Tooltip title="Reload data">
                     <Button {...buttonConfig} />
                 </Tooltip>
-                <Button
-                    onClick={showModal}
-                    type="primary"
-                    style={{
-                    marginBottom: 20,
-                    
-                    }}
-                >
-                   Add New Training
-                </Button>
+                <AddTraining refetch={refetch}/>
             </Space>
-            <Formik
-                initialValues={initialValues}
-                validationSchema={validationSchema}
-                onSubmit={async (values, actions) => {
-                        await createTraining(values).then((response) => {
-                            })
-                    refetch()
-                setOpen(false)
-                }}           
-            >
-                <Form >
-                    <Modal
-                        title="Add New Training Video" 
-                        open={open}
-                        confirmLoading={confirmLoading}
-                        onCancel={handleCancel}
-                        footer={[
-                            <Button key="cancel" onClick={() =>  setOpen(false)}>
-                                Cancel
-                            </Button>,
-                            <SubmitWrapper key="submit" type="primary" >
-                                Add New Training Video
-                            </SubmitWrapper>,
-                        ]}              
-                    >
-                            <Space direction='vertical' style={{ width: '100%'}}>
-                                <InputWrapper type="text" name="title" placeholder="Title" />
-                                <InputWrapper type="text" name="url" placeholder="Video Link (from YouTube)" /> 
-                                <SelectWrapper name="global" placeholder="Select Video Scope" datasource={global} onSelect={handleGlobal} />
-                                { showCities &&  <SelectWrapper allowClear  name="city_id" placeholder="Select City" datasource={cities} mode="multiple"  /> } 
-                            </Space>
-                    </Modal>
-                </Form>
-            </Formik>
             <Table
                 columns={tableColumns}
-                dataSource={data?.items}
+                dataSource={data?.data}
                 loading={isLoading}
                 rowKey={(record) => record.id}
                 rowClassName={() => 'clickable-row'}

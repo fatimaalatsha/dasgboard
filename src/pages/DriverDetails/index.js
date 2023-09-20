@@ -25,7 +25,7 @@ import {
   Popover,
   Dropdown,
 } from 'antd' // Import antd components
-import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined, DownOutlined } from '@ant-design/icons' // Import icon
+import { SendOutlined, QuestionCircleOutlined, CopyFilled, CopyOutlined } from '@ant-design/icons' // Import icon
 import { useParams, useLocation, useNavigate } from 'react-router-dom'
 import { Auth } from 'aws-amplify'// Import Amplify auth method
 import { Formik, Form as FormikForm } from 'formik'   // Import Formik form components
@@ -459,7 +459,7 @@ const DriverDetails = () => {
               >
                 Activate Driver
               </Button>,
-              data.status !== 'active' && <ChangeDriverStatus id={id} refetch={refetch}/> ,
+              data.status !== 'active' && <ChangeDriverStatus key={id} id={id} refetch={refetch}/> ,
             ]}
           >
                 <Descriptions labelStyle={{ fontWeight: 'bold' }}  >
@@ -646,7 +646,7 @@ const DriverDetails = () => {
           await updateApplicationStatus( id, values.application_status, values.status_reason)
             .then((response) => {
               if (response) {
-                successAlert(response.message)
+                successAlert('Application status updated successfully')
                 setSubmitting(false)
                 setChangeStatusModal(false)
                 refetch()
