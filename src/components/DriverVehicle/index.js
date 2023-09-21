@@ -60,7 +60,7 @@ const VehiclePhotosFeeder = ({vehicle, sub}) => {
 }
 
 const VehicleMakeFeeder = ({name, editable, value, handleUpdate}) => {
-    const { data, isLoading, error } = useFetch(`/v1/makes`)// Call useFetch custom hook
+    const { data, isLoading, error } = useFetch(`/v1/makes?paginated=false`)// Call useFetch custom hook
 
     if (isLoading) {
         return <>Loading...</>
