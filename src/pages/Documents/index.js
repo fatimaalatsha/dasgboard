@@ -134,6 +134,22 @@ const Documents = () => {
             ...( documentFilter.filter?.status && { defaultFilteredValue: documentFilter.filter?.status.map((status) => status.replace('in|', '')) }),
         },
         {
+            title: 'Driver Status',
+            dataIndex: 'driver_status',
+            key: 'u.status',
+            align: 'center',
+            render: (status) => (
+              <Tag color={status === 'active' ? 'success' : 'error' } style={{ textTransform: 'capitalize' }}>
+                {status.toUpperCase()}
+              </Tag>
+              ),
+              filters: [
+                { text: 'Inactive', value: 'inactive' },
+                { text: 'Active', value: 'active' },
+              ],
+            ...( documentFilter.filter?.['u.status'] && { defaultFilteredValue: documentFilter.filter?.['u.status'].map((status) => status.replace('in|', '')) }),
+        },
+        {
             title: 'Updated At',
             dataIndex: 'updated_at',
             render: (text, record) => `${dayjs(text).format('YYYY-MM-DD - HH:mm:ss')}`,
