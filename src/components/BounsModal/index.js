@@ -110,6 +110,7 @@ const [cities, setCities] = useState([]); // Set cities state
               end_time:
                 selectedDateRange.date_to + " " + selectedTimeRange.time_to,
             };
+            // close modal after submit
             props.onCancel();
             await createBonus(body).then((response) => {
               if (response) {
@@ -118,10 +119,11 @@ const [cities, setCities] = useState([]); // Set cities state
                 props.refetch();
               }
             });
+
           }}
         >
           <Modal
-            title={ // Create New Bounce
+            title={
               <Divider strong style={{ fontSize: "1.2rem" }}>
                 {" "}
                 Create New Bounce{" "}

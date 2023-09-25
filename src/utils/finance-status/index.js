@@ -33,25 +33,7 @@ const createBonus = async (values) => {
 }
 // get one bonus function
 
-const getOneBonus = async (id) => {
-    try {
-        const auth = await Auth.currentSession() // Get current session
-        const token = auth.getAccessToken().getJwtToken() // Get token from session
-        const options = { // Set options for fetch
-            headers: {
-                'Authorization': token,
-                ...(process.env.REACT_APP_NEW_ENV && { 'env': process.env.REACT_APP_NEW_ENV }),
-            }
-        }
-        const response = await NEW_API.get(`/v1/bonuses/${id}`, options)
-        const data = await response.data
-        console.log(data)
-        return data
-    } catch (error) {
-        console.log(error)
-        return false
-    }
-}
+
 
 //delete bonus function
 const deleteBonus = async (id) => {
@@ -108,5 +90,5 @@ const editBonus = async (id, values) => {
     }
 }
 
-export { createBonus, getOneBonus, deleteBonus, editBonus };
+export { createBonus, deleteBonus, editBonus };
           

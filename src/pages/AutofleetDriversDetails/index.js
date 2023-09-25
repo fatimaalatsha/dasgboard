@@ -26,19 +26,6 @@ const { Title, Text } = Typography;
     ...params,
 })
 
-const Test = () => {
-  const { data, error, isLoading, refetch } = useNewFetch(`/v1/bonuses`);
-  console.log(data);
-  return (
-    <div>
-      {isLoading && <p>Loading...</p>}
-      {error && <p>{error}</p>}
-      {data && <p>{JSON.stringify(data)}</p>}
-      <button onClick={() => refetch()}>Refetch</button>
-    </div>
-  );
-};
-
 
 const DriverReviews = ({ driverId }) => {
 
@@ -428,7 +415,6 @@ const AutofleetDriversDetails = () => {
             <Divider orientation="left"> Last 10 Rides </Divider>
             <LastRides name="Last Rides" driverId={id} />
             <Divider orientation="left"> Bonuses </Divider>
-            <Test />
           </Space>
         }
       />

@@ -1,46 +1,282 @@
-import React, { useState } from "react"
-import { Button, Modal, Typography } from "antd"
-import {getOneBonus} from "../../utils/finance-status"
+import React, { useEffect, useState } from "react"; // import react hooks
+import {
+  Button,
+  Divider,
+  Modal,
+  Space,
+  Typography,
+  TimePicker,
+  message,
+  Input,
+} from "antd";
+import { Formik, Form } from "formik"; // Import Formik form components
+import * as Yup from "yup"; // import yup for validation
+import dayjs from "dayjs";
+import useFetch from "../../hooks/use-new-fetch";
 
+import { editBonus } from "../../utils/finance-status"; // Import API base url
+import { getCities } from "../../utils/city-status"; // Import API base url
+//import components
+import SubmitWrapper from "../../components/forms/SubmitWrapper";
+import InputWrapper from "../../components/forms/InputWrapper";
+import SelectWrapper from "../../components/forms/SelectWrapper";
+import DateRangePicker from "../../components/DateRangePicker";
 
-const { Text } = Typography
-const BounceDetails = (bounceId) => {
+//validation schema
+const validationSchema = Yup.object({
+  name: Yup.string().required("Required"),
+  city_id: Yup.number().required("Required"),
+  type: Yup.string().required("Required"),
+  status: Yup.string().required("Required"),
+  goal: Yup.number().required("Required"),
+  payout: Yup.number().required("Required"),
+  // start_time: Yup.string().required("Required"),
+  // end_time: Yup.string().required("Required"),
+});
 
-const [bonus, setBonus] = useState([]); // Set bonus state
-
-    // Get bonus
-    const fetchBonus = async (bounceId) => {
-      const bonus = await getOneBonus(bounceId.bounceId);
-      console.log("bounceId",bounceId);
-      setBonus(bonus);
-    };
-    return (
-        <Modal
-            title="Bounce Details"
-            open={true}
-            onCancel={() => {}}
-            footer={null}
-        >
-            <Text>Name: {bonus.name}</Text>
-            <br />
-            <Text>City: {bonus.city_id}</Text>
-            <br />
-            <Text>Type: {bonus.type}</Text>
-            <br />
-            <Text>Status: {bonus.status}</Text>
-            <br />
-            <Text>Goal: {bonus.goal}</Text>
-            <br />
-            <Text>Payout: {bonus.payout}</Text>
-            <br />
-            <Text>Start Time: {bonus.start_time}</Text>
-            <br />
-            <Text>End Time: {bonus.end_time}</Text>            
-            <Button onClick={() => fetchBonus(bounceId)}>Get Bonus</Button>
-
-        </Modal>
-        
-    )
-}
+const { Text } = Typography;
+const BounceDetails = ({bounceId, open, onCancel}) => {
+    const [bonus, setBonus] = useState([]); // Set bonus state
     
-export default BounceDetails
+  const { data, loading, error, refetch } = useFetch(`/v1/bonuses/${bounceId}`); // Fetch data from API
+  
+  const [cities, setCities] = useState([]); // Set cities state
+
+  // Get cities
+  const fetchCities = async () => {
+    const cities = await getCities();
+    setCities(cities);
+  };
+
+  // Fetch cities on component mount
+  React.useEffect(() => {
+    fetchCities();
+  }, []);
+
+  // date selection handler
+  const [selectedDateRange, setSelectedDateRange] = useState({
+    date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD"),
+    date_to: dayjs().format("YYYY-MM-DD"),
+  });
+  const handleDateSelect = (dateRange) => {
+    setSelectedDateRange({
+      date_from: dayjs(dateRange[0]).format("YYYY-MM-DD"),
+      date_to: dayjs(dateRange[1]).format("YYYY-MM-DD"),
+    });
+  };
+
+  const [selectedTimeRange, setSelectedTimeRange] = useState({
+    time_to: dayjs().format("HH:mm"),
+  });
+
+  const [selectedTimeRange1, setSelectedTimeRange1] = useState({
+    time_from: dayjs().format("HH:mm"),
+  });
+  // bounce type options
+  const BounceType = [
+    {
+      text: "Money",
+      value: "money",
+    },
+    {
+      text: "Rides",
+      value: "rides",
+    },
+  ];
+
+    if (loading) return <p>Loading...</p>;
+    if (error) return <>Error </>;
+    return (
+      <>
+        <Formik
+          initialValues={{
+            name: data.name,
+            city_id: data.city_id,
+            type: data.type,
+            status: data.status,
+            goal: data.goal,
+            start_time: data.start_time,
+            end_time: data.end_time,
+            payout: data.payout,
+          }}
+          validationSchema={validationSchema}
+                onSubmit={async (values, actions) => {
+              console.log("values",values);
+            const body = {
+              name: values.name,
+              city_id: values.city_id,
+              type: values.type,
+              status: values.status,
+              goal: parseFloat(values.goal),
+              payout: parseFloat(values.payout),
+              //add time to body
+              start_time:
+                selectedDateRange.date_from +
+                " " +
+                selectedTimeRange1.time_from,
+              end_time:
+                selectedDateRange.date_to + " " + selectedTimeRange.time_to,
+            };
+              await editBonus(bounceId,body).then((response) => {
+                console.log(values);
+                if (response) {
+                  actions.resetForm();
+                  message.success("Bonus Updated successfully");
+                  refetch();
+                  onCancel();
+                  }
+                  else
+                    {
+                        message.error("Error updating bonus");
+                    }    
+              });
+          }}
+        >
+          {props => (
+            <Form>
+              <Modal
+                title={
+                  <Divider strong style={{ fontSize: "1.2rem" }}>
+                    {" "}
+                    Update Bounce{" "}
+                  </Divider>
+                }
+                className="modalStyle"
+                open={open}
+                onCancel={onCancel}
+                destroyOnClose={true}
+                footer={[
+                  <SubmitWrapper key="submit" type="primary">
+                    Submit
+                  </SubmitWrapper>,
+                ]}
+              >
+                <Space direction="vertical" style={{ width: "100%" }}>
+                  <Text type="secondary">Bonus Title</Text>
+                  <InputWrapper
+                    name="name"
+                    value={props.values.name}
+                  />
+                  <Text type="secondary"> Cities </Text>
+                  <SelectWrapper
+                    name="city_id"
+                    placeholder={bonus.city_id}
+                    datasource={cities}
+                    defaultValue={bonus.city_id}
+                    mode="multiple"
+                  />
+                  <Text type="secondary">Bonus Type</Text>
+                  <SelectWrapper
+                    name="type"
+                    placeholder="Type"
+                    datasource={BounceType}
+                  />
+                  <Text type="secondary">Status</Text>
+                  <SelectWrapper
+                    name="status"
+                    placeholder="Status"
+                    datasource={[
+                      {
+                        text: "Active",
+                        value: "active",
+                      },
+                      {
+                        text: "Inactive",
+                        value: "inactive",
+                      },
+                    ]}
+                  />
+                  <Text type="secondary">Goal</Text>
+                                <InputWrapper name="goal" placeholder="Goal" defaultValue={bonus.goal}/>
+                  <Text type="secondary">Payout</Text>
+                  <InputWrapper name="payout" placeholder="Payout" defaultValue={bonus.payout} />
+                  <Divider> Date</Divider>
+                  <div
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 16,
+                    }}
+                  >
+                    <Text type="secondary"> Date Range </Text>
+                    <DateRangePicker
+                      value={selectedDateRange}
+                      onDateSelect={handleDateSelect}
+                      unpresets={true}
+                      showTime={true}
+                    />
+                  </div>
+                  <Divider> Time </Divider>
+
+                  <div
+                    style={{
+                      width: "100%",
+                      display: "flex",
+                      justifyContent: "space-between",
+                      gap: 16,
+                    }}
+                  >
+                    <Text type="secondary">Start Time</Text>
+                    <TimePicker
+                      name="start_time"
+                      showNow
+                      format="HH:mm"
+                      hideDisabledOptions
+                      disabledTime={(current) => {
+                        return {
+                          disabledMinutes: () => {
+                            const minuteSteps = [0, 15, 30, 45, 59];
+                            const minutes = [];
+                            for (let i = 0; i < 60; i++) {
+                              if (!minuteSteps.includes(i)) {
+                                minutes.push(i);
+                              }
+                            }
+                            return minutes;
+                          },
+                        };
+                      }}
+                      onSelect={(value) => {
+                        setSelectedTimeRange1({
+                          time_from: dayjs(value).format("HH:mm"),
+                        });
+                      }}
+                    />
+                    <Text type="secondary">End Time</Text>
+                    <TimePicker
+                      name="end_time"
+                      showNow={false}
+                      format="HH:mm"
+                      hideDisabledOptions
+                      disabledTime={(current) => {
+                        return {
+                          disabledMinutes: () => {
+                            const minuteSteps = [0, 15, 30, 45, 59];
+                            const minutes = [];
+                            for (let i = 0; i < 60; i++) {
+                              if (!minuteSteps.includes(i)) {
+                                minutes.push(i);
+                              }
+                            }
+                            return minutes;
+                          },
+                        };
+                      }}
+                      onSelect={(value) => {
+                        setSelectedTimeRange({
+                          time_to: dayjs(value).format("HH:mm"),
+                        });
+                      }}
+                    />
+                  </div>
+                </Space>
+              </Modal>
+            </Form>
+          )}
+        </Formik>
+      </>
+    );
+};
+
+export default BounceDetails;

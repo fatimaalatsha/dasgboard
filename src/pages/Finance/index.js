@@ -1,5 +1,5 @@
 import { Table, Card, Button, Space, Alert, Modal } from "antd"; // import antd components
-import { DeleteOutlined } from "@ant-design/icons"; // import antd icons
+import { DeleteOutlined, EditTwoTone } from "@ant-design/icons"; // import antd icons
 import { useEffect, useState } from "react"; // import react hooks
 import useNewFetch from "../../hooks/use-new-fetch"; // import custom hook
 import qs from "qs"; // Import qs library
@@ -92,7 +92,15 @@ const Finance = () => {
         key: "action",
         render: (text, record) => (
           <Space size="middle">
-            <Button>Edit</Button>
+            <Button
+              icon={<EditTwoTone />}
+              type="text"
+              onClick={() => {
+                setBounceId(record.id);
+                console.log(record.id);
+                setShowDetails(true);
+              }}
+            ></Button>
             <Button
               icon={<DeleteOutlined />}
               danger
@@ -101,21 +109,11 @@ const Finance = () => {
                 // warning before delete
                 () => {
                   setBounceId(record.id);
-                  setWarning(true)
+                  setWarning(true);
                 }
               }
-            >
-           
-            </Button>
-            <Button
-              onClick={() => {
-                setBounceId(record.id);
-                console.log(record.id);
-                setShowDetails(true);
-              }}
-            >
-              Details
-            </Button>
+            ></Button>
+            <Button>Details</Button>
           </Space>
         ),
       },
@@ -193,16 +191,16 @@ const Finance = () => {
           open={warning}
           onCancel={() => setWarning(false)}
           onOk={() => {
-          deleteBonus(bounceId);
-          setWarning(false);
-          refetch();
-        }}>
-
-        <Alert
-          message="Warning"
-          description="Are you sure you want to delete this bonus?"
-          type="warning"
-          showIcon
+            deleteBonus(bounceId);
+            setWarning(false);
+            refetch();
+          }}
+        >
+          <Alert
+            message="Warning"
+            description="Are you sure you want to delete this bonus?"
+            type="warning"
+            showIcon
           />
         </Modal>
       )}
@@ -223,7 +221,14 @@ const Finance = () => {
         onCancel={handleCancel}
         onOk={handleCancel}
       />
-      {showDetails && <BounceDetails bounceId={bounceId} />}
+       {showDetails &&  <BounceDetails
+        bounceId={bounceId}
+        open={true}
+        onCancel={() => {
+          setShowDetails(false);
+          setBounceId(null);
+        }}
+      />}
     </Card>
   );
 };
