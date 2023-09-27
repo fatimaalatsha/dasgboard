@@ -71,7 +71,7 @@ let filterStore = (set) => ({
       position: ["bottomRight", "topRight"],
     },
     filter: {
-      status: null,
+      // status: null,
       //["in|online", "stand-by", "activating", "offline", "active"]
     },
     city_id: null,
@@ -103,7 +103,7 @@ let filterStore = (set) => ({
     set((state) => ({
       financeFilter: { ...state.financeFilter, ...filter },
     })),
-  
+
   ridesFilter: {
     pagination: {
       current: 1,

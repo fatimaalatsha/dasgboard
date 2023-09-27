@@ -1,13 +1,13 @@
-import { Table, Card, Button, Space } from "antd"; // import antd components
-
+import { Table, Card, Button, Space, Alert, Modal, Descriptions } from "antd"; // import antd components
+import { DeleteOutlined, EditTwoTone } from "@ant-design/icons"; // import antd icons
 import { useEffect, useState } from "react"; // import react hooks
 import useNewFetch from "../../hooks/use-new-fetch"; // import custom hook
 import qs from "qs"; // Import qs library
 import { useFilterStore } from "../../store"; // Import filter store
-
-//import components
-import CreateBounsModal from "../../components/BounsModal";
-
+import { deleteBonus } from "../../utils/finance-status"; // Import API base url
+import CreateBounsModal from "../../components/BounsModal"; // Import API base url
+import BounceDetails from "../BounceDetails"; // Import API base url
+import BounceOverview  from "../BounceOverview"; // Import API base url
 
 // user params
 const getUserParams = (params) => ({
@@ -18,131 +18,201 @@ const getUserParams = (params) => ({
 });
 
 const Finance = () => {
-    const financeFilter = useFilterStore((state) => state.financeFilter);
-    const setFinanceFilter = useFilterStore((state) => state.setFinanceFilter);
+  const financeFilter = useFilterStore((state) => state.financeFilter);
+  const setFinanceFilter = useFilterStore((state) => state.setFinanceFilter);
 
-    const [open, setOpen] = useState(false);
-    const columns = [
-      {
-        title: "Name",
-        dataIndex: "name",
-        key: "name",
+  const [open, setOpen] = useState(false);
+  const [showDetails, setShowDetails] = useState(false);
+  const [showModal, setShowModal] = useState(false);
+  const [bounceId, setBounceId] = useState(null);
+  const [warning, setWarning] = useState(false);
+  const columns = [
+    {
+      title: "Name",
+      dataIndex: "name",
+      key: "name",
+    },
+    {
+      title: "Cities",
+      dataIndex: "cities",
+      key: "cities",
+      render: (cities) => {
+        return cities.map((city) => city.name).join(", ");
       },
-      {
-        title: "Cities",
-        dataIndex: "cities",
-        key: "cities",
-        render: (cities) => {
-          return cities.map((city) => city.name).join(", ");
-        }
-        
+      ellipsis: true,
+      size: "large",
+    },
+    {
+      title: "Type",
+      dataIndex: "type",
+      key: "type",
+      render: (type) => {
+        // make the first letter capital
+        return type.charAt(0).toUpperCase() + type.slice(1);
       },
-      {
-        title: "Type",
-        dataIndex: "type",
-        key: "type",
+    },
+    {
+      title: "Status",
+      dataIndex: "status",
+      key: "status",
+      render: (status) => {
+        return status === "active" ? (
+          <span style={{ color: "green" }}>{status}</span>
+        ) : (
+          <span style={{ color: "red" }}>{status}</span>
+        );
       },
-      {
-        title: "Status",
-        dataIndex: "status",
-        key: "status",
-        render: (status) => {
-          return status === "active" ? (
-            <span style={{ color: "green" }}>{status}</span>
-          ) : (
-            <span style={{ color: "red" }}>{status}</span>
-          );
-        },
+    },
+    {
+      title: "Start Date",
+      dataIndex: "start_time",
+      key: "start_time",
+      render: (start_time) => {
+        //show date and time
+        return start_time?.split("T")[0];
       },
-      {
-        title: "Goal",
-        dataIndex: "goal",
-        key: "goal",
+    },
+    {
+      title: "End Date",
+      dataIndex: "end_time",
+      key: "end_time",
+      render: (end_time) => {
+        return end_time?.split("T")[0];
       },
-      {
-        title: "Start Date",
-        dataIndex: "start_time",
-        key: "start_time",
-        render: (start_time) => {
-          //clean up but show the time
-          return start_time?. split("T")[0];
-        },
-      },
-      {
-        title: "End Date",
-        dataIndex: "end_time",
-        key: "end_time",
-        render: (end_time) => {
-          return end_time?.split("T")[0];
-        },
-      },
-    ];
+    },
+    {
+      title: "Goal",
+      dataIndex: "goal",
+      key: "goal",
+    },
+    {
+      title: "Payout",
+      dataIndex: "payout",
+      key: "payout",
+    },
+    {
+      title: "Action",
+      key: "action",
+      render: (text, record) => (
+        <Space size="middle">
+          <Button
+            icon={<EditTwoTone />}
+            type="text"
+            onClick={() => {
+              setBounceId(record.id);
+              setShowDetails(true);
+            }}
+          ></Button>
+          <Button
+            icon={<DeleteOutlined />}
+            danger
+            type="text"
+            onClick={
+              // warning before delete
+              () => {
+                setBounceId(record.id);
+                setWarning(true);
+              }
+            }
+          ></Button>
+          <Button
+            type="primary"
+            onClick={() => {
+              setBounceId(record.id);
+              setShowModal(true);
+            }}
+          >
+            Details
+          </Button>
+        </Space>
+      ),
+    },
+  ];
 
-      // const { data, loading, error } = useNewFetch("/v1/bonuses");
-      const { data, error, loading, refetch } = useNewFetch(
-        `/v1/bonuses?${qs.stringify(getUserParams(financeFilter), {
-          skipNulls: true,
-          arrayFormat: "comma",
-        })}`
+  // const { data, loading, error } = useNewFetch("/v1/bonuses");
+  const { data, error, loading, refetch } = useNewFetch(
+    `/v1/bonuses?${qs.stringify(getUserParams(financeFilter), {
+      skipNulls: true,
+      arrayFormat: "comma",
+    })}`
   );
   //handle closing modal
   const handleCancel = () => {
     setOpen(false);
+  };
+
+  //handle table change
+  const handleTableChange = (pagination, filter, sorter) => {
+    // Handle table change
+    Object.keys(filter).forEach((key) => {
+      if (filter[key] && key !== "city_id") {
+        filter[key].unshift("in|" + filter[key][0]);
+        filter[key].splice(1, 1);
+      }
+    });
+
+    setFinanceFilter({
+      // Set filter to store
+      pagination: {
+        ...financeFilter.pagination,
+        ...pagination,
+      },
+      //    filter: {
+      //      ...filter,
+      //      city_id: null,
+      //    },
+      //    sort: {
+      //      ...financeFilter.sort,
+      //      ...sorter,
+      //    },
+    });
+  };
+
+  useEffect(() => {
+    let isMounted = true;
+    setFinanceFilter({
+      pagination: {
+        ...financeFilter.pagination,
+        total: data?.meta?.total_items,
+        showTotal: (total, range) =>
+          `${range[0]}-${range[1]} of ${total} Bonuses`,
+      },
+    });
+    if (isMounted) {
+      refetch();
+    }
+    return () => {
+      isMounted = false;
     };
-    
-    //handle table change
-   const handleTableChange = (pagination, filter, sorter) => {
-     // Handle table change
-     Object.keys(filter).forEach((key) => {
-       if (filter[key] && key !== "city_id") {
-         filter[key].unshift("in|" + filter[key][0]);
-         filter[key].splice(1, 1);
-       }
-     });
+  }, [financeFilter.pagination.current]);
 
-     setFinanceFilter({
-       // Set filter to store
-       pagination: {
-         ...financeFilter.pagination,
-         ...pagination,
-       },
-    //    filter: {
-    //      ...filter,
-    //      city_id: null,
-    //    },
-    //    sort: {
-    //      ...financeFilter.sort,
-    //      ...sorter,
-    //    },
-     });
-       
-    };
-    
-    useEffect(() => {
-        let isMounted = true;
-        setFinanceFilter({
-          pagination: {
-            ...financeFilter.pagination,
-            total: data?.meta?.total_items,
-            showTotal: (total, range) =>
-              `${range[0]}-${range[1]} of ${total} Bonuses`,
-          },
-        });
-        if (isMounted) {
-            refetch();
-        }
-        return () => {
-            isMounted = false;
-        }
-    }, [
-        financeFilter.pagination.current,        
-    ]);
-
-   
-
-
+  if (error) {
+    return <div>{error}</div>;
+  }
+  if (loading) {
+    return <div>Loading...</div>;
+  }
   return (
     <Card title={"Finance"} style={{ margin: 15 }}>
+      {warning && (
+        <Modal
+          title="Warning"
+          open={warning}
+          onCancel={() => setWarning(false)}
+          onOk={() => {
+            deleteBonus(bounceId);
+            setWarning(false);
+            refetch();
+          }}
+        >
+          <Alert
+            message="Warning"
+            description="Are you sure you want to delete this bonus?"
+            type="warning"
+            showIcon
+          />
+        </Modal>
+      )}
       <Space style={{ marginBottom: 15 }}>
         <Button type="primary" onClick={() => setOpen(true)}>
           Create Bonus
@@ -160,6 +230,15 @@ const Finance = () => {
         onCancel={handleCancel}
         onOk={handleCancel}
       />
+      <BounceDetails
+        bounceId={bounceId}
+        open={showDetails}
+        onCancel={() => {
+          setBounceId(null);
+          setShowDetails(false);
+        }}
+      />
+      {showModal && <BounceOverview bounceId={bounceId} onCancel={() => setShowModal(false)} />}
     </Card>
   );
 };
