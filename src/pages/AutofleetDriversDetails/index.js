@@ -16,19 +16,17 @@ import { UserOutlined } from "@ant-design/icons";
 import { useParams, useLocation, useNavigate } from "react-router-dom";
 import qs from "qs"; // Import qs library
 
-
 const { Title, Text } = Typography;
 
 //get the papams that will be passed to filters through qs
-  const getUserParams = (params) => ({ // Get table params
-    limit: params.pagination?.pageSize,
-    page: params.pagination?.current,
-    ...params,
-})
-
+const getUserParams = (params) => ({
+  // Get table params
+  limit: params.pagination?.pageSize,
+  page: params.pagination?.current,
+  ...params,
+});
 
 const DriverReviews = ({ driverId }) => {
-
   const [params, setParams] = useState({}); // Set params state
 
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
@@ -37,7 +35,7 @@ const DriverReviews = ({ driverId }) => {
     `/v1/active-drivers/${driverId}/reviews?${qs.stringify(
       // Pass the params to the query string
       getUserParams(params)
-    )}` 
+    )}`
   );
 
   const reviewToWords = (review) => {
@@ -105,7 +103,6 @@ const DriverReviews = ({ driverId }) => {
           pageSizeOptions: ["10", "20", "50"],
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} of ${total} reviews`,
-          
         }}
         onChange={(pagination, filters, sorter) => {
           // Update the params when the table state changes
@@ -183,11 +180,12 @@ const DriverReviews = ({ driverId }) => {
 };
 
 const LastRides = ({ driverId }) => {
-
   const [params, setParams] = useState({}); // Set params state
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
 
-  const { data, loading, error } = useNewFetch(`/v1/rides/drivers/${driverId}?${qs.stringify(getUserParams(params))}`);
+  const { data, loading, error } = useNewFetch(
+    `/v1/rides/drivers/${driverId}?${qs.stringify(getUserParams(params))}`
+  );
 
   const columns = [
     {
@@ -224,13 +222,12 @@ const LastRides = ({ driverId }) => {
       render: (dropoff_description) => <Text>{dropoff_description}</Text>,
     },
   ];
-    const handleRowExpand = (record) => {
-      // Toggle the expanded row when a row is clicked
-      setExpandedRowKey((prevExpandedKey) =>
-        prevExpandedKey === record.ride_id ? null : record.ride_id
-      );
-    };
-
+  const handleRowExpand = (record) => {
+    // Toggle the expanded row when a row is clicked
+    setExpandedRowKey((prevExpandedKey) =>
+      prevExpandedKey === record.ride_id ? null : record.ride_id
+    );
+  };
 
   return (
     <>
@@ -310,7 +307,7 @@ const LastRides = ({ driverId }) => {
                     <Descriptions.Item label="Pickup Location">
                       <Text>{record.pickup_description}</Text>
                     </Descriptions.Item>
-                  
+
                     <Descriptions.Item label="Drop Off Date ">
                       <Text>
                         {record.dropoff_completed_at
@@ -325,7 +322,6 @@ const LastRides = ({ driverId }) => {
                     <Descriptions.Item label="Drop Off ">
                       <Text>{record.dropoff_description}</Text>
                     </Descriptions.Item>
-                    
                   </Descriptions>
                 </Space>
               </Space>
@@ -337,9 +333,6 @@ const LastRides = ({ driverId }) => {
     </>
   );
 };
-
-
-
 
 const AutofleetDriversDetails = () => {
   //get the driver id from the url
@@ -409,7 +402,6 @@ const AutofleetDriversDetails = () => {
                 <Text>{data.address}</Text>
               </Descriptions.Item>
             </Descriptions>
-
             <Divider orientation="left"> Reviews </Divider>
             <DriverReviews name="Review" driverId={id} />
             <Divider orientation="left"> Last 10 Rides </Divider>

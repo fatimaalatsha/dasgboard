@@ -71,7 +71,7 @@ let filterStore = (set) => ({
       position: ["bottomRight", "topRight"],
     },
     filter: {
-      status: null,
+      // status: null,
       //["in|online", "stand-by", "activating", "offline", "active"]
     },
     city_id: null,
@@ -103,7 +103,7 @@ let filterStore = (set) => ({
     set((state) => ({
       financeFilter: { ...state.financeFilter, ...filter },
     })),
-  
+
   scheduleFilter: {
     filter: {
       city_id: "",
@@ -113,10 +113,10 @@ let filterStore = (set) => ({
     city_label: "",
     paginated: false,
     navigation: {
-      tab: 'active', // active, draft, approval
-      view: 1, // 1 = week, 0 = day, 2 = month (default: 1) 
+      tab: "active", // active, draft, approval
+      view: 1, // 1 = week, 0 = day, 2 = month (default: 1)
       template: 1, // 1 = Table, 0 = Grid (default: 1)
-    }
+    },
   },
   setScheduleFilter: (filter) =>
     set((state) => ({
