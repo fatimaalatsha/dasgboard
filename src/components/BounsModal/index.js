@@ -117,7 +117,7 @@ const CreateBounsModal = (props) => {
           title={
             <Divider strong style={{ fontSize: "1.2rem" }}>
               {" "}
-              Create New Bounce{" "}
+              Create New Bonus{" "}
             </Divider>
           }
           className="modalStyle"
@@ -133,7 +133,7 @@ const CreateBounsModal = (props) => {
           <Form>
             <Space direction="vertical" style={{ width: "100%" }}>
               <Text type="secondary">Bonus Title</Text>
-              <InputWrapper name="name" placeholder="Bounce Name" />
+              <InputWrapper name="name" placeholder="Bonus Name" />
               <Text type="secondary"> Cities </Text>
               <SelectWrapper
                 name="city_id"
@@ -166,7 +166,9 @@ const CreateBounsModal = (props) => {
               <InputWrapper name="goal" placeholder="Goal" />
               <Text type="secondary">Payout</Text>
               <InputWrapper name="payout" placeholder="Payout" />
-              <Divider> Date</Divider>
+              <Text type="secondary">Bonus Objective</Text>
+              <InputWrapper name="objective" placeholder="Objective" />
+              <Divider> Date and Time</Divider>
               <div
                 style={{
                   width: "100%",
@@ -183,8 +185,6 @@ const CreateBounsModal = (props) => {
                   showTime={true}
                 />
               </div>
-              <Divider> Time </Divider>
-
               <div
                 style={{
                   width: "100%",

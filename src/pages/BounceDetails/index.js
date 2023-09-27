@@ -183,7 +183,7 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
                     gap: 16,
                   }}
                 >
-                  <Text type="secondary"> Date Range </Text>
+                  <Text type="secondary"> Date and Time Range </Text>
                   <DateRangePicker
                     value={selectedDateRange}
                     onDateSelect={handleDateSelect}
@@ -191,8 +191,6 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
                     showTime={true}
                   />
                 </div>
-                <Divider> Time </Divider>
-
                 <div
                   style={{
                     width: "100%",
