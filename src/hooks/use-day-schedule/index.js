@@ -14,6 +14,7 @@ const useDaySchedule = (url, timezone, selectedDay) => {
     dayjs.tz.setDefault(timezone)
     const [fetchedData, setFetchedData] = useState({// Set initia fetch state to empty
         data: [],
+        response: [],
         isLoading: true,
         error: false,
     })
@@ -35,47 +36,44 @@ const useDaySchedule = (url, timezone, selectedDay) => {
             }
             const response = await API.get(url, options)// Fetch data from API
             const { items } = await response.data// Get data from response
-            const dayItems = items.map((item, idx) => { // Modify response data based on overnight flag
-                item.shifts?.map((shift, index) => {
-                    if(shift.is_overnight) {
-                        const isSameDay = selectedDay.tz().utc().isSame(dayjs(shift.end_time).tz().utc(), 'day')
-                        if(!isSameDay) {
-                            shift.overnight_end = shift.end_time
-                            shift.end_time = selectedDay.tz().utc().endOf('day').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
-                            shift.overnight_start = shift.start_time
-                        } else {
-                            shift.overnight_start = shift.start_time
-                            shift.start_time = selectedDay.tz().utc().startOf('day').format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]')
-                            shift.overnight_end = shift.end_time
-                        }
+
+            const dayData = items.map(item => {
+                const dayItems = item.shifts.map(shift => {
+                  if (shift.is_overnight) {
+                    const isSameDay = selectedDay.tz().utc().isSame(dayjs(shift.end_time), 'day');
+                    if (!isSameDay) {
+                      shift.overnight_end = shift.end_time;
+                      shift.end_time = selectedDay.tz().utc().endOf('day').toISOString();
+                      shift.overnight_start = shift.start_time;
+                    } else {
+                      shift.overnight_start = shift.start_time;
+                      shift.start_time = selectedDay.tz().utc().startOf('day').toISOString();
+                      shift.overnight_end = shift.end_time;
                     }
-                    return shift
-                })
-                return item
-            } )
-            const dayData = dayItems.reduce((acc, name) => {// Reduce data to fit AntD Table structure
-                const keyName = `${name.first_name} ${name.last_name}`
+                  }
+                  return shift;
+                });
+        
+                const keyName = `${item.first_name} ${item.last_name}`;
                 const timeObj = dayHours.reduce((obj, time) => {
-                    obj[time] = name.shifts.filter(item => time === dayjs(item.start_time).tz().utc().format('HH:mm'))
-                    obj[time] = obj[time] ? obj[time] : []
-                    return obj
-                }, {})
-
-                acc.push({
-                    key: name.user_id,
-                    driver: {
-                        license_number: name.license_number,
-                        phone: name.phone,
-                        name: keyName,
-                    },
-                    ...timeObj
-                })
-
-                return acc
-            }, [])
+                  obj[time] = dayItems.filter(shift => dayjs(shift.start_time).tz().utc().format('HH:mm') === time) || [];
+                  return obj;
+                }, {});
+        
+                return {
+                  key: item.user_id,
+                  driver: {
+                    license_number: item.license_number,
+                    phone: item.phone,
+                    name: keyName,
+                  },
+                  ...timeObj
+                };
+              });
 
             setFetchedData({// Set fetched data
                 data: dayData,
+                response: items,
                 isLoading: false,
                 error: false,
             })
@@ -83,6 +81,7 @@ const useDaySchedule = (url, timezone, selectedDay) => {
         catch (error) {
             setFetchedData({// Set fetched data
                 data: [],
+                response: [],
                 isLoading: false,
                 error: true,
             })
@@ -92,6 +91,7 @@ const useDaySchedule = (url, timezone, selectedDay) => {
     const refetch = () => {// Create a new refetch function
         setFetchedData({// Set fetched data
             data: [],
+            response: [],
             isLoading: true,
             error: false,
         })
@@ -103,8 +103,8 @@ const useDaySchedule = (url, timezone, selectedDay) => {
         return () => controller.abort()// Abort fetch on unmount
     }, [])
 
-    const { data, isLoading, error } = fetchedData// Destructure fetchedData
-    return { data, isLoading, error, refetch } // Return data, isLoading, error and refetch
+    const { data, response, isLoading, error } = fetchedData// Destructure fetchedData
+    return { data, response, isLoading, error, refetch } // Return data, isLoading, error and refetch
 }
 
 export default useDaySchedule

@@ -9,6 +9,7 @@ import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import DayCellShift from '../DayCellShift' // Import CellShift component
 import { useFilterStore } from '../../../store' // Import useFilterStore hook
 import useDaySchedule from '../../../hooks/use-day-schedule' // Import useDaySchedule hook
+import { shiftCount } from '../../../utils/schedule-status' // Import counter for each hour on shifts
 //import DayColumnHighlight from '../DayColumnHighlight'
 
 dayjs.extend(utc)
@@ -26,7 +27,8 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
   const { 
-    data, 
+    data,
+    response, 
     isLoading, 
     error, 
     refetch 
@@ -37,6 +39,10 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
     refetch()
     return () => controller.abort()// Abort fetch on unmount
   }, [selectedDay, city])
+
+  console.log(response)
+
+  error && <>Something went wrong...</>
 
   const columns = [
     {
@@ -71,13 +77,10 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           children: [
             {
               title: () => {
-                return ( <Text key={idx} type="secondary" code >{`${hour.substring(0,2)}`}</Text> )
-                /* return data.filter(item => item[hour].length > 0).map((item, idx) => {
-                  //console.log(item)
-                  return (
-                    <Text key={idx} type="secondary" code >{`${item[hour].length}`}</Text>
-                )}) */
-                
+                const computedCount = shiftCount(response, hour, scheduleFilter.tz, selectedDay)
+                return ( 
+                  <Text key={idx} type="secondary" code >{computedCount}</Text> 
+                )
               },
               dataIndex: hour,
               key: idx,
@@ -129,8 +132,6 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
     }
   ]
 
-  error && <>Something went wrong...</>
-  //console.log(data)
   return (
     <div style={{ position: 'relative'}}>
       <Table 
