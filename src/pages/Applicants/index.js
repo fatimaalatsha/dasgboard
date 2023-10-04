@@ -51,7 +51,7 @@ const Applicants = () => {
   const location = useLocation()
   const currentUrl = location.pathname
   const [cities, setCities] = useState([])
-  const [searchText, setSearchText] = useState( applicantFilter.full_name || '');
+  const [searchText, setSearchText] = useState( applicantFilter['full_name,email,phone'] || '');
   
   // Fetch Cities list from API
   const loadCities = async () => {
@@ -89,10 +89,10 @@ const Applicants = () => {
   }
   
   const handleSearch = (selectedKeys) => {
-    const regex = /^(?:\s|[\d]|\W)+$/g // TODO: Should be validated on the backend, temporary solution
-    const found = selectedKeys ? selectedKeys[0]?.match(regex) : null // Check if search value is a number or space
     setApplicantFilter({
-      full_name: selectedKeys && !found ? selectedKeys[0] : null,
+      filter: {
+        ['full_name,email,phone']: selectedKeys ? 'multiple|' + selectedKeys[0] : null,
+      },
       pagination: {
         ...applicantFilter.pagination,
         current: 1,
