@@ -51,7 +51,7 @@ const Drivers = () => {
   const setDriverFilter = useFilterStore((state) => state.setDriverFilter) // Set filter to store
   const componentIsMounted = useRef(false) // Create a ref to store the component mount state
   const [cities, setCities] = useState([])
-  const [searchText, setSearchText] = useState( driverFilter.full_name || '');
+  const [searchText, setSearchText] = useState( driverFilter['full_name,email,phone'] || '');
   
   // Fetch Cities list from API
   const loadCities = async () => {
@@ -90,10 +90,10 @@ const Drivers = () => {
   }
   
   const handleSearch = (selectedKeys) => {
-    const regex = /^(?:\s|[\d]|\W)+$/g // TODO: Should be validated on the backend, temporary solution
-    const found = selectedKeys ? selectedKeys[0]?.match(regex) : null // Check if search value is a number or space
     setDriverFilter({
-      full_name: selectedKeys && !found ? selectedKeys[0] : null,
+      filter: {
+        ['full_name,email,phone']: selectedKeys ? 'multiple|' + selectedKeys[0] : null
+      },
       pagination: {
         ...driverFilter.pagination,
         current: 1,
