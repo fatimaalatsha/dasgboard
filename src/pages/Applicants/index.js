@@ -51,7 +51,7 @@ const Applicants = () => {
   const location = useLocation()
   const currentUrl = location.pathname
   const [cities, setCities] = useState([])
-  const [searchText, setSearchText] = useState( applicantFilter['full_name,email,phone'] || '');
+  const [searchText, setSearchText] = useState( applicantFilter.filter['full_name,email,phone'] ? applicantFilter.filter['full_name,email,phone'].replace('multiple|', '') : '');
   
   // Fetch Cities list from API
   const loadCities = async () => {
@@ -91,6 +91,7 @@ const Applicants = () => {
   const handleSearch = (selectedKeys) => {
     setApplicantFilter({
       filter: {
+        ...applicantFilter.filter,
         ['full_name,email,phone']: selectedKeys ? 'multiple|' + selectedKeys[0] : null,
       },
       pagination: {
@@ -129,7 +130,7 @@ const Applicants = () => {
   }
 
   const searchConfig = {
-    placeholder: "Full Name Search",
+    placeholder: "Search on Name/Phone/Email",
     addonBefore: <Button type="text" size="small" onClick={() => handleSearch(null)}>Clear</Button>,
     value: searchText,
     type: 'text',

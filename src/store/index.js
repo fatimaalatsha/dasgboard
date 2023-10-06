@@ -20,6 +20,7 @@ let filterStore = (set) => ({
     },
     filter: {
       status: ["in|active", "inactive"],
+      'full_name,email,phone': null
     },
   },
   setDriverFilter: (filter) =>
@@ -56,6 +57,7 @@ let filterStore = (set) => ({
     },
     filter: {
       status: ["in|onboard", "pending"],
+      'full_name,email,phone': null
     },
   },
   setApplicantFilter: (filter) =>
