@@ -5,15 +5,10 @@ import useFetch from "../../hooks/use-new-fetch";
 const { Text } = Typography;
 const BounceOverview = ({ bounceId, onCancel }) => {
   const { data, loading, error, refetch } = useFetch(`/v1/bonuses/${bounceId}`); // Fetch data from API if bounceId is not null
-    
   return (
     <Modal open={!!bounceId} onCancel={onCancel} footer={null}>
       <Descriptions
-        title={
-          <Divider orientation="center">
-           Bonus Overview
-          </Divider>
-        }
+        title={<Divider orientation="center">Bonus Overview</Divider>}
         layout="horizontal"
         column={1}
       >
@@ -44,9 +39,13 @@ const BounceOverview = ({ bounceId, onCancel }) => {
         <Descriptions.Item label="Payout">
           <Text strong> {data?.payout} </Text>
         </Descriptions.Item>
+        <Descriptions.Item label="Bonus Objective">
+          <Text strong> {data?.objective} </Text>
+        </Descriptions.Item>
       </Descriptions>
     </Modal>
   );
 }
+
 
 export default BounceOverview;
