@@ -1,6 +1,14 @@
 import React, { useState } from "react";
 
-import { Modal, Typography, TimePicker, Space, Divider, message } from "antd";
+import {
+  Modal,
+  Typography,
+  TimePicker,
+  Space,
+  Divider,
+  message,
+  DatePicker,
+} from "antd";
 import { Formik, Form } from "formik"; // Import Formik form components
 import * as Yup from "yup"; // import yup for validation
 import dayjs from "dayjs";
@@ -11,7 +19,6 @@ import { getCities } from "../../utils/city-status"; // Import API base url
 import SubmitWrapper from "../forms/SubmitWrapper";
 import InputWrapper from "../forms/InputWrapper";
 import SelectWrapper from "../forms/SelectWrapper";
-import DateRangePicker from "../DateRangePicker";
 
 const { Text } = Typography;
 
@@ -34,6 +41,7 @@ const validationSchema = Yup.object({
   status: Yup.string().required("Required"),
   goal: Yup.number().required("Required"),
   payout: Yup.number().required("Required"),
+  objective : Yup.string(),
   // start_time: Yup.string().required("Required"),
   // end_time: Yup.string().required("Required"),
 });
@@ -52,22 +60,13 @@ const CreateBounsModal = (props) => {
     fetchCities();
   }, []);
 
-  // date selection handler
-  const [selectedDateRange, setSelectedDateRange] = useState({
-    date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD"),
-    date_to: dayjs().format("YYYY-MM-DD"),
-  });
-  const handleDateSelect = (dateRange) => {
-    setSelectedDateRange({
-      date_from: dayjs(dateRange[0]).format("YYYY-MM-DD"),
-      date_to: dayjs(dateRange[1]).format("YYYY-MM-DD"),
-    });
-  };
+  // date selection handlers
+  const [startDate, setStartDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [endDate, setEndDate] = useState(dayjs().format("YYYY-MM-DD"));
 
   const [selectedTimeRange, setSelectedTimeRange] = useState({
     time_to: dayjs().format("HH:mm"),
   });
-
   const [selectedTimeRange1, setSelectedTimeRange1] = useState({
     time_from: dayjs().format("HH:mm"),
   });
@@ -97,10 +96,9 @@ const CreateBounsModal = (props) => {
             goal: parseFloat(values.goal),
             payout: parseFloat(values.payout),
             //add time to body
-            start_time:
-              selectedDateRange.date_from + " " + selectedTimeRange1.time_from,
-            end_time:
-              selectedDateRange.date_to + " " + selectedTimeRange.time_to,
+            start_time: startDate + " " + selectedTimeRange1.time_from,
+            end_time: endDate + " " + selectedTimeRange.time_to,
+            objective: values.objective,
           };
           // close modal after submit
           props.onCancel();
@@ -160,6 +158,10 @@ const CreateBounsModal = (props) => {
                     text: "Inactive",
                     value: "inactive",
                   },
+                  {
+                    text: "Completed",
+                    value: "completed",
+                  },
                 ]}
               />
               <Text type="secondary">Goal</Text>
@@ -167,7 +169,11 @@ const CreateBounsModal = (props) => {
               <Text type="secondary">Payout</Text>
               <InputWrapper name="payout" placeholder="Payout" />
               <Text type="secondary">Bonus Objective</Text>
-              <InputWrapper name="objective" placeholder="Objective" />
+              <InputWrapper
+                name="objective"
+                placeholder="Objective (Optional)"
+              />
+
               <Divider> Date and Time</Divider>
               <div
                 style={{
@@ -177,22 +183,13 @@ const CreateBounsModal = (props) => {
                   gap: 16,
                 }}
               >
-                <Text type="secondary"> Date Range </Text>
-                <DateRangePicker
-                  value={selectedDateRange}
-                  onDateSelect={handleDateSelect}
-                  unpresets={true}
-                  showTime={true}
+                <Text type="secondary"> Start Date </Text>
+                <DatePicker
+                  name="start_date"
+                  onSelect={(value) => {
+                    setStartDate(dayjs(value).format("YYYY-MM-DD"));
+                  }}
                 />
-              </div>
-              <div
-                style={{
-                  width: "100%",
-                  display: "flex",
-                  justifyContent: "space-between",
-                  gap: 16,
-                }}
-              >
                 <Text type="secondary">Start Time</Text>
                 <TimePicker
                   name="start_time"
@@ -219,7 +216,25 @@ const CreateBounsModal = (props) => {
                     });
                   }}
                 />
-                <Text type="secondary">End Time</Text>
+              </div>
+              <div
+                style={{
+                  width: "100%",
+                  display: "flex",
+                  justifyContent: "space-between",
+                  gap: 16,
+                }}
+              >
+                <Text type="secondary"> End Date </Text>
+                <DatePicker
+                  name="end_date"
+                  onSelect={(value) => {
+                    setEndDate(dayjs(value).format("YYYY-MM-DD"));
+                  }}
+                  
+                />
+
+                <Text type="secondary"> End Time </Text>
                 <TimePicker
                   name="end_time"
                   showNow={false}

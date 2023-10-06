@@ -22,6 +22,7 @@ const createBonus = async (values) => {
             'start_time': values.start_time,
             'end_time': values.end_time,
             'payout': values.payout,
+            'objective': values.objective,
         }
         const response = await NEW_API.post(`/v1/bonuses`, body, options)
         const data = await response.data
@@ -78,6 +79,7 @@ const editBonus = async (id, values) => {
             'start_time': values.start_time,
             'end_time': values.end_time,
             'payout': values.payout,
+            'objective': values.objective,
         }
         const response = await NEW_API.put(`/v1/bonuses/${id}`, body, options)
         const data = await response.data
