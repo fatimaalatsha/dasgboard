@@ -37,7 +37,7 @@ export const pinkSlipContent = {
 
   effective_date_ontario: {
     label: "Effective Date/Date d'Entrée en Vigueur:",
-    value: "April 7, 2023 / 7 avril 2023",
+    value: "October 7, 2023 / 7 octobre 2023",
   },
   effective_date_alberta: {
     label: "Effective Date/Date d'Entrée en Vigueur:",
@@ -45,7 +45,7 @@ export const pinkSlipContent = {
   },
   expiry_date_ontario: {
     label: "Date of Expiry/Date d'Expiration:",
-    value: "October 6, 2023 / 6 octobre 2023",
+    value: "April 6, 2024 / 6 avril 2024",
   },
   expiry_date_alberta: {
     label: "Date of Expiry/Date d'Expiration:",
