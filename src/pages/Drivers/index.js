@@ -51,7 +51,7 @@ const Drivers = () => {
   const setDriverFilter = useFilterStore((state) => state.setDriverFilter) // Set filter to store
   const componentIsMounted = useRef(false) // Create a ref to store the component mount state
   const [cities, setCities] = useState([])
-  const [searchText, setSearchText] = useState( driverFilter['full_name,email,phone'] || '');
+  const [searchText, setSearchText] = useState( driverFilter.filter['full_name,email,phone'] ? driverFilter.filter['full_name,email,phone'].replace('multiple|', '') : '');
   
   // Fetch Cities list from API
   const loadCities = async () => {
@@ -92,6 +92,7 @@ const Drivers = () => {
   const handleSearch = (selectedKeys) => {
     setDriverFilter({
       filter: {
+        ...driverFilter.filter,
         ['full_name,email,phone']: selectedKeys ? 'multiple|' + selectedKeys[0] : null
       },
       pagination: {
@@ -131,7 +132,7 @@ const Drivers = () => {
   }
 
   const searchConfig = {
-    placeholder: "Full Name Search",
+    placeholder: "Search on Name/Phone/Email",
     addonBefore: <Button type="text" size="small" onClick={() => handleSearch(null)}>Clear</Button>,
     value: searchText,
     type: 'text',
