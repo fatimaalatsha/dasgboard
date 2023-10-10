@@ -7,7 +7,8 @@ import {
   Typography,
   TimePicker,
   message,
-  Input,
+  DatePicker,
+  
 } from "antd";
 import { Formik, Form } from "formik"; // Import Formik form components
 import * as Yup from "yup"; // import yup for validation
@@ -39,7 +40,7 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
   const [bonus, setBonus] = useState([]); // Set bonus state
 
   const { data, loading, error, refetch } = useFetch(`/v1/bonuses/${bounceId}`); // Fetch data from API if bounceId is not null
-
+  console.log(data);
   const [cities, setCities] = useState([]); // Set cities state
 
   // Get cities
@@ -54,16 +55,9 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
   }, []);
 
   // date selection handler
-  const [selectedDateRange, setSelectedDateRange] = useState({
-    date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD"),
-    date_to: dayjs().format("YYYY-MM-DD"),
-  });
-  const handleDateSelect = (dateRange) => {
-    setSelectedDateRange({
-      date_from: dayjs(dateRange[0]).format("YYYY-MM-DD"),
-      date_to: dayjs(dateRange[1]).format("YYYY-MM-DD"),
-    });
-  };
+  const [startDate, setStartDate] = useState(dayjs().format("YYYY-MM-DD"));
+  const [endDate, setEndDate] = useState(dayjs().format("YYYY-MM-DD"));
+
 
   const [selectedTimeRange, setSelectedTimeRange] = useState({
     time_to: dayjs().format("HH:mm"),
@@ -110,9 +104,9 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
             payout: parseFloat(values.payout),
             //add time to body
             start_time:
-              selectedDateRange.date_from + " " + selectedTimeRange1.time_from,
+              startDate + " " + selectedTimeRange1.time_from,
             end_time:
-              selectedDateRange.date_to + " " + selectedTimeRange.time_to,
+              endDate + " " + selectedTimeRange.time_to,
           };
           await editBonus(bounceId, body).then((response) => {
             if (response) {
@@ -174,7 +168,7 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
                 <InputWrapper name="goal" defaultValue={bonus.goal} />
                 <Text type="secondary">Payout</Text>
                 <InputWrapper name="payout" defaultValue={bonus.payout} />
-                <Divider> Date</Divider>
+                <Text type="secondary">Date and Time</Text>
                 <div
                   style={{
                     width: "100%",
@@ -183,22 +177,14 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
                     gap: 16,
                   }}
                 >
-                  <Text type="secondary"> Date and Time Range </Text>
-                  <DateRangePicker
-                    value={selectedDateRange}
-                    onDateSelect={handleDateSelect}
-                    unpresets={true}
-                    showTime={true}
+                  <Text type="secondary"> Start Date </Text>
+                  <DatePicker
+                    name="start_date"
+                    onSelect={(value) => {
+                      setStartDate(dayjs(value).format("YYYY-MM-DD"));
+                    }}
+                    defaultValue={dayjs(data.start_time)}
                   />
-                </div>
-                <div
-                  style={{
-                    width: "100%",
-                    display: "flex",
-                    justifyContent: "space-between",
-                    gap: 16,
-                  }}
-                >
                   <Text type="secondary">Start Time</Text>
                   <TimePicker
                     name="start_time"
@@ -224,8 +210,27 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
                         time_from: dayjs(value).format("HH:mm"),
                       });
                     }}
+                    defaultValue={dayjs(data.start_time)}
                   />
-                  <Text type="secondary">End Time</Text>
+                </div>
+                <div
+                  style={{
+                    width: "100%",
+                    display: "flex",
+                    justifyContent: "space-between",
+                    gap: 16,
+                  }}
+                >
+                  <Text type="secondary"> End Date </Text>
+                  <DatePicker
+                    name="end_date"
+                    onSelect={(value) => {
+                      setEndDate(dayjs(value).format("YYYY-MM-DD"));
+                    }}
+                    defaultValue={dayjs(data.end_time)}
+                  />
+
+                  <Text type="secondary"> End Time </Text>
                   <TimePicker
                     name="end_time"
                     showNow={false}
@@ -250,6 +255,7 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
                         time_to: dayjs(value).format("HH:mm"),
                       });
                     }}
+                    defaultValue={dayjs(data.end_time)}
                   />
                 </div>
               </Space>

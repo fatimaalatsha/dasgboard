@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import {
   Modal,
   Typography,
@@ -41,7 +40,7 @@ const validationSchema = Yup.object({
   status: Yup.string().required("Required"),
   goal: Yup.number().required("Required"),
   payout: Yup.number().required("Required"),
-  objective : Yup.string(),
+  objective : Yup.string().required("Required"),
   // start_time: Yup.string().required("Required"),
   // end_time: Yup.string().required("Required"),
 });
@@ -158,10 +157,6 @@ const CreateBounsModal = (props) => {
                     text: "Inactive",
                     value: "inactive",
                   },
-                  {
-                    text: "Completed",
-                    value: "completed",
-                  },
                 ]}
               />
               <Text type="secondary">Goal</Text>
@@ -171,10 +166,9 @@ const CreateBounsModal = (props) => {
               <Text type="secondary">Bonus Objective</Text>
               <InputWrapper
                 name="objective"
-                placeholder="Objective (Optional)"
+                placeholder="Objective"
               />
-
-              <Divider> Date and Time</Divider>
+              <Text type="secondary">Date and Time</Text>
               <div
                 style={{
                   width: "100%",
@@ -231,7 +225,6 @@ const CreateBounsModal = (props) => {
                   onSelect={(value) => {
                     setEndDate(dayjs(value).format("YYYY-MM-DD"));
                   }}
-                  
                 />
 
                 <Text type="secondary"> End Time </Text>
