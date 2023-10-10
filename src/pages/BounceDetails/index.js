@@ -31,8 +31,9 @@ const validationSchema = Yup.object({
   status: Yup.string().required("Required"),
   goal: Yup.number().required("Required"),
   payout: Yup.number().required("Required"),
-  // start_time: Yup.string().required("Required"),
-  // end_time: Yup.string().required("Required"),
+  // start_time: Yup.mixed().required("Required"),
+  // end_time: Yup.mixed().required("Required"),
+  objective: Yup.string().required("Required"),
 });
 
 const { Text } = Typography;
@@ -92,6 +93,7 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
           start_time: data.start_time,
           end_time: data.end_time,
           payout: data.payout,
+          objective: data.objective,
         }}
         validationSchema={validationSchema}
         onSubmit={async (values, actions) => {
@@ -102,11 +104,9 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
             status: values.status,
             goal: parseFloat(values.goal),
             payout: parseFloat(values.payout),
-            //add time to body
-            start_time:
-              startDate + " " + selectedTimeRange1.time_from,
-            end_time:
-              endDate + " " + selectedTimeRange.time_to,
+            start_time: startDate + " " + selectedTimeRange1.time_from,
+            end_time: endDate + " " + selectedTimeRange.time_to,
+            objective: values.objective,
           };
           await editBonus(bounceId, body).then((response) => {
             if (response) {
@@ -168,6 +168,8 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
                 <InputWrapper name="goal" defaultValue={bonus.goal} />
                 <Text type="secondary">Payout</Text>
                 <InputWrapper name="payout" defaultValue={bonus.payout} />
+                <Text type="secondary">Bonus Objective</Text>
+                <InputWrapper name="objective" defaultValue={bonus.objective} />
                 <Text type="secondary">Date and Time</Text>
                 <div
                   style={{

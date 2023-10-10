@@ -41,8 +41,8 @@ const validationSchema = Yup.object({
   goal: Yup.number().required("Required"),
   payout: Yup.number().required("Required"),
   objective : Yup.string().required("Required"),
-  // start_time: Yup.string().required("Required"),
-  // end_time: Yup.string().required("Required"),
+  // start_time: Yup.mixed().required("Required"),
+  // end_time: Yup.mixed().required("Required"),
 });
 
 const CreateBounsModal = (props) => {
@@ -164,10 +164,7 @@ const CreateBounsModal = (props) => {
               <Text type="secondary">Payout</Text>
               <InputWrapper name="payout" placeholder="Payout" />
               <Text type="secondary">Bonus Objective</Text>
-              <InputWrapper
-                name="objective"
-                placeholder="Objective"
-              />
+              <InputWrapper name="objective" placeholder="Objective"/>
               <Text type="secondary">Date and Time</Text>
               <div
                 style={{
@@ -209,6 +206,7 @@ const CreateBounsModal = (props) => {
                       time_from: dayjs(value).format("HH:mm"),
                     });
                   }}
+                  
                 />
               </div>
               <div

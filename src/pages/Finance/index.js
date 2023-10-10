@@ -5,6 +5,7 @@ import useNewFetch from "../../hooks/use-new-fetch"; // import custom hook
 import qs from "qs"; // Import qs library
 import { useFilterStore } from "../../store"; // Import filter store
 import { deleteBonus } from "../../utils/finance-status"; // Import API base url
+import { getCities } from "../../utils/city-status"; // Import API base url
 import CreateBounsModal from "../../components/BounsModal"; // Import API base url
 import BounceDetails from "../BounceDetails"; // Import API base url
 import BounceOverview  from "../BounceOverview"; // Import API base url
@@ -20,12 +21,19 @@ const getUserParams = (params) => ({
 const Finance = () => {
   const financeFilter = useFilterStore((state) => state.financeFilter);
   const setFinanceFilter = useFilterStore((state) => state.setFinanceFilter);
-
+  const [cities, setCities] = useState([]);
   const [open, setOpen] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
   const [showModal, setShowModal] = useState(false);
   const [bounceId, setBounceId] = useState(null);
   const [warning, setWarning] = useState(false);
+
+  // Fetch Cities list from API
+  const loadCities = async () => {
+    await getCities().then((response) => {
+      setCities(response);
+    });
+  };
   const columns = [
     {
       title: "Name",
@@ -41,6 +49,19 @@ const Finance = () => {
       },
       ellipsis: true,
       size: "large",
+      sorter: true,
+      filters: cities,
+      filterSearch: true,
+      filteredValue: null,
+      ...(financeFilter.sort?.name && {
+        defaultSortOrder:
+          financeFilter.sort?.name === "asc" ? "ascend" : "descend",
+      }),
+      ...(financeFilter.filter?.city_id && {
+        filteredValue: financeFilter.filter?.city_id.map((city, index) =>
+          index === 0 ? city.replace("in|", "") : city.toString()
+        ),
+      }),
     },
     {
       title: "Type",
@@ -71,6 +92,10 @@ const Finance = () => {
         //show date and time
         return start_time?.split("T")[0];
       },
+      sorter: true,
+      ...(financeFilter.sort?.field === "start_time" && {
+        sortOrder: financeFilter.sorter.order,
+      }),
     },
     {
       title: "End Date",
@@ -79,6 +104,10 @@ const Finance = () => {
       render: (end_time) => {
         return end_time?.split("T")[0];
       },
+      sorter: true,
+      ...(financeFilter.sort?.field === "end_time" && {
+        sortOrder: financeFilter.sorter.order,
+      }),
     },
     {
       title: "Goal",
@@ -129,13 +158,13 @@ const Finance = () => {
     },
   ];
 
-  // const { data, loading, error } = useNewFetch("/v1/bonuses");
   const { data, error, loading, refetch } = useNewFetch(
     `/v1/bonuses?${qs.stringify(getUserParams(financeFilter), {
       skipNulls: true,
       arrayFormat: "comma",
     })}`
   );
+  console.log(data);
   //handle closing modal
   const handleCancel = () => {
     setOpen(false);
@@ -143,13 +172,14 @@ const Finance = () => {
 
   //handle table change
   const handleTableChange = (pagination, filter, sorter) => {
-    // Handle table change
-    Object.keys(filter).forEach((key) => {
-      if (filter[key] && key !== "city_id") {
-        filter[key].unshift("in|" + filter[key][0]);
-        filter[key].splice(1, 1);
-      }
-    });
+ 
+     Object.keys(filter).forEach((key) => {
+       if (filter[key]) {
+         filter[key].unshift("in|" + filter[key][0]);
+         filter[key].splice(1, 1);
+       }
+     });
+  
 
     setFinanceFilter({
       // Set filter to store
@@ -157,14 +187,21 @@ const Finance = () => {
         ...financeFilter.pagination,
         ...pagination,
       },
-      //    filter: {
-      //      ...filter,
-      //      city_id: null,
-      //    },
-      //    sort: {
-      //      ...financeFilter.sort,
-      //      ...sorter,
-      //    },
+      filter: {
+        ...filter,
+        ...(financeFilter.filter?.city_id &&
+          filter.city_id &&
+          filter.city_id[0] === "in|undefined" && {
+            city_id: financeFilter.filter?.city_id,
+          }),
+        ...(filter.status === null && { status: ["in|active", "inactive"] }),
+      },
+      ...(Object.keys(sorter).length !== 0 && {
+        sort: {
+          [`${sorter.columnKey === "cities" ? "name" : sorter.columnKey}`]:
+            sorter.order === "ascend" ? "asc" : "desc",
+        },
+      }),
     });
   };
 
@@ -178,13 +215,10 @@ const Finance = () => {
           `${range[0]}-${range[1]} of ${total} Bonuses`,
       },
     });
-    if (isMounted) {
-      refetch();
-    }
     return () => {
       isMounted = false;
     };
-  }, [financeFilter.pagination.current]);
+  }, [data]);
 
   if (error) {
     return <div>{error}</div>;
@@ -238,7 +272,12 @@ const Finance = () => {
           setShowDetails(false);
         }}
       />
-      {showModal && <BounceOverview bounceId={bounceId} onCancel={() => setShowModal(false)} />}
+      {showModal && (
+        <BounceOverview
+          bounceId={bounceId}
+          onCancel={() => setShowModal(false)}
+        />
+      )}
     </Card>
   );
 };
