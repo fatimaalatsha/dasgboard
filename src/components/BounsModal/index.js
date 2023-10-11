@@ -164,8 +164,8 @@ const CreateBounsModal = (props) => {
               <Text type="secondary">Payout</Text>
               <InputWrapper name="payout" placeholder="Payout" />
               <Text type="secondary">Bonus Objective</Text>
-              <InputWrapper name="objective" placeholder="Objective"/>
-              <Text type="secondary">Date and Time</Text>
+              <InputWrapper name="objective" placeholder="Objective" />
+              <br />
               <div
                 style={{
                   width: "100%",
