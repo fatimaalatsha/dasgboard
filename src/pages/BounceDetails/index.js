@@ -1,6 +1,5 @@
 import React, { useState } from "react"; // import react hooks
 import {
-  Button,
   Divider,
   Modal,
   Space,
@@ -8,7 +7,6 @@ import {
   TimePicker,
   message,
   DatePicker,
-  
 } from "antd";
 import { Formik, Form } from "formik"; // Import Formik form components
 import * as Yup from "yup"; // import yup for validation
@@ -21,7 +19,6 @@ import { getCities } from "../../utils/city-status"; // Import API base url
 import SubmitWrapper from "../../components/forms/SubmitWrapper";
 import InputWrapper from "../../components/forms/InputWrapper";
 import SelectWrapper from "../../components/forms/SelectWrapper";
-import DateRangePicker from "../../components/DateRangePicker";
 
 //validation schema
 const validationSchema = Yup.object({
@@ -111,7 +108,6 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
             if (response) {
               actions.resetForm();
               message.success("Bonus Updated successfully");
-              refetch();
               onCancel();
             } else {
               message.error("Error updating bonus");
@@ -160,6 +156,10 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
                     {
                       text: "Inactive",
                       value: "inactive",
+                    },
+                    {
+                      text: "Completed",
+                      value: "completed",
                     },
                   ]}
                 />

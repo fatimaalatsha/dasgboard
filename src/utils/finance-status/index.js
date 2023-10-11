@@ -33,8 +33,6 @@ const createBonus = async (values) => {
     }
 }
 
-
-
 //delete bonus function
 const deleteBonus = async (id) => {
     try {
@@ -82,7 +80,6 @@ const editBonus = async (id, values) => {
         }
         const response = await NEW_API.put(`/v1/bonuses/${id}`, body, options)
         const data = await response.data
-        console.log(data)
         return data
     }
     catch (error) {

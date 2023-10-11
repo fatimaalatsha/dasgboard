@@ -316,6 +316,7 @@ const Finance = () => {
         onCancel={() => {
           setBounceId(null);
           setShowDetails(false);
+          refetch();
         }}
       />
       {showModal && (
