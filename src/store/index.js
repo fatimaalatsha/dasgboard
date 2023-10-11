@@ -97,7 +97,8 @@ let filterStore = (set) => ({
       created_at: "desc",
     },
     filter: {
-      // status: ["in|active", "inactive"],
+      status: ["in|active", "inactive", "completed"],
+      type: ["in|money", "rides"],
     },
   },
   setFinanceFilter: (filter) =>

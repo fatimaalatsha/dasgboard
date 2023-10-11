@@ -69,6 +69,22 @@ const Finance = () => {
       title: "Type",
       dataIndex: "type",
       key: "type",
+      filters: [
+        {
+          text: "Money",
+          value: "money",
+        },
+        {
+          text: "Rides",
+          value: "rides",
+        },
+      ],
+      filteredValue: null,
+      ...(financeFilter.filter?.type && {
+        filteredValue: financeFilter.filter?.type.map((type, index) =>
+          index === 0 ? type.replace("in|", "") : type.toString()
+        ),
+      }),
       render: (type) => {
         // make the first letter capital
         return type.charAt(0).toUpperCase() + type.slice(1);
@@ -78,6 +94,26 @@ const Finance = () => {
       title: "Status",
       dataIndex: "status",
       key: "status",
+      filters: [
+        {
+          text: "Active",
+          value: "active",
+        },
+        {
+          text: "Inactive",
+          value: "inactive",
+        },
+        {
+          text: "Completed",
+          value: "completed",
+        }
+      ],
+      filteredValue: null,
+      ...(financeFilter.filter?.status && {
+        filteredValue: financeFilter.filter?.status.map((status, index) =>
+          index === 0 ? status.replace("in|", "") : status.toString()
+        ),
+      }),
       render: (status) => {
         return status === "active" ? (
           <span style={{ color: "green" }}>{status}</span>
