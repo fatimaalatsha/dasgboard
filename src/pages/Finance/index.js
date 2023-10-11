@@ -268,18 +268,6 @@ const Finance = () => {
         pagination={financeFilter.pagination}
         onChange={handleTableChange}
         rowKey="id"
-        onRow={
-          //handle row click
-          (record, rowIndex) => {
-            return {
-              onClick: (event) => {
-                setBounceId(record.id);
-                setShowDetails(true);
-              },
-            };
-          }
-        }
-        
       />
       <CreateBounsModal
         open={open}
