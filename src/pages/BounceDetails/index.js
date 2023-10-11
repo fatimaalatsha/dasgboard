@@ -169,7 +169,7 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
                 <InputWrapper name="payout" defaultValue={bonus.payout} />
                 <Text type="secondary">Bonus Objective</Text>
                 <InputWrapper name="objective" defaultValue={bonus.objective} />
-                <Text type="secondary">Date and Time</Text>
+                <br />
                 <div
                   style={{
                     width: "100%",
