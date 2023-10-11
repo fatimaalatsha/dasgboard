@@ -76,8 +76,9 @@ let filterStore = (set) => ({
       // status: null,
       //["in|online", "stand-by", "activating", "offline", "active"]
     },
-    city_id: null,
-    // sort: "ASC",
+    sort: {
+      created_at: "desc",
+    },
   },
   setAutofleetFilter: (filter) =>
     set((state) => ({
@@ -95,7 +96,7 @@ let filterStore = (set) => ({
       position: ["bottomRight", "topRight"],
     },
     sort: {
-      // created_at: "desc",
+      created_at: "desc",
     },
     filter: {
       // status: ["in|active", "inactive"],

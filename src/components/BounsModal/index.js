@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-
 import {
   Modal,
   Typography,
@@ -41,9 +40,9 @@ const validationSchema = Yup.object({
   status: Yup.string().required("Required"),
   goal: Yup.number().required("Required"),
   payout: Yup.number().required("Required"),
-  objective : Yup.string(),
-  // start_time: Yup.string().required("Required"),
-  // end_time: Yup.string().required("Required"),
+  objective : Yup.string().required("Required"),
+  // start_time: Yup.mixed().required("Required"),
+  // end_time: Yup.mixed().required("Required"),
 });
 
 const CreateBounsModal = (props) => {
@@ -113,7 +112,7 @@ const CreateBounsModal = (props) => {
       >
         <Modal
           title={
-            <Divider strong style={{ fontSize: "1.2rem" }}>
+            <Divider style={{ fontSize: "1.2rem" }}>
               {" "}
               Create New Bonus{" "}
             </Divider>
@@ -158,10 +157,6 @@ const CreateBounsModal = (props) => {
                     text: "Inactive",
                     value: "inactive",
                   },
-                  {
-                    text: "Completed",
-                    value: "completed",
-                  },
                 ]}
               />
               <Text type="secondary">Goal</Text>
@@ -169,12 +164,8 @@ const CreateBounsModal = (props) => {
               <Text type="secondary">Payout</Text>
               <InputWrapper name="payout" placeholder="Payout" />
               <Text type="secondary">Bonus Objective</Text>
-              <InputWrapper
-                name="objective"
-                placeholder="Objective (Optional)"
-              />
-
-              <Divider> Date and Time</Divider>
+              <InputWrapper name="objective" placeholder="Objective"/>
+              <Text type="secondary">Date and Time</Text>
               <div
                 style={{
                   width: "100%",
@@ -215,6 +206,7 @@ const CreateBounsModal = (props) => {
                       time_from: dayjs(value).format("HH:mm"),
                     });
                   }}
+                  
                 />
               </div>
               <div
@@ -231,7 +223,6 @@ const CreateBounsModal = (props) => {
                   onSelect={(value) => {
                     setEndDate(dayjs(value).format("YYYY-MM-DD"));
                   }}
-                  
                 />
 
                 <Text type="secondary"> End Time </Text>
