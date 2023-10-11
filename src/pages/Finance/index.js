@@ -1,6 +1,6 @@
 import { Table, Card, Button, Space, Alert, Modal, Descriptions } from "antd"; // import antd components
 import { DeleteOutlined, EditTwoTone } from "@ant-design/icons"; // import antd icons
-import { useEffect, useState } from "react"; // import react hooks
+import { useEffect, useState, useRef } from "react"; // import react hooks
 import useNewFetch from "../../hooks/use-new-fetch"; // import custom hook
 import qs from "qs"; // Import qs library
 import { useFilterStore } from "../../store"; // Import filter store
@@ -21,6 +21,7 @@ const getUserParams = (params) => ({
 const Finance = () => {
   const financeFilter = useFilterStore((state) => state.financeFilter);
   const setFinanceFilter = useFilterStore((state) => state.setFinanceFilter);
+  const componentIsMounted = useRef(false) // Set the initial value to true
   const [cities, setCities] = useState([]);
   const [open, setOpen] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
@@ -31,6 +32,7 @@ const Finance = () => {
   // Fetch Cities list from API
   const loadCities = async () => {
     await getCities().then((response) => {
+      console.log(response);
       setCities(response);
     });
   };
@@ -43,14 +45,14 @@ const Finance = () => {
     {
       title: "Cities",
       dataIndex: "cities",
-      key: "cities",
+      key: "city_id",
       render: (cities) => {
         return cities.map((city) => city.name).join(", ");
       },
       ellipsis: true,
       size: "large",
       sorter: true,
-      filters: cities,
+      // filters: cities,
       filterSearch: true,
       filteredValue: null,
       ...(financeFilter.sort?.name && {
@@ -88,6 +90,7 @@ const Finance = () => {
       title: "Start Date",
       dataIndex: "start_time",
       key: "start_time",
+      align: "right",
       render: (start_time) => {
         //show date and time
         return start_time?.split("T")[0];
@@ -101,6 +104,7 @@ const Finance = () => {
       title: "End Date",
       dataIndex: "end_time",
       key: "end_time",
+      align: "right",
       render: (end_time) => {
         return end_time?.split("T")[0];
       },
@@ -113,11 +117,13 @@ const Finance = () => {
       title: "Goal",
       dataIndex: "goal",
       key: "goal",
+      align: "center",
     },
     {
       title: "Payout",
       dataIndex: "payout",
       key: "payout",
+      align: "center",
     },
     {
       title: "Action",
@@ -164,7 +170,6 @@ const Finance = () => {
       arrayFormat: "comma",
     })}`
   );
-  console.log(data);
   //handle closing modal
   const handleCancel = () => {
     setOpen(false);
@@ -191,7 +196,7 @@ const Finance = () => {
         ...filter,
         ...(financeFilter.filter?.city_id &&
           filter.city_id &&
-          filter.city_id[0] === "in|undefined" && {
+          filter.city_id[0] === "eq|undefined" && {
             city_id: financeFilter.filter?.city_id,
           }),
         ...(filter.status === null && { status: ["in|active", "inactive"] }),
@@ -215,9 +220,13 @@ const Finance = () => {
           `${range[0]}-${range[1]} of ${total} Bonuses`,
       },
     });
+     if(!componentIsMounted.current) { // Check if component is mounted
+        loadCities()
+      }
+
     return () => {
-      isMounted = false;
-    };
+        componentIsMounted.current = true // Set the component mount state to false on component unmount
+    }
   }, [data]);
 
   if (error) {
@@ -258,6 +267,19 @@ const Finance = () => {
         columns={columns}
         pagination={financeFilter.pagination}
         onChange={handleTableChange}
+        rowKey="id"
+        onRow={
+          //handle row click
+          (record, rowIndex) => {
+            return {
+              onClick: (event) => {
+                setBounceId(record.id);
+                setShowDetails(true);
+              },
+            };
+          }
+        }
+        
       />
       <CreateBounsModal
         open={open}

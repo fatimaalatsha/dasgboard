@@ -112,7 +112,7 @@ const CreateBounsModal = (props) => {
       >
         <Modal
           title={
-            <Divider strong style={{ fontSize: "1.2rem" }}>
+            <Divider style={{ fontSize: "1.2rem" }}>
               {" "}
               Create New Bonus{" "}
             </Divider>

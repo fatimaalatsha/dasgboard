@@ -41,7 +41,6 @@ const BounceDetails = ({ bounceId, open, onCancel }) => {
   const [bonus, setBonus] = useState([]); // Set bonus state
 
   const { data, loading, error, refetch } = useFetch(`/v1/bonuses/${bounceId}`); // Fetch data from API if bounceId is not null
-  console.log(data);
   const [cities, setCities] = useState([]); // Set cities state
 
   // Get cities
