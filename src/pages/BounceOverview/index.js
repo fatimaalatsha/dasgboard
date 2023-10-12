@@ -1,10 +1,28 @@
-import React, { useState } from "react";
-import { Descriptions, Divider, Modal , Typography} from "antd";
+import React, { useState, useRef, useEffect } from "react";
+import { Descriptions, Divider, Modal, Typography } from "antd";
+import {getDriversWhoMetGoal} from "../../utils/finance-status";
 import useFetch from "../../hooks/use-new-fetch";
 
 const { Text } = Typography;
 const BounceOverview = ({ bounceId, onCancel }) => {
   const { data, loading, error, refetch } = useFetch(`/v1/bonuses/${bounceId}`); // Fetch data from API if bounceId is not null
+
+  const [drivers, setDrivers] = useState([]); // Set drivers state
+
+  // Get drivers
+  const fetchDrivers = async (bounceId) => {
+    console.log(bounceId);
+    const drivers = await getDriversWhoMetGoal(bounceId);
+    console.log(drivers);
+    setDrivers(drivers);
+  };
+
+  // Fetch drivers on component mount
+  useEffect(() => {
+    let isMounted = true; // note mutable flag
+    fetchDrivers(bounceId);
+  }, []);
+
   return (
     <Modal open={!!bounceId} onCancel={onCancel} footer={null}>
       <Descriptions
@@ -41,6 +59,10 @@ const BounceOverview = ({ bounceId, onCancel }) => {
         </Descriptions.Item>
         <Descriptions.Item label="Bonus Objective">
           <Text strong> {data?.objective} </Text>
+        </Descriptions.Item>
+        <Descriptions.Item label="Drivers Who Met Goal">
+          <Text strong> {drivers?.length} </Text>
+           
         </Descriptions.Item>
       </Descriptions>
     </Modal>

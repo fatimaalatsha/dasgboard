@@ -88,5 +88,32 @@ const editBonus = async (id, values) => {
     }
 }
 
-export { createBonus, deleteBonus, editBonus };
+const getDriversWhoMetGoal = async (params) => {
+  try {
+    const auth = await Auth.currentSession(); // Get current session
+      const token = auth.getAccessToken().getJwtToken(); // Get token from session 
+      console.log(params);
+
+    const options = {
+      // Set options for fetch
+        headers: {
+        Authorization: token,
+        ...(process.env.REACT_APP_NEW_ENV && {
+          env: process.env.REACT_APP_NEW_ENV,
+        }),
+      },
+    };
+    const response = await NEW_API.get(
+      `/v1/bonuses/${params}/drivers`,
+      options
+    );
+    const data = await response.data;
+    return data;
+  } catch (error) {
+    console.log(error);
+    return false;
+  }
+};
+
+export { createBonus, deleteBonus, editBonus, getDriversWhoMetGoal };
           

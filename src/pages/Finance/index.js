@@ -1,4 +1,4 @@
-import { Table, Card, Button, Space, Alert, Modal, Descriptions } from "antd"; // import antd components
+import { Table, Card, Button, Space, Alert, Modal } from "antd"; // import antd components
 import { DeleteOutlined, EditTwoTone } from "@ant-design/icons"; // import antd icons
 import { useEffect, useState, useRef } from "react"; // import react hooks
 import useNewFetch from "../../hooks/use-new-fetch"; // import custom hook
@@ -9,6 +9,7 @@ import { getCities } from "../../utils/city-status"; // Import API base url
 import CreateBounsModal from "../../components/BounsModal"; // Import API base url
 import BounceDetails from "../BounceDetails"; // Import API base url
 import BounceOverview  from "../BounceOverview"; // Import API base url
+import { object } from "yup";
 
 // user params
 const getUserParams = (params) => ({
@@ -32,7 +33,6 @@ const Finance = () => {
   // Fetch Cities list from API
   const loadCities = async () => {
     await getCities().then((response) => {
-      console.log(response);
       setCities(response);
     });
   };
@@ -52,7 +52,7 @@ const Finance = () => {
       ellipsis: true,
       size: "large",
       sorter: true,
-      // filters: cities,
+      filters: cities,
       filterSearch: true,
       filteredValue: null,
       ...(financeFilter.sort?.name && {
@@ -60,8 +60,8 @@ const Finance = () => {
           financeFilter.sort?.name === "asc" ? "ascend" : "descend",
       }),
       ...(financeFilter.filter?.city_id && {
-        filteredValue: financeFilter.filter?.city_id.map((city, index) =>
-          index === 0 ? city.replace("in|", "") : city.toString()
+        filteredValue: financeFilter.filter?.city_id.map((city_id, index) =>
+          index === 0 ? city_id.replace("array|", "") : city_id.toString()
         ),
       }),
     },
@@ -74,6 +74,10 @@ const Finance = () => {
           text: "Money",
           value: "money",
         },
+
+
+
+
         {
           text: "Rides",
           value: "rides",
@@ -106,7 +110,7 @@ const Finance = () => {
         {
           text: "Completed",
           value: "completed",
-        }
+        },
       ],
       filteredValue: null,
       ...(financeFilter.filter?.status && {
@@ -213,15 +217,20 @@ const Finance = () => {
 
   //handle table change
   const handleTableChange = (pagination, filter, sorter) => {
- 
-     Object.keys(filter).forEach((key) => {
-       if (filter[key]) {
-         filter[key].unshift("in|" + filter[key][0]);
-         filter[key].splice(1, 1);
-       }
-     });
-  
 
+    Object.keys(filter).forEach((key) => {
+      if (filter[key] && key !== "city_id") {
+        filter[key].unshift("in|" + filter[key][0]);
+        filter[key].splice(1, 1);
+      }
+    });
+    
+    Object.keys(filter).forEach((key) => {
+      if (filter[key] && key === "city_id") {
+        filter[key].unshift("array|" + filter[key][0]);
+        filter[key].splice(1, 1);
+      }
+    });
     setFinanceFilter({
       // Set filter to store
       pagination: {
@@ -230,11 +239,7 @@ const Finance = () => {
       },
       filter: {
         ...filter,
-        ...(financeFilter.filter?.city_id &&
-          filter.city_id &&
-          filter.city_id[0] === "eq|undefined" && {
-            city_id: financeFilter.filter?.city_id,
-          }),
+        ...(filter.city_id === null && { city_id: ["array|"] }),
         ...(filter.status === null && { status: ["in|active", "inactive"] }),
       },
       ...(Object.keys(sorter).length !== 0 && {
@@ -244,6 +249,7 @@ const Finance = () => {
         },
       }),
     });
+
   };
 
   useEffect(() => {
