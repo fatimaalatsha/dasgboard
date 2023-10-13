@@ -5,9 +5,13 @@ import API from '../../api/NewUrl'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
+import isSameOrAfter from 'dayjs/plugin/isSameOrAfter'
+import isSameOrBefore from 'dayjs/plugin/isSameOrBefore'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
+dayjs.extend(isSameOrAfter)
+dayjs.extend(isSameOrBefore)
 
 const convertToHourTz = (date, timezone) => {
     return dayjs(date).tz(timezone).utc().format('HH:mm')
@@ -219,6 +223,29 @@ const updateShiftTemplate = async (payload, id) => {
     }
 }
 
+const isShiftInHour = (shift, hour, timezone, selectedDay) => { // Check if a shift falls within a specific hour
+    // Get the start and end times of the shift, adjusting for the time zone
+    const shiftStartTime = dayjs(shift.start_time).tz(timezone).utc()
+    const shiftEndTime = dayjs(shift.end_time).tz(timezone).utc()
+
+    /**
+     * Check if the shift's start time is on or before the end of the specified hour
+     * and if the shift's end time is on or after the start of the specified hour
+     */
+
+    return shiftStartTime.isSameOrBefore(selectedDay.tz(timezone).utc().hour(parseInt(hour)).endOf('hour')) &&
+        shiftEndTime.isSameOrAfter(selectedDay.tz(timezone).utc().hour(parseInt(hour)).startOf('hour'))
+}
+
+const shiftCount = (data, hour, timezone, selectedDay) => { // Count the number of shifts that match a specific hour
+  return data.reduce((count, driver) => { // Iterate through the data and accumulate the count
+    return (
+      count +
+      driver['shifts'].filter((shift) => isShiftInHour(shift, hour, timezone, selectedDay)).length
+    )
+  }, 0)
+}
+
 export { 
     createWeekShift, 
     updateWeekShift, 
@@ -232,4 +259,5 @@ export {
     updateShiftTemplate,
     deleteShiftTemplate,
     updateShiftByDriverId,
+    shiftCount
 }
