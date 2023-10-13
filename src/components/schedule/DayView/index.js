@@ -40,8 +40,6 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
     return () => controller.abort()// Abort fetch on unmount
   }, [selectedDay, city])
 
-  console.log(response)
-
   error && <>Something went wrong...</>
 
   const columns = [
@@ -77,7 +75,13 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           children: [
             {
               title: () => {
-                const computedCount = shiftCount(response, hour, scheduleFilter.tz, selectedDay)
+
+                const filteredData = response.map(item => ({ // Filter response to include only approved shifts
+                  ...item,
+                  shifts: item.shifts.filter(shift => shift.application.status === 'approved')
+                })).filter(item => item.shifts.length > 0)
+                
+                const computedCount = shiftCount(filteredData, hour, scheduleFilter.tz, selectedDay)
                 return ( 
                   <Text key={idx} type="secondary" code >{computedCount}</Text> 
                 )
