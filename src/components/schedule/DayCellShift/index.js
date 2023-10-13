@@ -666,9 +666,17 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
 
     const floatingComponentWidth = (record.is_overnight ? getShiftDuration() : hours.diff) * 60.9936  // 60.9936 is the average width of each hour in the calendar
 
-    const cardStyleConfig = {
-        backgroundColor: record.application?.status === 'approved' ? record.is_overnight ? token['purple-8'] : token['geekblue-1'] : token.colorWarningBg,
-        borderColor: record.application?.status === 'approved' ? record.is_overnight ? token['geekblue-10'] : token['geekblue-3'] : token['gold-4'],
+    const cardStyleConfig = { // Style configuration variable
+        backgroundColor: record.application?.status === 'approved' ? 
+            record.is_overnight ? 
+                token['purple-8'] 
+                : token['geekblue-1'] 
+            : token.colorWarningBg,
+        borderColor: record.application?.status === 'approved' ? 
+            record.is_overnight ? 
+                token['geekblue-10'] 
+                : token['geekblue-3'] 
+            : token['gold-4'],
         width: floatingComponentWidth,
         height: 'calc(100% + 2px)',
     }
