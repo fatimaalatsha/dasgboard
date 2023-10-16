@@ -35,9 +35,9 @@ const useDaySchedule = (url, timezone, selectedDay) => {
                 }
             }
             const response = await API.get(url, options)// Fetch data from API
-            const { items } = await response.data// Get data from response
+            const { data } = await response.data// Get data from response
 
-            const dayData = items.map(item => {
+            const dayData = data.map(item => {
                 const dayItems = item.shifts.map(shift => {
                   if (shift.is_overnight) {
                     const isSameDay = selectedDay.tz().utc().isSame(dayjs(shift.end_time), 'day');
@@ -73,7 +73,7 @@ const useDaySchedule = (url, timezone, selectedDay) => {
 
             setFetchedData({// Set fetched data
                 data: dayData,
-                response: items,
+                response: data,
                 isLoading: false,
                 error: false,
             })
