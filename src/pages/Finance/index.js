@@ -120,9 +120,11 @@ const Finance = () => {
       }),
       render: (status) => {
         return status === "active" ? (
-          <span style={{ color: "green" }}>{status}</span>
+          <span style={{ color: "blue" }}>{status}</span>
+        ) : status === "inactive" ? (
+          <span style={{ color: "orange" }}>{status}</span>
         ) : (
-          <span style={{ color: "red" }}>{status}</span>
+          <span style={{ color: "green" }}>{status}</span>
         );
       },
     },
@@ -210,7 +212,7 @@ const Finance = () => {
       arrayFormat: "comma",
     })}`
   );
-  //handle closing modal
+  //handle closing modal  
   const handleCancel = () => {
     setOpen(false);
   };
@@ -239,7 +241,7 @@ const Finance = () => {
       },
       filter: {
         ...filter,
-        ...(filter.city_id === null && { city_id: ["array|"] }),
+        ...(filter.city_id === null && { city_id: null }),
         ...(filter.status === null && { status: ["in|active", "inactive"] }),
       },
       ...(Object.keys(sorter).length !== 0 && {
