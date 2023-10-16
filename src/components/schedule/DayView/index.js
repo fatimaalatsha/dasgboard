@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react' // Import React hooks
+import { useState, useEffect, useRef } from 'react' // Import React hooks
 import { Table, Typography, Tooltip, Space } from 'antd' // Import Ant components
 import qs from 'qs' // Import qs library
 import dayjs from 'dayjs' // Import dayjs
@@ -19,26 +19,51 @@ const { Text, Title } = Typography
 
 //get the papams that will be passed to filters through qs
 const queryHandler = (params) => ({ // Get table params
-  day: params.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'),
-  paginated: false,
+  day: params.day,
+  limit: params.pagination?.pageSize,
+  page: params.pagination?.current,
+  ...params
 })
 
 const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+  const dayFilter = useFilterStore( state => state.dayFilter) // get local day view filters
+  const setDayFilter = useFilterStore( state => state.setDayFilter ) // set local day view filters
+  const componentIsMounted = useRef(false) // Create a ref to store the component mount state
   const { 
     data,
     response, 
     isLoading, 
     error, 
     refetch 
-  } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler(selectedDay), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, selectedDay ) // Call useSchedule hook
-  const controller = new AbortController()// Create a new AbortController
+  } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler({day: selectedDay.format('YYYY-MM-DD'), ...dayFilter}), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, selectedDay ) // Call useSchedule hook
+
+  const handleTableChange = (pagination, filter, sorter) => { // Table filters handler
+    setDayFilter({
+      pagination: {
+        ...dayFilter.pagination,
+        ...pagination,
+      }
+    })
+  }
   
   useEffect(() => {
-    refetch()
-    return () => controller.abort()// Abort fetch on unmount
-  }, [selectedDay, city])
+    setDayFilter({
+      pagination: {
+        ...dayFilter.pagination,
+        total: response.meta?.total_items,
+        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Drivers`,
+      }
+    })
+
+    if(!!!componentIsMounted.current){
+      refetch()
+    }
+    return () => {
+      componentIsMounted.current = true // Set the component mount state to false on component unmount
+  }
+  }, [selectedDay, city, response])
 
   error && <>Something went wrong...</>
 
@@ -76,7 +101,7 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
             {
               title: () => {
 
-                const filteredData = response.map(item => ({ // Filter response to include only approved shifts
+                const filteredData = response?.data.map(item => ({ // Filter response to include only approved shifts
                   ...item,
                   shifts: item.shifts.filter(shift => shift.application.status === 'approved')
                 })).filter(item => item.shifts.length > 0)
@@ -142,7 +167,8 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           columns={columns}
           dataSource={data}
           loading={isLoading}
-          pagination={false}
+          pagination={dayFilter.pagination}
+          onChange={handleTableChange}
           className="schedule-day-table"
           bordered
           size="small"
