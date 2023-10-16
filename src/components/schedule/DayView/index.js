@@ -146,12 +146,6 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
           className="schedule-day-table"
           bordered
           size="small"
-          summary={pageData => {
-            //console.log('page data: ', pageData)
-            return (
-              <></>
-            )
-          }}
       />
       {loadTimeline && <CurrentTimeLine axis tz={tz} />}
     </div>
