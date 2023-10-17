@@ -95,7 +95,14 @@ const Schedule = () => {
                 />
         ,
         draft: <ShiftTemplates />,
-        approval: <ShiftApproval selectedDate={selectedDate} tz={scheduleFilter.tz} />,
+        approval: <ShiftApproval 
+            selectedDate={selectedDate} 
+            tz={scheduleFilter.tz} 
+            checkDisabled={checkDisabled()}
+            handleWeekChange={handleWeekChange}
+            handleTodayClick={handleTodayClick}
+            setSelectedDate={setSelectedDate}
+        />,
     }
 
     return (

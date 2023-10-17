@@ -12,6 +12,7 @@ import useFetch from '../../../hooks/use-new-fetch'
 import { useFilterStore } from '../../../store'
 import { confirmApplication } from '../../../utils/schedule-status'
 import { CitySelect } from '../../CitySelect'
+import CalendarFilterBar from '../CalendarFilterBar'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -26,7 +27,14 @@ const queryHandler = (params) => ({ // Get table params
     paginated: false,
 })
 
-const ShiftApproval = ({ selectedDate, tz }) => {
+const ShiftApproval = ({ 
+  selectedDate, 
+  tz,
+  checkDisabled,
+  handleWeekChange,
+  handleTodayClick,
+  setSelectedDate
+}) => {
   dayjs.tz.setDefault(tz)
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
   const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
@@ -139,6 +147,14 @@ const ShiftApproval = ({ selectedDate, tz }) => {
 
   return (
     <>
+      <CalendarFilterBar 
+          checkDisabled={checkDisabled}
+          handleWeekChange={handleWeekChange}
+          handleTodayClick={handleTodayClick}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          refetch={refetch}
+      />
       { scheduleFilter.filter.city_id?.split('|')[1] ?
         <Table 
           columns={columns} 
