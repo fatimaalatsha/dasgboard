@@ -26,7 +26,7 @@ const queryHandler = (params) => ({ // Get table params
     paginated: false,
 })
 
-const ShiftApproval = ({ selectedDate, tz, view }) => {
+const ShiftApproval = ({ selectedDate, tz }) => {
   dayjs.tz.setDefault(tz)
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
   const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
@@ -34,8 +34,8 @@ const ShiftApproval = ({ selectedDate, tz, view }) => {
 
   const filters = {
       city_id: Number(scheduleFilter.filter.city_id.replace('in|', '')),
-      date_from: view === 1 ? selectedDate.week.startOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
-      date_to: view === 1 ? selectedDate.week.endOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
+      date_from: scheduleFilter.navigation.view === 1 ? selectedDate.week.startOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
+      date_to: scheduleFilter.navigation.view === 1 ? selectedDate.week.endOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
   }
 
   const { data, isLoading, error, refetch } = useFetch(`/v1/shifts/applications?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`)

@@ -7,6 +7,7 @@ import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
 import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import DayCellShift from '../DayCellShift' // Import CellShift component
+import CalendarFilterBar from '../CalendarFilterBar' // Calendar Filters and navigation
 import { useFilterStore } from '../../../store' // Import useFilterStore hook
 import useDaySchedule from '../../../hooks/use-day-schedule' // Import useDaySchedule hook
 import { shiftCount } from '../../../utils/schedule-status' // Import counter for each hour on shifts
@@ -25,7 +26,17 @@ const queryHandler = (params) => ({ // Get table params
   ...params
 })
 
-const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
+const DayView = ({
+  selectedDay, 
+  hours, 
+  tz, 
+  city, 
+  loadTimeline,
+  handleWeekChange,
+  handleTodayClick,
+  selectedDate,
+  setSelectedDate
+ }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
   const dayFilter = useFilterStore( state => state.dayFilter) // get local day view filters
@@ -162,19 +173,29 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
   ]
 
   return (
-    <div style={{ position: 'relative'}}>
-      <Table 
-          columns={columns}
-          dataSource={data}
-          loading={isLoading}
-          pagination={dayFilter.pagination}
-          onChange={handleTableChange}
-          className="schedule-day-table"
-          bordered
-          size="small"
+    <>
+      <CalendarFilterBar 
+          checkDisabled={loadTimeline}
+          handleWeekChange={handleWeekChange}
+          handleTodayClick={handleTodayClick}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          refetch={refetch}
       />
-      {loadTimeline && <CurrentTimeLine axis tz={tz} />}
-    </div>
+      <div style={{ position: 'relative'}}>
+        <Table 
+            columns={columns}
+            dataSource={data}
+            loading={isLoading}
+            pagination={dayFilter.pagination}
+            onChange={handleTableChange}
+            className="schedule-day-table"
+            bordered
+            size="small"
+        />
+        {loadTimeline && <CurrentTimeLine axis tz={tz} />}
+      </div>
+    </>
   )
 }
 
