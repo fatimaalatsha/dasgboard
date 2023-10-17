@@ -90,7 +90,7 @@ const CalendarFilterBar = ({
                         }   
                         style={{ width: 200 }}
                     />
-                    {  scheduleFilter.navigation.view === 0 && (
+                    {  scheduleFilter.navigation.view === 6 && (
                         <Select 
                             placeholder="Columns"
                             style={{ width: 200 }}
