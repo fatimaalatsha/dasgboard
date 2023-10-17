@@ -16,11 +16,6 @@ dayjs.extend(timezone)
 
 const days = ["sunday","monday", "tuesday", "wednesday", "thursday", "friday", "saturday",]
 
-const dayHours = [];
-for (let hour = 0; hour < 24; hour++) {
-    dayHours.push( dayjs().hour(hour).minute(0).format('HH:mm') )
-}
-
 const Schedule = () => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
@@ -28,6 +23,13 @@ const Schedule = () => {
         week: dayjs().startOf('week'),
         day: dayjs().startOf('day'),
     })
+    const [dayHours, setDayHours] = useState([...Array(24)].map((_, idx) => {
+        const timeLoop = dayjs().hour(idx).minute(0).format('HH:mm')
+        return {
+            label: timeLoop,
+            value: timeLoop
+        }
+    }))
 
     const tabList = [
         {
@@ -85,6 +87,7 @@ const Schedule = () => {
                 <DayView 
                     selectedDay={selectedDate.day} 
                     hours={dayHours} 
+                    setHours={setDayHours}
                     tz={scheduleFilter.tz} 
                     city={Number(scheduleFilter.filter.city_id.replace('in|', ''))} 
                     loadTimeline={checkDisabled()}

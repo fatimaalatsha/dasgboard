@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import {Space, Button, DatePicker, Select, Radio, Tooltip } from 'antd' // Import Ant components
+import {Space, Button, DatePicker, Select, Radio, Tooltip, Divider } from 'antd' // Import Ant components
 import { LeftOutlined, RightOutlined, ReloadOutlined } from '@ant-design/icons' // Import Ant icons
+
+import dayjs from 'dayjs' // Import date handlers
 
 import { CitySelect } from '../../CitySelect'
 import CreateWeekShift from '../CreateWeekShift'
@@ -12,7 +14,8 @@ const CalendarFilterBar = ({
     selectedDate, 
     setSelectedDate,
     checkDisabled,
-    refetch
+    refetch,
+    ...props
 }) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
@@ -33,12 +36,46 @@ const CalendarFilterBar = ({
           disabled: true
         },
     ]
+    
+    const hoursOptions = [...Array(24)].map((_, idx) => {
+        const timeLoop = dayjs().hour(idx).minute(0).format('HH:mm')
+        return {
+            label: timeLoop,
+            value: timeLoop
+        }
+    })
+
+    const handleHourChange = (option) => {
+        const sortOptionArr = option.sort((a, b) => {
+            // Extract the hour and minute parts and convert them to numbers for comparison
+            const [aHour, aMinute] = a.label.split(':').map(Number)
+            const [bHour, bMinute] = b.label.split(':').map(Number)
+          
+            // Compare the hours first
+            if (aHour < bHour) return -1
+            if (aHour > bHour) return 1
+          
+            // If hours are equal, compare the minutes
+            if (aMinute < bMinute) return -1
+            if (aMinute > bMinute) return 1
+          
+            // If both hours and minutes are equal, they are the same
+            return 0
+          })
+        props.setHours(sortOptionArr)
+    }
 
     const refetchConfig = {
         icon: <ReloadOutlined />,
         onClick: () => refetch(),
         type: 'primary',
         ghost: true,
+    }
+
+    const resetConfig = {
+        type: 'primary',
+        block: true,
+        onClick: () => handleHourChange(hoursOptions)
     }
 
     return (   
@@ -53,6 +90,25 @@ const CalendarFilterBar = ({
                         }   
                         style={{ width: 200 }}
                     />
+                    {  scheduleFilter.navigation.view === 0 && (
+                        <Select 
+                            placeholder="Columns"
+                            style={{ width: 200 }}
+                            options={hoursOptions}
+                            value={props?.hours}
+                            mode="multiple"
+                            maxTagCount={0}
+                            maxTagPlaceholder="...Filtered columns"
+                            onChange={(_, option) => handleHourChange(option)}
+                            dropdownRender={(menu) => (
+                                <>
+                                    {menu}
+                                    <Divider style={{margin: '8px 0'}} />
+                                    <Button {...resetConfig}>Reset</Button>
+                                </>
+                            )}
+                        />
+                    )}
                     <Select
                         placeholder="Status"
                         optionFilterProp="children"

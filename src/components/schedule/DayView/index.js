@@ -29,6 +29,7 @@ const queryHandler = (params) => ({ // Get table params
 const DayView = ({
   selectedDay, 
   hours, 
+  setHours,
   tz, 
   city, 
   loadTimeline,
@@ -106,7 +107,7 @@ const DayView = ({
       ),
       children: [
         ...hours.map((hour, idx) => ({ // Loop through the days
-          title: <>{hour}</>,
+          title: <>{hour.label}</>,
           align: 'center',
           children: [
             {
@@ -117,18 +118,18 @@ const DayView = ({
                   shifts: item.shifts.filter(shift => shift.application.status === 'approved')
                 })).filter(item => item.shifts.length > 0)
                 
-                const computedCount = shiftCount(filteredData, hour, scheduleFilter.tz, selectedDay)
+                const computedCount = shiftCount(filteredData, hour.label, scheduleFilter.tz, selectedDay)
                 return ( 
                   <Text key={idx} type="secondary" code >{computedCount}</Text> 
                 )
               },
-              dataIndex: hour,
+              dataIndex: hour.label,
               key: idx,
               align: 'center',
               onCell: (record) => {
                   return {
                       onMouseEnter: () => { // Mouse enter event
-                          setHoveredCell({ key: record.key, hour: hour })
+                          setHoveredCell({ key: record.key, hour: hour.label })
                       },
                       onMouseLeave: () => { // Mouse leave event
                           setHoveredCell(null)
@@ -138,12 +139,12 @@ const DayView = ({
               render: (text, record ) => {
                 return (
                   <div className="container" style={{ minHeight: 24, height: '100%', zIndex: 999 }}>
-                    { record[hour].length > 0 ? record[hour].map((item, idx) => (
+                    { record[hour.label].length > 0 ? record[hour.label].map((item, idx) => (
                         <DayCellShift 
                           key={idx}
-                          isCellFilled={dayjs(item.start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour}
+                          isCellFilled={dayjs(item.start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour.label}
                           record={item}
-                          hour={hour}
+                          hour={hour.label}
                           day={selectedDay}
                           setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
                           refetch={refetch}
@@ -152,9 +153,9 @@ const DayView = ({
                         />
                     )) : (
                       <DayCellShift 
-                        display={hoveredCell?.key === record.key && hoveredCell?.hour === hour} 
+                        display={hoveredCell?.key === record.key && hoveredCell?.hour === hour.label} 
                         record={record} 
-                        hour={hour}
+                        hour={hour.label}
                         day={selectedDay}
                         setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
                         refetch={refetch}
@@ -181,6 +182,8 @@ const DayView = ({
           selectedDate={selectedDate}
           setSelectedDate={setSelectedDate}
           refetch={refetch}
+          hours={hours}
+          setHours={setHours}
       />
       <div style={{ position: 'relative'}}>
         <Table 
