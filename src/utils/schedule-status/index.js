@@ -246,6 +246,25 @@ const shiftCount = (data, hour, timezone, selectedDay) => { // Count the number 
   }, 0)
 }
 
+const rangeFilter = (range, data) => {
+    const userIds = data.filter((user) => {
+        if (user.shifts.length === 0) {
+            return true
+        }
+
+        const shiftNotInRange = user.shifts.every((shift) => {
+          const shiftStart = dayjs(shift.start_time)
+          const shiftEnd = dayjs(shift.end_time)
+          return shiftStart.isBefore(range.start_time) || shiftEnd.isAfter(range.end_time)
+        })
+        
+        return shiftNotInRange
+    })
+    .map(user => user.user_id)
+
+    return userIds
+}
+
 export { 
     createWeekShift, 
     updateWeekShift, 
@@ -259,5 +278,6 @@ export {
     updateShiftTemplate,
     deleteShiftTemplate,
     updateShiftByDriverId,
-    shiftCount
+    shiftCount,
+    rangeFilter
 }

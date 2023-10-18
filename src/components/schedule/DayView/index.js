@@ -184,6 +184,7 @@ const DayView = ({
           refetch={refetch}
           hours={hours}
           setHours={setHours}
+          data={response.data}
       />
       <div style={{ position: 'relative'}}>
         <Table 

@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import {Space, Button, DatePicker, Select, Radio, Tooltip, Divider, TimePicker } from 'antd' // Import Ant components
+import { Space, Button, DatePicker, Select, Radio, Tooltip, Divider, TimePicker } from 'antd' // Import Ant components
 import { LeftOutlined, RightOutlined, ReloadOutlined } from '@ant-design/icons' // Import Ant icons
 
 import dayjs from 'dayjs' // Import date handlers
@@ -9,12 +9,12 @@ import { object, string } from 'yup'
 import { CitySelect } from '../../CitySelect'
 import CreateWeekShift from '../CreateWeekShift'
 import { useFilterStore } from '../../../store'
-import TimePickerWrapper from '../../forms/TimePickerWrapper'
+import { rangeFilter } from '../../../utils/schedule-status'
 import Submit from '../../forms/SubmitWrapper'
 
 const { RangePicker } = TimePicker
 
-const HourDayFilter = () => {
+const HourDayFilter = (props) => {
     const validationSchema = object().shape({
         start_time: string().required('Required.'),
         end_time: string().required('Required.'),
@@ -28,7 +28,8 @@ const HourDayFilter = () => {
             }}
             validationSchema={validationSchema}
             onSubmit={(values, { setSubmitting }) => {
-                console.log(values)
+                const userIds = rangeFilter(values, props.data)
+                console.log("Users: ",userIds)
                 setSubmitting(false)
             }}
         >
@@ -179,7 +180,9 @@ const CalendarFilterBar = ({
                         />
                     )}
                     {  scheduleFilter.navigation.view === 0 && (
-                            <HourDayFilter />
+                            <HourDayFilter 
+                                data={props.data}
+                            />
                     )}
                     <Select
                         placeholder="Status"
