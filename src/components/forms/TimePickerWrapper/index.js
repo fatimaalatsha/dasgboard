@@ -23,11 +23,17 @@ const TimePickerWrapper = forwardRef((props, ref) => {
 
     return (
         <Space direction="vertical" style={{ width: '100%' }}>
-            <Text strong style={{ textTransform: 'capitalize'}}>{props.name.replace('_', ' ')}</Text>
+            { !props.hideTitle && (
+                <Text strong style={{ textTransform: 'capitalize'}}>
+                    {props.name.replace('_', ' ')}
+                </Text>
+            )}
             <TimePicker {...pickerConfig} />
-            <ErrorMessage name={props.name}>
-                {msg => <Text type="danger">{msg}</Text>}
-            </ErrorMessage>
+            { pickerConfig.status === "error" && (
+                <ErrorMessage name={props.name}>
+                    {msg => <Text type="danger">{msg}</Text>}
+                </ErrorMessage>
+            )}
         </Space>
     )
 })

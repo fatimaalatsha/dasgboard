@@ -10,6 +10,7 @@ import isBetween from 'dayjs/plugin/isBetween' // Import dayjs isBetween plugin
 
 import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import CellShift from '../CellShift' // Import CellShift component
+import CalendarFilterBar from '../CalendarFilterBar'
 import { CitySelect } from '../../CitySelect'
 import { useFilterStore } from '../../../store'
 import useWeekSchedule from '../../../hooks/use-week-schedule'
@@ -28,7 +29,17 @@ const queryHandler = (params) => ({ // Get table params
     paginated: false,
 })
 
-const WeekView = ({selectedWeek, days, tz, city, loadTimeline }) => {
+const WeekView = ({
+    selectedWeek, 
+    days, 
+    tz, 
+    city, 
+    loadTimeline,
+    handleWeekChange,
+    handleTodayClick,
+    selectedDate,
+    setSelectedDate
+ }) => {
     dayjs.tz.setDefault(tz)
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
     const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
@@ -167,6 +178,14 @@ const WeekView = ({selectedWeek, days, tz, city, loadTimeline }) => {
     
     return (
     <>
+        <CalendarFilterBar 
+            checkDisabled={loadTimeline}
+            handleWeekChange={handleWeekChange}
+            handleTodayClick={handleTodayClick}
+            selectedDate={selectedDate}
+            setSelectedDate={setSelectedDate}
+            refetch={refetch}
+        />
         { scheduleFilter.filter.city_id?.split('|')[1] ? 
         <div style={{ position: 'relative'}}>
             <Table 

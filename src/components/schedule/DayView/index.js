@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react' // Import React hooks
+import { useState, useEffect, useRef } from 'react' // Import React hooks
 import { Table, Typography, Tooltip, Space } from 'antd' // Import Ant components
 import qs from 'qs' // Import qs library
 import dayjs from 'dayjs' // Import dayjs
@@ -7,6 +7,7 @@ import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
 
 import CurrentTimeLine from '../CurrentTimeLine' // Import Red Bar component
 import DayCellShift from '../DayCellShift' // Import CellShift component
+import CalendarFilterBar from '../CalendarFilterBar' // Calendar Filters and navigation
 import { useFilterStore } from '../../../store' // Import useFilterStore hook
 import useDaySchedule from '../../../hooks/use-day-schedule' // Import useDaySchedule hook
 import { shiftCount } from '../../../utils/schedule-status' // Import counter for each hour on shifts
@@ -19,26 +20,62 @@ const { Text, Title } = Typography
 
 //get the papams that will be passed to filters through qs
 const queryHandler = (params) => ({ // Get table params
-  day: params.format('YYYY-MM-DD[T]HH:mm:ss.SSS[Z]'),
-  paginated: false,
+  day: params.day,
+  limit: params.pagination?.pageSize,
+  page: params.pagination?.current,
+  ...params
 })
 
-const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
+const DayView = ({
+  selectedDay, 
+  hours, 
+  setHours,
+  tz, 
+  city, 
+  loadTimeline,
+  handleWeekChange,
+  handleTodayClick,
+  selectedDate,
+  setSelectedDate
+ }) => {
   const [hoveredCell, setHoveredCell] = useState(null) // Create state to store the hover state
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
+  const dayFilter = useFilterStore( state => state.dayFilter) // get local day view filters
+  const setDayFilter = useFilterStore( state => state.setDayFilter ) // set local day view filters
+  const componentIsMounted = useRef(false) // Create a ref to store the component mount state
   const { 
     data,
     response, 
     isLoading, 
     error, 
     refetch 
-  } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler(selectedDay), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, selectedDay ) // Call useSchedule hook
-  const controller = new AbortController()// Create a new AbortController
+  } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler({day: selectedDay.format('YYYY-MM-DD'), ...dayFilter}), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, selectedDay ) // Call useSchedule hook
+
+  const handleTableChange = (pagination, filter, sorter) => { // Table filters handler
+    setDayFilter({
+      pagination: {
+        ...dayFilter.pagination,
+        ...pagination,
+      }
+    })
+  }
   
   useEffect(() => {
-    refetch()
-    return () => controller.abort()// Abort fetch on unmount
-  }, [selectedDay, city])
+    setDayFilter({
+      pagination: {
+        ...dayFilter.pagination,
+        total: response.meta?.total_items,
+        showTotal: (total, range) => `${range[0]}-${range[1]} of ${total} Drivers`,
+      }
+    })
+
+    if(!!!componentIsMounted.current){
+      refetch()
+    }
+    return () => {
+      componentIsMounted.current = true // Set the component mount state to false on component unmount
+  }
+  }, [selectedDay, city, response])
 
   error && <>Something went wrong...</>
 
@@ -70,29 +107,29 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
       ),
       children: [
         ...hours.map((hour, idx) => ({ // Loop through the days
-          title: <>{hour}</>,
+          title: <>{hour.label}</>,
           align: 'center',
           children: [
             {
               title: () => {
 
-                const filteredData = response.map(item => ({ // Filter response to include only approved shifts
+                const filteredData = response?.data.map(item => ({ // Filter response to include only approved shifts
                   ...item,
                   shifts: item.shifts.filter(shift => shift.application.status === 'approved')
                 })).filter(item => item.shifts.length > 0)
                 
-                const computedCount = shiftCount(filteredData, hour, scheduleFilter.tz, selectedDay)
+                const computedCount = shiftCount(filteredData, hour.label, scheduleFilter.tz, selectedDay)
                 return ( 
                   <Text key={idx} type="secondary" code >{computedCount}</Text> 
                 )
               },
-              dataIndex: hour,
+              dataIndex: hour.label,
               key: idx,
               align: 'center',
               onCell: (record) => {
                   return {
                       onMouseEnter: () => { // Mouse enter event
-                          setHoveredCell({ key: record.key, hour: hour })
+                          setHoveredCell({ key: record.key, hour: hour.label })
                       },
                       onMouseLeave: () => { // Mouse leave event
                           setHoveredCell(null)
@@ -102,12 +139,12 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
               render: (text, record ) => {
                 return (
                   <div className="container" style={{ minHeight: 24, height: '100%', zIndex: 999 }}>
-                    { record[hour].length > 0 ? record[hour].map((item, idx) => (
+                    { record[hour.label].length > 0 ? record[hour.label].map((item, idx) => (
                         <DayCellShift 
                           key={idx}
-                          isCellFilled={dayjs(item.start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour}
+                          isCellFilled={dayjs(item.start_time).tz(scheduleFilter.tz).utc().format('HH:mm') === hour.label}
                           record={item}
-                          hour={hour}
+                          hour={hour.label}
                           day={selectedDay}
                           setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
                           refetch={refetch}
@@ -116,9 +153,9 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
                         />
                     )) : (
                       <DayCellShift 
-                        display={hoveredCell?.key === record.key && hoveredCell?.hour === hour} 
+                        display={hoveredCell?.key === record.key && hoveredCell?.hour === hour.label} 
                         record={record} 
-                        hour={hour}
+                        hour={hour.label}
                         day={selectedDay}
                         setHoveredCell={(values) => setHoveredCell({time: values.time, day: values.day})}
                         refetch={refetch}
@@ -137,24 +174,32 @@ const DayView = ({selectedDay, hours, tz, city, loadTimeline }) => {
   ]
 
   return (
-    <div style={{ position: 'relative'}}>
-      <Table 
-          columns={columns}
-          dataSource={data}
-          loading={isLoading}
-          pagination={false}
-          className="schedule-day-table"
-          bordered
-          size="small"
-          summary={pageData => {
-            //console.log('page data: ', pageData)
-            return (
-              <></>
-            )
-          }}
+    <>
+      <CalendarFilterBar 
+          checkDisabled={loadTimeline}
+          handleWeekChange={handleWeekChange}
+          handleTodayClick={handleTodayClick}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          refetch={refetch}
+          hours={hours}
+          setHours={setHours}
+          data={response.data}
       />
-      {loadTimeline && <CurrentTimeLine axis tz={tz} />}
-    </div>
+      <div style={{ position: 'relative'}}>
+        <Table 
+            columns={columns}
+            dataSource={data}
+            loading={isLoading}
+            pagination={dayFilter.pagination}
+            onChange={handleTableChange}
+            className="schedule-day-table"
+            bordered
+            size="small"
+        />
+        {loadTimeline && <CurrentTimeLine axis tz={tz} />}
+      </div>
+    </>
   )
 }
 

@@ -12,6 +12,7 @@ import useFetch from '../../../hooks/use-new-fetch'
 import { useFilterStore } from '../../../store'
 import { confirmApplication } from '../../../utils/schedule-status'
 import { CitySelect } from '../../CitySelect'
+import CalendarFilterBar from '../CalendarFilterBar'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -26,7 +27,14 @@ const queryHandler = (params) => ({ // Get table params
     paginated: false,
 })
 
-const ShiftApproval = ({ selectedDate, tz, view }) => {
+const ShiftApproval = ({ 
+  selectedDate, 
+  tz,
+  checkDisabled,
+  handleWeekChange,
+  handleTodayClick,
+  setSelectedDate
+}) => {
   dayjs.tz.setDefault(tz)
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
   const setScheduleFilter = useFilterStore(state => state.setScheduleFilter)
@@ -34,8 +42,8 @@ const ShiftApproval = ({ selectedDate, tz, view }) => {
 
   const filters = {
       city_id: Number(scheduleFilter.filter.city_id.replace('in|', '')),
-      date_from: view === 1 ? selectedDate.week.startOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
-      date_to: view === 1 ? selectedDate.week.endOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
+      date_from: scheduleFilter.navigation.view === 1 ? selectedDate.week.startOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
+      date_to: scheduleFilter.navigation.view === 1 ? selectedDate.week.endOf('week').format('YYYY-MM-DD') : selectedDate.day.format('YYYY-MM-DD'),
   }
 
   const { data, isLoading, error, refetch } = useFetch(`/v1/shifts/applications?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`)
@@ -139,6 +147,14 @@ const ShiftApproval = ({ selectedDate, tz, view }) => {
 
   return (
     <>
+      <CalendarFilterBar 
+          checkDisabled={checkDisabled}
+          handleWeekChange={handleWeekChange}
+          handleTodayClick={handleTodayClick}
+          selectedDate={selectedDate}
+          setSelectedDate={setSelectedDate}
+          refetch={refetch}
+      />
       { scheduleFilter.filter.city_id?.split('|')[1] ?
         <Table 
           columns={columns} 

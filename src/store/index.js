@@ -117,7 +117,7 @@ let filterStore = (set) => ({
     },
     pagination: {
       current: 1,
-      pageSize: 20,
+      pageSize: 25,
       showSizeChanger: true,
       pageSizeOptions: pageSize,
       position: ["bottomRight", "topRight"],
@@ -126,6 +126,19 @@ let filterStore = (set) => ({
   setScheduleFilter: (filter) =>
     set((state) => ({
       scheduleFilter: { ...state.scheduleFilter, ...filter },
+    })),
+  dayFilter: {
+    pagination: {
+      current: 1,
+      pageSize: 25,
+      showSizeChanger: true,
+      pageSizeOptions: pageSize,
+      position: ["bottomRight", "topRight"],
+    },
+  },
+  setDayFilter: (filter) => 
+    set((state) => ({ 
+      dayFilter: { ...state.dayFilter, ...filter}
     })),
   reportFilter: {
     date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD"),

@@ -3,7 +3,7 @@ import { Select } from 'antd'
 import useFetch from '../../hooks/use-new-fetch'
 
 const CitySelect = forwardRef((props, ref) => {
-    const { data, error, isLoading } = useFetch('/v1/cities?paginated=false&filter[status]=in|active')
+    const { data, error, isLoading } = useFetch('/v1/cities?paginated=false&filter[status]=in|active&sort[name]=ASC')
 
     const cities = data?.data?.map((city) => {
         city.label = city.name
