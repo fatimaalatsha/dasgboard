@@ -179,7 +179,7 @@ const CalendarFilterBar = ({
                             )}
                         />
                     )}
-                    {  scheduleFilter.navigation.view === 6 && (
+                    {  scheduleFilter.navigation.view === 0 && (
                             <HourDayFilter 
                                 data={props.data}
                             />
