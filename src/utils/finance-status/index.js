@@ -88,15 +88,15 @@ const editBonus = async (id, values) => {
     }
 }
 
-const getDriversWhoMetGoal = async (params) => {
+const getDriversWhoMetGoal = async (params, pagination) => {
   try {
     const auth = await Auth.currentSession(); // Get current session
-      const token = auth.getAccessToken().getJwtToken(); // Get token from session 
-      console.log(params);
+    const token = auth.getAccessToken().getJwtToken(); // Get token from session
+    console.log(params);
 
     const options = {
       // Set options for fetch
-        headers: {
+      headers: {
         Authorization: token,
         ...(process.env.REACT_APP_NEW_ENV && {
           env: process.env.REACT_APP_NEW_ENV,
@@ -104,7 +104,7 @@ const getDriversWhoMetGoal = async (params) => {
       },
     };
     const response = await NEW_API.get(
-      `/v1/bonuses/${params}/drivers`,
+      `/v1/bonuses/${params}/drivers?all=${pagination}`,
       options
     );
     const data = await response.data;

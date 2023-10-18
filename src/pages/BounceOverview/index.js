@@ -10,38 +10,49 @@ import {
   Table,
   Button,
 } from "antd";
-import {getDriversWhoMetGoal} from "../../utils/finance-status";
 import useFetch from "../../hooks/use-new-fetch";
 
+import {getDriversWhoMetGoal} from "../../utils/finance-status";
 
 const { Text, Title } = Typography;
 
 // drivers who mit the goal component
-const DriversWhoMetGoal = ({ bounceId, pagination, all }) => {
-  const [drivers, setDrivers] = useState([]); // Set drivers state
-  console.log(pagination);
-  const { data, loading, error, refetch } = useFetch(
-    `/v1/bonuses/${bounceId}/drivers?all=${pagination}`
-  ); // Fetch data from API if bounceId is not null
-      console.log(data);
-
+const DriversWhoMetGoal = ({ bounceId, pagination }) => {
+  const [drivers, setDrivers] = useState(); // Set drivers state
   
-   
-  
+  //flat data
+  const flatData = (data) => {
+    return data.map((item) => {
+      return {
+        full_name: item.driver.full_name,
+        is_achieved: item.is_achieved,
+        paid: item.paid,
+        paid_out_at: item.paid_out_at ? item.paid_out_at : "N/A",
+        updated_at: item.updated_at,
+        id: item.driver.user_id,
+      };
+    });
+  };
+  //get drivers
+  const getDrivers = async () => {
+    const data = await getDriversWhoMetGoal(bounceId, pagination);
+    const flatDataArray = flatData(data);
+    setDrivers(flatDataArray);
+  };
 
-   
-  //tabList
-  const tabList = [
-    {
-      key: "completed",
-      tab: "Completed",
-    },
-    {
-      key: "all",
-      tab: "All",
-    },
-  ];
+  useEffect(() => {
+    getDrivers();
+  }
+    , [bounceId, pagination]);
+
   const driversColumns = [
+    {
+      title: "ID",
+      dataIndex: "id",
+      key: "id",
+  
+    }, 
+
     {
       title: "Name",
       dataIndex: "full_name",
@@ -53,7 +64,7 @@ const DriversWhoMetGoal = ({ bounceId, pagination, all }) => {
       key: "is_achieved",
       align: "center",
       render: (is_achieved) => {
-        return is_achieved === "Yes" ? (
+        return is_achieved === true ? (
           <Tag color="green">Yes</Tag>
         ) : (
           <Tag color="red">No</Tag>
@@ -101,7 +112,7 @@ const DriversWhoMetGoal = ({ bounceId, pagination, all }) => {
       align: "center",
       render: (text, record) => (
         <Space size="middle">
-          <a>Edit</a>
+          <Button type="primary" disabled>Edit</Button>
         </Space>
       ),
     },
@@ -110,8 +121,7 @@ const DriversWhoMetGoal = ({ bounceId, pagination, all }) => {
   //return table with the info
   return (
     <Table columns={driversColumns} dataSource={drivers} pagination={false} />
-);
-  
+  );
 };
 
 
@@ -140,6 +150,7 @@ const BounceOverview = ({ bounceId, onCancel }) => {
       open={!!bounceId}
       onCancel={onCancel}
       width={1000}
+
       closable={false}
       footer={
         <Space>
@@ -211,7 +222,7 @@ const BounceOverview = ({ bounceId, onCancel }) => {
             <DriversWhoMetGoal bounceId={bounceId} pagination={false} />
           )}
           {BounceTab.navigation.tab === "all" && (
-            <DriversWhoMetGoal bounceId={bounceId} pagination={ true } all={true} />
+            <DriversWhoMetGoal bounceId={bounceId} pagination={ true } />
           )}
         </Card>
       </Card>
