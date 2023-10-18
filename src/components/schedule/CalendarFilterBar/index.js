@@ -1,12 +1,81 @@
 import { useState } from 'react'
-import {Space, Button, DatePicker, Select, Radio, Tooltip, Divider } from 'antd' // Import Ant components
+import {Space, Button, DatePicker, Select, Radio, Tooltip, Divider, TimePicker } from 'antd' // Import Ant components
 import { LeftOutlined, RightOutlined, ReloadOutlined } from '@ant-design/icons' // Import Ant icons
 
 import dayjs from 'dayjs' // Import date handlers
+import { Formik, Form as FormikForm } from 'formik'
+import { object, string } from 'yup'
 
 import { CitySelect } from '../../CitySelect'
 import CreateWeekShift from '../CreateWeekShift'
 import { useFilterStore } from '../../../store'
+import TimePickerWrapper from '../../forms/TimePickerWrapper'
+import Submit from '../../forms/SubmitWrapper'
+
+const { RangePicker } = TimePicker
+
+const HourDayFilter = () => {
+    const validationSchema = object().shape({
+        start_time: string().required('Required.'),
+        end_time: string().required('Required.'),
+    })
+
+    return (
+        <Formik
+            initialValues={{
+                start_time: '',
+                end_time: ''
+            }}
+            validationSchema={validationSchema}
+            onSubmit={(values, { setSubmitting }) => {
+                console.log(values)
+                setSubmitting(false)
+            }}
+        >
+            { props => (
+                <FormikForm>
+                    <Space.Compact>
+                        <RangePicker
+                            status={props.isValid ? 'success' : 'error'}
+                            format="HH:mm"
+                            value={
+                                props.values.start_time && props.values.end_time ?
+                                [
+                                    dayjs(props.values.start_time, 'HH:mm'),
+                                    dayjs(props.values.end_time, 'HH:mm')
+                                ]
+                                :
+                                ''
+                            }
+                            hideDisabledOptions
+                            disabledTime={() => {
+                                return {
+                                    disabledMinutes: () => {
+                                        const steps = [0, 30, 59]
+                                        const minutes = [...Array(60)].map((_, idx) => {
+                                            if (!steps.includes(idx)) {
+                                                return idx
+                                            }
+                                            return null
+                                        })
+                                        return minutes
+                                    }
+                                }
+                            }}
+                            onChange={value => {
+                                props.setFieldValue('start_time', value ? dayjs(value[0]).format('HH:mm') : null)
+                                props.setFieldValue('end_time', value ? dayjs(value[1]).format('HH:mm') : null)
+                            }}
+                        />
+                        <Submit type="primary">
+                            Filter
+                        </Submit>
+                    </Space.Compact>
+                </FormikForm>
+            )}
+        </Formik>
+    )
+}
 
 const CalendarFilterBar = ({
     handleWeekChange, 
@@ -108,6 +177,9 @@ const CalendarFilterBar = ({
                                 </>
                             )}
                         />
+                    )}
+                    {  scheduleFilter.navigation.view === 0 && (
+                            <HourDayFilter />
                     )}
                     <Select
                         placeholder="Status"
