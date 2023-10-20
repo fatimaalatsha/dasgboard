@@ -19,10 +19,10 @@ const getUserParams = (params) => ({
   ...params,
 });
 
-const Finance = () => {
+const Incentive = () => {
   const financeFilter = useFilterStore((state) => state.financeFilter);
   const setFinanceFilter = useFilterStore((state) => state.setFinanceFilter);
-  const componentIsMounted = useRef(false) // Set the initial value to true
+  const componentIsMounted = useRef(false); // Set the initial value to true
   const [cities, setCities] = useState([]);
   const [open, setOpen] = useState(false);
   const [showDetails, setShowDetails] = useState(false);
@@ -74,9 +74,6 @@ const Finance = () => {
           text: "Money",
           value: "money",
         },
-
-
-
 
         {
           text: "Rides",
@@ -212,21 +209,20 @@ const Finance = () => {
       arrayFormat: "comma",
     })}`
   );
-  //handle closing modal  
+  //handle closing modal
   const handleCancel = () => {
     setOpen(false);
   };
 
   //handle table change
   const handleTableChange = (pagination, filter, sorter) => {
-
     Object.keys(filter).forEach((key) => {
       if (filter[key] && key !== "city_id") {
         filter[key].unshift("in|" + filter[key][0]);
         filter[key].splice(1, 1);
       }
     });
-    
+
     Object.keys(filter).forEach((key) => {
       if (filter[key] && key === "city_id") {
         filter[key].unshift("array|" + filter[key][0]);
@@ -251,7 +247,6 @@ const Finance = () => {
         },
       }),
     });
-
   };
 
   useEffect(() => {
@@ -264,13 +259,14 @@ const Finance = () => {
           `${range[0]}-${range[1]} of ${total} Bonuses`,
       },
     });
-     if(!componentIsMounted.current) { // Check if component is mounted
-        loadCities()
-      }
+    if (!componentIsMounted.current) {
+      // Check if component is mounted
+      loadCities();
+    }
 
     return () => {
-        componentIsMounted.current = true // Set the component mount state to false on component unmount
-    }
+      componentIsMounted.current = true; // Set the component mount state to false on component unmount
+    };
   }, [data]);
 
   if (error) {
@@ -280,7 +276,7 @@ const Finance = () => {
     return <div>Loading...</div>;
   }
   return (
-    <Card title={"Finance"} style={{ margin: 15 }}>
+    <Card title={"Incentive"} style={{ margin: 15 }}>
       {warning && (
         <Modal
           title="Warning"
@@ -337,4 +333,4 @@ const Finance = () => {
   );
 };
 
-export default Finance;
+export default Incentive;

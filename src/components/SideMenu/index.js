@@ -105,8 +105,8 @@ const SideMenu = ({collapsed}) => {
       icon: <ProjectOutlined />,
     },
     {
-      key: "/finance",
-      label: "Finance",
+      key: "/incentive",
+      label: "Incentive",
       icon: <DollarOutlined />,
     },
     {

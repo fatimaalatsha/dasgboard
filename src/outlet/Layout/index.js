@@ -25,7 +25,7 @@ import Schedule from '../../pages/Schedule'
 import IneligibleApplicants from '../../pages/IneligibleApplicants'
 import AutofleetDrivers from '../../pages/AutofleetDrivers'
 import AutofleetDriversDetails from "../../pages/AutofleetDriversDetails";
-import Finance from '../../pages/Finance'
+import Incentive from '../../pages/Incentive'
 
 const { Sider, Content, Header} = Container // Destructuring Layout component
 
@@ -62,7 +62,7 @@ const Layout = () => {
                     <Route path='/reports/conversion_rates_by_application' element={<ConversionRatesByApplication />} />
                     <Route path='/reports/conversion_rates/:state' element={<IneligibleApplicants />} />
                     <Route path='/autofleet_drivers/:id' element={<AutofleetDriversDetails />} />
-                    <Route path='/finance' element={<Finance />} />
+                    <Route path='/incentive' element={<Incentive />} />
                     {['/documents/:id', '/drivers/:id', '/applicants/:id' ].map(path => <Route key="Details" path={path} element={<DriverDetails />} />)}
                 </Routes>
             </Content>
