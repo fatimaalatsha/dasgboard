@@ -73,11 +73,12 @@ let filterStore = (set) => ({
       position: ["bottomRight", "topRight"],
     },
     filter: {
-      status: null,
+      // status: null,
       //["in|online", "stand-by", "activating", "offline", "active"]
     },
-    city_id: null,
-    // sort: "ASC",
+    sort: {
+      created_at: "desc",
+    },
   },
   setAutofleetFilter: (filter) =>
     set((state) => ({
@@ -86,6 +87,27 @@ let filterStore = (set) => ({
         ...filter,
       },
     })),
+  financeFilter: {
+    pagination: {
+      current: 1,
+      pageSize: 10,
+      showSizeChanger: true,
+      pageSizeOptions: pageSize,
+      position: ["bottomRight", "topRight"],
+    },
+    sort: {
+      created_at: "desc",
+    },
+    filter: {
+      status: ["in|active", "inactive", "completed"],
+      type: ["in|money", "rides"],
+    },
+  },
+  setFinanceFilter: (filter) =>
+    set((state) => ({
+      financeFilter: { ...state.financeFilter, ...filter },
+    })),
+
   ridesFilter: {
     pagination: {
       current: 1,
@@ -148,11 +170,9 @@ let filterStore = (set) => ({
     set((state) => ({
       reportFilter: { ...state.reportFilter, ...filter },
     })),
-});
+})
 
-filterStore = devtools(filterStore, {
-  enabled: process.env.REACT_APP_ENV === "admin_dev",
-});
-filterStore = persist(filterStore, { name: "filter" });
+filterStore = devtools(filterStore, { enabled: process.env.REACT_APP_ENV === "admin_dev" })
+filterStore = persist(filterStore, { name: "filter" })
 
 export const useFilterStore = create(filterStore);

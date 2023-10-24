@@ -34,7 +34,6 @@ const ChartLine = ({ props, xField, yField, seriesField, onReady }) => {
           duration: 3000,
         },
       }}
-      //   point={{ visible:  xField > 0 , }}
     />
   );
 };
