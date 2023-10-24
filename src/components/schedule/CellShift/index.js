@@ -1114,183 +1114,183 @@ const CellShift = ({display, record, day, setHoveredCell, isCellFilled, selected
                                                     props.setFieldValue('template', e.target.value)
                                                     props.setFieldValue('pattern', 'weekly')
 
-                                                    switch (e.target.value) {
-                                                        case '1':
-                                                            props.setFieldValue('days_of_week', WEEK_PATTERNS.full_week)
-                                                            break
-                                                        case '2':
-                                                            props.setFieldValue('days_of_week', WEEK_PATTERNS.work_week)
-                                                            break
-                                                        case '3':
-                                                            props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
-                                                            break
-                                                        case '4':
-                                                            props.setFieldValue('days_of_week', WEEK_PATTERNS.end_week)
-                                                            break
-                                                        case 'weekly':
-                                                            props.setFieldValue('days_of_week', [DEFAULT_DAY])
-                                                            break
-                                                        case 'custom':
-                                                            props.setFieldValue('days_of_week', [DEFAULT_DAY])
-                                                            break
-                                                        default:
-                                                            props.setFieldValue('days_of_week', [DEFAULT_DAY])
-                                                            break
-                                                    }
-                                                } 
-                                            } 
-                                            value={props.values.template}
-                                        >
-                                            <Space direction="vertical" style={{ width: '100%' }}>
-                                                <Radio value="1">{`Monday to Sunday`}</Radio>
-                                                <Radio value="2">{`Monday to Friday`}</Radio>
-                                                <Radio value="4">{`Friday and Saturday`}</Radio>
-                                                <Radio value="3">{`Saturday and Sunday`}</Radio>
-                                                <Radio value={'weekly'}>{`Weekly on: ${dayjs(shift.day).format('dddd')}`}</Radio>
-                                                <Radio value={'custom'}>Custom</Radio>
-                                            { props.values.template === 'custom' && (
-                                                <>
-                                                <Divider orientation="left" plain>Custom Recurrence</Divider>
-                                                <Radio.Group 
-                                                    value={props.values.pattern} 
-                                                    buttonStyle="solid" 
-                                                    onChange={(e) => {
-                                                        props.setFieldValue('pattern', e.target.value)
-                                                        if (e.target.value === 'once') {
-                                                            props.setFieldValue('ends', 'after')
-                                                            props.setFieldValue('max_occurrences', 1)
+                                                        switch (e.target.value) {
+                                                            case '1':
+                                                                props.setFieldValue('days_of_week', WEEK_PATTERNS.full_week)
+                                                                break
+                                                            case '2':
+                                                                props.setFieldValue('days_of_week', WEEK_PATTERNS.work_week)
+                                                                break
+                                                            case '3':
+                                                                props.setFieldValue('days_of_week', WEEK_PATTERNS.weekend)
+                                                                break
+                                                            case '4':
+                                                                props.setFieldValue('days_of_week', WEEK_PATTERNS.end_week)
+                                                                break
+                                                            case 'weekly':
+                                                                props.setFieldValue('days_of_week', [DEFAULT_DAY])
+                                                                break
+                                                            case 'custom':
+                                                                props.setFieldValue('days_of_week', [DEFAULT_DAY])
+                                                                break
+                                                            default:
+                                                                props.setFieldValue('days_of_week', [DEFAULT_DAY])
+                                                                break
                                                         }
-                                                    }}
-                                                >
-                                                    <Radio.Button value="once">Once</Radio.Button>
-                                                    <Radio.Button value="weekly">Weekly</Radio.Button>
-                                                </Radio.Group>
-                                                { props.values.pattern === 'weekly' && (
+                                                    } 
+                                                } 
+                                                value={props.values.template}
+                                            >
+                                                <Space direction="vertical" style={{ width: '100%' }}>
+                                                    <Radio value="1">{`Monday to Sunday`}</Radio>
+                                                    <Radio value="2">{`Monday to Friday`}</Radio>
+                                                    <Radio value="4">{`Friday and Saturday`}</Radio>
+                                                    <Radio value="3">{`Saturday and Sunday`}</Radio>
+                                                    <Radio value={'weekly'}>{`Weekly on: ${dayjs(shift.day).format('dddd')}`}</Radio>
+                                                    <Radio value={'custom'}>Custom</Radio>
+                                                { props.values.template === 'custom' && (
                                                     <>
-                                                    <Divider orientation="left" plain>Repeat On</Divider>
-                                                    <Checkbox.Group options={weeklyDaysReccurence} defaultValue={dayjs(shift.day).format('d')} onChange={(value) => props.setFieldValue('days_of_week', value)} />
+                                                    <Divider orientation="left" plain>Custom Recurrence</Divider>
+                                                    <Radio.Group 
+                                                        value={props.values.pattern} 
+                                                        buttonStyle="solid" 
+                                                        onChange={(e) => {
+                                                            props.setFieldValue('pattern', e.target.value)
+                                                            if (e.target.value === 'once') {
+                                                                props.setFieldValue('ends', 'after')
+                                                                props.setFieldValue('max_occurrences', 1)
+                                                            }
+                                                        }}
+                                                    >
+                                                        <Radio.Button value="once">Once</Radio.Button>
+                                                        <Radio.Button value="weekly">Weekly</Radio.Button>
+                                                    </Radio.Group>
+                                                    { props.values.pattern === 'weekly' && (
+                                                        <>
+                                                        <Divider orientation="left" plain>Repeat On</Divider>
+                                                        <Checkbox.Group options={weeklyDaysReccurence} defaultValue={dayjs(shift.day).format('d')} onChange={(value) => props.setFieldValue('days_of_week', value)} />
+                                                        </>
+                                                    )}
+                                                    <Divider orientation="left" plain>Ends</Divider>
+                                                    <Radio.Group 
+                                                        name="ends"
+                                                        value={props.values.ends}
+                                                        onChange={(e) => {
+                                                            props.setFieldValue('ends', e.target.value)
+                                                        }}
+                                                    >
+                                                        <Space direction="vertical">
+                                                            <Radio disabled={props.values.pattern === 'once'} value="never">Never</Radio>
+                                                            <Radio disabled={props.values.pattern === 'once'} value="on">
+                                                                On
+                                                                <DatePicker 
+                                                                    disabled={props.values.ends !== 'on' } 
+                                                                    style={{ marginLeft: 16 }} 
+                                                                    value={dayjs(props.values.end_date)}
+                                                                    onChange={(date, dateString) => props.setFieldValue('end_date', dateString)} 
+                                                                    allowClear={false}
+                                                                />
+                                                            </Radio>
+                                                            <Radio disabled={props.values.pattern === 'once'} value="after">
+                                                                After
+                                                                <InputNumber 
+                                                                    name="max_occurrences" 
+                                                                    disabled={props.values.ends !== 'after' || props.values.pattern === 'once'} 
+                                                                    style={{ width: 180, marginLeft: 8 }} 
+                                                                    addonAfter="occurrences" 
+                                                                    min={1} 
+                                                                    value={props.values.ends !== 'after' ? 0 : props.values.max_occurrences} 
+                                                                    onChange={(value) => {
+                                                                        props.setFieldValue('max_occurrences', Number(value))
+                                                                        }
+                                                                    } 
+                                                                />
+                                                            </Radio>
+                                                        </Space>
+                                                    </Radio.Group>
                                                     </>
                                                 )}
-                                                <Divider orientation="left" plain>Ends</Divider>
-                                                <Radio.Group 
-                                                    name="ends"
-                                                    value={props.values.ends}
-                                                    onChange={(e) => {
-                                                        props.setFieldValue('ends', e.target.value)
-                                                    }}
-                                                >
-                                                    <Space direction="vertical">
-                                                        <Radio disabled={props.values.pattern === 'once'} value="never">Never</Radio>
-                                                        <Radio disabled={props.values.pattern === 'once'} value="on">
-                                                            On
-                                                            <DatePicker 
-                                                                disabled={props.values.ends !== 'on' } 
-                                                                style={{ marginLeft: 16 }} 
-                                                                value={dayjs(props.values.end_date)}
-                                                                onChange={(date, dateString) => props.setFieldValue('end_date', dateString)} 
-                                                                allowClear={false}
-                                                            />
-                                                        </Radio>
-                                                        <Radio disabled={props.values.pattern === 'once'} value="after">
-                                                            After
-                                                            <InputNumber 
-                                                                name="max_occurrences" 
-                                                                disabled={props.values.ends !== 'after' || props.values.pattern === 'once'} 
-                                                                style={{ width: 180, marginLeft: 8 }} 
-                                                                addonAfter="occurrences" 
-                                                                min={1} 
-                                                                value={props.values.ends !== 'after' ? 0 : props.values.max_occurrences} 
-                                                                onChange={(value) => {
-                                                                    props.setFieldValue('max_occurrences', Number(value))
-                                                                    }
-                                                                } 
-                                                            />
-                                                        </Radio>
-                                                    </Space>
-                                                </Radio.Group>
-                                                </>
-                                            )}
-                                            </Space>
+                                                </Space>
+                                            </Radio.Group>
+                                        )}
+                                    </Space>
+                                </Modal>
+                            </FormikForm>
+                        )}
+                    </Formik>
+                )}
+                {/* Shift Modal for Edit Mode */}
+                { edit.editMode &&  (
+                    <EditShiftModal shift_id={edit.editRecord} parent_id={record.parent_id} open={edit.editMode} tz={scheduleFilter.tz} refetch={refetch} record={record}/>
+                )}
+                
+                { deleteModal.open && (
+                <Formik
+                    initialValues={{
+                        affects_to: 'current',
+                    }}
+                    validationSchema={editRecurringSchema}
+                    onSubmit={async (values, { setSubmitting, resetForm }) => {
+                        await deleteWeekShift({'affects_to': values.affects_to}, deleteModal.shift_id)
+                        .then((res) => {
+                            if(res.status === 400) {
+                                message.error(res.message)
+                            } else {
+                                message.success(res.message)
+                            }
+                            setSubmitting(false)
+                            resetForm()
+                            setDeleteModal({ ...deleteModal, open: false})
+                            refetch()
+                        })
+                    }}
+                >
+                    {props => (
+                        <FormikForm>
+                            <Modal
+                                 title={`Delete ${record.is_recurring ? 'recurring' : ''} shift`}
+                                open={deleteModal.open}
+                                destroyOnClose
+                                onCancel={() => {
+                                    setDeleteModal({ ...deleteModal, open: false})
+                                    props.resetForm()
+                                    refetch()
+                                }}
+                                footer={[
+                                    <Button key="back" onClick={() => {
+                                        setDeleteModal({ ...deleteModal, open: false})
+                                        props.resetForm()
+                                        refetch()
+                                    }}>
+                                        Cancel
+                                    </Button>,
+                                    <Submit key="submit" type="primary">
+                                        OK
+                                    </Submit>,
+                                ]}
+                            >
+                                <Space direction="vertical" size={16} style={{ width: '100%' }}>
+                                    {record.is_recurring ? (
+                                        <Radio.Group
+                                            style={{ width: '100%' }} 
+                                            value={props.values.affects_to}
+                                            onChange={(e) => props.setFieldValue('affects_to', e.target.value)}
+                                        >
+                                        <Space direction="vertical" style={{ width: '100%' }}>
+                                            <Radio value="current">{`This shift`}</Radio>
+                                            <Radio value="future">{`This and following shifts`}</Radio>
+                                            <Radio value="all">{`All Shifts`}</Radio>
+                                        </Space>
                                         </Radio.Group>
-                                    )}
+                                        ) : (
+                                        <Text>{`Are you sure you want to delete this shift?`}</Text>)
+                                    }
                                 </Space>
                             </Modal>
                         </FormikForm>
                     )}
                 </Formik>
-            )}
-            {/* Shift Modal for Edit Mode */}
-            { edit.editMode &&  (
-                <EditShiftModal shift_id={edit.editRecord} parent_id={record.parent_id} open={edit.editMode} tz={scheduleFilter.tz} refetch={refetch} record={record}/>
-            )}
-            
-            { deleteModal.open && (
-            <Formik
-                initialValues={{
-                    affects_to: 'current',
-                }}
-                validationSchema={editRecurringSchema}
-                onSubmit={async (values, { setSubmitting, resetForm }) => {
-                    await deleteWeekShift({'affects_to': values.affects_to}, deleteModal.shift_id)
-                    .then((res) => {
-                        if(res.status === 400) {
-                            message.error(res.message)
-                        } else {
-                            message.success(res.message)
-                        }
-                        setSubmitting(false)
-                        resetForm()
-                        setDeleteModal({ ...deleteModal, open: false})
-                        refetch()
-                    })
-                }}
-            >
-                {props => (
-                    <FormikForm>
-                        <Modal
-                            title={`Delete ${record.is_recurring ? 'recurring' : ''} shift`}
-                            open={deleteModal.open}
-                            destroyOnClose
-                            onCancel={() => {
-                                setDeleteModal({ ...deleteModal, open: false})
-                                props.resetForm()
-                                refetch()
-                            }}
-                            footer={[
-                                <Button key="back" onClick={() => {
-                                    setDeleteModal({ ...deleteModal, open: false})
-                                    props.resetForm()
-                                    refetch()
-                                }}>
-                                    Cancel
-                                </Button>,
-                                <Submit key="submit" type="primary">
-                                    OK
-                                </Submit>,
-                            ]}
-                        >
-                            <Space direction="vertical" size={16} style={{ width: '100%' }}>
-                                {record.is_recurring ? (
-                                    <Radio.Group
-                                        style={{ width: '100%' }} 
-                                        value={props.values.affects_to}
-                                        onChange={(e) => props.setFieldValue('affects_to', e.target.value)}
-                                    >
-                                    <Space direction="vertical" style={{ width: '100%' }}>
-                                        <Radio value="current">{`This shift`}</Radio>
-                                        <Radio value="future">{`This and following shifts`}</Radio>
-                                        <Radio value="all">{`All Shifts`}</Radio>
-                                    </Space>
-                                    </Radio.Group>
-                                    ) : (
-                                    <Text>{`Are you sure you want to delete this shift?`}</Text>)
-                                }
-                            </Space>
-                        </Modal>
-                    </FormikForm>
                 )}
-            </Formik>
-            )}
         </>
     )
 }

@@ -44,8 +44,9 @@ const getUserParams = (params) => ({
   limit: params.pagination?.pageSize,
   page: params.pagination?.current,
   ...params,
-  
 });
+
+
 
 const AutofleetDrivers = () => {
   const autofleetFilter = useFilterStore((state) => state.autofleetFilter); // Get filter from store
@@ -273,7 +274,7 @@ const AutofleetDrivers = () => {
       },
     });
     if (isMounted) {
-      getVendorIdList();
+      getVendorIdList();      
       loadCities();
     }
     return () => {
