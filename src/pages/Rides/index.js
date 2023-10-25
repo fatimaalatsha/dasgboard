@@ -1,6 +1,7 @@
-import React, { useState, useEffect } from "react";
-import { Table, Tag, Space, Typography, Descriptions, Rate } from "antd";
+import React, { useState, useEffect,  } from "react";
+import { Table, Tag, Space, Typography, Descriptions, Rate, Input, Button } from "antd";
 import useNewFetch from "../../hooks/use-new-fetch";
+import { useRef } from "react";
 import qs from "qs";
 
 import { useFilterStore } from "../../store"; // Import filter store
@@ -19,6 +20,87 @@ const Rides = ({ driverId }) => {
     const ridesFilter = useFilterStore((state) => state.ridesFilter); // Get filter store
     const setRidesFilter = useFilterStore((state) => state.setRidesFilter); // Get filter store
     const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
+    const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  
+  const SearchOutlined = () => <i className="fas fa-search"></i>;
+      const searchInput = useRef(null);
+      const handleSearch = (selectedKeys, confirm, dataIndex) => {
+        confirm();
+        setSearchText(selectedKeys[0]);
+        setSearchedColumn(dataIndex);
+      };
+  const handleReset = (clearFilters) => {
+    clearFilters();
+    setSearchText("");
+  };
+  const getColumnSearchProps = (dataIndex, placeholder) => ({
+    // Search function
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+    }) => (
+      <div style={{ padding: 8 }}>
+        <Input
+          ref={searchInput}
+          placeholder={placeholder}
+          value={selectedKeys[0]}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{ marginBottom: 8, display: "block" }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => handleReset(clearFilters)}
+            size="small"
+            style={{ width: 90 }}
+          >
+            Reset
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+    // Filter icon
+      <SearchOutlined style={{ color: filtered ? "#1890ff" : undefined }} />
+    ),
+    onFilter: (value, record) => {
+      // Filter function
+      return record[dataIndex]
+        ? record[dataIndex]
+          .toString()
+          .toLowerCase()
+          .includes(value.toLowerCase())
+        : "";
+    },
+    onFilterDropdownVisibleChange: (visible) => {
+      // Focus on the search input when the filter icon is clicked
+      if (visible) {
+        setTimeout(() => searchInput.current.select(), 100);
+      }
+    },
+    render: (text) =>
+      // don not Highlight the search text
+      searchedColumn === dataIndex ? (
+        <Text>{text}</Text>
+      ) : (
+        text
+      ),
+  });
+
+
 
     const { data, loading, error, refetch } = useNewFetch(`/v1/rides/drivers/${driverId}?${qs.stringify(getUserParams(ridesFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API//data
         const handleTableChange = (pagination, filter, sorter) => {// handle table change
@@ -96,6 +178,7 @@ const Rides = ({ driverId }) => {
         key: "pickup_description",
         render: (pickup_description) => <Text>{pickup_description}</Text>,
         ellipsis: true,
+
       },
       {
         title: "Drop Off",

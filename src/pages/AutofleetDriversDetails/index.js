@@ -31,6 +31,7 @@ const { Title, Text } = Typography;
 })
 
 
+
 const AutofleetDriversDetails = () => {
   //get the driver id from the url
   const { id } = useParams();
