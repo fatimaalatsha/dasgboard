@@ -31,13 +31,10 @@ const { Title, Text } = Typography;
 const DriverReviews = ({ driverId }) => {
 
   const [params, setParams] = useState({}); // Set params state
-
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
-
   const { data, loading, error } = useNewFetch(
     `/v1/active-drivers/${driverId}/reviews?${qs.stringify(
-      // Pass the params to the query string
-      getUserParams(params)
+    getUserParams(params)  // Pass the params to the query string
     )}` 
   );
 
@@ -192,6 +189,7 @@ const AutofleetDriversDetails = () => {
   const parentUrl = pathArray.join("/");
 
   const { data, loading, error } = useNewFetch(`/v1/active-drivers/${id}`);
+  console.log(data);
   const isLoading = loading || !data;
 
   return (

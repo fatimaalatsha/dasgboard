@@ -83,7 +83,7 @@ const AutofleetDrivers = () => {
       arrayFormat: "comma",
     })}`
   );
-
+ console.log(data)
   const handleTableChange = (pagination, filter, sorter) => {
     // Handle table change
     Object.keys(filter).forEach((key) => {
