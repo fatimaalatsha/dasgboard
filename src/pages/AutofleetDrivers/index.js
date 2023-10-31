@@ -226,6 +226,12 @@ const AutofleetDrivers = () => {
       ),
     },
     {
+      title: "Rank",
+      
+      
+
+    },
+    {
       title: "View Details",
       dataIndex: "view",
       key: "view",
