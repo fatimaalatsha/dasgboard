@@ -83,7 +83,6 @@ const AutofleetDrivers = () => {
       arrayFormat: "comma",
     })}`
   );
- console.log(data)
   const handleTableChange = (pagination, filter, sorter) => {
     // Handle table change
     Object.keys(filter).forEach((key) => {
@@ -227,9 +226,30 @@ const AutofleetDrivers = () => {
     },
     {
       title: "Rank",
-      
-      
+      dataIndex: "rank",
+      key: "rank",
+      align: "center",
+      sorter: true,
+      ...(autofleetFilter.sort?.rank && {
+        defaultSort:
+          autofleetFilter.sort?.rank === "ascend" ? "desc" : "asc",
+      }),
+      filteredValue: null,
+      render: (rank) => <Tag color="blue">{rank}</Tag>,
 
+    },
+    {
+      title: "Votes",
+      dataIndex: "votes",
+      key: "votes",
+      align: "center",
+      sorter: true,
+      ...(autofleetFilter.sort?.votes && {
+        defaultSort:
+          autofleetFilter.sort?.votes === "ascend" ? "desc" : "asc",
+      }),
+      filteredValue: null,
+      render: (votes) => <Tag color="green">{votes}</Tag>,
     },
     {
       title: "View Details",

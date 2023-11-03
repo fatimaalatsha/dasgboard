@@ -189,7 +189,6 @@ const AutofleetDriversDetails = () => {
   const parentUrl = pathArray.join("/");
 
   const { data, loading, error } = useNewFetch(`/v1/active-drivers/${id}`);
-  console.log(data);
   const isLoading = loading || !data;
 
   return (
@@ -208,6 +207,8 @@ const AutofleetDriversDetails = () => {
               >
                 {data.status}
               </Tag>
+              <Tag color="green"> Votes {data.votes}</Tag>
+              <Tag color="blue"> Rank {data.rank}</Tag>
             </Space>
             <Descriptions labelStyle={{ fontWeight: "bold" }}>
               <Descriptions.Item label="First Name">
