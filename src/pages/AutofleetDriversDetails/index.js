@@ -1,5 +1,5 @@
 import useNewFetch from "../../hooks/use-new-fetch";
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import {
   Card,
   Space,
@@ -10,15 +10,17 @@ import {
   Divider,
   Rate,
   Table,
-  Progress,
+  Button,
+  Input,
 } from "antd";
-import { UserOutlined } from "@ant-design/icons";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { UserOutlined, SearchOutlined } from "@ant-design/icons";
+import { useParams, useLocation } from "react-router-dom";
 import qs from "qs"; // Import qs library
 
 
 
 import Rides from "../Rides";
+import { ref } from "yup";
 
 const { Title, Text } = Typography;
 //get the papams that will be passed to filters through qs
@@ -29,14 +31,133 @@ const { Title, Text } = Typography;
 })
 
 const DriverReviews = ({ driverId }) => {
-
   const [params, setParams] = useState({}); // Set params state
   const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
-  const { data, loading, error } = useNewFetch(
+  const location = useLocation(); // Get current location
+  const pathArray = location.pathname.split("/");
+
+  const { data, loading, error, refresh } = useNewFetch(
     `/v1/active-drivers/${driverId}/reviews?${qs.stringify(
-    getUserParams(params)  // Pass the params to the query string
-    )}` 
+      getUserParams(params), // Pass the params to the query string
+      {
+        skipNulls: true, // Skip null values
+        arrayFormat: "comma", // Use comma separator
+      }
+    )}`
   );
+
+  pathArray.pop();
+  const parentUrl = pathArray.join("/");
+  const [searchText, setSearchText] = useState("");
+  const [searchedColumn, setSearchedColumn] = useState("");
+  const searchInput = useRef(null);
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    // setSearchText(selectedKeys[0]);
+    // setSearchedColumn(dataIndex);
+    setParams({
+      ...params,
+      [dataIndex]: selectedKeys[0],
+    });
+
+  };
+  const handleReset = (clearFilters, dataIndex) => {
+    clearFilters();
+    setSearchText("");
+    setParams({
+      ...params,
+      feedback: null,
+    });
+  };
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }) => (
+      <div
+        style={{
+          padding: 8,
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{
+            marginBottom: 8,
+            display: "block",
+          }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              confirm({
+                closeDropdown: false,
+              });
+              setSearchText(selectedKeys[0]);
+              setSearchedColumn(dataIndex);
+            }}
+          >
+            Filter
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+              refresh();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? "#1677ff" : undefined,
+        }}
+      />
+    ),
+    onFilter: (value, record) =>
+      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
+    onFilterDropdownOpenChange: (visible) => {
+      if (visible) {
+        setTimeout(() => searchInput.current?.select(), 100);
+      }
+    },
+  });
 
   const reviewToWords = (review) => {
     switch (review) {
@@ -82,6 +203,7 @@ const DriverReviews = ({ driverId }) => {
           {feedback}
         </Text>
       ),
+      ...getColumnSearchProps("feedback"),
     },
   ];
   const handleRowExpand = (record) => {
@@ -103,7 +225,6 @@ const DriverReviews = ({ driverId }) => {
           pageSizeOptions: ["10", "20", "50"],
           showTotal: (total, range) =>
             `${range[0]}-${range[1]} of ${total} reviews`,
-          
         }}
         onChange={(pagination, filters, sorter) => {
           // Update the params when the table state changes
@@ -184,10 +305,6 @@ const AutofleetDriversDetails = () => {
   //get the driver id from the url
   const { id } = useParams();
   const location = useLocation(); // Get current location
-  const pathArray = location.pathname.split("/");
-  pathArray.pop();
-  const parentUrl = pathArray.join("/");
-
   const { data, loading, error } = useNewFetch(`/v1/active-drivers/${id}`);
   const isLoading = loading || !data;
 
