@@ -17,18 +17,16 @@ import { UserOutlined, SearchOutlined } from "@ant-design/icons";
 import { useParams, useLocation } from "react-router-dom";
 import qs from "qs"; // Import qs library
 
-
-
 import Rides from "../Rides";
-import { ref } from "yup";
 
 const { Title, Text } = Typography;
 //get the papams that will be passed to filters through qs
-  const getUserParams = (params) => ({ // Get table params
-    limit: params.pagination?.pageSize,
-    page: params.pagination?.current,
-    ...params,
-})
+const getUserParams = (params) => ({
+  // Get table params
+  limit: params.pagination?.pageSize,
+  page: params.pagination?.current,
+  ...params,
+});
 
 const DriverReviews = ({ driverId }) => {
   const [params, setParams] = useState({}); // Set params state
@@ -36,7 +34,7 @@ const DriverReviews = ({ driverId }) => {
   const location = useLocation(); // Get current location
   const pathArray = location.pathname.split("/");
 
-  const { data, loading, error, refresh } = useNewFetch(
+  const { data, loading, error, refetch } = useNewFetch(
     `/v1/active-drivers/${driverId}/reviews?${qs.stringify(
       getUserParams(params), // Pass the params to the query string
       {
@@ -49,25 +47,26 @@ const DriverReviews = ({ driverId }) => {
   pathArray.pop();
   const parentUrl = pathArray.join("/");
   const [searchText, setSearchText] = useState("");
-  const [searchedColumn, setSearchedColumn] = useState("");
   const searchInput = useRef(null);
   const handleSearch = (selectedKeys, confirm, dataIndex) => {
     confirm();
-    // setSearchText(selectedKeys[0]);
-    // setSearchedColumn(dataIndex);
     setParams({
       ...params,
-      [dataIndex]: selectedKeys[0],
+      filter: {
+        [dataIndex]: selectedKeys[0] ? `like|${selectedKeys[0]}` : null,
+      },
     });
-
   };
   const handleReset = (clearFilters, dataIndex) => {
     clearFilters();
     setSearchText("");
     setParams({
       ...params,
-      feedback: null,
+      filter: {
+        [dataIndex]: null,
+      },
     });
+    refetch();
   };
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({
@@ -121,21 +120,7 @@ const DriverReviews = ({ driverId }) => {
             type="link"
             size="small"
             onClick={() => {
-              confirm({
-                closeDropdown: false,
-              });
-              setSearchText(selectedKeys[0]);
-              setSearchedColumn(dataIndex);
-            }}
-          >
-            Filter
-          </Button>
-          <Button
-            type="link"
-            size="small"
-            onClick={() => {
               close();
-              refresh();
             }}
           >
             close
@@ -150,13 +135,6 @@ const DriverReviews = ({ driverId }) => {
         }}
       />
     ),
-    onFilter: (value, record) =>
-      record[dataIndex].toString().toLowerCase().includes(value.toLowerCase()),
-    onFilterDropdownOpenChange: (visible) => {
-      if (visible) {
-        setTimeout(() => searchInput.current?.select(), 100);
-      }
-    },
   });
 
   const reviewToWords = (review) => {
@@ -187,6 +165,7 @@ const DriverReviews = ({ driverId }) => {
       dataIndex: "rating",
       key: "rating",
       render: (rating) => <Rate disabled defaultValue={rating} />,
+      sorter: true,
     },
     {
       title: "Feedback",
@@ -212,7 +191,7 @@ const DriverReviews = ({ driverId }) => {
       prevExpandedKey === record.ride_id ? null : record.ride_id
     );
   };
-
+  error && console.log(error);
   return (
     <>
       <Table
@@ -235,9 +214,12 @@ const DriverReviews = ({ driverId }) => {
               pageSize: pagination.pageSize,
               limit: pagination.pageSize,
             },
-            sortField: sorter.field,
-            sortOrder: sorter.order,
             ...filters,
+            sort: sorter.order
+              ? {
+                  [sorter.field]: sorter.order === "ascend" ? "asc" : "desc",
+                }
+              : null,
           });
         }}
         rowKey="ride_id"
@@ -257,10 +239,7 @@ const DriverReviews = ({ driverId }) => {
                     {reviewToWords(record.rating)}
                   </Tag>
                 </Space>
-
                 <Space direction="vertical">
-                  {/* <Descriptions labelStyle={{ fontWeight: "bold" }}>
-              <Descriptions.Item label="First Name"> */}
                   <Descriptions labelStyle={{ fontWeight: "bold" }} column={1}>
                     <Descriptions.Item label="Feedback">
                       <Text
