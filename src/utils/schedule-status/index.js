@@ -234,7 +234,7 @@ const isShiftInHour = (shift, hour, timezone, selectedDay) => { // Check if a sh
      */
 
     return shiftStartTime.isSameOrBefore(selectedDay.tz(timezone).utc().hour(parseInt(hour)).endOf('hour')) &&
-        shiftEndTime.isSameOrAfter(selectedDay.tz(timezone).utc().hour(parseInt(hour)).startOf('hour'))
+        shiftEndTime.isAfter(selectedDay.tz(timezone).utc().hour(parseInt(hour)).startOf('hour'))
 }
 
 const shiftCount = (data, hour, timezone, selectedDay) => { // Count the number of shifts that match a specific hour

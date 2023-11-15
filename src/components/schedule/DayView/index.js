@@ -152,7 +152,7 @@ const DayView = ({
                 key: idx,
                 align: 'center',
                 onCell: (record) => ({
-                    style: computedCount === MIN_DRIVER ? { backgroundColor: token['red-3'], color: 'white', borderColor: token['red-2'] } : {},
+                    style: computedCount === MIN_DRIVER ? { backgroundColor: token['red-3'], color: 'white', borderColor: token['red-2'], width: 60 } : { width: 60 },
                     onMouseEnter: () => { // Mouse enter event
                         setHoveredCell({ key: record.key, hour: hour.label })
                     },
