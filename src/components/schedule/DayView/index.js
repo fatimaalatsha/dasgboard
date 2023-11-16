@@ -139,12 +139,12 @@ const DayView = ({
             children: [
               {
                 title: () => {
-                  const columnStyle = computedCount === MIN_DRIVER ? { ...titleStyle } : {};
+                  const columnStyle = computedCount < scheduleFilter.staff ? { ...titleStyle } : {};
                   return ( 
                     <div style={columnStyle}>
-                      <Text key={idx} type="secondary" code >
-                        {computedCount}
-                      </Text> 
+                        <Text key={idx} type="secondary" code>
+                          {computedCount}
+                        </Text> 
                     </div>
                   )
                 },
@@ -152,7 +152,7 @@ const DayView = ({
                 key: idx,
                 align: 'center',
                 onCell: (record) => ({
-                    style: computedCount === MIN_DRIVER ? { backgroundColor: token['red-3'], color: 'white', borderColor: token['red-2'], width: 60 } : { width: 60 },
+                    style: computedCount < scheduleFilter.staff ? { backgroundColor: token['red-3'], color: 'white', borderColor: token['red-2'], width: 60 } : { width: 60 },
                     onMouseEnter: () => { // Mouse enter event
                         setHoveredCell({ key: record.key, hour: hour.label })
                     },
