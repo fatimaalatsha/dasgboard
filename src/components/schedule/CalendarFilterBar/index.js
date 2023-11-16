@@ -1,5 +1,5 @@
 import { useState } from 'react'
-import { Space, Button, DatePicker, Select, Radio, Tooltip, Divider, TimePicker } from 'antd' // Import Ant components
+import { Space, Button, DatePicker, Select, Radio, Tooltip, Divider, TimePicker, Input } from 'antd' // Import Ant components
 import { LeftOutlined, RightOutlined, ReloadOutlined } from '@ant-design/icons' // Import Ant icons
 
 import dayjs from 'dayjs' // Import date handlers
@@ -151,7 +151,7 @@ const CalendarFilterBar = ({
     return (   
         <Space style={{ display: 'flex', width: '100%', justifyContent: 'space-between' }}>               
             <>
-                <Space style={{ display: 'flex', width: '100%'}}>
+                <Space style={{ display: 'flex' }} size={[8, 16]} wrap>
                     <CitySelect
                         value={scheduleFilter.filter.city_id ? Number(scheduleFilter.filter.city_id.replace('in|', '')) : null}
                         onChange={(value, label) => {
@@ -199,8 +199,17 @@ const CalendarFilterBar = ({
                             { label: 'Unavailability', value: 'Unavailability' },
                         ]}
                     />
+                    {  scheduleFilter.navigation.view === 0 && (
+                            <Input
+                                placeholder="Understaffed Slots"
+                                type="number"
+                                min={0}
+                                value={Number(scheduleFilter.staff)}
+                                onChange={(e) => setScheduleFilter({...scheduleFilter, staff: Number(e.target.value) })}
+                            />
+                    )}
                 </Space>
-                <Space style={{ display: 'flex', width: '100%'}}>
+                <Space style={{ display: 'flex', width: '100%', justifyContent: 'flex-end' }} wrap>
                     <Tooltip title="Reload data">
                         <Button {...refetchConfig} />
                     </Tooltip>
@@ -215,7 +224,13 @@ const CalendarFilterBar = ({
                         value={scheduleFilter.navigation.view === 1 ? selectedDate.week : selectedDate.day}
                         allowClear={false}
                     />
-                    <Radio.Group options={options} value={scheduleFilter.navigation.view} defaultValue={scheduleFilter.navigation.view} optionType="button" onChange={(e) => setScheduleFilter({...scheduleFilter, navigation:{ ...scheduleFilter.navigation, view: Number(e.target.value)} })}/>
+                    <Radio.Group 
+                        options={options} 
+                        value={scheduleFilter.navigation.view} 
+                        defaultValue={scheduleFilter.navigation.view} 
+                        optionType="button" 
+                        onChange={(e) => setScheduleFilter({...scheduleFilter, navigation:{ ...scheduleFilter.navigation, view: Number(e.target.value)} })}
+                    />
                 </Space>
             </>
         </Space>
