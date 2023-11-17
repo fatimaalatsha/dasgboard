@@ -141,13 +141,16 @@ const DayView = ({
                 title: () => {
                   const columnStyle = computedCount < scheduleFilter.staff ? { ...titleStyle } : {};
                   return ( 
-                    <div style={columnStyle}>
-                        <Text key={idx} type="secondary" code>
+                    <div>
+                        <Text key={idx} code>
                           {computedCount}
                         </Text> 
                     </div>
                   )
                 },
+                onHeaderCell: () => ({
+                  style: computedCount < scheduleFilter.staff ? { backgroundColor: token['red-2'], color: 'white', borderColor: token['red-1'] } : { }
+                }),
                 dataIndex: hour.label,
                 key: idx,
                 align: 'center',
