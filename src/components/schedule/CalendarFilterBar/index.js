@@ -179,11 +179,6 @@ const CalendarFilterBar = ({
                             )}
                         />
                     )}
-                    {  scheduleFilter.navigation.view === 0 && (
-                            <HourDayFilter 
-                                data={props.data}
-                            />
-                    )}
                     <Select
                         placeholder="Status"
                         optionFilterProp="children"
@@ -200,6 +195,10 @@ const CalendarFilterBar = ({
                         ]}
                     />
                     {  scheduleFilter.navigation.view === 0 && (
+                        <>
+                            <HourDayFilter 
+                                data={props.data}
+                            />
                             <Input
                                 placeholder="Understaffed Slots"
                                 type="number"
@@ -207,6 +206,7 @@ const CalendarFilterBar = ({
                                 value={Number(scheduleFilter.staff)}
                                 onChange={(e) => setScheduleFilter({...scheduleFilter, staff: Number(e.target.value) })}
                             />
+                        </>
                     )}
                 </Space>
                 <Space style={{ display: 'flex', width: '100%', justifyContent: 'flex-end' }} wrap>
