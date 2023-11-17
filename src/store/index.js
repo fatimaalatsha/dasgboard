@@ -132,6 +132,7 @@ let filterStore = (set) => ({
     tz: "America/Thunder_Bay",
     city_label: "",
     paginated: false,
+    staff: 0,
     navigation: {
       tab: "active", // active, draft, approval
       view: 1, // 1 = week, 0 = day, 2 = month (default: 1)
