@@ -664,7 +664,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         return END_TIME.diff(START_TIME, 'hour', true)
     }
 
-    const floatingComponentWidth = (record.is_overnight ? getShiftDuration() : hours.diff) * 60.9936  // 60.9936 is the average width of each hour in the calendar
+    const floatingComponentWidth = (record.is_overnight ? getShiftDuration() : hours.diff) * 60  // 60.9936 is the average width of each hour in the calendar
 
     const cardStyleConfig = { // Style configuration variable
         backgroundColor: record.application?.status === 'approved' ? 

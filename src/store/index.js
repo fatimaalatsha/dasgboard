@@ -132,6 +132,7 @@ let filterStore = (set) => ({
     tz: "America/Thunder_Bay",
     city_label: "",
     paginated: false,
+    staff: 0,
     navigation: {
       tab: "active", // active, draft, approval
       view: 1, // 1 = week, 0 = day, 2 = month (default: 1)
@@ -139,7 +140,7 @@ let filterStore = (set) => ({
     },
     pagination: {
       current: 1,
-      pageSize: 20,
+      pageSize: 25,
       showSizeChanger: true,
       pageSizeOptions: pageSize,
       position: ["bottomRight", "topRight"],
@@ -148,6 +149,19 @@ let filterStore = (set) => ({
   setScheduleFilter: (filter) =>
     set((state) => ({
       scheduleFilter: { ...state.scheduleFilter, ...filter },
+    })),
+  dayFilter: {
+    pagination: {
+      current: 1,
+      pageSize: 25,
+      showSizeChanger: true,
+      pageSizeOptions: pageSize,
+      position: ["bottomRight", "topRight"],
+    },
+  },
+  setDayFilter: (filter) => 
+    set((state) => ({ 
+      dayFilter: { ...state.dayFilter, ...filter}
     })),
   reportFilter: {
     date_from: dayjs().subtract(90, "days").format("YYYY-MM-DD"),

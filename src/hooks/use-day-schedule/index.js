@@ -14,7 +14,10 @@ const useDaySchedule = (url, timezone, selectedDay) => {
     dayjs.tz.setDefault(timezone)
     const [fetchedData, setFetchedData] = useState({// Set initia fetch state to empty
         data: [],
-        response: [],
+        response: {
+          data: [],
+          meta: {},
+        },
         isLoading: true,
         error: false,
     })
@@ -35,9 +38,9 @@ const useDaySchedule = (url, timezone, selectedDay) => {
                 }
             }
             const response = await API.get(url, options)// Fetch data from API
-            const { items } = await response.data// Get data from response
+            const { data, meta } = await response.data// Get data from response
 
-            const dayData = items.map(item => {
+            const dayData = data.map(item => {
                 const dayItems = item.shifts.map(shift => {
                   if (shift.is_overnight) {
                     const isSameDay = selectedDay.tz().utc().isSame(dayjs(shift.end_time), 'day');
@@ -73,7 +76,7 @@ const useDaySchedule = (url, timezone, selectedDay) => {
 
             setFetchedData({// Set fetched data
                 data: dayData,
-                response: items,
+                response: {data: data, meta: meta},
                 isLoading: false,
                 error: false,
             })
@@ -81,7 +84,10 @@ const useDaySchedule = (url, timezone, selectedDay) => {
         catch (error) {
             setFetchedData({// Set fetched data
                 data: [],
-                response: [],
+                response: {
+                  data: [],
+                  meta: {},
+                },
                 isLoading: false,
                 error: true,
             })
@@ -91,7 +97,10 @@ const useDaySchedule = (url, timezone, selectedDay) => {
     const refetch = () => {// Create a new refetch function
         setFetchedData({// Set fetched data
             data: [],
-            response: [],
+            response: {
+              data: [],
+              meta: {},
+            },
             isLoading: true,
             error: false,
         })
@@ -101,7 +110,7 @@ const useDaySchedule = (url, timezone, selectedDay) => {
     useEffect(() => {// Create a new useEffect
         fetchData()// Call fetchData function
         return () => controller.abort()// Abort fetch on unmount
-    }, [])
+    }, [url])
 
     const { data, response, isLoading, error } = fetchedData// Destructure fetchedData
     return { data, response, isLoading, error, refetch } // Return data, isLoading, error and refetch

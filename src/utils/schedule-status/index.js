@@ -234,7 +234,7 @@ const isShiftInHour = (shift, hour, timezone, selectedDay) => { // Check if a sh
      */
 
     return shiftStartTime.isSameOrBefore(selectedDay.tz(timezone).utc().hour(parseInt(hour)).endOf('hour')) &&
-        shiftEndTime.isSameOrAfter(selectedDay.tz(timezone).utc().hour(parseInt(hour)).startOf('hour'))
+        shiftEndTime.isAfter(selectedDay.tz(timezone).utc().hour(parseInt(hour)).startOf('hour'))
 }
 
 const shiftCount = (data, hour, timezone, selectedDay) => { // Count the number of shifts that match a specific hour
@@ -244,6 +244,25 @@ const shiftCount = (data, hour, timezone, selectedDay) => { // Count the number 
       driver['shifts'].filter((shift) => isShiftInHour(shift, hour, timezone, selectedDay)).length
     )
   }, 0)
+}
+
+const rangeFilter = (range, data) => {
+    const userIds = data.filter((user) => {
+        if (user.shifts.length === 0) {
+            return true
+        }
+
+        const shiftNotInRange = user.shifts.every((shift) => {
+          const shiftStart = dayjs(shift.start_time)
+          const shiftEnd = dayjs(shift.end_time)
+          return shiftStart.isBefore(range.start_time) || shiftEnd.isAfter(range.end_time)
+        })
+        
+        return shiftNotInRange
+    })
+    .map(user => user.user_id)
+
+    return userIds
 }
 
 export { 
@@ -259,5 +278,6 @@ export {
     updateShiftTemplate,
     deleteShiftTemplate,
     updateShiftByDriverId,
-    shiftCount
+    shiftCount,
+    rangeFilter
 }

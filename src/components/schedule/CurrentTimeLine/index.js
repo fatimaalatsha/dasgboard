@@ -31,13 +31,13 @@ const CurrentTimeLine = ({axis, tz}) => {
         key: 'current-timeline',
         style: {
             position: 'absolute',
-            top: axis ? 0 : `calc(${percentOfDay}% + 39px)`, // 48px is the height of the header
+            top: axis ? 55 : `calc(${percentOfDay}% + 39px)`, // 48px is the height of the header
             left: axis ? `calc(${percentOfDay}% + 45.45px)` : 0,
             margin: 0,
             width: axis ? '2px' : '100%',
             ...(axis && { minWidth: '2px'}),
             backgroundColor: 'red',
-            height: axis ? '100%' : '2px',
+            height: axis ? 'calc(100% - 111px)' : '2px',
             zIndex: 999,
         }
     }
