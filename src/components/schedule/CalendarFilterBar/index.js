@@ -200,11 +200,16 @@ const CalendarFilterBar = ({
                                 data={props.data}
                             />
                             <Input
-                                placeholder="Understaffed Slots"
+                                addonBefore="Shortage:"
+                                placeholder="Amount"
                                 type="number"
                                 min={0}
+                                max={99}
                                 value={Number(scheduleFilter.staff)}
                                 onChange={(e) => setScheduleFilter({...scheduleFilter, staff: Number(e.target.value) })}
+                                style={{
+                                    width: 140,
+                                }}
                             />
                         </>
                     )}
