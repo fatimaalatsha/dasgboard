@@ -139,34 +139,7 @@ const Notifications = () => {
                 { !section ? (
                     <ListItem data={data} />
                 ) : (
-                    <List
-                        itemLayout="horizontal"
-                        dataSource={data}
-                        renderItem={(item, idx) => (
-                            <List.Item
-                                actions={[<Button type="primary" ghost>Expand</Button>]}
-                            >
-                                <List.Item.Meta 
-                                    title={
-                                        <Space 
-                                            direction="vertical"
-                                            size={1}
-                                        >
-                                            <Text type="secondary">{item.date}</Text>
-                                            <Title level={5} style={{ marginTop: 0 }}>{item.title}</Title>
-                                        </Space>
-                                    }
-                                    description={
-                                        <Text>
-                                            {item.content}
-                                        </Text>
-                                    }
-                                />
-                            </List.Item>
-                        )}
-                    >
-
-                    </List>
+                    <ListItem data={data} />
                 )
                 }
             </Drawer>
