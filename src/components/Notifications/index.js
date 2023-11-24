@@ -1,5 +1,5 @@
-import { useState } from "react"
-import { Button, Badge, Drawer, Segmented, List, Typography, Space } from "antd"
+import { useState, useEffect } from "react"
+import { Button, Badge, Drawer, Segmented, List, Typography, Space, notification } from "antd"
 
 import { BellOutlined } from '@ant-design/icons'
 import UnreadIcon from "../icons/UnreadIcon"
@@ -98,7 +98,7 @@ const Notifications = () => {
     ]
 
     const data = [...Array(10)].map((_, idx) => ({
-        title: `Notification ${idx}`,
+        title: `Notification Title ${idx}`,
         content: 'Driver submitted insurance documents Driver submitted insurance documents Driver submitted insurance documents', 
         date: 'Fri, Nov 23, 2023 - 13:30'
     }))
@@ -111,10 +111,19 @@ const Notifications = () => {
         setOpen(false)
     }
 
+    useEffect(() => {
+        if(data.length !== 0) {
+            notification.info({
+                message: "Unread Notifications",
+                description: "You've got unread messages waiting for you! 📬 Don't forget to check your inbox to stay up-to-date and never miss out on important information."
+            })
+        }
+    }, [])
+
     return (
         <>
             <Badge
-                count={8}
+                count={data.length}
             >
                 <Button 
                     size="large"
