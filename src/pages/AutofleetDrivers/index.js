@@ -116,18 +116,23 @@ const AutofleetDrivers = () => {
       }),
     });
   };
-  const handleSearch = (selectedKeys) => {
-    const regex = /^(?:\s|[\d]|\W)+$/g;
-    const found = selectedKeys ? selectedKeys[0]?.match(regex) : null; // Check if search value is a number or space
-    setAutofleetFilter({
-      query: selectedKeys && !found ? selectedKeys[0] : null,
-      pagination: {
-        ...autofleetFilter.pagination,
-        current: 1,
-      },
-    });
-    selectedKeys ?? setSearchText("");
-  };
+const handleSearch = (selectedKeys) => {
+  
+  const regex = /^[\d\s\w-]+$/; // Allow combinations of numbers, names, and hyphens  
+  const trimmedValue = selectedKeys ? selectedKeys[0]?.trim() : null; // Remove leading and trailing spaces
+  const found = trimmedValue ? trimmedValue.match(regex) : null; // Check if value matches regex
+  setAutofleetFilter({
+    query: trimmedValue && found ? trimmedValue : null,
+    pagination: {
+      ...autofleetFilter.pagination,
+      current: 1,
+    },
+  });
+  selectedKeys ?? setSearchText(""); // Set searchText to empty string if selectedKeys is falsy
+};
+
+
+
 
   const columns = [
     {
