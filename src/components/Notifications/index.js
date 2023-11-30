@@ -2,8 +2,13 @@ import { useState, useEffect } from "react"
 import { Button, Badge, Drawer, Segmented, List, Typography, Space, notification } from "antd"
 
 import { BellOutlined } from '@ant-design/icons'
+import dayjs from "dayjs"
+
 import UnreadIcon from "../icons/UnreadIcon"
 import ReadIcon from "../icons/ReadIcon"
+
+import  { pathUrl } from "../../api/path-url"
+import useMessages from "../../hooks/use-messages"
 
 const { Title, Text, Paragraph } = Typography
 
@@ -12,13 +17,13 @@ const ListItem = ({ data }) => {
         expand: false,
         data: {
             title: '',
-            date: '',
-            content: '',
+            created_at: '',
+            message: '',
         }
     })
 
     const handleOpen = (data) => {
-        setOpen({...open, expand: true, data})
+        setOpen({...open, expand: true, data })
     }
 
     const handleClose = () => {
@@ -48,7 +53,7 @@ const ListItem = ({ data }) => {
                                     direction="vertical"
                                     size={1}
                                 >
-                                    <Text type="secondary">{item.date}</Text>
+                                    <Text type="secondary">{dayjs(item.created_at).format('dddd DD, MMMM YYYY - HH:mm')}</Text>
                                     <Title level={5} style={{ marginTop: 0 }}>{item.title}</Title>
                                 </Space>
                             }
@@ -56,7 +61,7 @@ const ListItem = ({ data }) => {
                                 <Paragraph
                                     ellipsis
                                 >
-                                    {item.content}
+                                    {item.message}
                                 </Paragraph>
                             }
                         />
@@ -71,9 +76,9 @@ const ListItem = ({ data }) => {
                 onClose={handleClose}
                 open={open.expand}
             >
-                <Text type="secondary">{open.data.date}</Text>
+                <Text type="secondary">{dayjs(open.data.created_at).format('dddd DD, MMMM YYYY - HH:mm')}</Text>
                 <Paragraph>
-                    {open.data.content}
+                    {open.data.message}
                 </Paragraph>
             </Drawer>
         </>
@@ -83,6 +88,8 @@ const ListItem = ({ data }) => {
 const Notifications = () => {
     const [open, setOpen] = useState(false)
     const [section, setSection] = useState(0)
+
+    const { data, isLoading, error } = useMessages(pathUrl.messages)
 
     const segmentOptions = [
         {
@@ -97,11 +104,11 @@ const Notifications = () => {
         }
     ]
 
-    const data = [...Array(10)].map((_, idx) => ({
+    /* const data = [...Array(10)].map((_, idx) => ({
         title: `Notification Title ${idx}`,
         content: 'Driver submitted insurance documents Driver submitted insurance documents Driver submitted insurance documents', 
         date: 'Fri, Nov 23, 2023 - 13:30'
-    }))
+    })) */
 
     const handleOpen = () => {
         setOpen(true)
@@ -112,18 +119,28 @@ const Notifications = () => {
     }
 
     useEffect(() => {
-        if(data.length !== 0) {
+        if(data?.data && data.data?.length !== 0) {
             notification.info({
                 message: "Unread Notifications 📬",
                 description: "You've got unread messages waiting for you!"
             })
         }
-    }, [])
+    }, [data])
+
+    if (isLoading) {
+        return <>Loading...</>
+    }
+
+    if (error) {
+        return <>Error!</>
+    }
+
+    console.log(data)
 
     return (
         <>
             <Badge
-                count={data.length}
+                count={data.data?.length}
             >
                 <Button 
                     size="large"
@@ -146,9 +163,9 @@ const Notifications = () => {
                 open={open}
             >
                 { !section ? (
-                    <ListItem data={data} />
+                    <ListItem data={data.data} />
                 ) : (
-                    <ListItem data={data} />
+                    <ListItem data={data.data} />
                 )
                 }
             </Drawer>
