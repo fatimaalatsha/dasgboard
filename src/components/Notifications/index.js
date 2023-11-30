@@ -114,8 +114,8 @@ const Notifications = () => {
     useEffect(() => {
         if(data.length !== 0) {
             notification.info({
-                message: "Unread Notifications",
-                description: "You've got unread messages waiting for you! 📬 Don't forget to check your inbox to stay up-to-date and never miss out on important information."
+                message: "Unread Notifications 📬",
+                description: "You've got unread messages waiting for you!"
             })
         }
     }, [])
