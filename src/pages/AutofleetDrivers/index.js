@@ -44,7 +44,6 @@ const getUserParams = (params) => ({
   limit: params.pagination?.pageSize,
   page: params.pagination?.current,
   ...params,
-  
 });
 
 const AutofleetDrivers = () => {
@@ -91,7 +90,7 @@ const AutofleetDrivers = () => {
         filter[key].splice(1, 1);
       }
     });
-  
+
     setAutofleetFilter({
       // Set filter to store
       pagination: {
@@ -110,29 +109,26 @@ const AutofleetDrivers = () => {
       city_id: filter.city_id,
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
-          [`${sorter.columnKey === "city_id" ? "city.name" : sorter.columnKey}`]:
-            sorter.order === "ascend" ? "asc" : "desc",
+          [`${
+            sorter.columnKey === "city_id" ? "city.name" : sorter.columnKey
+          }`]: sorter.order === "ascend" ? "asc" : "desc",
         },
       }),
     });
   };
-const handleSearch = (selectedKeys) => {
-  
-  const regex = /^[\d\s\w-]+$/; // Allow combinations of numbers, names, and hyphens  
-  const trimmedValue = selectedKeys ? selectedKeys[0]?.trim() : null; // Remove leading and trailing spaces
-  const found = trimmedValue ? trimmedValue.match(regex) : null; // Check if value matches regex
-  setAutofleetFilter({
-    query: trimmedValue && found ? trimmedValue : null,
-    pagination: {
-      ...autofleetFilter.pagination,
-      current: 1,
-    },
-  });
-  selectedKeys ?? setSearchText(""); // Set searchText to empty string if selectedKeys is falsy
-};
-
-
-
+  const handleSearch = (selectedKeys) => {
+    const regex = /^[\d\s\w-]+$/; // Allow combinations of numbers, names, and hyphens
+    const trimmedValue = selectedKeys ? selectedKeys[0]?.trim() : null; // Remove leading and trailing spaces
+    const found = trimmedValue ? trimmedValue.match(regex) : null; // Check if value matches regex
+    setAutofleetFilter({
+      query: trimmedValue && found ? trimmedValue : null,
+      pagination: {
+        ...autofleetFilter.pagination,
+        current: 1,
+      },
+    });
+    selectedKeys ?? setSearchText(""); // Set searchText to empty string if selectedKeys is falsy
+  };
 
   const columns = [
     {
@@ -230,18 +226,16 @@ const handleSearch = (selectedKeys) => {
       ),
     },
     {
-      title: "Rank",
+      title: "Rating",
       dataIndex: "rank",
       key: "rank",
       align: "center",
       sorter: true,
       ...(autofleetFilter.sort?.rank && {
-        defaultSort:
-          autofleetFilter.sort?.rank === "ascend" ? "desc" : "asc",
+        defaultSort: autofleetFilter.sort?.rank === "ascend" ? "desc" : "asc",
       }),
       filteredValue: null,
       render: (rank) => <Tag color="blue">{rank}</Tag>,
-
     },
     {
       title: "Votes",
@@ -250,8 +244,7 @@ const handleSearch = (selectedKeys) => {
       align: "center",
       sorter: true,
       ...(autofleetFilter.sort?.votes && {
-        defaultSort:
-          autofleetFilter.sort?.votes === "ascend" ? "desc" : "asc",
+        defaultSort: autofleetFilter.sort?.votes === "ascend" ? "desc" : "asc",
       }),
       filteredValue: null,
       render: (votes) => <Tag color="green">{votes}</Tag>,
@@ -304,7 +297,7 @@ const handleSearch = (selectedKeys) => {
       },
     });
     if (isMounted) {
-      getVendorIdList();      
+      getVendorIdList();
       loadCities();
     }
     return () => {

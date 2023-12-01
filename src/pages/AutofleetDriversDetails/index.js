@@ -304,7 +304,7 @@ const AutofleetDriversDetails = () => {
                 {data.status}
               </Tag>
               <Tag color="green"> Votes {data.votes}</Tag>
-              <Tag color="blue"> Rank {data.rank}</Tag>
+              <Tag color="blue"> Rating {data.rank}</Tag>
             </Space>
             <Descriptions labelStyle={{ fontWeight: "bold" }}>
               <Descriptions.Item label="First Name">
