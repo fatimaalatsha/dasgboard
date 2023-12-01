@@ -135,7 +135,7 @@ const Notifications = () => {
         return <>Error!</>
     }
 
-    console.log(data)
+    //console.log(data)
 
     return (
         <>
