@@ -89,13 +89,8 @@ const DayView = ({
       }
     })
 
-    if(!!!componentIsMounted.current){
-      refetch()
-    }
-    return () => {
-      componentIsMounted.current = true // Set the component mount state to false on component unmount
-  }
-  }, [selectedDay, city, response])
+    refetch()
+  }, [selectedDay, city])
 
   error && <>Something went wrong...</>
 
