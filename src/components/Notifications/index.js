@@ -1,8 +1,9 @@
 import { useState, useEffect } from "react"
-import { Button, Badge, Drawer, Segmented, List, Typography, Space, notification } from "antd"
+import { Button, Badge, Drawer, Segmented, List, Typography, Space, notification, Modal } from "antd"
 
-import { BellOutlined } from '@ant-design/icons'
+import { BellOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from "dayjs"
+import { Form as FormikForm, Formik } from "formik"
 
 import UnreadIcon from "../icons/UnreadIcon"
 import ReadIcon from "../icons/ReadIcon"
@@ -86,7 +87,10 @@ const ListItem = ({ data }) => {
 }
 
 const Notifications = () => {
-    const [open, setOpen] = useState(false)
+    const [open, setOpen] = useState({
+        drawer: false,
+        modal: false
+    })
     const [section, setSection] = useState(0)
 
     const { data, isLoading, error } = useMessages(pathUrl.messages)
@@ -110,12 +114,12 @@ const Notifications = () => {
         date: 'Fri, Nov 23, 2023 - 13:30'
     })) */
 
-    const handleOpen = () => {
-        setOpen(true)
+    const handleOpen = (section) => {
+        setOpen({...open, [section]: true})
     }
 
-    const handleClose = () => {
-        setOpen(false)
+    const handleClose = (section) => {
+        setOpen({...open, [section]: false})
     }
 
     useEffect(() => {
@@ -145,13 +149,12 @@ const Notifications = () => {
                 <Button 
                     size="large"
                     icon={<BellOutlined />}
-                    onClick={handleOpen}
+                    onClick={() => handleOpen('drawer')}
                 />
             </Badge>
             <Drawer
                 title={
                     <Segmented 
-                        block
                         options={segmentOptions}
                         value={section}
                         onChange={setSection}
@@ -159,8 +162,19 @@ const Notifications = () => {
                 }
                 placement="right"
                 size="large"
-                onClose={handleClose}
-                open={open}
+                onClose={() => handleClose('drawer')}
+                open={open.drawer}
+                extra={
+                    <Space>
+                        <Button 
+                            type="primary"
+                            icon={<PlusOutlined />}
+                            onClick={() => handleOpen('modal')}
+                        >
+                            Message
+                        </Button>
+                    </Space>
+                }
             >
                 { !section ? (
                     <ListItem data={data.data} />
@@ -169,6 +183,34 @@ const Notifications = () => {
                 )
                 }
             </Drawer>
+            { open.modal && (
+                <Formik
+                    initialValues={{
+                        title: '',
+                        message: '',
+                        city_id: [],
+                        status: '',
+                        drivers_ids: []
+                    }}
+                    onSubmit={ async (values, { setSubmitting, resetForm }) => {
+                        console.log(values)
+                    }}
+                >
+                    { props => (
+                        <FormikForm>
+                            <Modal
+                                title="New Message"
+                                open={open.modal}
+                                onOk={() => handleClose('modal')}
+                                okText="Create"
+                                onCancel={() => handleClose('modal')}
+                            >
+                                <p>The Quick Brown Fox Jumped Over The Lazy Dog.</p>
+                            </Modal>
+                        </FormikForm>
+                    )}
+                </Formik>
+            )}
         </>
     )
 }
