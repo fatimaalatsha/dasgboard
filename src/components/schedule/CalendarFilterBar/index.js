@@ -194,7 +194,7 @@ const CalendarFilterBar = ({
                             { label: 'Unavailability', value: 'Unavailability' },
                         ]}
                     />
-                    {  scheduleFilter.navigation.view === 0 && (
+                    {  scheduleFilter.navigation.view === 0 && scheduleFilter.navigation.tab === 'active' && (
                         <>
                             <HourDayFilter 
                                 data={props.data}
