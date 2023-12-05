@@ -14,6 +14,7 @@ import useMessages from "../../hooks/use-messages"
 import InputWrapper from "../forms/InputWrapper"
 import { CitySelect } from "../CitySelect"
 import DriverSelect from "../DriverSelect"
+import SubmitWrapper from "../forms/SubmitWrapper"
 
 const { Title, Text, Paragraph } = Typography
 
@@ -205,9 +206,27 @@ const Notifications = () => {
                             <Modal
                                 title="New Message"
                                 open={open.modal}
-                                onOk={() => handleClose('modal')}
-                                okText="Create"
                                 onCancel={() => handleClose('modal')}
+                                destroyOnClose
+                                footer={[
+                                    <Button
+                                        key="cancel"
+                                        onClick={() => {
+                                            handleClose('modal')
+                                            props.resetForm()
+                                        }}
+                                    >
+                                        Cancel
+                                    </Button>,
+                                    <SubmitWrapper
+                                        key="create"
+                                        type="primary"
+                                        htmlType="submit"
+                                        loading={props.isSubmitting}
+                                    >
+                                        Create
+                                    </SubmitWrapper>
+                                ]}
                             >
                                 <Space 
                                     direction="vertical" 
@@ -231,9 +250,10 @@ const Notifications = () => {
                                         }}
                                     />
                                     <DriverSelect 
-                                        simple={true}
+                                        simple="true"
                                         disabled={!Boolean(props.values.city_id)}
                                         city_id={Number(props.values.city_id)}
+                                        onChange={(value) => props.setFieldValue('drivers', value)}
                                     />
                                     <InputWrapper 
                                         name="message"
