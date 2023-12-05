@@ -113,12 +113,6 @@ const Notifications = () => {
         }
     ]
 
-    /* const data = [...Array(10)].map((_, idx) => ({
-        title: `Notification Title ${idx}`,
-        content: 'Driver submitted insurance documents Driver submitted insurance documents Driver submitted insurance documents', 
-        date: 'Fri, Nov 23, 2023 - 13:30'
-    })) */
-
     const handleOpen = (section) => {
         setOpen({...open, [section]: true})
     }
