@@ -11,7 +11,7 @@ import { useFilterStore } from '../../store'
 
 const DriverSelect = forwardRef((props, ref) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
-    const city = Number(scheduleFilter.filter.city_id.replace('in|', ''))
+    const city = props.city_id || Number(scheduleFilter.filter.city_id.replace('in|', ''))
     const { data, error, isLoading } = useFetch('/v1/drivers?paginated=false&filter[status]=in|active&filter[city_id]=in|' + city) // Fetches active drivers in selected city
     const [drivers, setDrivers] = useState([])
     const { values, setFieldValue, initialValues } = useFormikContext()
@@ -67,15 +67,13 @@ const DriverSelect = forwardRef((props, ref) => {
             <Tag {...tagConfig}>
                 <Space style={{ marginRight: 8 }}>
                 {label}
-                {!simpleTags && (    
-                    <Tooltip title="Permanent Driver?">
+                {!simpleTags && (    <Tooltip title="Permanent Driver?">
                         <Switch 
                             size="small" 
                             checked={values.drivers.find((driver) => driver.user_id === value)?.is_permanent}
                             onChange={handleSwitchChange}
                         />
-                    </Tooltip>
-                )}
+                    </Tooltip>)}
                 </Space>
             </Tag>
         )
