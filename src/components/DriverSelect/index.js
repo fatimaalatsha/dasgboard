@@ -3,6 +3,7 @@
 * It leaves onChange and value up to the parent component.
 * @city accepts a value (number) for dependable formik forms with single city select
 * or it will pull directly from schedule module city selection
+* @simpleTags takes inherit props for removing permanent drivers switch
 */
 import { forwardRef, useState, useEffect } from 'react'
 import { Select, Tag, Space, Switch, Tooltip } from 'antd'
