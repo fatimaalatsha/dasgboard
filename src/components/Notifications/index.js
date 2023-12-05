@@ -11,6 +11,10 @@ import ReadIcon from "../icons/ReadIcon"
 import  { pathUrl } from "../../api/path-url"
 import useMessages from "../../hooks/use-messages"
 
+import InputWrapper from "../forms/InputWrapper"
+import { CitySelect } from "../CitySelect"
+import DriverSelect from "../DriverSelect"
+
 const { Title, Text, Paragraph } = Typography
 
 const ListItem = ({ data }) => {
@@ -188,9 +192,9 @@ const Notifications = () => {
                     initialValues={{
                         title: '',
                         message: '',
-                        city_id: [],
+                        city_id: null,
                         status: '',
-                        drivers_ids: []
+                        drivers: []
                     }}
                     onSubmit={ async (values, { setSubmitting, resetForm }) => {
                         console.log(values)
@@ -205,7 +209,40 @@ const Notifications = () => {
                                 okText="Create"
                                 onCancel={() => handleClose('modal')}
                             >
-                                <p>The Quick Brown Fox Jumped Over The Lazy Dog.</p>
+                                <Space 
+                                    direction="vertical" 
+                                    size={16}
+                                    style={{
+                                        width: '100%',
+                                    }}
+                                >
+                                    <InputWrapper 
+                                        name="title"
+                                        placeholder="Title"
+                                        type="text"
+                                        value={props.values.title}
+                                    />
+                                    <CitySelect 
+                                        style={{
+                                            width: '100%'
+                                        }}
+                                        onChange={(value) => {
+                                            props.setFieldValue('city_id', Number(value))
+                                        }}
+                                    />
+                                    <DriverSelect 
+                                        simple={true}
+                                        disabled={!Boolean(props.values.city_id)}
+                                        city_id={Number(props.values.city_id)}
+                                    />
+                                    <InputWrapper 
+                                        name="message"
+                                        placeholder="Message"
+                                        textarea="true"
+                                        value={props.values.message}
+                                        rows={4}
+                                    />
+                                </Space>
                             </Modal>
                         </FormikForm>
                     )}
