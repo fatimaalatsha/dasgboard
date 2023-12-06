@@ -4,7 +4,7 @@ import { Button, Badge, Drawer, Segmented, List, Typography, Space, notification
 import { BellOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from "dayjs"
 import { Form as FormikForm, Formik } from "formik"
-import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
+import { object, string, number, array } from 'yup' // Import Yup for form validation
 
 import UnreadIcon from "../icons/UnreadIcon"
 import ReadIcon from "../icons/ReadIcon"
