@@ -619,6 +619,13 @@ console.log('APP: ', application)
                                         </Tag>
                                     </Tooltip>
                                 )}
+                                { record?.is_recurring && (
+                                    <Tooltip title="Recurring Shift">
+                                        <Tag color="lime">
+                                            <SyncOutlined />
+                                        </Tag>
+                                    </Tooltip>
+                                )}
                                 { application?.tags?.map((tag, idx) => (
                                     <CardStatus key={idx} status={tag} guarantee={record?.guarantee?.amount}/>
                                 )) }
@@ -648,6 +655,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         driver_id: user_id,
         current_day: dayjs(day).tz(scheduleFilter.tz).utc().format('YYYY-MM-DD'),
         is_individual: record.is_individual,
+        is_recurring: record.is_recurring,
         id: record.id,
         is_overnight: record.is_overnight,
         ...(record.is_overnight && {
