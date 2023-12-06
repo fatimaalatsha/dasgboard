@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react"
-import { Button, Badge, Drawer, Segmented, List, Typography, Space, notification, Modal, message } from "antd"
+import { Button, Badge, Drawer, Segmented, List, Typography, Space, notification, Modal, message, Switch, Tooltip } from "antd"
 
 import { BellOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from "dayjs"
 import { Form as FormikForm, Formik } from "formik"
-import { object, string, number, array } from 'yup' // Import Yup for form validation
+import { object, string, number, array, boolean, bool } from 'yup' // Import Yup for form validation
 
 import UnreadIcon from "../icons/UnreadIcon"
 import ReadIcon from "../icons/ReadIcon"
@@ -23,7 +23,12 @@ const messageSchema = object().shape({
     title: string().required('Required'),
     message: string().required('Required'),
     city_id: number().required('Required'),
-    drivers: array().of(number()).min(1, 'Select at least 1 driver.').required('Required')
+    specific_drivers: boolean().notRequired(),
+    drivers: array().when('specific_drivers', {
+        is: true,
+        then: array().of(number()).min(1, 'Select at least 1 driver.').required('Required'),
+        otherwise: array().notRequired()
+    })
 })
 
 const ListItem = ({ data }) => {
@@ -146,8 +151,6 @@ const Notifications = () => {
         return <>Error!</>
     }
 
-    //console.log(data)
-
     return (
         <>
             <Badge
@@ -195,8 +198,8 @@ const Notifications = () => {
                     initialValues={{
                         title: '',
                         message: '',
-                        city_id: null,
-                        status: '',
+                        city_id: 0,
+                        specific_drivers: false,
                         drivers: []
                     }}
                     validationSchema={messageSchema}
@@ -204,10 +207,12 @@ const Notifications = () => {
                         const payload = {
                             title: values.title,
                             message: values.message,
-                            city_id: values.city_id,
-                            drivers_ids: values.drivers,
+                            ...(values.specific_drivers ? 
+                                { drivers_ids: values.drivers } 
+                                : { city_id: values.city_id }
+                            )
                         }
-                        console.log(payload)
+                        //console.log(payload)
                         await createMessage(payload)
                             .then(() => {
                                 message.success('Message created successfully')
@@ -271,14 +276,33 @@ const Notifications = () => {
                                         }}
                                         onChange={(value) => {
                                             props.setFieldValue('city_id', Number(value))
+                                            props.setFieldValue('drivers', [])
                                         }}
                                     />
-                                    <DriverSelect 
-                                        simple="true"
-                                        disabled={!Boolean(props.values.city_id)}
-                                        city_id={Number(props.values.city_id)}
-                                        onChange={(value) => props.setFieldValue('drivers', value)}
-                                    />
+                                    <div
+                                        style={{
+                                            width: '100%',
+                                            display: 'flex',
+                                            gap: 8,
+                                            alignItems: 'center'
+                                        }}
+                                    >
+                                        <DriverSelect 
+                                            simple="true"
+                                            disabled={!props.values.specific_drivers}
+                                            city_id={Number(props.values.city_id)}
+                                            onChange={(value) => props.setFieldValue('drivers', value)}
+                                            style={{
+                                                width: '100%'
+                                            }}
+                                        />
+                                        <Tooltip title="Specific Drivers?">
+                                            <Switch 
+                                                disabled={!Boolean(props.values.city_id)}
+                                                onChange={(checked) => props.setFieldValue('specific_drivers', checked)}
+                                            />
+                                        </Tooltip>
+                                    </div>
                                     <InputWrapper 
                                         name="message"
                                         placeholder="Message"
