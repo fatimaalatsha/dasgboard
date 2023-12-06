@@ -205,7 +205,7 @@ const Notifications = () => {
                             title: values.title,
                             message: values.message,
                             city_id: values.city_id,
-                            drivers_id: values.drivers,
+                            drivers_ids: values.drivers,
                         }
                         console.log(payload)
                         await createMessage(payload)
