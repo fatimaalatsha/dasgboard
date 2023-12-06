@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react"
-import { Button, Badge, Drawer, Segmented, List, Typography, Space, notification, Modal } from "antd"
+import { Button, Badge, Drawer, Segmented, List, Typography, Space, notification, Modal, message } from "antd"
 
 import { BellOutlined, PlusOutlined } from '@ant-design/icons'
 import dayjs from "dayjs"
 import { Form as FormikForm, Formik } from "formik"
+import { object, string, number, boolean, array, mixed } from 'yup' // Import Yup for form validation
 
 import UnreadIcon from "../icons/UnreadIcon"
 import ReadIcon from "../icons/ReadIcon"
@@ -17,6 +18,13 @@ import DriverSelect from "../DriverSelect"
 import SubmitWrapper from "../forms/SubmitWrapper"
 
 const { Title, Text, Paragraph } = Typography
+
+const messageSchema = object().shape({
+    title: string().required('Required'),
+    message: string().required('Required'),
+    city_id: number().required('Required'),
+    drivers: array().of(number()).min(1, 'Select at least 1 driver.').required('Required')
+})
 
 const ListItem = ({ data }) => {
     const [open, setOpen] = useState({
@@ -98,7 +106,7 @@ const Notifications = () => {
     })
     const [section, setSection] = useState(0)
 
-    const { data, isLoading, error } = useMessages(pathUrl.messages)
+    const { data, isLoading, error, refetch, createMessage } = useMessages(pathUrl.messages)
 
     const segmentOptions = [
         {
@@ -191,8 +199,30 @@ const Notifications = () => {
                         status: '',
                         drivers: []
                     }}
+                    validationSchema={messageSchema}
                     onSubmit={ async (values, { setSubmitting, resetForm }) => {
-                        console.log(values)
+                        const payload = {
+                            title: values.title,
+                            message: values.message,
+                            city_id: values.city_id,
+                            drivers_id: values.drivers,
+                        }
+                        console.log(payload)
+                        await createMessage(payload)
+                            .then(() => {
+                                message.success('Message created successfully')
+                                setSubmitting(false)
+                                resetForm()
+                                handleClose('modal')
+                                refetch()
+                            })
+                            .catch(() => {
+                                message.error('Message could not be created')
+                                setSubmitting(false)
+                                resetForm()
+                                handleClose('modal')
+                                refetch()
+                            })
                     }}
                 >
                     { props => (
