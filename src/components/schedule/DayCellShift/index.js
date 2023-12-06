@@ -32,6 +32,8 @@ import {
     DeleteOutlined,
     ApiOutlined,
     InteractionOutlined,
+    SyncOutlined, // Recurring Icon
+
 } from '@ant-design/icons'
 import OvernightIcon from '../../icons/OvernightIcon'
 
@@ -563,7 +565,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
             refetch()
         })
     }
-
+console.log('APP: ', application)
     return (
         <Popover 
             open={open} 
@@ -607,6 +609,13 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
                                     <Tooltip title={`Guarantee: $${record.guarantee.amount}`}>
                                         <Tag color="gold">
                                             <DollarOutlined /> 
+                                        </Tag>
+                                    </Tooltip>
+                                )}
+                                { application?.comment && (
+                                    <Tooltip title={`Comment: ${application.comment.slice(0, 30) + '...'}`}>
+                                        <Tag color="purple">
+                                            <MessageOutlined />
                                         </Tag>
                                     </Tooltip>
                                 )}
