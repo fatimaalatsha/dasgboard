@@ -62,7 +62,7 @@ const useMessages = (url) => {
     const createMessage = async (payload) => {
         try {
             const { options } = await getAuth()
-            const response = await API.patch(pathUrl.messages, {...payload} ,options)
+            const response = await API.post(pathUrl.messages, {...payload} ,options)
             const data = await response.data
             return data
         } catch (error) {
