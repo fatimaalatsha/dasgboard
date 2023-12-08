@@ -19,12 +19,41 @@ const ExpandableDayShift = ({day}) => {
         date_from: day.format('YYYY-MM-DD'),
         date_to: day.format('YYYY-MM-DD'),
     }
-    const { data, isLoading, error } = useDayShifts(`/v1/shifts?${qs.stringify(queryHandler(filters), { skipNulls: true, arrayFormat: 'comma' })}`)
+    const { 
+        data, 
+        isLoading, 
+        error 
+    } = useDayShifts(`/v1/shifts?${qs.stringify(queryHandler(filters), { 
+        skipNulls: true, 
+        arrayFormat: 'comma' 
+    })}`, scheduleFilter.tz, day)
+
+    const columns = [
+        {
+            title: 'Day',
+            dataIndex: 'day',
+            key: 'day',
+            width: 330,
+        },
+        ...[...Array(24)].map((_, idx) => ({
+            title: idx < 10 ? `0${idx}:00` : `${idx}:00`,
+            dataIndex: idx,
+            align: 'center',
+            width: 100
+        }))
+    ]
 
     error && <>Something went wrong...</>
-
+console.log('Data', data)
     return (
-        <>Wrong turn at Albuquerque</>
+        <Table
+            columns={columns}
+            dataSource={data}
+            loading={isLoading}
+            pagination={false}
+            bordered
+            size="small"
+        />
     )
 }
 
