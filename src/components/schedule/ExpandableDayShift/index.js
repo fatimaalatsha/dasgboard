@@ -31,20 +31,21 @@ const ExpandableDayShift = ({day}) => {
     const columns = [
         {
             title: 'Day',
-            dataIndex: 'day',
-            key: 'day',
+            dataIndex: 'key',
+            key: 'key',
             width: 330,
         },
         ...[...Array(24)].map((_, idx) => ({
             title: idx < 10 ? `0${idx}:00` : `${idx}:00`,
             dataIndex: idx,
+            key: idx,
             align: 'center',
             width: 100
         }))
     ]
 
     error && <>Something went wrong...</>
-console.log('Data', data)
+console.log('Shift Data', data)
     return (
         <Table
             columns={columns}

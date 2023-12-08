@@ -73,12 +73,12 @@ const useDayShifts = (url, tz, day) => {
             const shiftData = dayHours.reduce((obj, time) => {
                 obj[time] = shiftItems.filter(shift => dayjs(shift.start_time).tz().utc().format('HH:mm') === time) || []
                 return obj
-            }, {})
+            }, { key: day.format('YYYY-MM-DD') })
 
             console.log('shiftData: ', shiftData)
 
             setFetchedData({
-                data: shiftData,
+                data: items,
                 isLoading: false,
                 error: false
             })
