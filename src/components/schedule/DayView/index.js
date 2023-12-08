@@ -110,16 +110,18 @@ const DayView = ({
           color={'#FFF'} 
           placement="topLeft"
           title={
+            record.driver.name === 'Week Shift' ?
+            '' : (
             <Space direction="vertical">
               <Text>{text}</Text>
               <Text>{`DL# ${record.driver.license_number}`}</Text>
               <Text>{`Tel. ${record.driver.phone}`}</Text>
             </Space>
-          } 
+          )} 
         >
           <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '' }} >{text}</Text>
         </Tooltip>
-      )
+      ),
     },
     {
       title: (
@@ -219,6 +221,12 @@ const DayView = ({
             className="schedule-day-table"
             bordered
             size="small"
+            expandable={{
+              expandedRowRender: () => (
+                <>Wrong turn at Albuquerque</>
+              ),
+              rowExpandable: (record) => record.driver.name === 'Week Shift'
+            }}
         />
         {loadTimeline && <CurrentTimeLine axis tz={tz} />}
       </div>
