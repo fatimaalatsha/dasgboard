@@ -23,6 +23,19 @@ const useDaySchedule = (url, timezone, selectedDay) => {
     })
     const controller = new AbortController()// Create a new AbortController
     const dayHours = getDayHours() // Array of hours in a day 24h format
+    const emptyItem = {
+      "key": 0,
+      ...[...Array(24)].reduce((acc, _, idx) => {
+        const formattedHour = idx < 10 ? `0${idx}:00` : `${idx}:00`;
+        acc[formattedHour] = [];
+        return acc;
+      }, {}),
+      "driver": {
+        "license_number": "0",
+        "phone": "0",
+        "name": "Week Shift"
+      },
+  }
 
     const fetchData = useCallback(async () => {// Create a new fetchData function
         try {
@@ -75,7 +88,7 @@ const useDaySchedule = (url, timezone, selectedDay) => {
               });
 
             setFetchedData({// Set fetched data
-                data: dayData,
+                data: dayData.length > 0 ? [emptyItem, ...dayData] : dayData, // Add empty row if dayData has values
                 response: {data: data, meta: meta},
                 isLoading: false,
                 error: false,
