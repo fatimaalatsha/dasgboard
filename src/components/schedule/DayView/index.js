@@ -223,7 +223,9 @@ const DayView = ({
             size="small"
             expandable={{
               expandedRowRender: () => (
-                <ExpandableDayShift />
+                <ExpandableDayShift 
+                  day={selectedDay}
+                />
               ),
               rowExpandable: (record) => record.driver.name === 'Week Shift'
             }}
