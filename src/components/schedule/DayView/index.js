@@ -11,7 +11,7 @@ import CalendarFilterBar from '../CalendarFilterBar' // Calendar Filters and nav
 import { useFilterStore } from '../../../store' // Import useFilterStore hook
 import useDaySchedule from '../../../hooks/use-day-schedule' // Import useDaySchedule hook
 import { shiftCount } from '../../../utils/schedule-status' // Import counter for each hour on shifts
-//import DayColumnHighlight from '../DayColumnHighlight'
+import ExpandableDayShift from '../ExpandableDayShift'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -136,7 +136,7 @@ const DayView = ({
             children: [
               {
                 title: () => {
-                  const columnStyle = computedCount < scheduleFilter.staff ? { ...titleStyle } : {};
+                  
                   return ( 
                     <div>
                         <Text key={idx} code>
@@ -223,7 +223,7 @@ const DayView = ({
             size="small"
             expandable={{
               expandedRowRender: () => (
-                <>Wrong turn at Albuquerque</>
+                <ExpandableDayShift />
               ),
               rowExpandable: (record) => record.driver.name === 'Week Shift'
             }}
