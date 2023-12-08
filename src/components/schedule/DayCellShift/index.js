@@ -565,7 +565,7 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
             refetch()
         })
     }
-console.log('APP: ', application)
+
     return (
         <Popover 
             open={open} 
