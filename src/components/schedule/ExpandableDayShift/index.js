@@ -1,5 +1,6 @@
 import { Table } from 'antd'
 import qs from 'qs'
+import dayjs from 'dayjs'
 
 import { useFilterStore } from '../../../store'
 import useDayShifts from '../../../hooks/use-day-shifts'
@@ -34,6 +35,9 @@ const ExpandableDayShift = ({day}) => {
             dataIndex: 'key',
             key: 'key',
             width: 330,
+            render: (text) => (
+                <>{dayjs(text).format('MMM, dd DD')}</>
+            )
         },
         ...[...Array(24)].map((_, idx) => ({
             title: idx < 10 ? `0${idx}:00` : `${idx}:00`,

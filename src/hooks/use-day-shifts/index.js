@@ -83,10 +83,13 @@ const useDayShifts = (url, tz, day) => {
                 }, {}),
               }]
 
-            console.log('UNique: ', shiftItems)
+            const filteredShiftItems = shiftItems.filter((entry) => {
+            const dataValues = Object.values(entry[day.format('YYYY-MM-DD')]);
+            return dataValues.some((shifts) => shifts.length > 0);
+            })
 
             setFetchedData({
-                data: shiftItems,
+                data: filteredShiftItems,
                 isLoading: false,
                 error: false
             })
