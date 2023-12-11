@@ -54,31 +54,39 @@ const useDayShifts = (url, tz, day) => {
                     : item
             )
 
-            const shiftItems = duplicatedItems.map(item => { // Add overnight times
-                if (item.is_overnight) {
-                    const isSameDay = day.tz().utc().isSame(dayjs(item.end_time), 'day');
+            const shiftItems = [{
+                key: day.format('YYYY-MM-DD'),
+                [day.format('YYYY-MM-DD')]: duplicatedItems.map(item => {
+                  // Add overnight times
+                  if (item.is_overnight) {
+                    const isSameDay = day.isSame(dayjs(item.end_time), 'day');
                     if (!isSameDay) {
                       item.overnight_end = item.end_time;
-                      item.end_time = day.tz().utc().endOf('day').toISOString();
+                      item.end_time = day.endOf('day').toISOString();
                       item.overnight_start = item.start_time;
                     } else {
                       item.overnight_start = item.start_time;
-                      item.start_time = day.tz().utc().startOf('day').toISOString();
+                      item.start_time = day.startOf('day').toISOString();
                       item.overnight_end = item.end_time;
                     }
                   }
-                  return item
-            })
+              
+                  const time = dayjs(item.start_time).tz().utc().format('HH:mm');
+                  return { [time]: [item] };
+                }).reduce((acc, obj) => {
+                  const key = Object.keys(obj)[0];
+                  if (!acc[key]) {
+                    acc[key] = [];
+                  }
+                  acc[key].push(...obj[key]);
+                  return acc;
+                }, {}),
+              }]
 
-            const shiftData = dayHours.reduce((obj, time) => {
-                obj[time] = shiftItems.filter(shift => dayjs(shift.start_time).tz().utc().format('HH:mm') === time) || []
-                return obj
-            }, { key: day.format('YYYY-MM-DD') })
-
-            console.log('shiftData: ', shiftData)
+            console.log('UNique: ', shiftItems)
 
             setFetchedData({
-                data: items,
+                data: shiftItems,
                 isLoading: false,
                 error: false
             })

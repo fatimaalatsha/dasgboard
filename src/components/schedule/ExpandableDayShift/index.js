@@ -45,7 +45,7 @@ const ExpandableDayShift = ({day}) => {
     ]
 
     error && <>Something went wrong...</>
-console.log('Shift Data', data)
+
     return (
         <Table
             columns={columns}
