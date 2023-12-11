@@ -59,14 +59,14 @@ const useDayShifts = (url, tz, day) => {
                 [day.format('YYYY-MM-DD')]: duplicatedItems.map(item => {
                   // Add overnight times
                   if (item.is_overnight) {
-                    const isSameDay = day.isSame(dayjs(item.end_time), 'day');
+                    const isSameDay = day.tz().utc().isSame(dayjs(item.end_time), 'day');
                     if (!isSameDay) {
                       item.overnight_end = item.end_time;
-                      item.end_time = day.endOf('day').toISOString();
+                      item.end_time = day.tz().utc().endOf('day').toISOString();
                       item.overnight_start = item.start_time;
                     } else {
                       item.overnight_start = item.start_time;
-                      item.start_time = day.startOf('day').toISOString();
+                      item.start_time = day.tz().utc().startOf('day').toISOString();
                       item.overnight_end = item.end_time;
                     }
                   }
