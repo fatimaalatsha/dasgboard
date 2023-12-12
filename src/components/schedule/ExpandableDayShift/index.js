@@ -137,7 +137,7 @@ const CellShift = ({record, tz}) => {
     )
 }
 
-const ExpandableDayShift = ({day}) => {
+const ExpandableDayShift = ({day}) => { //TODO: Add overlapping shift visuals
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
 
     const filters = {
