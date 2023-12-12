@@ -12,7 +12,7 @@ dayjs.extend(utc)
 dayjs.extend(timezone)
 
 const { useToken } = theme
-const { Text, Title } = Typography
+const { Text } = Typography
 
 //get the papams that will be passed to filters through qs
 const queryHandler = (params) => ({ // Get table params
@@ -45,7 +45,6 @@ const CellShift = ({record, tz}) => {
         count,
         capacity
     } = record
-    console.log('record: ',record)
 
     const getShiftDuration = () => {
         const END_TIME = dayjs(end_time).tz(tz).utc()
