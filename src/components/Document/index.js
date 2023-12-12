@@ -110,7 +110,7 @@ const Document = (props) => {
     }
     
     const showUpload = () => { // Show upload feature
-        return props.status === 'missing'
+        return props.status === 'missing' || props.status === 'rejected' || props.status === 'expired'
     }
 
     return (
