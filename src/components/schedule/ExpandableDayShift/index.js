@@ -104,14 +104,7 @@ const CellShift = ({record, tz}) => {
                         <Row>
                             <Space size={0}>
                                 <Text 
-                                    strong 
-                                    style={{ 
-                                        marginRight: 4, 
-                                        ...(is_overnight 
-                                            ? {color: '#FFFF'} 
-                                            : {}
-                                        ) 
-                                    }}
+                                    {...ellipsisStyle}
                                 >
                                     {`${count} / ${capacity}`}
                                 </Text>
@@ -122,7 +115,7 @@ const CellShift = ({record, tz}) => {
                                         </Tag>
                                     </Tooltip>
                                 )}
-                                { is_recurring && (
+                                { is_recurring && styleConfig.width > 100 && (
                                     <Tooltip title="Recurring Shift">
                                         <Tag color="lime">
                                             <SyncOutlined />
