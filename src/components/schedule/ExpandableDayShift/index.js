@@ -1,4 +1,5 @@
-import { Table, Card } from 'antd'
+import { Table, Card, theme, Space, Row, Typography, Tooltip, Tag } from 'antd'
+import { DollarOutlined, SyncOutlined } from '@ant-design/icons'
 import qs from 'qs'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
@@ -9,6 +10,9 @@ import useDayShifts from '../../../hooks/use-day-shifts'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
+
+const { useToken } = theme
+const { Text, Title } = Typography
 
 //get the papams that will be passed to filters through qs
 const queryHandler = (params) => ({ // Get table params
@@ -27,21 +31,50 @@ const hoursIdx = [...Array(24)].map((_, idx) => {
 })
 
 const CellShift = ({record, tz}) => {
-
+    const { token } = useToken()
+    const { 
+        status, 
+        is_overnight, 
+        start_time, 
+        end_time, 
+        overnight_start, 
+        overnight_end,
+        duration,
+        guarantee,
+        is_recurring,
+        count,
+        capacity
+    } = record
     console.log('record: ',record)
 
     const getShiftDuration = () => {
-        const END_TIME = dayjs(record.end_time).tz(tz).utc()
-        const START_TIME = dayjs(record.start_time).tz(tz).utc()
+        const END_TIME = dayjs(end_time).tz(tz).utc()
+        const START_TIME = dayjs(start_time).tz(tz).utc()
         return END_TIME.diff(START_TIME, 'hour', true)
     }
 
-    const floatingComponentWidth = (record.is_overnight ? getShiftDuration() : record.duration) * 60  // 60.9936 is the average width of each hour in the calendar
+    const floatingComponentWidth = (is_overnight ? getShiftDuration() : duration) * 60  // 60.9936 is the average width of each hour in the calendar
 
     const styleConfig = {
-        backgroundColor: "red",
+        backgroundColor: status === "active"
+            ? is_overnight 
+                ? token['purple-8']
+                : token.colorSuccessBg
+            : token.colorWarningBg,
+        boderColor: status === "active"
+            ? is_overnight
+                ? token['geekblue-10']
+                : token['green-4']
+            : token['gold-4'],
         height: 'calc(100% + 2px)',
         width: floatingComponentWidth
+    }
+    
+    const ellipsisStyle = {
+        style: styleConfig.width < 100 ? { width: styleConfig.width, textAlign: 'left', 
+        ...(is_overnight && { color: '#FFFFFF' })} : {...(is_overnight && { color: '#FFFFFF' })},
+        ellipsis: { tooltip: true, suffix: '' },
+        strong: true,
     }
 
     return (
@@ -53,7 +86,53 @@ const CellShift = ({record, tz}) => {
                     padding: 4
                 }}
             >
-                <>here</>
+                <Space direction="horizontal" style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'flex-start' }}>
+                    <Space direction="vertical" size={0}>
+                        <Row>
+                            <Space>
+                                <Text {...ellipsisStyle} >
+                                    {
+                                        `${is_overnight && start_time !== overnight_start 
+                                            ? `🌙` + dayjs(overnight_start).tz(tz).utc().format('HH:mm')
+                                            : dayjs(record?.start_time).tz(tz).utc().format('HH:mm')} ➡ ${is_overnight && end_time !== overnight_end 
+                                                ? dayjs(overnight_end).tz(tz).utc().format('HH:mm') + `🌙` 
+                                                : dayjs(end_time).tz(tz).utc().format('HH:mm') }`
+                                    }
+                                </Text>
+                            </Space>
+                        </Row>
+                        <Row>
+                            <Space size={0}>
+                                <Text 
+                                    strong 
+                                    style={{ 
+                                        marginRight: 4, 
+                                        ...(is_overnight 
+                                            ? {color: '#FFFF'} 
+                                            : {}
+                                        ) 
+                                    }}
+                                >
+                                    {`${count} / ${capacity}`}
+                                </Text>
+                                { guarantee && (
+                                    <Tooltip title={`Guarantee: $${guarantee}`}>
+                                        <Tag color="gold">
+                                            <DollarOutlined /> 
+                                        </Tag>
+                                    </Tooltip>
+                                )}
+                                { is_recurring && (
+                                    <Tooltip title="Recurring Shift">
+                                        <Tag color="lime">
+                                            <SyncOutlined />
+                                        </Tag>
+                                    </Tooltip>
+                                )}
+                            </Space>
+                        </Row>
+                    </Space>
+                </Space>
             </Card>
         </div>
     )
