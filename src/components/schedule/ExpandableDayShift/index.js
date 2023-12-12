@@ -60,7 +60,7 @@ const CellShift = ({record, tz}) => {
                 ? token['purple-8']
                 : token.colorSuccessBg
             : token.colorWarningBg,
-        boderColor: status === "active"
+        borderColor: status === "active"
             ? is_overnight
                 ? token['geekblue-10']
                 : token['green-4']
@@ -91,11 +91,12 @@ const CellShift = ({record, tz}) => {
                             <Space>
                                 <Text {...ellipsisStyle} >
                                     {
-                                        `${is_overnight && start_time !== overnight_start 
+                                        `${ is_overnight && start_time !== overnight_start 
                                             ? `🌙` + dayjs(overnight_start).tz(tz).utc().format('HH:mm')
-                                            : dayjs(record?.start_time).tz(tz).utc().format('HH:mm')} ➡ ${is_overnight && end_time !== overnight_end 
-                                                ? dayjs(overnight_end).tz(tz).utc().format('HH:mm') + `🌙` 
-                                                : dayjs(end_time).tz(tz).utc().format('HH:mm') }`
+                                            : dayjs(record?.start_time).tz(tz).utc().format('HH:mm')} ➡ ${
+                                            is_overnight && end_time !== overnight_end 
+                                            ? dayjs(overnight_end).tz(tz).utc().format('HH:mm') + `🌙` 
+                                            : dayjs(end_time).tz(tz).utc().format('HH:mm') }`
                                     }
                                 </Text>
                             </Space>
