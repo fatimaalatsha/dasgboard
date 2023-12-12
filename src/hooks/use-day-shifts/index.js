@@ -16,9 +16,6 @@ const useDayShifts = (url, tz, day) => {
         isLoading: true,
         error: false
     }
-    const dayHours = [...Array(24)].map((_,idx) => (
-        idx < 10 ? `0${idx}:00` : `${idx}:00`
-    ))
 
     const [fetchedData, setFetchedData] = useState(initialState)
 
@@ -49,7 +46,9 @@ const useDayShifts = (url, tz, day) => {
             const { items } = await response.data
 
             const duplicatedItems = items.flatMap((item) => // Duplicate overnight shifts
-                item.is_overnight && dayjs(item.end_time).tz().utc().isSame(dayjs(day).tz().utc(), 'day') && dayjs(item.start_time).tz().utc().isSame(dayjs(day).tz().utc(), 'day')
+                item.is_overnight 
+                && dayjs(item.end_time).tz().utc().isSame(dayjs(day).tz().utc(), 'day') 
+                && dayjs(item.start_time).tz().utc().isSame(dayjs(day).tz().utc(), 'day')
                     ? [item, { ...item, is_duplicate: true }]
                     : item
             )
@@ -59,33 +58,34 @@ const useDayShifts = (url, tz, day) => {
                 [day.format('YYYY-MM-DD')]: duplicatedItems.map(item => {
                   // Add overnight times
                   if (item.is_overnight) {
-                    const isSameDay = day.tz().utc().isSame(dayjs(item.end_time), 'day');
+                    const isSameDay = day.tz().utc().isSame(dayjs(item.end_time), 'day')
                     if (!isSameDay) {
-                      item.overnight_end = item.end_time;
-                      item.end_time = day.tz().utc().endOf('day').toISOString();
-                      item.overnight_start = item.start_time;
+                      item.overnight_end = item.end_time
+                      item.end_time = day.tz().utc().endOf('day').toISOString()
+                      item.overnight_start = item.start_time
                     } else {
-                      item.overnight_start = item.start_time;
-                      item.start_time = day.tz().utc().startOf('day').toISOString();
-                      item.overnight_end = item.end_time;
+                      item.overnight_start = item.start_time
+                      item.start_time = day.tz().utc().startOf('day').toISOString()
+                      item.overnight_end = item.end_time
                     }
                   }
               
-                  const time = dayjs(item.start_time).tz().utc().format('HH:mm');
-                  return { [time]: [item] };
+                  const time = dayjs(item.start_time).tz().utc().format('HH:mm')
+
+                  return { [time]: [item] }
                 }).reduce((acc, obj) => {
-                  const key = Object.keys(obj)[0];
+                  const key = Object.keys(obj)[0]
                   if (!acc[key]) {
-                    acc[key] = [];
+                    acc[key] = []
                   }
-                  acc[key].push(...obj[key]);
-                  return acc;
+                  acc[key].push(...obj[key])
+                  return acc
                 }, {}),
               }]
 
             const filteredShiftItems = shiftItems.filter((entry) => {
-            const dataValues = Object.values(entry[day.format('YYYY-MM-DD')]);
-            return dataValues.some((shifts) => shifts.length > 0);
+            const dataValues = Object.values(entry[day.format('YYYY-MM-DD')])
+            return dataValues.some((shifts) => shifts.length > 0)
             })
 
             setFetchedData({
