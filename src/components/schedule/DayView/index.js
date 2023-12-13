@@ -1,4 +1,4 @@
-import { useState, useEffect, useRef } from 'react' // Import React hooks
+import { useState, useEffect } from 'react' // Import React hooks
 import { Table, Typography, Tooltip, Space, theme } from 'antd' // Import Ant components
 import qs from 'qs' // Import qs library
 import dayjs from 'dayjs' // Import dayjs
@@ -43,9 +43,7 @@ const DayView = ({
   const scheduleFilter = useFilterStore(state => state.scheduleFilter)
   const dayFilter = useFilterStore( state => state.dayFilter) // get local day view filters
   const setDayFilter = useFilterStore( state => state.setDayFilter ) // set local day view filters
-  const componentIsMounted = useRef(false) // Create a ref to store the component mount state
   const { token } = useToken() // Antd Theme token property
-  const MIN_DRIVER = 0
   const { 
     data,
     response, 

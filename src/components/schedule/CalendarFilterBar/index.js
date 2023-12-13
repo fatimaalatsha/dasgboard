@@ -15,27 +15,66 @@ import Submit from '../../forms/SubmitWrapper'
 const { RangePicker } = TimePicker
 
 const HourDayFilter = (props) => {
+    const dayFilter = useFilterStore( state => state.dayFilter) // get local day view filters
+    const setDayFilter = useFilterStore( state => state.setDayFilter ) // set local day view filters
+
     const validationSchema = object().shape({
+        status: string().required('Required.'),
         start_time: string().required('Required.'),
         end_time: string().required('Required.'),
     })
 
+    const handleClear = () => {
+        setDayFilter({
+            ...dayFilter,
+            status: null,
+            start_time: null,
+            end_time: null
+        })
+    }
+
     return (
         <Formik
             initialValues={{
-                start_time: '',
-                end_time: ''
+                status: dayFilter.status || null,
+                start_time: dayFilter.start_time?.slice(0, -3) || '',
+                end_time: dayFilter.end_time?.slice(0, -3) || ''
             }}
             validationSchema={validationSchema}
             onSubmit={(values, { setSubmitting }) => {
-                const userIds = rangeFilter(values, props.data)
-                console.log("Users: ",userIds)
+                //const userIds = rangeFilter(values, props.data)
+                const payload = {
+                    ...values,
+                    start_time: values.start_time + ':00',
+                    end_time: values.end_time + ':00'
+                }
+                setDayFilter({...dayFilter,...payload})
                 setSubmitting(false)
             }}
         >
             { props => (
                 <FormikForm>
                     <Space.Compact>
+                        <Button
+                            onClick={() => {
+                                handleClear()
+                                props.resetForm()
+                            }}
+                        >
+                            Clear
+                        </Button>
+                        <Select
+                            placeholder="Status"
+                            optionFilterProp="children"
+                            style={{ width: 150 }}
+                            options={[
+                                { label: 'Available', value: 'available' },
+                                { label: 'Unavailable', value: 'unavailable' },
+                                { label: 'Preferred', value: 'preferred' },
+                            ]}
+                            value={props.values.status}
+                            onChange={(value) => props.setFieldValue('status', value)}
+                        />
                         <RangePicker
                             status={props.isValid ? 'success' : 'error'}
                             format="HH:mm"
@@ -179,21 +218,6 @@ const CalendarFilterBar = ({
                             )}
                         />
                     )}
-                    <Select
-                        placeholder="Status"
-                        optionFilterProp="children"
-                        style={{ width: 150 }}
-                        options={[
-                            { label: 'Scheduled Shifts', value: 'Scheduled Shifts' },
-                            { label: 'Available Shifts', value: 'Available Shifts' },
-                            { label: 'Unassigned Shifts', value: 'Unassigned Shifts' },
-                            { label: 'Time Off', value: 'Time Off' },
-                            { label: 'Absent', value: 'Absent' },
-                            { label: 'Early In', value: 'Early In' },
-                            { label: 'Late Out', value: 'Late Out' },
-                            { label: 'Unavailability', value: 'Unavailability' },
-                        ]}
-                    />
                     {  scheduleFilter.navigation.view === 0 && scheduleFilter.navigation.tab === 'active' && (
                         <>
                             <HourDayFilter 
