@@ -57,8 +57,8 @@ const HourDayFilter = (props) => {
                     <Space.Compact>
                         <Button
                             onClick={() => {
-                                handleClear()
                                 props.resetForm()
+                                handleClear()
                             }}
                         >
                             Clear
