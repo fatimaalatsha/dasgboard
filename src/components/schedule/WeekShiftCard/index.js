@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { Card, Space, Row, Col, Typography, Tag, Tooltip, Popover, Button, theme } from 'antd'
-import { DeleteOutlined, EditOutlined, FlagOutlined, LikeOutlined, DislikeOutlined, CalendarOutlined, ExceptionOutlined, DollarOutlined, UserOutlined } from '@ant-design/icons'
+import { DeleteOutlined, EditOutlined, FlagOutlined, LikeOutlined, DislikeOutlined, CalendarOutlined, ExceptionOutlined, DollarOutlined, UserOutlined, SyncOutlined } from '@ant-design/icons'
 import OvernightIcon from '../../icons/OvernightIcon'
 import dayjs from 'dayjs'
 
@@ -154,6 +154,13 @@ const WeekShiftCard = ({record, cardStyle, handleEdit, handleDelete, handleStatu
                         <Text strong style={{ fontSize: 16, textAlign: 'left', ...(calcWidth < 100 ? {width: calcWidth} : {}), ...(record.is_overnight ? { color: '#FFFFFF'} : {}) }} ellipsis={{ tooltip: true, suffix: '' }}>{`${record.count || 0} / ${record.drivers}`}</Text>
                         { record.guarantee !== 0 && <Text {...ellipsisStyle}>${record.guarantee}</Text>}
                         <Text {...ellipsisStyle}>{`${record.is_overnight && record.start !== record.overnight_start ? `🌙` + record.overnight_start : record?.start} ➡ ${record.is_overnight && record.end !== record.overnight_end ? record.overnight_end + `🌙` : record?.end}`}</Text>
+                        { record?.hasRecurrency && (
+                            <Tooltip title="Recurring Shift">
+                                <Tag color="geekblue">
+                                    <SyncOutlined />
+                                </Tag>
+                            </Tooltip>
+                        )}
                     </Space>
                 </Card>
             </Popover>
