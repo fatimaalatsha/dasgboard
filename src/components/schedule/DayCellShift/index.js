@@ -32,6 +32,8 @@ import {
     DeleteOutlined,
     ApiOutlined,
     InteractionOutlined,
+    SyncOutlined, // Recurring Icon
+
 } from '@ant-design/icons'
 import OvernightIcon from '../../icons/OvernightIcon'
 
@@ -610,6 +612,20 @@ const ShiftCard = ({ record, cardStyle, handleEdit, handleStatus, application, r
                                         </Tag>
                                     </Tooltip>
                                 )}
+                                { application?.comment && (
+                                    <Tooltip title={`Comment: ${application.comment.slice(0, 30) + '...'}`}>
+                                        <Tag color="purple">
+                                            <MessageOutlined />
+                                        </Tag>
+                                    </Tooltip>
+                                )}
+                                { record?.is_recurring && (
+                                    <Tooltip title="Recurring Shift">
+                                        <Tag color="lime">
+                                            <SyncOutlined />
+                                        </Tag>
+                                    </Tooltip>
+                                )}
                                 { application?.tags?.map((tag, idx) => (
                                     <CardStatus key={idx} status={tag} guarantee={record?.guarantee?.amount}/>
                                 )) }
@@ -639,6 +655,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
         driver_id: user_id,
         current_day: dayjs(day).tz(scheduleFilter.tz).utc().format('YYYY-MM-DD'),
         is_individual: record.is_individual,
+        is_recurring: record.is_recurring,
         id: record.id,
         is_overnight: record.is_overnight,
         ...(record.is_overnight && {

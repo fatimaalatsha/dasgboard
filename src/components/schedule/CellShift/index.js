@@ -15,7 +15,7 @@ import {
     Input,
     Switch,
 } from 'antd'
-import { UserOutlined, PlusOutlined, CheckOutlined, CloseOutlined  } from '@ant-design/icons'
+import { UserOutlined, PlusOutlined, CheckOutlined, CloseOutlined } from '@ant-design/icons'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
