@@ -285,10 +285,9 @@ const DriverReviews = ({ driverId }) => {
 const AutofleetDriversDetails = () => {
   //get the driver id from the url
   const { id } = useParams();
-  const location = useLocation(); // Get current location
   const { data, loading, error } = useNewFetch(`/v1/active-drivers/${id}`);
-  const isLoading = loading || !data;
-
+  error && console.log(error);
+  loading && console.log(loading);
   return (
     <Card title="Autofleet Drivers Details" style={{ width: "100%" }}>
       <Card.Meta
