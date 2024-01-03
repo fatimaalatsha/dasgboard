@@ -21,7 +21,7 @@ const DriverTimeline = ({ id }) => {
           <Timeline.Item 
           key={index} 
           color={item.description.includes('rejected') ? 'red' : 'green'}>
-            {item.description} - {dayjs(item.createdAt).format('MMM, DD - YYYY hh:mm A')}
+            {item.description} - {dayjs(item.created_at).format('MMM, DD - YYYY hh:mm A')}
           </Timeline.Item> 
         ))
       }
