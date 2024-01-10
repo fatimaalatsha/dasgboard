@@ -53,8 +53,8 @@ const CellShift = ({record, tz, index, overlap, isContained}) => {
         const START_TIME = dayjs(start_time).tz(tz).utc()
         return END_TIME.diff(START_TIME, 'hour', true)
     }
-    const calcHeight = (isContained ? 90 : 100 ) / overlap
-    const calcTop = (calcHeight / 100) * 52 * index
+    const calcHeight = (isContained ? 95 - (index * 3.5) : 100 ) / overlap
+    const calcTop = (calcHeight / 100) * 52 * 0
     const floatingComponentWidth = (is_overnight ? getShiftDuration() : duration) * 60  // 60.9936 is the average width of each hour in the calendar
 
     const styleConfig = {
@@ -90,7 +90,7 @@ const CellShift = ({record, tz, index, overlap, isContained}) => {
                     padding: 4
                 }}
             >
-                <Space direction="horizontal" style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'flex-start' }}>
+                <Space direction="horizontal" style={{ display: 'flex', width: '100%', height: '100%', justifyContent: 'flex-start', alignContent: 'center' }}>
                     <Space direction="vertical" size={0}>
                         <Row>
                             <Space>
@@ -172,12 +172,12 @@ const ExpandableDayShift = ({day}) => { //TODO: Add overlapping shift visuals
             width: 100,
             render: (_, record) => {
                 return (
-                    <div className="container" style={{ minHeight: 52, height: '100%', zIndex: 999 }}>
+                    <div className="container" style={{ minHeight: 104, height: '100%', zIndex: 999 }}>
                     { record[dayjs(day).format('YYYY-MM-DD')][hour.label]?.length > 0 
                         ?  record[dayjs(day).format('YYYY-MM-DD')][hour.label].map((item, idx) => (
                             <CellShift 
                                 key={idx}
-                                index={idx}
+                                index={Object.values(record[dayjs(day).format('YYYY-MM-DD')]).flat().indexOf(item)}
                                 record={item}
                                 tz={scheduleFilter.tz}
                                 overlap={record[dayjs(day).format('YYYY-MM-DD')][hour.label]?.length}
