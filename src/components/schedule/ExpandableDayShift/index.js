@@ -4,11 +4,13 @@ import qs from 'qs'
 import dayjs from 'dayjs'
 import utc from 'dayjs/plugin/utc' // Import dayjs utc plugin
 import timezone from 'dayjs/plugin/timezone' // Import dayjs timezone plugin
+import isBetween from 'dayjs/plugin/isBetween' // Import dayjs isBetween plugin
 
 import { useFilterStore } from '../../../store'
 import useDayShifts from '../../../hooks/use-day-shifts'
 
 dayjs.extend(utc)
+dayjs.extend(isBetween)
 dayjs.extend(timezone)
 
 const { useToken } = theme
@@ -30,7 +32,7 @@ const hoursIdx = [...Array(24)].map((_, idx) => {
     }
 })
 
-const CellShift = ({record, tz}) => {
+const CellShift = ({record, tz, index, overlap, isContained}) => {
     const { token } = useToken()
     const { 
         status, 
@@ -51,7 +53,8 @@ const CellShift = ({record, tz}) => {
         const START_TIME = dayjs(start_time).tz(tz).utc()
         return END_TIME.diff(START_TIME, 'hour', true)
     }
-
+    const calcHeight = (isContained ? 90 : 100 ) / overlap
+    const calcTop = (calcHeight / 100) * 52 * index
     const floatingComponentWidth = (is_overnight ? getShiftDuration() : duration) * 60  // 60.9936 is the average width of each hour in the calendar
 
     const styleConfig = {
@@ -65,8 +68,10 @@ const CellShift = ({record, tz}) => {
                 ? token['geekblue-10']
                 : token['green-4']
             : token['gold-4'],
-        height: 'calc(100% + 2px)',
-        width: floatingComponentWidth
+        height: `calc(${calcHeight}%)`,
+        top: calcTop + (isContained ? 5 : 0),
+        width: floatingComponentWidth,
+        ...(calcHeight === 100 && {padding: '2px 3px'}),
     }
     
     const ellipsisStyle = {
@@ -167,13 +172,16 @@ const ExpandableDayShift = ({day}) => { //TODO: Add overlapping shift visuals
             width: 100,
             render: (_, record) => {
                 return (
-                    <div className="container" style={{ minHeight: 24, height: '100%', zIndex: 999 }}>
+                    <div className="container" style={{ minHeight: 52, height: '100%', zIndex: 999 }}>
                     { record[dayjs(day).format('YYYY-MM-DD')][hour.label]?.length > 0 
                         ?  record[dayjs(day).format('YYYY-MM-DD')][hour.label].map((item, idx) => (
                             <CellShift 
                                 key={idx}
+                                index={idx}
                                 record={item}
                                 tz={scheduleFilter.tz}
+                                overlap={record[dayjs(day).format('YYYY-MM-DD')][hour.label]?.length}
+                                isContained={Boolean(Object.values(record[dayjs(day).format('YYYY-MM-DD')]).flat().find(element => dayjs(item.start_time).isBetween(element.start_time, element.end_time)))}
                             />
                         ))
                         : ( <></> )
