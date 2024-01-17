@@ -1,5 +1,5 @@
 import useNewFetch from "../../hooks/use-new-fetch";
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState } from "react";
 import {
   Card,
   Space,
@@ -10,39 +10,284 @@ import {
   Divider,
   Rate,
   Table,
-  Progress,
+  Button,
+  Input,
 } from "antd";
-import { UserOutlined } from "@ant-design/icons";
-import { useParams, useLocation, useNavigate } from "react-router-dom";
+import { UserOutlined, SearchOutlined } from "@ant-design/icons";
+import { useParams, useLocation } from "react-router-dom";
 import qs from "qs"; // Import qs library
 
-//import pages 
-import DriverReviews from "../DriverReviews";
 
 
 import Rides from "../Rides";
 
 const { Title, Text } = Typography;
 //get the papams that will be passed to filters through qs
-  const getUserParams = (params) => ({ // Get table params
-    limit: params.pagination?.pageSize,
-    page: params.pagination?.current,
-    ...params,
-})
+const getUserParams = (params) => ({
+  // Get table params
+  limit: params.pagination?.pageSize,
+  page: params.pagination?.current,
+  ...params,
+});
 
+const DriverReviews = ({ driverId }) => {
+  const [params, setParams] = useState({}); // Set params state
+  const [expandedRowKey, setExpandedRowKey] = useState(null); // Track the row key
+  const location = useLocation(); // Get current location
+  const pathArray = location.pathname.split("/");
 
+  const { data, loading, error, refetch } = useNewFetch(
+    `/v1/active-drivers/${driverId}/reviews?${qs.stringify(
+      getUserParams(params), // Pass the params to the query string
+      {
+        skipNulls: true, // Skip null values
+        arrayFormat: "comma", // Use comma separator
+      }
+    )}`
+  );
+
+  pathArray.pop();
+  const parentUrl = pathArray.join("/");
+  const [searchText, setSearchText] = useState("");
+  const searchInput = useRef(null);
+  const handleSearch = (selectedKeys, confirm, dataIndex) => {
+    confirm();
+    setParams({
+      ...params,
+      filter: {
+        [dataIndex]: selectedKeys[0] ? `like|${selectedKeys[0]}` : null,
+      },
+    });
+  };
+  const handleReset = (clearFilters, dataIndex) => {
+    clearFilters();
+    setSearchText("");
+    setParams({
+      ...params,
+      filter: {
+        [dataIndex]: null,
+      },
+    });
+    refetch();
+  };
+  const getColumnSearchProps = (dataIndex) => ({
+    filterDropdown: ({
+      setSelectedKeys,
+      selectedKeys,
+      confirm,
+      clearFilters,
+      close,
+    }) => (
+      <div
+        style={{
+          padding: 8,
+        }}
+        onKeyDown={(e) => e.stopPropagation()}
+      >
+        <Input
+          ref={searchInput}
+          placeholder={`Search ${dataIndex}`}
+          value={selectedKeys[0]}
+          onChange={(e) =>
+            setSelectedKeys(e.target.value ? [e.target.value] : [])
+          }
+          onPressEnter={() => handleSearch(selectedKeys, confirm, dataIndex)}
+          style={{
+            marginBottom: 8,
+            display: "block",
+          }}
+        />
+        <Space>
+          <Button
+            type="primary"
+            onClick={() => handleSearch(selectedKeys, confirm, dataIndex)}
+            icon={<SearchOutlined />}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Search
+          </Button>
+          <Button
+            onClick={() => clearFilters && handleReset(clearFilters)}
+            size="small"
+            style={{
+              width: 90,
+            }}
+          >
+            Reset
+          </Button>
+          <Button
+            type="link"
+            size="small"
+            onClick={() => {
+              close();
+            }}
+          >
+            close
+          </Button>
+        </Space>
+      </div>
+    ),
+    filterIcon: (filtered) => (
+      <SearchOutlined
+        style={{
+          color: filtered ? "#1677ff" : undefined,
+        }}
+      />
+    ),
+  });
+
+  const reviewToWords = (review) => {
+    switch (review) {
+      case 1:
+        return "Very Bad";
+      case 2:
+        return "Bad";
+      case 3:
+        return "Average";
+      case 4:
+        return "Good";
+      case 5:
+        return "Excellent";
+      default:
+        return "No Rating";
+    }
+  };
+
+  const columns = [
+    {
+      title: "Passenger",
+      dataIndex: "passenger",
+      key: "passenger",
+    },
+    {
+      title: "Rating",
+      dataIndex: "rating",
+      key: "rating",
+      render: (rating) => <Rate disabled defaultValue={rating} />,
+      sorter: true,
+    },
+    {
+      title: "Feedback",
+      dataIndex: "feedback",
+      key: "feedback",
+      render: (feedback) => (
+        <Text
+          style={{
+            whiteSpace: "pre-wrap",
+            wordBreak: "break-all",
+            ellipsis: true,
+          }}
+        >
+          {feedback}
+        </Text>
+      ),
+      ...getColumnSearchProps("feedback"),
+    },
+  ];
+  const handleRowExpand = (record) => {
+    // Toggle the expanded row when a row is clicked
+    setExpandedRowKey((prevExpandedKey) =>
+      prevExpandedKey === record.ride_id ? null : record.ride_id
+    );
+  };
+  error && console.log(error);
+  return (
+    <>
+      <Table
+        columns={columns}
+        dataSource={data?.data}
+        loading={loading}
+        pagination={{
+          total: data?.meta?.total_items,
+          showSizeChanger: true,
+          pageSizeOptions: ["10", "20", "50"],
+          showTotal: (total, range) =>
+            `${range[0]}-${range[1]} of ${total} reviews`,
+        }}
+        onChange={(pagination, filters, sorter) => {
+          // Update the params when the table state changes
+          setParams({
+            ...params,
+            pagination: {
+              current: pagination.current,
+              pageSize: pagination.pageSize,
+              limit: pagination.pageSize,
+            },
+            ...filters,
+            sort: sorter.order
+              ? {
+                  [sorter.field]: sorter.order === "ascend" ? "asc" : "desc",
+                }
+              : null,
+          });
+        }}
+        rowKey="ride_id"
+        expandable={{
+          expandedRowKeys: [expandedRowKey], // Specify the currently expanded row key
+          onExpand: (expanded, record) => handleRowExpand(record), // Handle row expansion
+          expandedRowRender: (record) => (
+            <>
+              <Space direction="horizontal" size="large">
+                <Space direction="vertical">
+                  <Rate disabled defaultValue={record.rating} />
+                  <Tag
+                    color={record.rating < 3 ? "red" : "green"}
+                    style={{ marginLeft: 10 }}
+                    className="large-badge"
+                  >
+                    {reviewToWords(record.rating)}
+                  </Tag>
+                </Space>
+                <Space direction="vertical">
+                  <Descriptions labelStyle={{ fontWeight: "bold" }} column={1}>
+                    <Descriptions.Item label="Feedback">
+                      <Text
+                        style={{
+                          whiteSpace: "pre-wrap",
+                          wordBreak: "break-all",
+                          ellipsis: true,
+                        }}
+                      >
+                        {record.feedback}{" "}
+                      </Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Ride ID ">
+                      <Text>{record.ride_id}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Passenger ID ">
+                      <Text>{record.passenger_id}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Drop Off ">
+                      <Text> {record.dropoff_completed_at?.split("T")[0]}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Creation Date ">
+                      <Text> {record.creation_date?.split("T")[0]}</Text>
+                    </Descriptions.Item>
+                    <Descriptions.Item label="Last Updated ">
+                      {/* make date more readable */}
+                      <Text> {record.updated_at?.split("T")[0]}</Text>
+                    </Descriptions.Item>
+                  </Descriptions>
+                </Space>
+              </Space>
+            </>
+          ),
+          rowExpandable: () => true,
+        }}
+      />
+    </>
+  );
+};
 
 const AutofleetDriversDetails = () => {
   //get the driver id from the url
   const { id } = useParams();
-  const location = useLocation(); // Get current location
-  const pathArray = location.pathname.split("/");
-  pathArray.pop();
-  const parentUrl = pathArray.join("/");
-
   const { data, loading, error } = useNewFetch(`/v1/active-drivers/${id}`);
-  const isLoading = loading || !data;
-
+  error && console.log(error);
+  loading && console.log(loading);
   return (
     <Card title="Autofleet Drivers Details" style={{ width: "100%" }}>
       <Card.Meta
@@ -59,6 +304,8 @@ const AutofleetDriversDetails = () => {
               >
                 {data.status}
               </Tag>
+              <Tag color="green"> Votes {data.votes}</Tag>
+              <Tag color="blue"> Rating {data.rank}</Tag>
             </Space>
             <Descriptions labelStyle={{ fontWeight: "bold" }}>
               <Descriptions.Item label="First Name">
