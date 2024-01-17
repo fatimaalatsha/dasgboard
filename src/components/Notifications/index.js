@@ -10,7 +10,7 @@ import UnreadIcon from "../icons/UnreadIcon"
 import ReadIcon from "../icons/ReadIcon"
 
 import  { pathUrl } from "../../api/path-url"
-import useMessages from "../../hooks/use-messages"
+import useNotification from "../../hooks/use-notification"
 
 import InputWrapper from "../forms/InputWrapper"
 import { CitySelect } from "../CitySelect"
@@ -31,7 +31,7 @@ const messageSchema = object().shape({
     })
 })
 
-const ListItem = ({ data }) => {
+const ListItem = ({ data, update, refetch }) => {
     const [open, setOpen] = useState({
         expand: false,
         data: {
@@ -40,13 +40,17 @@ const ListItem = ({ data }) => {
             message: '',
         }
     })
-
-    const handleOpen = (data) => {
+    console.log(data)
+    const handleOpen = async (data) => {
+        if (!data.is_read) {
+            await update(data.id, { "is_read": true })
+        }
         setOpen({...open, expand: true, data })
     }
 
     const handleClose = () => {
         setOpen({...open, expand: false})
+        refetch()
     }
 
     return (
@@ -73,14 +77,14 @@ const ListItem = ({ data }) => {
                                     size={1}
                                 >
                                     <Text type="secondary">{dayjs(item.created_at).format('dddd DD, MMMM YYYY - HH:mm')}</Text>
-                                    <Title level={5} style={{ marginTop: 0 }}>{item.title}</Title>
+                                    <Title level={5} style={{ marginTop: 0 }}>{item.message.title}</Title>
                                 </Space>
                             }
                             description={
                                 <Paragraph
                                     ellipsis
                                 >
-                                    {item.message}
+                                    {item.message.message}
                                 </Paragraph>
                             }
                         />
@@ -89,7 +93,7 @@ const ListItem = ({ data }) => {
             >
             </List>
             <Drawer
-                title={open.data.title}
+                title={open.data.message.title}
                 width={320}
                 closable={false}
                 onClose={handleClose}
@@ -97,7 +101,7 @@ const ListItem = ({ data }) => {
             >
                 <Text type="secondary">{dayjs(open.data.created_at).format('dddd DD, MMMM YYYY - HH:mm')}</Text>
                 <Paragraph>
-                    {open.data.message}
+                    {open.data.message.message}
                 </Paragraph>
             </Drawer>
         </>
@@ -111,7 +115,15 @@ const Notifications = () => {
     })
     const [section, setSection] = useState(0)
 
-    const { data, isLoading, error, refetch, createMessage } = useMessages(pathUrl.messages)
+    const { 
+        data, 
+        meta,
+        isLoading, 
+        error, 
+        refetch, 
+        updateNotification, 
+        deleteNotification 
+    } = useNotification(pathUrl.notification)
 
     const segmentOptions = [
         {
@@ -154,7 +166,7 @@ const Notifications = () => {
     return (
         <>
             <Badge
-                count={data.data?.length}
+                count={data.unread?.length}
             >
                 <Button 
                     size="large"
@@ -187,9 +199,17 @@ const Notifications = () => {
                 }
             >
                 { !section ? (
-                    <ListItem data={data.data} />
+                    <ListItem 
+                        data={data.unread}
+                        update={updateNotification}
+                        refetch={refetch}
+                    />
                 ) : (
-                    <ListItem data={data.data} />
+                    <ListItem 
+                        data={data.read}
+                        update={updateNotification}
+                        refetch={refetch}
+                    />
                 )
                 }
             </Drawer>
@@ -212,8 +232,8 @@ const Notifications = () => {
                                 : { city_id: values.city_id }
                             )
                         }
-                        //console.log(payload)
-                        await createMessage(payload)
+                        console.log(payload)
+                        /* await createMessage(payload)
                             .then(() => {
                                 message.success('Message created successfully')
                                 setSubmitting(false)
@@ -227,7 +247,7 @@ const Notifications = () => {
                                 resetForm()
                                 handleClose('modal')
                                 refetch()
-                            })
+                            }) */
                     }}
                 >
                     { props => (
