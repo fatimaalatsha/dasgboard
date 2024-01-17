@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react"
 import { Button, Badge, Drawer, Segmented, List, Typography, Space, notification, Modal, message, Switch, Tooltip } from "antd"
 
-import { BellOutlined, PlusOutlined } from '@ant-design/icons'
+import { BellOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import dayjs from "dayjs"
 import { Form as FormikForm, Formik } from "formik"
 import { object, string, number, array, boolean, bool } from 'yup' // Import Yup for form validation
@@ -31,16 +31,22 @@ const messageSchema = object().shape({
     })
 })
 
-const ListItem = ({ data, update, refetch }) => {
+const ListItem = ({ 
+    data, 
+    update, 
+    refetch,
+    remove
+ }) => {
     const [open, setOpen] = useState({
         expand: false,
+        isDeleting: false,
         data: {
             title: '',
             created_at: '',
             message: '',
         }
     })
-    console.log(data)
+    
     const handleOpen = async (data) => {
         if (!data.is_read) {
             await update(data.id, { "is_read": true })
@@ -49,8 +55,18 @@ const ListItem = ({ data, update, refetch }) => {
     }
 
     const handleClose = () => {
-        setOpen({...open, expand: false})
+        setOpen({...open, expand: false, isDeleting: false})
         refetch()
+    }
+
+    const handleDelete = async (id) => {
+        setOpen({...open, isDeleting: true})
+        await remove(id)
+        .then(response => {
+            message.success(response.message)
+            handleClose()
+        })
+        .catch(error => message.error(error.message))
     }
 
     return (
@@ -98,6 +114,17 @@ const ListItem = ({ data, update, refetch }) => {
                 closable={false}
                 onClose={handleClose}
                 open={open.expand}
+                extra={
+                    <Tooltip title="Delete">
+                        <Button 
+                            type="primary" 
+                            danger 
+                            icon={<DeleteOutlined />}
+                            loading={open.isDeleting}
+                            onClick={() => handleDelete(open.data.id)}
+                        />
+                    </Tooltip>
+                }
             >
                 <Text type="secondary">{dayjs(open.data.created_at).format('dddd DD, MMMM YYYY - HH:mm')}</Text>
                 <Paragraph>
@@ -203,12 +230,14 @@ const Notifications = () => {
                         data={data.unread}
                         update={updateNotification}
                         refetch={refetch}
+                        remove={deleteNotification}
                     />
                 ) : (
                     <ListItem 
                         data={data.read}
                         update={updateNotification}
                         refetch={refetch}
+                        remove={deleteNotification}
                     />
                 )
                 }
