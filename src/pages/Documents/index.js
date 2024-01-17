@@ -28,23 +28,22 @@ const Documents = () => {
 
     const controller = new AbortController()// Create a new abort controller
     const [cities, setCities] = useState([])
-  const { data, isLoading, error, refetch } = useFetch(`v1/documents?${qs.stringify(getUserParams(documentFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
-  console.log(data);
-   const handleTableChange = (pagination, filter, sorter) => {
-      Object.keys(filter).forEach((key) => {
-        if (
-          key === "status" &&
-          filter.status &&
-          filter.status[0] === "expiring"
-        ) {
-          filter["is_expiring"] = ["eq|true"];
-          delete filter.status;
-        } else if (filter[key]) {
-          //skip expiring 
+    const { data, isLoading, error, refetch } = useFetch(`v1/documents?${qs.stringify(getUserParams(documentFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
+    const handleTableChange = (pagination, filter, sorter) => {
+        Object.keys(filter).forEach((key) => {
+          if (
+            key === "status" &&
+            filter.status &&
+            filter.status[0] === "expiring"
+          ) {
+            filter["is_expiring"] = ["eq|true"];
+            delete filter.status;
+          } else if (filter[key]) {
+            //skip expiring 
 
-          filter[key] = ["in|" + filter[key]];
-        }
-      });
+            filter[key] = ["in|" + filter[key]];
+          }
+        });
 
       setDocumentFilter({
         pagination,
