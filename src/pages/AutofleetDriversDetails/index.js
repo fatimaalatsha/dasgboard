@@ -186,6 +186,14 @@ const DriverReviews = ({ driverId }) => {
       ),
       ...getColumnSearchProps("feedback"),
     },
+    {
+      title: "Date",
+      dataIndex: "dropoff_completed_at",
+      key: "dropoff_completed_at",
+      sorter: true,
+      render: (date) => <Text>{date?.split("T")[0]}</Text>,
+    },
+    
   ];
   const handleRowExpand = (record) => {
     // Toggle the expanded row when a row is clicked
