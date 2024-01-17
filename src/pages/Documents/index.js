@@ -99,66 +99,111 @@ const Documents = () => {
     }
 
     const tableColumns = [
-        {
-            title: 'Driver',
-            dataIndex: 'first_name',
-            render: (text, record) => `${record.first_name} ${record.last_name}`,
-        },
-        {
-            title: 'Document',
-            dataIndex: 'title',
-        },
-        {
-            title: 'City',
-            dataIndex: 'city',
-            filters: cities, 
-            key: 'c.id',
-            sorter: true,
-            filterSearch: true,
-            ...( documentFilter.filter?.['c.id'] && { defaultFilteredValue: documentFilter.filter?.['c.id'].map((city, index) => index === 0 ? city.replace('in|', '') : city.toString()) }),       
-            ...( documentFilter.sort?.city && { defaultSortOrder: documentFilter.sort?.city === 'asc' ? 'ascend' : 'descend' }),
-        },
-        {
-            title: 'Status',
-            dataIndex: 'status',
-            align: 'center',
-            render: (status) => <Tag color={status === 'approved' ? 'green' : status === 'rejected' || status === 'expired' ? 'red' : status === 'review' ? 'purple' : 'gold'}>{status.toUpperCase()}</Tag>,
-            filters: [
-                { text: 'Review', value: 'review' },
-                { text: 'Approved', value: 'approved' },
-                { text: 'Rejected', value: 'rejected' },
-                { text: 'Expired', value: 'expired' },
-                { text: 'Expiring', value: 'expiring' },
-
-            ],
-            ...( documentFilter.filter?.status && { defaultFilteredValue: documentFilter.filter?.status.map((status) => status.replace('in|', '')) }),
-        },
-        {
-            title: 'Driver Status',
-            dataIndex: 'driver_status',
-            key: 'u.status',
-            align: 'center',
-            render: (status) => (
-              <Tag color={status === 'active' ? 'success' : 'error' } style={{ textTransform: 'capitalize' }}>
-                {status.toUpperCase()}
-              </Tag>
-              ),
-              filters: [
-                { text: 'Inactive', value: 'inactive' },
-                { text: 'Active', value: 'active' },
-              ],
-            ...( documentFilter.filter?.['u.status'] && { defaultFilteredValue: documentFilter.filter?.['u.status'].map((status) => status.replace('in|', '')) }),
-        },
-        {
-            title: 'Updated At',
-            dataIndex: 'updated_at',
-            render: (text, record) => `${dayjs(text).format('YYYY-MM-DD - HH:mm:ss')}`,
-            align: 'right',
-            sorter: true,
-            key: 'updated_at',
-            ...( documentFilter.sort?.updated_at && { defaultSortOrder: documentFilter.sort?.updated_at === 'asc' ? 'ascend' : 'descend' }),
-        },
-    ]
+      {
+        title: "Driver",
+        dataIndex: "first_name",
+        render: (text, record) => `${record.first_name} ${record.last_name}`,
+      },
+      {
+        title: "Document",
+        dataIndex: "title",
+      },
+      {
+        title: "City",
+        dataIndex: "city",
+        filters: cities,
+        key: "c.id",
+        sorter: true,
+        filterSearch: true,
+        ...(documentFilter.filter?.["c.id"] && {
+          defaultFilteredValue: documentFilter.filter?.["c.id"].map(
+            (city, index) =>
+              index === 0 ? city.replace("in|", "") : city.toString()
+          ),
+        }),
+        ...(documentFilter.sort?.city && {
+          defaultSortOrder:
+            documentFilter.sort?.city === "asc" ? "ascend" : "descend",
+        }),
+      },
+      {
+        title: "Status",
+        dataIndex: "status",
+        align: "center",
+        render: (status) => (
+          <Tag
+            color={
+              status === "approved"
+                ? "green"
+                : status === "rejected" || status === "expired"
+                ? "red"
+                : status === "review"
+                ? "purple"
+                : "gold"
+            }
+          >
+            {status.toUpperCase()}
+          </Tag>
+        ),
+        filters: [
+          { text: "Review", value: "review" },
+          { text: "Approved", value: "approved" },
+          { text: "Rejected", value: "rejected" },
+          { text: "Expired", value: "expired" },
+        ],
+        ...(documentFilter.filter?.status && {
+          defaultFilteredValue: documentFilter.filter?.status.map((status) =>
+            status.replace("in|", "")
+          ),
+        }),
+      },
+      {
+        title: "Expiring",
+        dataIndex: "is_expiring",
+        align: "center",
+        filter: [
+          { title: "Yes", value: "yes" },
+          { title: "No", value: "no" },
+        ],
+        
+      },
+      {
+        title: "Driver Status",
+        dataIndex: "driver_status",
+        key: "u.status",
+        align: "center",
+        render: (status) => (
+          <Tag
+            color={status === "active" ? "success" : "error"}
+            style={{ textTransform: "capitalize" }}
+          >
+            {status.toUpperCase()}
+          </Tag>
+        ),
+        filters: [
+          { text: "Inactive", value: "inactive" },
+          { text: "Active", value: "active" },
+        ],
+        ...(documentFilter.filter?.["u.status"] && {
+          defaultFilteredValue: documentFilter.filter?.["u.status"].map(
+            (status) => status.replace("in|", "")
+          ),
+        }),
+      },
+      {
+        title: "Updated At",
+        dataIndex: "updated_at",
+        render: (text, record) =>
+          `${dayjs(text).format("YYYY-MM-DD - HH:mm:ss")}`,
+        align: "right",
+        sorter: true,
+        key: "updated_at",
+        ...(documentFilter.sort?.updated_at && {
+          defaultSortOrder:
+            documentFilter.sort?.updated_at === "asc" ? "ascend" : "descend",
+        }),
+      },
+    ];
 
     const columns = tableColumns.map((col) => {
       return {
