@@ -161,10 +161,20 @@ const Documents = () => {
         title: "Expiring",
         dataIndex: "is_expiring",
         align: "center",
-        filter: [
-          { title: "Yes", value: "yes" },
-          { title: "No", value: "no" },
+        filters: [
+          { text: "Yes", value: true },
+          { text: "No", value: false },
         ],
+        ...(documentFilter.filter?.is_expiring && {
+          defaultFilteredValue: documentFilter.filter?.is_expiring.map(
+            (is_expiring) => is_expiring.replace("in|", "")
+          ),
+        }),
+        render: (is_expiring) => (
+          <Tag color={is_expiring ? "red" : "green"}>
+            {is_expiring ? "Yes" : "No"}
+          </Tag>
+        ),
         
       },
       {
