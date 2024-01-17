@@ -56,7 +56,7 @@ const AutofleetDrivers = () => {
   const [open, setOpen] = useState(false);
   const [driver, setDriver] = useState({});
   const [vendorId, setVendorId] = useState([]);
-  const [searchText, setSearchText] = useState(autofleetFilter.full_name || "");
+  const [searchText, setSearchText] = useState(autofleetFilter.query || "");
   const [cities, setCities] = useState([]);
 
   const navigate = useNavigate();
