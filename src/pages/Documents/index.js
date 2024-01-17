@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { Card, Table, Tag, Button, Tooltip, Typography } from 'antd' // Import Ant components
+import { Card, Table, Tag, Button, Tooltip, Typography, Space } from "antd"; // Import Ant components
 import { ReloadOutlined } from '@ant-design/icons' // Import Ant Icons
 import qs from 'qs' // Import qs library
 import dayjs from "dayjs"// Import date handlers
@@ -28,30 +28,46 @@ const Documents = () => {
 
     const controller = new AbortController()// Create a new abort controller
     const [cities, setCities] = useState([])
-    const { data, isLoading, error, refetch } = useFetch(`v1/documents?${qs.stringify(getUserParams(documentFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
+  const { data, isLoading, error, refetch } = useFetch(`v1/documents?${qs.stringify(getUserParams(documentFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
+  console.log(data);
+   const handleTableChange = (pagination, filter, sorter) => {
+      Object.keys(filter).forEach((key) => {
+        if (
+          key === "status" &&
+          filter.status &&
+          filter.status[0] === "expiring"
+        ) {
+          filter["is_expiring"] = ["eq|true"];
+          delete filter.status;
+        } else if (filter[key]) {
+          //skip expiring 
 
-    const handleTableChange = (pagination, filter, sorter) => { // Handle table change
-        Object.keys(filter).forEach(key => {
-            if (filter[key]) {
-              filter[key].unshift('in|'+ filter[key][0])
-              filter[key].splice(1, 1)
-            }
-        })
-        
-        setDocumentFilter({
-            pagination,
-            filter: {
-                ...documentFilter.filter,
-                ...filter,
-                ...( documentFilter.filter?.['c.id'] && filter['c.id']  && filter['c.id'][0] === 'in|undefined' && { 'c.id': documentFilter.filter?.['c.id'] }),
-            },
-            ...(Object.keys(sorter).length !== 0 && {
-                sort: {
-                    [`${sorter.columnKey === 'c.id' ? 'city' : sorter.columnKey}`]: sorter.order === 'ascend' ? 'asc' : 'desc',
-                }
+          filter[key] = ["in|" + filter[key]];
+        }
+      });
+
+      setDocumentFilter({
+        pagination,
+        filter: {
+          ...documentFilter.filter,
+          ...filter,
+          ...(documentFilter.filter?.["c.id"] &&
+            filter["c.id"] &&
+            filter["c.id"][0] === "in|undefined" && {
+              "c.id": documentFilter.filter?.["c.id"],
             }),
-        })
-    }
+        },
+        ...(Object.keys(sorter).length !== 0 && {
+          sort: {
+            [`${sorter.columnKey === "c.id" ? "city" : sorter.columnKey}`]:
+              sorter.order === "ascend" ? "asc" : "desc",
+          },
+        }),
+      });
+    };
+
+
+
 
     const fetchCities = async () => {
       await getCities().then((response) => {
