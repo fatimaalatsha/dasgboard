@@ -1,10 +1,10 @@
 import { useState, useEffect } from "react"
-import { Button, Badge, Drawer, Segmented, List, Typography, Space, notification, Modal, message, Switch, Tooltip } from "antd"
+import { Button, Badge, Drawer, Segmented, List, Typography, Space, notification, Modal, message, Switch, Tooltip, Spin } from "antd"
 
 import { BellOutlined, PlusOutlined, DeleteOutlined } from '@ant-design/icons'
 import dayjs from "dayjs"
 import { Form as FormikForm, Formik } from "formik"
-import { object, string, number, array, boolean, bool } from 'yup' // Import Yup for form validation
+import { object, string, number, array, boolean } from 'yup' // Import Yup for form validation
 
 import UnreadIcon from "../icons/UnreadIcon"
 import ReadIcon from "../icons/ReadIcon"
@@ -144,7 +144,7 @@ const Notifications = () => {
 
     const { 
         data, 
-        meta,
+        meta, // Use when pagination is required
         isLoading, 
         error, 
         refetch, 
@@ -183,7 +183,7 @@ const Notifications = () => {
     }, [data])
 
     if (isLoading) {
-        return <>Loading...</>
+        return <Spin />
     }
 
     if (error) {
@@ -215,13 +215,13 @@ const Notifications = () => {
                 open={open.drawer}
                 extra={
                     <Space>
-                        <Button 
+                        {/* <Button // Hidden until messasing section is required
                             type="primary"
                             icon={<PlusOutlined />}
                             onClick={() => handleOpen('modal')}
                         >
                             Message
-                        </Button>
+                        </Button> */}
                     </Space>
                 }
             >
@@ -242,7 +242,7 @@ const Notifications = () => {
                 )
                 }
             </Drawer>
-            { open.modal && (
+            { open.modal && ( // FALSE until messaging section is required, move this to individual page.
                 <Formik
                     initialValues={{
                         title: '',
@@ -364,7 +364,8 @@ const Notifications = () => {
                         </FormikForm>
                     )}
                 </Formik>
-            )}
+            )
+            }
         </>
     )
 }
