@@ -83,13 +83,30 @@ const useDayShifts = (url, tz, day) => {
                 }, {}),
               }]
 
-            const filteredShiftItems = shiftItems.filter((entry) => {
+            const filteredShiftItems = shiftItems.filter((entry) => { // SHows shifts grouped under 1 single day
             const dataValues = Object.values(entry[day.format('YYYY-MM-DD')])
             return dataValues.some((shifts) => shifts.length > 0)
             })
 
+            const flattenedData = shiftItems.reduce((acc, item) => { // Shows shifts individually by hour on each day as row
+                const key = item.key;
+                const dateEntry = item[key];
+              
+                Object.keys(dateEntry).forEach(time => {
+                  acc.push({
+                    key: key,
+                    [key]: {
+                      [time]: dateEntry[time]
+                    }
+                  });
+                });
+              
+                return acc;
+              }, []);
+
+            
             setFetchedData({
-                data: filteredShiftItems,
+                data: flattenedData,
                 isLoading: false,
                 error: false
             })
