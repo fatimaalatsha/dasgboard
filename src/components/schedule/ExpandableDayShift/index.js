@@ -160,8 +160,15 @@ const ExpandableDayShift = ({day}) => { //TODO: Add overlapping shift visuals
             dataIndex: 'key',
             key: 'key',
             width: 330,
-            render: (text) => (
-                <>{dayjs(text).format('MMM, dd DD')}</>
+            onCell: (_, index) => {
+                if (index === 0 ) {
+                    return {
+                        rowSpan: data.length
+                    }
+                }
+            },
+            render: (text, record, index) => (
+                <>{index === 0 ? dayjs(text).format('MMM, dd DD') : null}</>
             )
         },
         ...hoursIdx.map((hour, idx) => ({
