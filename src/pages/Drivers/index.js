@@ -79,7 +79,7 @@ const Drivers = () => {
       filter: {
         ...filter,
         ...(driverFilter.filter?.city_id && filter.city_id && filter.city_id[0] === 'in|undefined' &&  { city_id: driverFilter.filter?.city_id } ),
-        ...(filter.status === null && { status: ['in|active', 'inactive'] } ),
+        ...(filter.status === null && { status: ['in|active', 'inactive', 'suspended'] } ),
       },
       ...(Object.keys(sorter).length !== 0 && {
         sort: {
@@ -253,6 +253,7 @@ const Drivers = () => {
       }
       ,
       filters: [
+        { text: 'Suspended', value: 'suspended' },
         { text: 'Inactive', value: 'inactive' },
         { text: 'Active', value: 'active' },
       ],
