@@ -246,7 +246,7 @@ const Drivers = () => {
       key: 'status',
       render: (status) => {                                                                           
         return (
-          <Tag color={status === 'active' ? 'success' : 'error' } style={{ textTransform: 'capitalize' }}>
+          <Tag color={status === 'active' ? 'success' : status === 'suspended' ? 'purple' : 'error' } style={{ textTransform: 'capitalize' }}>
             {status}
           </Tag>
         )
