@@ -29,41 +29,41 @@ const Documents = () => {
     const controller = new AbortController()// Create a new abort controller
     const [cities, setCities] = useState([])
     const { data, isLoading, error, refetch } = useFetch(`v1/documents?${qs.stringify(getUserParams(documentFilter), { skipNulls: true, arrayFormat: 'comma' })}`) // Fetch data from API
-    const handleTableChange = (pagination, filter, sorter) => {
-        Object.keys(filter).forEach((key) => {
-          if (
-            key === "status" &&
-            filter.status &&
-            filter.status[0] === "expiring"
-          ) {
-            filter["is_expiring"] = ["eq|true"];
-            delete filter.status;
-          } else if (filter[key]) {
-            //skip expiring 
+  
 
-            filter[key] = ["in|" + filter[key]];
-          }
-        });
+  const handleTableChange = (pagination, filter, sorter) => {
 
-      setDocumentFilter({
-        pagination,
-        filter: {
-          ...documentFilter.filter,
-          ...filter,
-          ...(documentFilter.filter?.["c.id"] &&
-            filter["c.id"] &&
-            filter["c.id"][0] === "in|undefined" && {
-              "c.id": documentFilter.filter?.["c.id"],
-            }),
-        },
-        ...(Object.keys(sorter).length !== 0 && {
-          sort: {
-            [`${sorter.columnKey === "c.id" ? "city" : sorter.columnKey}`]:
-              sorter.order === "ascend" ? "asc" : "desc",
-          },
-        }),
-      });
-    };
+    Object.keys(filter).forEach((key) => {
+      if (filter[key] ) {
+        filter[key].unshift("in|" + filter[key][0]);
+        filter[key].splice(1, 1);
+        // if bot and no are selected, remove the filter
+        if ((filter[key][0] === "in|true" || filter[key][0] === "in|false") && filter[key].length > 1) {
+          filter[key] = null;}
+      }   
+     });      
+
+     setDocumentFilter({
+       pagination,
+       filter: {
+         ...documentFilter.filter,
+         ...filter,
+         ...(documentFilter.filter?.["c.id"] &&
+           filter["c.id"] &&
+           filter["c.id"][0] === "in|undefined" &&
+           documentFilter.filter["c.id"] !== "in|" && {
+             "c.id": documentFilter.filter["c.id"],
+         }),
+       },
+       ...(Object.keys(sorter).length !== 0 && {
+         sort: {
+           [`${sorter.columnKey === "c.id" ? "city" : sorter.columnKey}`]:
+             sorter.order === "ascend" ? "asc" : "desc",
+         },
+       }),
+     });
+   };
+
 
 
 
