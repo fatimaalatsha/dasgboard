@@ -199,8 +199,17 @@ const Documents = () => {
         align: "center",
         render: (status) => (
           <Tag
-            color={status === "active" ? "success" : "error"}
-            style={{ textTransform: "capitalize" }}
+            color={
+              status === "active"
+                ? "green"
+                : status === "inactive"
+                ? "red"
+                : status === "suspended"
+                ? "volcano"
+                : status === "pending"
+                ? "gold"
+                : "blue"
+            }
           >
             {status.toUpperCase()}
           </Tag>
@@ -208,6 +217,9 @@ const Documents = () => {
         filters: [
           { text: "Inactive", value: "inactive" },
           { text: "Active", value: "active" },
+          { text: "Suspended", value: "suspended" },
+          { text: "Pending", value: "pending" },
+          {text : "Onboard", value: "onboard"},
         ],
         ...(documentFilter.filter?.["u.status"] && {
           defaultFilteredValue: documentFilter.filter?.["u.status"].map(
