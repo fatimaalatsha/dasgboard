@@ -10,6 +10,7 @@ import useFetch from '../../hooks/use-new-fetch'// Import useFetch custom hook
 
 import { useFilterStore } from '../../store' // Import filter store
 import { getCities } from '../../utils/city-status'
+import {app_status as appStatus} from '../../assets/data/app_status' // Import app_status from data
 
 const getUserParams = (params) => ({ // Get table params
     limit: params.pagination?.pageSize,
@@ -190,7 +191,6 @@ const Documents = () => {
             {is_expiring ? "Yes" : "No"}
           </Tag>
         ),
-        
       },
       {
         title: "Driver Status",
@@ -214,6 +214,26 @@ const Documents = () => {
             (status) => status.replace("in|", "")
           ),
         }),
+      },
+      {
+        title: "Application Status",
+        dataIndex: "application_status",
+        key: "application_status",
+        align: "center",
+        render: (application_status) => (
+          <Tag color="lime" style={{ textTransform: "capitalize" }}>
+            {application_status}
+          </Tag>
+        ),
+        // filters: [
+        //   ...appStatus
+           
+        // ],
+        // ...(documentFilter.filter?.["a.status"] && {
+        //   defaultFilteredValue: documentFilter.filter?.["a.status"].map(
+        //     (status) => status.replace("in|", "")
+        //   ),
+        // }),
       },
       {
         title: "Updated At",
