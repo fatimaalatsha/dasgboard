@@ -155,22 +155,15 @@ const ExpandableDayShift = ({day}) => { //TODO: Add overlapping shift visuals
     })}`, scheduleFilter.tz, day)
 
     const columns = [
-        {
+        /* {
             title: 'Day',
             dataIndex: 'key',
             key: 'key',
             width: 330,
-            /* onCell: (_, index) => {
-                if (index === 0 ) {
-                    return {
-                        rowSpan: data.length
-                    }
-                }
-            }, */
             render: (text, record, index) => (
                 <>{index === 0 ? dayjs(text).format('MMM, dd DD') : null}</>
             )
-        },
+        }, */
         ...hoursIdx.map((hour, idx) => ({
             title: <>{hour.label}</>,
             dataIndex: idx,
@@ -179,7 +172,7 @@ const ExpandableDayShift = ({day}) => { //TODO: Add overlapping shift visuals
             width: 100,
             render: (_, record) => {
                 return (
-                    <div className="container" style={{ minHeight: 104, height: '100%', zIndex: 999 }}>
+                    <div className="container" style={{ minHeight: 24, height: '100%', zIndex: 999 }}>
                     { record[dayjs(day).format('YYYY-MM-DD')][hour.label]?.length > 0 
                         ?  record[dayjs(day).format('YYYY-MM-DD')][hour.label].map((item, idx) => (
                             <CellShift 
