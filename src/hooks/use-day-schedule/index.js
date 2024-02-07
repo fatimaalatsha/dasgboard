@@ -10,13 +10,14 @@ import { getDayHours } from '../../utils/schedule-status'
 dayjs.extend(utc)
 dayjs.extend(timezone)
 
-const useDaySchedule = (url, timezone, selectedDay) => {
+const useDaySchedule = (url, timezone, selectedDay, selectedCity) => {
     dayjs.tz.setDefault(timezone)
     const [fetchedData, setFetchedData] = useState({// Set initia fetch state to empty
         data: [],
         response: {
           data: [],
           meta: {},
+          required: {},
         },
         isLoading: true,
         error: false,
@@ -51,7 +52,10 @@ const useDaySchedule = (url, timezone, selectedDay) => {
                 }
             }
             const response = await API.get(url, options)// Fetch data from API
+            //const requiredResponse = await API.get(`/v1/cities/${selectedCity}/required-drivers`, options) // replace once endpoint responses include empty array
+            const requiredResponse = await API.get(`/v1/cities/2/required-drivers`, options)
             const { data, meta } = await response.data// Get data from response
+            const requiredData = await requiredResponse.data
 
             const dayData = data.map(item => {
                 const dayItems = item.shifts.map(shift => {
@@ -85,11 +89,15 @@ const useDaySchedule = (url, timezone, selectedDay) => {
                   },
                   ...timeObj
                 };
-              });
+              })
 
             setFetchedData({// Set fetched data
                 data: dayData.length > 0 ? [emptyItem, ...dayData] : dayData, // Add empty row if dayData has values
-                response: {data: data, meta: meta},
+                response: { 
+                  data: data, 
+                  meta: meta,
+                  required: requiredData, // required drivers data response
+                },
                 isLoading: false,
                 error: false,
             })
@@ -100,7 +108,7 @@ const useDaySchedule = (url, timezone, selectedDay) => {
                 response: {
                   data: [],
                   meta: {},
-                },
+                  required: {},                },
                 isLoading: false,
                 error: true,
             })
@@ -113,6 +121,7 @@ const useDaySchedule = (url, timezone, selectedDay) => {
             response: {
               data: [],
               meta: {},
+              required: {},
             },
             isLoading: true,
             error: false,
