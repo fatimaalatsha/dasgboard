@@ -52,8 +52,7 @@ const useDaySchedule = (url, timezone, selectedDay, selectedCity) => {
                 }
             }
             const response = await API.get(url, options)// Fetch data from API
-            //const requiredResponse = await API.get(`/v1/cities/${selectedCity}/required-drivers`, options) // replace once endpoint responses include empty array
-            const requiredResponse = await API.get(`/v1/cities/2/required-drivers`, options)
+            const requiredResponse = await API.get(`/v1/cities/${selectedCity}/required-drivers`, options) 
             const { data, meta } = await response.data// Get data from response
             const requiredData = await requiredResponse.data
 
