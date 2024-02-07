@@ -441,6 +441,16 @@ const DriverDetails = () => {
               </Space>
             }
             extra={[
+              ['active', 'inactive'].includes(data.status) && <Button
+                loading={loading}
+                key="3"
+                type="primary"
+                ghost
+                onClick={() => showConfirmInactive('suspended')}
+                disabled={data.status === 'onboard' || data.status === 'pending' || data.status === 'inactive' || data.status === 'suspended'}
+              >
+                Suspend
+              </Button>,
               <Button 
                 loading={loading} 
                 key="2" 

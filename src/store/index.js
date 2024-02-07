@@ -19,7 +19,7 @@ let filterStore = (set) => ({
       created_at: "desc",
     },
     filter: {
-      status: ["in|active", "inactive"],
+      status: ["in|active", "inactive", "suspended"],
       'full_name,email,phone': null
     },
   },
