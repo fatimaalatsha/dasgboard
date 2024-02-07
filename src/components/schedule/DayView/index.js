@@ -52,7 +52,7 @@ const DayView = ({
     isLoading, 
     error, 
     refetch 
-  } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler({day: selectedDay.format('YYYY-MM-DD'), ...dayFilter}), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, selectedDay ) // Call useSchedule hook
+  } = useDaySchedule(`/v1/shifts/${scheduleFilter.filter.city_id.replace('in|', '')}/drivers?${qs.stringify(queryHandler({day: selectedDay.format('YYYY-MM-DD'), ...dayFilter}), { skipNulls: true, arrayFormat: 'comma' })}`, scheduleFilter.tz, selectedDay, scheduleFilter.filter.city_id.replace('in|', '') ) // Call useSchedule hook
 
   const titleStyle = {
     backgroundColor: token['red-3'],
@@ -129,7 +129,8 @@ const DayView = ({
       ),
       children: [
         ...hours.map((hour, idx) => { // Loop through the days
-          const computedCount = getShiftCount(filteredData, hour.label, scheduleFilter.tz, selectedDay)
+          // Deprecated after required-drivers endpoint implementation
+          //const computedCount = getShiftCount(filteredData, hour.label, scheduleFilter.tz, selectedDay)
           return { 
             title: <>{hour.label}</>,
             align: 'center',
@@ -140,19 +141,19 @@ const DayView = ({
                   return ( 
                     <div>
                         <Text key={idx} code>
-                          {computedCount}
+                          {response.required?.[selectedDay.format('dddd').toLowerCase()]?.[idx]}
                         </Text> 
                     </div>
                   )
                 },
                 onHeaderCell: () => ({
-                  style: computedCount < scheduleFilter.staff ? { backgroundColor: token['red-2'], color: 'white', borderColor: token['red-1'] } : { }
+                  style: response.required?.[selectedDay.format('dddd').toLowerCase()]?.[idx] < scheduleFilter.staff ? { backgroundColor: token['red-2'], color: 'white', borderColor: token['red-1'] } : { }
                 }),
                 dataIndex: hour.label,
                 key: idx,
                 align: 'center',
                 onCell: (record) => ({
-                    style: computedCount < scheduleFilter.staff ? { backgroundColor: token['red-3'], color: 'white', borderColor: token['red-2'], width: 60 } : { width: 60 },
+                    style: response.required?.[selectedDay.format('dddd').toLowerCase()]?.[idx] < scheduleFilter.staff ? { backgroundColor: token['red-3'], color: 'white', borderColor: token['red-2'], width: 60 } : { width: 60 },
                     onMouseEnter: () => { // Mouse enter event
                         setHoveredCell({ key: record.key, hour: hour.label })
                     },
