@@ -226,6 +226,9 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                         {vehicle.status}
                     </Tag>
                 </Descriptions.Item>
+                <Descriptions.Item label="VIN Number">
+                    <EditableText name='vin_number' value={vehicle.plate_number} updateCallback={value => handleUpdate(value)} />
+                </Descriptions.Item>
             </Descriptions>
         </List.Item>
          <Drawer destroyOnClose title="Vehicle Photos" placement="right" size="large" onClose={() => setOpen({...open, drawer: {open: false, id: null}})} open={open.drawer.open}>
