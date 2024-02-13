@@ -27,6 +27,7 @@ import EditableSelect from '../EditableSelect' // Import EditableSelect componen
 
 const vehicleSchema = object().shape({
     plate_number: string().required('Required'),
+    vin: string().required('Required'),
     year: string().required('Required'),
     color: string().required('Required'),
     make_id: number().required('Required'),
@@ -227,7 +228,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                     </Tag>
                 </Descriptions.Item>
                 <Descriptions.Item label="VIN Number">
-                    <EditableText name='vin_number' value={vehicle.plate_number} updateCallback={value => handleUpdate(value)} />
+                    <EditableText name="vin" value={vehicle.vin} updateCallback={value => handleUpdate(value)} />
                 </Descriptions.Item>
             </Descriptions>
         </List.Item>
@@ -291,6 +292,7 @@ const DriverVehicle = ({ id, sub }) => {
 
     const initialValues = { // Set initial values for form
         plate_number: '',
+        vin: '',
         year: '',
         color: '',
         make_id: '',
@@ -322,6 +324,7 @@ const DriverVehicle = ({ id, sub }) => {
                     const payload = { // Sets values to specified contraints
                         'user_id': Number(values.user_id),
                         'plate_number': values.plate_number,
+                        'vin': values.vin,
                         'year': Number(values.year),
                         'color': values.color,
                         'model_id': Number(values.model_id),
@@ -354,6 +357,7 @@ const DriverVehicle = ({ id, sub }) => {
                         >
                             <Space direction='vertical' style={{ width: '100%'}}>
                                 <InputWrapper name="plate_number" placeholder="Plate Number" maxLength={20} />
+                                <InputWrapper name="vin" placeholder="VIN Number" maxLength={17} />
                                 <VehicleMakeFeeder name="make_id" />
                                 { props.values.make_id && <VehicleModelFeeder name="model_id" make_id={props.values.make_id} />}
                                 <InputWrapper name="year" placeholder="Year" year="true" />
