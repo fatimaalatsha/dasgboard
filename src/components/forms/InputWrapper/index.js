@@ -3,6 +3,7 @@ import { Input, Typography } from 'antd' // Import antd components
 import { useField, useFormikContext, ErrorMessage } from 'formik' // Import Formik form components
 
 const { Text } = Typography // Destructure Text from Typography
+const { TextArea } = Input // Destructure TextArea Component
 
 const InputWrapper = forwardRef((props, ref) => {
     const { setFieldValue } = useFormikContext() // Destructure setFieldValue from useFormikContext
@@ -32,7 +33,11 @@ const InputWrapper = forwardRef((props, ref) => {
 
     return (
         <>
-            <Input {...configInput} />
+            { props.textarea ? (
+                <TextArea {...configInput} />
+            ) : (
+                <Input {...configInput} />
+            )}
             <ErrorMessage name={props.name}>
                 {msg => <Text type="danger">{msg}</Text>}
             </ErrorMessage>

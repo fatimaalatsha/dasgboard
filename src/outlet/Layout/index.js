@@ -26,6 +26,7 @@ import IneligibleApplicants from '../../pages/IneligibleApplicants'
 import AutofleetDrivers from '../../pages/AutofleetDrivers'
 import AutofleetDriversDetails from "../../pages/AutofleetDriversDetails";
 import Incentive from '../../pages/Incentive'
+import Notifications from '../../components/Notifications' // Notifications Section
 
 const { Sider, Content, Header} = Container // Destructuring Layout component
 
@@ -43,6 +44,7 @@ const Layout = () => {
                   className: 'trigger',
                   onClick: () => setCollapsed(!collapsed),
                 })}
+                {process.env.REACT_APP_NEW_URL === 'https://admin-api.uride.co' && <Notifications /> }
             </Header>
             <Content >
                 <Routes>

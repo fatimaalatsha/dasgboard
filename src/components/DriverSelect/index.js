@@ -1,6 +1,9 @@
 /* Driver Select Dropdown 
 * This component is a standalone select dropdown that is used to select drivers in formik forms.
 * It leaves onChange and value up to the parent component.
+* @city accepts a value (number) for dependable formik forms with single city select
+* or it will pull directly from schedule module city selection
+* @simpleTags takes inherit props for removing permanent drivers switch
 */
 import { forwardRef, useState, useEffect } from 'react'
 import { Select, Tag, Space, Switch, Tooltip } from 'antd'
@@ -11,10 +14,11 @@ import { useFilterStore } from '../../store'
 
 const DriverSelect = forwardRef((props, ref) => {
     const scheduleFilter = useFilterStore(state => state.scheduleFilter)
-    const city = Number(scheduleFilter.filter.city_id.replace('in|', ''))
+    const city = props.city_id || Number(scheduleFilter.filter.city_id.replace('in|', ''))
     const { data, error, isLoading } = useFetch('/v1/drivers?paginated=false&filter[status]=in|active&filter[city_id]=in|' + city) // Fetches active drivers in selected city
     const [drivers, setDrivers] = useState([])
     const { values, setFieldValue, initialValues } = useFormikContext()
+    const simpleTags = Boolean(props.simple)
 
     useEffect(() => {
         if (data) {
@@ -35,8 +39,8 @@ const DriverSelect = forwardRef((props, ref) => {
         const { label, value, closable, onClose } = props
 
         const onPreventMouseDown = (event) => {
-        event.preventDefault();
-        event.stopPropagation();
+            event.preventDefault()
+            event.stopPropagation()
         }
         
         const tagConfig = {
@@ -66,13 +70,13 @@ const DriverSelect = forwardRef((props, ref) => {
             <Tag {...tagConfig}>
                 <Space style={{ marginRight: 8 }}>
                 {label}
-                <Tooltip title="Permanent Driver?">
-                    <Switch 
-                        size="small" 
-                        checked={values.drivers.find((driver) => driver.user_id === value)?.is_permanent}
-                        onChange={handleSwitchChange}
-                    />
-                </Tooltip>
+                {!simpleTags && (    <Tooltip title="Permanent Driver?">
+                        <Switch 
+                            size="small" 
+                            checked={values.drivers.find((driver) => driver.user_id === value)?.is_permanent}
+                            onChange={handleSwitchChange}
+                        />
+                    </Tooltip>)}
                 </Space>
             </Tag>
         )
