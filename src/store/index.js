@@ -158,6 +158,9 @@ let filterStore = (set) => ({
       pageSizeOptions: pageSize,
       position: ["bottomRight", "topRight"],
     },
+    status: null, // available, unavailable, preferred
+    start_time: null, // format HH:mm:ss
+    end_time: null, // format HH:mm:ss
   },
   setDayFilter: (filter) => 
     set((state) => ({ 
