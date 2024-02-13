@@ -44,7 +44,7 @@ const Layout = () => {
                   className: 'trigger',
                   onClick: () => setCollapsed(!collapsed),
                 })}
-                <Notifications />
+                {process.env.REACT_APP_NEW_URL === 'https://admin-api.uride.co' && <Notifications /> }
             </Header>
             <Content >
                 <Routes>
