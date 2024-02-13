@@ -28,6 +28,7 @@ import EditableSelect from '../EditableSelect' // Import EditableSelect componen
 const vehicleSchema = object().shape({
     plate_number: string().required('Required'),
     vin: string().required('Required'),
+    registration_number: string().required('Required'),
     year: string().required('Required'),
     color: string().required('Required'),
     make_id: number().required('Required'),
@@ -227,8 +228,11 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                         {vehicle.status}
                     </Tag>
                 </Descriptions.Item>
-                <Descriptions.Item label="VIN Number">
+                <Descriptions.Item label="VIN">
                     <EditableText name="vin" value={vehicle.vin} updateCallback={value => handleUpdate(value)} />
+                </Descriptions.Item>
+                <Descriptions.Item label="RIN">
+                    <EditableText name="registration_number" value={vehicle.registration_number} updateCallback={value => handleUpdate(value)} />
                 </Descriptions.Item>
             </Descriptions>
         </List.Item>
@@ -293,6 +297,7 @@ const DriverVehicle = ({ id, sub }) => {
     const initialValues = { // Set initial values for form
         plate_number: '',
         vin: '',
+        registration_number: '',
         year: '',
         color: '',
         make_id: '',
@@ -325,6 +330,7 @@ const DriverVehicle = ({ id, sub }) => {
                         'user_id': Number(values.user_id),
                         'plate_number': values.plate_number,
                         'vin': values.vin,
+                        'registration_number': values.registration_number,
                         'year': Number(values.year),
                         'color': values.color,
                         'model_id': Number(values.model_id),
@@ -357,7 +363,8 @@ const DriverVehicle = ({ id, sub }) => {
                         >
                             <Space direction='vertical' style={{ width: '100%'}}>
                                 <InputWrapper name="plate_number" placeholder="Plate Number" maxLength={20} />
-                                <InputWrapper name="vin" placeholder="VIN Number" maxLength={17} />
+                                <InputWrapper name="vin" placeholder="VIN" maxLength={17} />
+                                <InputWrapper name="registration_number" placeholder="RIN" maxLength={20} />
                                 <VehicleMakeFeeder name="make_id" />
                                 { props.values.make_id && <VehicleModelFeeder name="model_id" make_id={props.values.make_id} />}
                                 <InputWrapper name="year" placeholder="Year" year="true" />
