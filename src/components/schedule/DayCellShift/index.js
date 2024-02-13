@@ -742,7 +742,7 @@ const DayCellShift = ({display, record, day, setHoveredCell, isCellFilled, hour,
                 />
             ) : (
             <>
-                { display && (
+                { display && record.driver.name !== 'Week Shift' && (
                     <Tooltip title="Add shift">
                         <Button type="text" style={{ width: '100%', height: '100%', padding: 8 }} size="small" onClick={handleClick} icon={<PlusOutlined />} />
                     </Tooltip>

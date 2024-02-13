@@ -11,7 +11,7 @@ import CalendarFilterBar from '../CalendarFilterBar' // Calendar Filters and nav
 import { useFilterStore } from '../../../store' // Import useFilterStore hook
 import useDaySchedule from '../../../hooks/use-day-schedule' // Import useDaySchedule hook
 import { shiftCount } from '../../../utils/schedule-status' // Import counter for each hour on shifts
-//import DayColumnHighlight from '../DayColumnHighlight'
+import ExpandableDayShift from '../ExpandableDayShift'
 
 dayjs.extend(utc)
 dayjs.extend(timezone)
@@ -110,16 +110,18 @@ const DayView = ({
           color={'#FFF'} 
           placement="topLeft"
           title={
+            record.driver.name === 'Week Shift' ?
+            '' : (
             <Space direction="vertical">
               <Text>{text}</Text>
               <Text>{`DL# ${record.driver.license_number}`}</Text>
               <Text>{`Tel. ${record.driver.phone}`}</Text>
             </Space>
-          } 
+          )} 
         >
           <Text style={{ textTransform: 'capitalize', width: 100 }} ellipsis={{ suffix: '' }} >{text}</Text>
         </Tooltip>
-      )
+      ),
     },
     {
       title: (
@@ -134,7 +136,7 @@ const DayView = ({
             children: [
               {
                 title: () => {
-                  const columnStyle = computedCount < scheduleFilter.staff ? { ...titleStyle } : {};
+                  
                   return ( 
                     <div>
                         <Text key={idx} code>
@@ -219,6 +221,14 @@ const DayView = ({
             className="schedule-day-table"
             bordered
             size="small"
+            expandable={{
+              expandedRowRender: () => (
+                <ExpandableDayShift 
+                  day={selectedDay}
+                />
+              ),
+              rowExpandable: (record) => record.driver.name === 'Week Shift'
+            }}
         />
         {loadTimeline && <CurrentTimeLine axis tz={tz} />}
       </div>
