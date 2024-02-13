@@ -101,3 +101,10 @@ body {
 .schedule-day-table .ant-table-small .ant-table-content table tbody tr td:first-child {
   padding: 15px;
 }
+
+.site-layout-background {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding-right: 24px !important;
+}
