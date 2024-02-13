@@ -61,6 +61,7 @@ const useWeekSchedule = (url, timezone, selectedWeek) => {
                 } 
                 return item
             })
+            
             const weekData = weekHours.reduce((acc, time) => {
                 const dayObj = weekDays.reduce((obj, day) => {
                     obj[day] = weekItems.filter(item => day === dayjs(item.start_time).tz().utc().format('dddd').toLowerCase() && time === dayjs(item.start_time).tz().utc().format('HH:mm'))
