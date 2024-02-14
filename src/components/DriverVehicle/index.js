@@ -231,7 +231,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                 <Descriptions.Item label="VIN">
                     <EditableText name="vin" value={vehicle.vin} updateCallback={value => handleUpdate(value)} />
                 </Descriptions.Item>
-                <Descriptions.Item label="RIN">
+                <Descriptions.Item label="Registration Number">
                     <EditableText name="registration_number" value={vehicle.registration_number} updateCallback={value => handleUpdate(value)} />
                 </Descriptions.Item>
             </Descriptions>
@@ -364,7 +364,7 @@ const DriverVehicle = ({ id, sub }) => {
                             <Space direction='vertical' style={{ width: '100%'}}>
                                 <InputWrapper name="plate_number" placeholder="Plate Number" maxLength={20} />
                                 <InputWrapper name="vin" placeholder="VIN" maxLength={17} />
-                                <InputWrapper name="registration_number" placeholder="RIN" maxLength={20} />
+                                <InputWrapper name="registration_number" placeholder="Registration Number" maxLength={20} />
                                 <VehicleMakeFeeder name="make_id" />
                                 { props.values.make_id && <VehicleModelFeeder name="model_id" make_id={props.values.make_id} />}
                                 <InputWrapper name="year" placeholder="Year" year="true" />
