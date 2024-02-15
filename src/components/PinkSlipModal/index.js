@@ -26,10 +26,9 @@ const PinkSlipModal = ({ id, provinceId, usersub, open, setOpen, pinkslipStatus 
        }, 300);
       const activeObj = arr.find((obj) => obj.status === "active")
       if (!activeObj) return false
-      const keys = Object.keys(activeObj)
-      const hasValue = keys.every((key) => activeObj[key])
-      if (hasValue) return activeObj
-      return false
+      const { make, year, model } = activeObj;
+      if (make && year && model) return activeObj;
+      return false;
   }
         
   const createPdf = async (provinceId) => {
