@@ -549,7 +549,7 @@ const DriverDetails = () => {
           </Space>
             <DriverDocument id={id} sub={data.sub_id} />
             <Divider orientation="left"><Title level={4}>Driver Vehicle</Title></Divider>
-            <DriverVehicle id={id} sub={data.sub_id} />
+            <DriverVehicle id={id} sub={data.sub_id} province_id={data.city?.province?.id}/>
             <Divider orientation="left"><Title level={4}>Driver Trainings</Title></Divider>
             <Table
               columns={tableColumns}

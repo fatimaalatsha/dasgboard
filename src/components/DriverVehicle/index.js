@@ -24,15 +24,11 @@ import SelectWrapper from '../forms/SelectWrapper' // Import SelectWrapper compo
 import DocViewer from '../DocViewer' // Import DocViewer component
 import EditableText from '../EditableText' // Import EditableText component
 import EditableSelect from '../EditableSelect' // Import EditableSelect component
-
-const vehicleSchema = object().shape({
-    plate_number: string().required('Required'),
-    year: string().required('Required'),
-    color: string().required('Required'),
-    make_id: number().required('Required'),
-    model_id: number().required('Required'),
-    user_id: number().required('Required'),
-})
+    
+/* Vehicle registration number is only required in
+* British Columbia: 2, Alberta: 6
+*/
+const REG_NUMBER_ALLOWED = [2, 6]
 
 const VehiclePhotosFeeder = ({vehicle, sub}) => {
     const { data, isLoading, error } = useFetch(`/v1/vehicles/photos/${vehicle}/vehicle`)// Call useFetch custom hook
@@ -99,7 +95,7 @@ const VehicleModelFeeder = ({name, make_id, editable, value, handleUpdate}) => {
     )
 }
 
-const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
+const VehicleList = ({ vehicle, setOpen, open, refetch, sub, province_id }) => {
     const [makeId, setMakeId] = useState(vehicle.make?.id)
     const [isModalVisible, setIsModalVisible] = useState(false) // Set modal state to false
 
@@ -226,6 +222,14 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
                         {vehicle.status}
                     </Tag>
                 </Descriptions.Item>
+                <Descriptions.Item label="VIN">
+                    <EditableText name="vin" value={vehicle.vin} updateCallback={value => handleUpdate(value)} />
+                </Descriptions.Item>
+                { REG_NUMBER_ALLOWED.includes(province_id) && (
+                    <Descriptions.Item label="Registration Number">
+                        <EditableText name="registration_number" value={vehicle.registration_number} updateCallback={value => handleUpdate(value)} />
+                    </Descriptions.Item>
+                )}
             </Descriptions>
         </List.Item>
          <Drawer destroyOnClose title="Vehicle Photos" placement="right" size="large" onClose={() => setOpen({...open, drawer: {open: false, id: null}})} open={open.drawer.open}>
@@ -275,7 +279,7 @@ const VehicleList = ({ vehicle, setOpen, open, refetch, sub }) => {
 
 const { Title, Text } = Typography // Destructure Title from Typography
 
-const DriverVehicle = ({ id, sub }) => {
+const DriverVehicle = ({ id, sub, province_id }) => {
     const { data, isLoading, error, refetch } = useFetch(`/v1/drivers/${id}/vehicles`)// Call useFetch custom hook
     const [open, setOpen] = useState({// Drawer state manager
         drawer: {
@@ -288,12 +292,25 @@ const DriverVehicle = ({ id, sub }) => {
 
     const initialValues = { // Set initial values for form
         plate_number: '',
+        vin: '',
+        ...(REG_NUMBER_ALLOWED.includes(province_id) ? {registration_number: ''} : {}),
         year: '',
         color: '',
         make_id: '',
         model_id: '',
         user_id: id,
     }
+    
+    const vehicleSchema = object().shape({
+        plate_number: string().required('Required'),
+        vin: string().required('Required'),
+        ...(REG_NUMBER_ALLOWED.includes(province_id) ? { registration_number: string().required('Required') } : {}),
+        year: string().required('Required'),
+        color: string().required('Required'),
+        make_id: number().required('Required'),
+        model_id: number().required('Required'),
+        user_id: number().required('Required'),
+    })
 
     if (isLoading) {
         return <>Loading...</>
@@ -308,7 +325,14 @@ const DriverVehicle = ({ id, sub }) => {
             <List 
                 dataSource={data.items} 
                 renderItem={item => (
-                    <VehicleList vehicle={item} setOpen={setOpen} open={open} refetch={refetch} sub={sub} />
+                    <VehicleList 
+                        vehicle={item} 
+                        setOpen={setOpen} 
+                        open={open} 
+                        refetch={refetch} 
+                        sub={sub} 
+                        province_id={province_id} 
+                    />
                 )}
             />
             <Button onClick={() => setOpen({...open, modal: true})} >Add New Vehicle</Button>
@@ -319,6 +343,8 @@ const DriverVehicle = ({ id, sub }) => {
                     const payload = { // Sets values to specified contraints
                         'user_id': Number(values.user_id),
                         'plate_number': values.plate_number,
+                        'vin': values.vin,
+                        ...( REG_NUMBER_ALLOWED.includes(province_id) ? { 'registration_number': values.registration_number } : {}),
                         'year': Number(values.year),
                         'color': values.color,
                         'model_id': Number(values.model_id),
@@ -351,6 +377,8 @@ const DriverVehicle = ({ id, sub }) => {
                         >
                             <Space direction='vertical' style={{ width: '100%'}}>
                                 <InputWrapper name="plate_number" placeholder="Plate Number" maxLength={20} />
+                                <InputWrapper name="vin" placeholder="VIN" maxLength={17} />
+                                { REG_NUMBER_ALLOWED.includes(province_id) && <InputWrapper name="registration_number" placeholder="Registration Number" maxLength={20} /> }
                                 <VehicleMakeFeeder name="make_id" />
                                 { props.values.make_id && <VehicleModelFeeder name="model_id" make_id={props.values.make_id} />}
                                 <InputWrapper name="year" placeholder="Year" year="true" />
