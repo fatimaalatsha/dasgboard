@@ -142,7 +142,7 @@ const Notifications = () => {
     })
     const [section, setSection] = useState(0)
 
-    const { // TODO: Endpoint returns 500
+    const { 
         data, 
         meta, // Use when pagination is required
         isLoading, 
@@ -150,7 +150,7 @@ const Notifications = () => {
         refetch, 
         updateNotification, 
         deleteNotification 
-    } = useNotification(`${pathUrl.notification}?paginated=false&sort[created_at]=asc`)
+    } = useNotification(`${pathUrl.notification}?paginated=false&sort[created_at]=desc`)
 
     const segmentOptions = [
         {
