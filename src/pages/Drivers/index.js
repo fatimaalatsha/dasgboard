@@ -259,6 +259,7 @@ const Drivers = () => {
         { text: "Yes", value: 'yes' },
         { text: "No", value: 'no' }
       ],
+      filterMultiple: false,
       filteredValue: null,
       ...( driverFilter.filter?.hst_number && { filteredValue: driverFilter.filter?.hst_number.map((hst) => {
         if (hst === `ne|''`) {
