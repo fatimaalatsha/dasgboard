@@ -150,7 +150,7 @@ const Notifications = () => {
         refetch, 
         updateNotification, 
         deleteNotification 
-    } = useNotification(pathUrl.notification)
+    } = useNotification(`${pathUrl.notification}?paginated=false&sort[created_at]=desc`)
 
     const segmentOptions = [
         {
