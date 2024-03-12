@@ -66,8 +66,14 @@ const Drivers = () => {
 
     Object.keys(filter).forEach(key => {
       if (filter[key]) {
-        filter[key].unshift('in|' + filter[key][0])
-        filter[key].splice(1, 1)
+        if ( key === 'hst_number' ) {
+          // handle special case for hst filter
+          filter[key] = filter[key][0] === 'yes' ? [`ne|''`] : filter[key][0] === 'no' ? ['is|null'] : filter[key]
+        } else {
+          // Handle other common filters
+          filter[key].unshift('in|' + filter[key][0])
+          filter[key].splice(1, 1)
+        }
       }
     })
   
@@ -239,6 +245,31 @@ const Drivers = () => {
           <DocumentOverview {...documents} />
         )
       }
+    },
+    {
+      title: 'HST No.',
+      dataIndex: 'hst_number',
+      key: 'hst_number',
+      render: (text) => (
+        <Tag color={ text ? 'success' : 'error' }>
+          { text ? "Yes" : "No" }
+        </Tag>
+      ),
+      filters: [
+        { text: "Yes", value: 'yes' },
+        { text: "No", value: 'no' }
+      ],
+      filterMultiple: false,
+      filteredValue: null,
+      ...( driverFilter.filter?.hst_number && { filteredValue: driverFilter.filter?.hst_number.map((hst) => {
+        if (hst === `ne|''`) {
+          return 'yes' // 'yes' for `ne|''` 
+        } else if ( hst === 'is|null' ) {
+          return 'no' // 'no' for 'is|null'
+        } 
+        // Is case other exceptions are added
+        return hst
+      })})
     },
     {
       title: 'Status',
