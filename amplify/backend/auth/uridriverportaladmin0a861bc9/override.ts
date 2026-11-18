@@ -20,8 +20,8 @@ export function override(resources: AmplifyAuthCognitoStackTemplate) {
           'custom:last_name': "family_name"
         },
         ProviderDetails: {
-          client_id: "***REMOVED***-jvk3ld5ca3ijm2q8v09i01eu062hifea.apps.googleusercontent.com",
-          client_secret: "***REMOVED***",
+          client_id: process.env.GOOGLE_CLIENT_ID || "",
+          client_secret: process.env.GOOGLE_CLIENT_SECRET || "",
           authorize_scopes: "openid email profile"
         },
         ProviderName: "Google",
